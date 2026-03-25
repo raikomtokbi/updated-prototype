@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 220 20% 6%;
+    --foreground: 210 40% 95%;
+    --card: 220 20% 9%;
+    --card-foreground: 210 40% 95%;
+    --muted: 220 15% 14%;
+    --muted-foreground: 220 10% 55%;
+    --border: 220 15% 16%;
+    --input: 220 15% 14%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 196 100% 50%;
+    --accent-foreground: 220 20% 6%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 258 90% 66%;
+    --radius: 0.5rem;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: hsl(220, 20%, 6%);
+  color: hsl(210, 40%, 95%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.font-rajdhani {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(220, 20%, 8%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(258, 90%, 50%);
+  border-radius: 3px;
+}
+
+/* Glow utilities */
+.glow-purple {
+  box-shadow: 0 0 20px hsla(258, 90%, 66%, 0.3);
+}
+.glow-cyan {
+  box-shadow: 0 0 20px hsla(196, 100%, 50%, 0.3);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(258, 90%, 70%), hsl(196, 100%, 50%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Game card gradient border */
+.game-card {
+  background: hsl(220, 20%, 9%);
+  border: 1px solid hsl(220, 15%, 16%);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.game-card:hover {
+  border-color: hsla(258, 90%, 66%, 0.5);
+  box-shadow: 0 0 20px hsla(258, 90%, 66%, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background: linear-gradient(135deg, hsl(258, 90%, 60%), hsl(258, 90%, 50%));
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 16px hsla(258, 90%, 66%, 0.4);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background: transparent;
+  color: hsl(210, 40%, 95%);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(220, 15%, 26%);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  border-color: hsl(258, 90%, 66%);
+  background: hsla(258, 90%, 66%, 0.08);
+}
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Input */
+.input-field {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: hsl(220, 15%, 12%);
+  border: 1px solid hsl(220, 15%, 20%);
+  border-radius: 0.5rem;
+  color: hsl(210, 40%, 95%);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.input-field:focus {
+  border-color: hsl(258, 90%, 66%);
+  box-shadow: 0 0 0 3px hsla(258, 90%, 66%, 0.15);
+}
+.input-field::placeholder {
+  color: hsl(220, 10%, 45%);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.badge-purple {
+  background: hsla(258, 90%, 66%, 0.2);
+  color: hsl(258, 90%, 75%);
+  border: 1px solid hsla(258, 90%, 66%, 0.3);
+}
+.badge-cyan {
+  background: hsla(196, 100%, 50%, 0.15);
+  color: hsl(196, 100%, 60%);
+  border: 1px solid hsla(196, 100%, 50%, 0.3);
+}
+.badge-green {
+  background: hsla(145, 70%, 45%, 0.15);
+  color: hsl(145, 70%, 55%);
+  border: 1px solid hsla(145, 70%, 45%, 0.3);
+}
+
+/* Divider */
+.divider {
+  border: none;
+  border-top: 1px solid hsl(220, 15%, 16%);
+  margin: 1.5rem 0;
+}

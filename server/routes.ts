@@ -23,6 +23,18 @@ function injectAdminRole(req: Request, _res: Response, next: NextFunction) {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   app.use("/api/admin", injectAdminRole);
 
+  // ── Public product routes ──────────────────────────────────────────────────
+  app.get("/api/products", async (_req, res) => {
+    const prods = await storage.getAllProducts();
+    res.json(prods);
+  });
+
+  app.get("/api/products/:id", async (req, res) => {
+    const p = await storage.getProduct(req.params.id);
+    if (!p) return res.status(404).json({ message: "Not found" });
+    res.json(p);
+  });
+
   // ── Auth / login ───────────────────────────────────────────────────────────
   app.post("/api/auth/login", async (req, res) => {
     const { username, password } = req.body ?? {};
