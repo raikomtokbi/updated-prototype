@@ -37,7 +37,8 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    // Output frontend to client/dist for cPanel deployment
+    outDir: path.resolve(import.meta.dirname, "client/dist"),
     emptyOutDir: true,
   },
   server: {

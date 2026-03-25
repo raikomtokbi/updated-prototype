@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import {
   type User, type InsertUser,
   type Product, type InsertProduct,
@@ -13,7 +14,7 @@ import {
   transactions, coupons, tickets, ticketReplies,
   campaigns, reviews, paymentMethods,
 } from "@shared/schema";
-import { eq, desc, count, sum, and, gte, sql } from "drizzle-orm";
+import { eq, desc, count, sum, sql } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -77,13 +78,23 @@ export interface IStorage {
   updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod | undefined>;
   deletePaymentMethod(id: string): Promise<void>;
 
-  // Dashboard Stats
+  // Dashboard
   getDashboardStats(): Promise<{
     totalUsers: number;
     totalOrders: number;
     totalRevenue: number;
     openTickets: number;
   }>;
+}
+
+// ─── Helper: fetch-after-write (MySQL has no RETURNING) ──────────────────────
+async function fetchAfter<T>(
+  table: any,
+  id: string,
+  idCol: any,
+): Promise<T> {
+  const [row] = await db.select().from(table).where(eq(idCol, id));
+  return row as T;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -101,15 +112,16 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   async createUser(insertUser: InsertUser) {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
+    const id = randomUUID();
+    await db.insert(users).values({ ...insertUser, id });
+    return fetchAfter<User>(users, id, users.id);
   }
   async getAllUsers(limit = 50, offset = 0) {
     return db.select().from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset);
   }
   async updateUser(id: string, data: Partial<User>) {
-    const [user] = await db.update(users).set({ ...data, updatedAt: new Date() }).where(eq(users.id, id)).returning();
-    return user;
+    await db.update(users).set({ ...data, updatedAt: new Date() }).where(eq(users.id, id));
+    return fetchAfter<User>(users, id, users.id);
   }
   async deleteUser(id: string) {
     await db.delete(users).where(eq(users.id, id));
@@ -131,12 +143,13 @@ export class DatabaseStorage implements IStorage {
     return p;
   }
   async createProduct(data: InsertProduct) {
-    const [p] = await db.insert(products).values(data).returning();
-    return p;
+    const id = randomUUID();
+    await db.insert(products).values({ ...data, id });
+    return fetchAfter<Product>(products, id, products.id);
   }
   async updateProduct(id: string, data: Partial<Product>) {
-    const [p] = await db.update(products).set({ ...data, updatedAt: new Date() }).where(eq(products.id, id)).returning();
-    return p;
+    await db.update(products).set({ ...data, updatedAt: new Date() }).where(eq(products.id, id));
+    return fetchAfter<Product>(products, id, products.id);
   }
   async deleteProduct(id: string) {
     await db.delete(products).where(eq(products.id, id));
@@ -155,11 +168,11 @@ export class DatabaseStorage implements IStorage {
   }
   async getTotalRevenue() {
     const [r] = await db.select({ total: sum(orders.totalAmount) }).from(orders).where(eq(orders.status, "completed"));
-    return parseFloat(r.total ?? "0");
+    return parseFloat((r.total as string | null) ?? "0");
   }
   async updateOrderStatus(id: string, status: string) {
-    const [o] = await db.update(orders).set({ status: status as any, updatedAt: new Date() }).where(eq(orders.id, id)).returning();
-    return o;
+    await db.update(orders).set({ status: status as any, updatedAt: new Date() }).where(eq(orders.id, id));
+    return fetchAfter<Order>(orders, id, orders.id);
   }
 
   // ── Transactions ───────────────────────────────────────────────────────────
@@ -175,12 +188,13 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(coupons).orderBy(desc(coupons.createdAt));
   }
   async createCoupon(data: InsertCoupon) {
-    const [c] = await db.insert(coupons).values(data).returning();
-    return c;
+    const id = randomUUID();
+    await db.insert(coupons).values({ ...data, id });
+    return fetchAfter<Coupon>(coupons, id, coupons.id);
   }
   async updateCoupon(id: string, data: Partial<Coupon>) {
-    const [c] = await db.update(coupons).set(data).where(eq(coupons.id, id)).returning();
-    return c;
+    await db.update(coupons).set(data).where(eq(coupons.id, id));
+    return fetchAfter<Coupon>(coupons, id, coupons.id);
   }
   async deleteCoupon(id: string) {
     await db.delete(coupons).where(eq(coupons.id, id));
@@ -195,16 +209,18 @@ export class DatabaseStorage implements IStorage {
     return t;
   }
   async createTicket(data: InsertTicket) {
-    const [t] = await db.insert(tickets).values(data).returning();
-    return t;
+    const id = randomUUID();
+    await db.insert(tickets).values({ ...data, id });
+    return fetchAfter<Ticket>(tickets, id, tickets.id);
   }
   async updateTicketStatus(id: string, status: string) {
-    const [t] = await db.update(tickets).set({ status: status as any, updatedAt: new Date() }).where(eq(tickets.id, id)).returning();
-    return t;
+    await db.update(tickets).set({ status: status as any, updatedAt: new Date() }).where(eq(tickets.id, id));
+    return fetchAfter<Ticket>(tickets, id, tickets.id);
   }
   async replyToTicket(ticketId: string, userId: string, message: string, isStaff = false) {
-    const [r] = await db.insert(ticketReplies).values({ ticketId, userId, message, isStaff }).returning();
-    return r;
+    const id = randomUUID();
+    await db.insert(ticketReplies).values({ id, ticketId, userId, message, isStaff });
+    return fetchAfter<TicketReply>(ticketReplies, id, ticketReplies.id);
   }
   async getTicketReplies(ticketId: string) {
     return db.select().from(ticketReplies).where(eq(ticketReplies.ticketId, ticketId)).orderBy(ticketReplies.createdAt);
@@ -215,12 +231,13 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
   }
   async createCampaign(data: Partial<Campaign>) {
-    const [c] = await db.insert(campaigns).values(data as any).returning();
-    return c;
+    const id = randomUUID();
+    await db.insert(campaigns).values({ ...(data as any), id });
+    return fetchAfter<Campaign>(campaigns, id, campaigns.id);
   }
   async updateCampaign(id: string, data: Partial<Campaign>) {
-    const [c] = await db.update(campaigns).set(data).where(eq(campaigns.id, id)).returning();
-    return c;
+    await db.update(campaigns).set(data).where(eq(campaigns.id, id));
+    return fetchAfter<Campaign>(campaigns, id, campaigns.id);
   }
   async deleteCampaign(id: string) {
     await db.delete(campaigns).where(eq(campaigns.id, id));
@@ -231,8 +248,8 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(reviews).orderBy(desc(reviews.createdAt));
   }
   async updateReviewApproval(id: string, approved: boolean) {
-    const [r] = await db.update(reviews).set({ isApproved: approved }).where(eq(reviews.id, id)).returning();
-    return r;
+    await db.update(reviews).set({ isApproved: approved }).where(eq(reviews.id, id));
+    return fetchAfter<Review>(reviews, id, reviews.id);
   }
   async deleteReview(id: string) {
     await db.delete(reviews).where(eq(reviews.id, id));
@@ -243,12 +260,13 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(paymentMethods).orderBy(paymentMethods.sortOrder);
   }
   async createPaymentMethod(data: Partial<PaymentMethod>) {
-    const [p] = await db.insert(paymentMethods).values(data as any).returning();
-    return p;
+    const id = randomUUID();
+    await db.insert(paymentMethods).values({ ...(data as any), id });
+    return fetchAfter<PaymentMethod>(paymentMethods, id, paymentMethods.id);
   }
   async updatePaymentMethod(id: string, data: Partial<PaymentMethod>) {
-    const [p] = await db.update(paymentMethods).set(data).where(eq(paymentMethods.id, id)).returning();
-    return p;
+    await db.update(paymentMethods).set(data).where(eq(paymentMethods.id, id));
+    return fetchAfter<PaymentMethod>(paymentMethods, id, paymentMethods.id);
   }
   async deletePaymentMethod(id: string) {
     await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
@@ -263,7 +281,7 @@ export class DatabaseStorage implements IStorage {
     return {
       totalUsers: userCount.count,
       totalOrders: orderCount.count,
-      totalRevenue: parseFloat(revenueRow.total ?? "0"),
+      totalRevenue: parseFloat((revenueRow.total as string | null) ?? "0"),
       openTickets: ticketCount.count,
     };
   }

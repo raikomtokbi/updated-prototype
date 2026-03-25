@@ -3,16 +3,19 @@ import fs from "fs";
 import path from "path";
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+  // In production the compiled server lives at dist/server/index.js
+  // so __dirname = <root>/dist/server — walk up two levels to reach client/dist
+  const distPath = path.resolve(__dirname, "../../client/dist");
+
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory: ${distPath}. Run "npm run build" first.`,
     );
   }
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
+  // SPA fallback — all non-API routes serve index.html
   app.use("/{*path}", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
