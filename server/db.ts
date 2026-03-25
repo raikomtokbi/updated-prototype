@@ -1,53 +1,15 @@
-export const db: any = {
-    select() {
-        return {
-              from() {
-                      return {
-                                where() {
-                                            return [];
-                                                      },
-                                                                orderBy() {
-                                                                            return [];
-                                                                                      }
-                                                                                              };
-                                                                                                    }
-                                                                                                        };
-                                                                                                          },
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
 
-                                                                                                            insert() {
-                                                                                                                return {
-                                                                                                                      values() {
-                                                                                                                              return {
-                                                                                                                                        returning() {
-                                                                                                                                                    return [];
-                                                                                                                                                              }
-                                                                                                                                                                      };
-                                                                                                                                                                            }
-                                                                                                                                                                                };
-                                                                                                                                                                                  },
+neonConfig.webSocketConstructor = ws;
 
-                                                                                                                                                                                    update() {
-                                                                                                                                                                                        return {
-                                                                                                                                                                                              set() {
-                                                                                                                                                                                                      return {
-                                                                                                                                                                                                                where() {
-                                                                                                                                                                                                                            return {
-                                                                                                                                                                                                                                          returning() {
-                                                                                                                                                                                                                                                          return [];
-                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                                    };
-                                                                                                                                                                                                                                                                                              }
-                                                                                                                                                                                                                                                                                                      };
-                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                };
-                                                                                                                                                                                                                                                                                                                  },
-
-                                                                                                                                                                                                                                                                                                                    delete() {
-                                                                                                                                                                                                                                                                                                                        return {
-                                                                                                                                                                                                                                                                                                                              where() {
-                                                                                                                                                                                                                                                                                                                                      return [];
-                                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                                                };
-                                                                                                                                                                                                                                                                                                                                                  }
-                                                                                                                                                                                                                                                                                                                                                  };
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
 }
+
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle({ client: pool, schema });
