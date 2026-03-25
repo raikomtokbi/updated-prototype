@@ -203,3 +203,33 @@ body {
   border-top: 1px solid hsl(220, 15%, 16%);
   margin: 1.5rem 0;
 }
+
+/* Hide scrollbar for trending row */
+.trending-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar-desktop {
+    display: none !important;
+  }
+  .nav-links-desktop {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .bonus-img {
+    display: none !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

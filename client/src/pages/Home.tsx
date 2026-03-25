@@ -1,347 +1,978 @@
 import { Link } from "wouter";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Zap, Shield, Clock, ArrowRight, Star, ChevronRight } from "lucide-react";
+import {
+  Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
+  Facebook, Twitter, Instagram, Youtube, Gamepad2, Gift, HeadphonesIcon,
+} from "lucide-react";
 import type { Product } from "@shared/schema";
 
+import heroBannerImg from "@assets/hero-banner_1774458324894.png";
+import mlbbBannerImg from "@assets/mlbb-banner_1774458324929.png";
+import game1Img from "@assets/game-1_1774458324765.png";
+import game2Img from "@assets/game-2_1774458324828.png";
+import game3Img from "@assets/game-3_1774458324856.png";
+import mlbbLogoImg from "@assets/mlbb-logo_1774458324950.png";
+
+// ─── Slider data ──────────────────────────────────────────────────────────────
+const SLIDES = [
+  {
+    id: 1,
+    bg: heroBannerImg,
+    badge: "WEEKEND SPECIAL",
+    title: ["LEVEL UP", "YOUR", "GAMEPLAY"],
+    highlight: 2,
+    sub: "The fastest, safest way to top up your favorite games. Get game credits, diamonds, and gift cards instantly.",
+    cta1: { label: "Browse Games", href: "/products" },
+    cta2: { label: "View Offers", href: "/products" },
+  },
+  {
+    id: 2,
+    bg: mlbbBannerImg,
+    badge: "LIMITED TIME",
+    title: ["DOUBLE", "DIAMOND", "WEEKEND"],
+    highlight: 1,
+    sub: "Get 2x diamonds on all Mobile Legends top-ups this weekend only. Don't miss out!",
+    cta1: { label: "Top Up Now", href: "/products" },
+    cta2: { label: "Learn More", href: "/" },
+  },
+  {
+    id: 3,
+    bg: game2Img,
+    badge: "NEW GAME",
+    title: ["FANTASY", "REALMS", "AWAIT"],
+    highlight: 0,
+    sub: "Explore new worlds with instant in-game currency. No delays, no hassle — just gaming.",
+    cta1: { label: "Shop Now", href: "/products" },
+    cta2: { label: "View Deals", href: "/products" },
+  },
+];
+
+// ─── Trending games ───────────────────────────────────────────────────────────
+const TRENDING_GAMES = [
+  { name: "Valorant", img: game1Img, badge: "HOT", badgeColor: "#ef4444" },
+  { name: "League of Legends", img: game2Img, badge: "NEW", badgeColor: "#22d3ee" },
+  { name: "Genshin Impact", img: game3Img, badge: null, badgeColor: null },
+  { name: "Mobile Legends", img: mlbbLogoImg, badge: "TOP", badgeColor: "#7c3aed" },
+  { name: "PUBG Mobile", img: game1Img, badge: null, badgeColor: null },
+  { name: "Free Fire", img: game3Img, badge: "SALE", badgeColor: "#f59e0b" },
+];
+
+// ─── Features ─────────────────────────────────────────────────────────────────
 const FEATURES = [
-  {
-    icon: Zap,
-    title: "Instant Delivery",
-    desc: "Get your game credits delivered within seconds after payment confirmation.",
-  },
-  {
-    icon: Shield,
-    title: "Secure Payments",
-    desc: "Multiple payment methods with end-to-end encryption for your safety.",
-  },
-  {
-    icon: Clock,
-    title: "24/7 Support",
-    desc: "Our team is always here to help you with any questions or issues.",
-  },
+  { icon: Zap, title: "Lightning Fast", desc: "Instant delivery to your account within seconds" },
+  { icon: Shield, title: "Secure Payments", desc: "256-bit encryption on all transactions" },
+  { icon: Tag, title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups" },
 ];
 
-const REVIEWS = [
-  { name: "Alex K.", rating: 5, text: "Super fast delivery! Got my Mobile Legends diamonds in under a minute.", game: "Mobile Legends" },
-  { name: "Sarah M.", rating: 5, text: "Best prices for Genshin Impact crystals. Highly recommend!", game: "Genshin Impact" },
-  { name: "James R.", rating: 5, text: "Reliable and trustworthy. Been using Nexcoin for 6 months now.", game: "PUBG Mobile" },
-];
+// ─── Hero Slider ──────────────────────────────────────────────────────────────
+function HeroSlider() {
+  const [current, setCurrent] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-export default function Home() {
-  const { data: products = [] } = useQuery<Product[]>({ queryKey: ["/api/products"] });
-  const featured = products.slice(0, 4);
+  function startTimer() {
+    timerRef.current = setInterval(() => {
+      setCurrent((c) => (c + 1) % SLIDES.length);
+    }, 5000);
+  }
+
+  useEffect(() => {
+    startTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  function goTo(idx: number) {
+    setCurrent(idx);
+    if (timerRef.current) clearInterval(timerRef.current);
+    startTimer();
+  }
+
+  const slide = SLIDES[current];
 
   return (
-    <div style={{ minHeight: "100vh" }}>
-      {/* Hero */}
-      <section
+    <section
+      style={{
+        position: "relative",
+        height: "min(100vh, 700px)",
+        minHeight: "540px",
+        overflow: "hidden",
+        background: "#070b14",
+      }}
+    >
+      {/* Slide backgrounds — fade transition */}
+      {SLIDES.map((s, i) => (
+        <div
+          key={s.id}
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: i === current ? 1 : 0,
+            transition: "opacity 0.9s ease",
+          }}
+        >
+          <img
+            src={s.bg}
+            alt=""
+            aria-hidden
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+          />
+          {/* Dark wash gradient over bg */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(90deg, rgba(7,11,20,0.90) 0%, rgba(7,11,20,0.55) 55%, rgba(7,11,20,0.15) 100%), linear-gradient(0deg, rgba(7,11,20,0.85) 0%, transparent 40%)",
+            }}
+          />
+        </div>
+      ))}
+
+      {/* Glow accent */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: "radial-gradient(ellipse 40% 60% at 20% 50%, rgba(124,58,237,0.18) 0%, transparent 65%)",
+        }}
+      />
+
+      {/* Content */}
+      <div
         style={{
           position: "relative",
-          padding: "6rem 1.5rem 5rem",
-          textAlign: "center",
-          overflow: "hidden",
+          zIndex: 2,
+          maxWidth: "1320px",
+          margin: "0 auto",
+          padding: "0 1.5rem",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        {/* Background glow orbs */}
+        <div style={{ maxWidth: "580px" }}>
+          {/* Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.3rem 0.8rem",
+              borderRadius: "9999px",
+              background: "rgba(124, 58, 237, 0.2)",
+              border: "1px solid rgba(124, 58, 237, 0.4)",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <Zap size={12} color="#a78bfa" />
+            <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+              {slide.badge}
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1
+            className="font-orbitron"
+            style={{ lineHeight: 1.05, marginBottom: "1.25rem" }}
+          >
+            {slide.title.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "block",
+                  fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "-0.02em",
+                  color: i === slide.highlight
+                    ? "transparent"
+                    : "#e5e7eb",
+                  background: i === slide.highlight
+                    ? "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)"
+                    : undefined,
+                  WebkitBackgroundClip: i === slide.highlight ? "text" : undefined,
+                  WebkitTextFillColor: i === slide.highlight ? "transparent" : undefined,
+                  backgroundClip: i === slide.highlight ? "text" : undefined,
+                  textShadow: i !== slide.highlight ? "0 0 40px rgba(124,58,237,0.3)" : undefined,
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </h1>
+
+          {/* Sub */}
+          <p
+            style={{
+              fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
+              color: "rgba(229, 231, 235, 0.65)",
+              lineHeight: 1.7,
+              marginBottom: "2rem",
+              maxWidth: "460px",
+            }}
+          >
+            {slide.sub}
+          </p>
+
+          {/* CTAs */}
+          <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap" }}>
+            <Link
+              href={slide.cta1.href}
+              data-testid="link-browse-games"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.7rem 1.5rem",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                color: "white",
+                fontSize: "0.875rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                boxShadow: "0 0 20px rgba(124,58,237,0.45)",
+                transition: "opacity 0.2s, box-shadow 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
+            >
+              <Gamepad2 size={16} />
+              {slide.cta1.label}
+            </Link>
+            <Link
+              href={slide.cta2.href}
+              data-testid="link-view-offers"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.7rem 1.5rem",
+                borderRadius: "8px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                color: "rgba(229,231,235,0.9)",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                backdropFilter: "blur(6px)",
+                transition: "border-color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
+                e.currentTarget.style.background = "rgba(124,58,237,0.12)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+              }}
+            >
+              {slide.cta2.label}
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Slider controls */}
+      <button
+        onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
+        data-testid="button-slide-prev"
+        style={{
+          position: "absolute",
+          left: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 10,
+          width: "40px",
+          height: "40px",
+          borderRadius: "50%",
+          background: "rgba(124,58,237,0.15)",
+          border: "1px solid rgba(124,58,237,0.3)",
+          color: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(4px)",
+          transition: "background 0.2s",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+      >
+        <ChevronLeft size={18} />
+      </button>
+      <button
+        onClick={() => goTo((current + 1) % SLIDES.length)}
+        data-testid="button-slide-next"
+        style={{
+          position: "absolute",
+          right: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 10,
+          width: "40px",
+          height: "40px",
+          borderRadius: "50%",
+          background: "rgba(124,58,237,0.15)",
+          border: "1px solid rgba(124,58,237,0.3)",
+          color: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(4px)",
+          transition: "background 0.2s",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+      >
+        <ChevronRight size={18} />
+      </button>
+
+      {/* Dot indicators */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "1.5rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 10,
+          display: "flex",
+          gap: "0.5rem",
+        }}
+      >
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            data-testid={`button-slide-dot-${i}`}
+            style={{
+              width: i === current ? "24px" : "8px",
+              height: "8px",
+              borderRadius: "9999px",
+              background: i === current ? "#7c3aed" : "rgba(255,255,255,0.25)",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: i === current ? "0 0 8px rgba(124,58,237,0.6)" : "none",
+            }}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Features strip ───────────────────────────────────────────────────────────
+function FeaturesStrip() {
+  return (
+    <section
+      style={{
+        background: "#0b1020",
+        borderTop: "1px solid rgba(124,58,237,0.12)",
+        borderBottom: "1px solid rgba(124,58,237,0.12)",
+        padding: "2.5rem 1.5rem",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1320px",
+          margin: "0 auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "2rem",
+        }}
+      >
+        {FEATURES.map(({ icon: Icon, title, desc }) => (
+          <div
+            key={title}
+            style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}
+          >
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "10px",
+                background: "rgba(124,58,237,0.12)",
+                border: "1px solid rgba(124,58,237,0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 0 12px rgba(124,58,237,0.15)",
+              }}
+            >
+              <Icon size={20} color="#a78bfa" />
+            </div>
+            <div>
+              <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "#e5e7eb", marginBottom: "0.3rem" }}>
+                {title}
+              </h3>
+              <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.65)", lineHeight: 1.5 }}>{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Trending Games ───────────────────────────────────────────────────────────
+function TrendingGames() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: products = [] } = useQuery<Product[]>({ queryKey: ["/api/products"] });
+
+  return (
+    <section style={{ padding: "3.5rem 0", maxWidth: "1320px", margin: "0 auto" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "1.5rem",
+          padding: "0 1.5rem",
+          flexWrap: "wrap",
+          gap: "0.75rem",
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+            <Zap size={16} color="#a78bfa" />
+            <span
+              className="font-orbitron"
+              style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+            >
+              Trending Now
+            </span>
+          </div>
+          <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+            Top up the most popular games instantly
+          </p>
+        </div>
+        <Link
+          href="/products"
+          data-testid="link-view-all-games"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            color: "#a78bfa",
+            textDecoration: "none",
+          }}
+        >
+          View All <ArrowRight size={13} />
+        </Link>
+      </div>
+
+      <div
+        ref={scrollRef}
+        style={{
+          display: "flex",
+          gap: "1rem",
+          overflowX: "auto",
+          padding: "0.5rem 1.5rem 1rem",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        {TRENDING_GAMES.map((game, idx) => (
+          <Link
+            key={game.name}
+            href="/products"
+            data-testid={`card-game-${idx}`}
+            style={{
+              flexShrink: 0,
+              width: "155px",
+              borderRadius: "10px",
+              overflow: "hidden",
+              textDecoration: "none",
+              display: "block",
+              position: "relative",
+              border: "1px solid rgba(124,58,237,0.15)",
+              background: "#0b1020",
+              transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "none";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+            }}
+          >
+            {/* Image */}
+            <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative" }}>
+              <img
+                src={game.img}
+                alt={game.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              {/* Dark gradient bottom */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(0deg, rgba(11,16,32,0.85) 0%, transparent 55%)",
+                }}
+              />
+              {/* Badge */}
+              {game.badge && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "0.4rem",
+                    left: "0.4rem",
+                    padding: "0.15rem 0.4rem",
+                    borderRadius: "4px",
+                    background: game.badgeColor!,
+                    color: "white",
+                    fontSize: "0.6rem",
+                    fontWeight: 800,
+                    letterSpacing: "0.05em",
+                    boxShadow: `0 0 8px ${game.badgeColor}60`,
+                  }}
+                >
+                  {game.badge}
+                </span>
+              )}
+            </div>
+            {/* Name */}
+            <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
+              <p
+                style={{
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  color: "#e5e7eb",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {game.name}
+              </p>
+            </div>
+          </Link>
+        ))}
+
+        {/* DB products if any */}
+        {products.map((p) => (
+          <Link
+            key={p.id}
+            href="/products"
+            data-testid={`card-db-game-${p.id}`}
+            style={{
+              flexShrink: 0,
+              width: "155px",
+              borderRadius: "10px",
+              overflow: "hidden",
+              textDecoration: "none",
+              display: "block",
+              border: "1px solid rgba(124,58,237,0.15)",
+              background: "#0b1020",
+              transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "none";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "120px",
+                background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(11,16,32,0.9))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+              }}
+            >
+              {p.imageUrl ? (
+                <img src={p.imageUrl} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <Gamepad2 size={36} style={{ color: "rgba(167,139,250,0.3)" }} />
+              )}
+            </div>
+            <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
+              <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {p.title}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Weekend Bonus Banner ─────────────────────────────────────────────────────
+function BonusBanner() {
+  return (
+    <section style={{ padding: "0 1.5rem 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
+      <div
+        style={{
+          borderRadius: "16px",
+          overflow: "hidden",
+          position: "relative",
+          background: "linear-gradient(135deg, #0f0c29, #302b63, #0f0c29)",
+          border: "1px solid rgba(124,58,237,0.35)",
+          boxShadow: "0 0 40px rgba(124,58,237,0.15)",
+          display: "flex",
+          alignItems: "center",
+          minHeight: "180px",
+        }}
+      >
+        {/* Glow */}
         <div
           aria-hidden
           style={{
             position: "absolute",
             inset: 0,
+            background: "radial-gradient(ellipse 60% 80% at 30% 50%, rgba(124,58,237,0.25) 0%, transparent 70%)",
             pointerEvents: "none",
-            background:
-              "radial-gradient(ellipse 60% 40% at 50% 0%, hsla(258,90%,66%,0.15) 0%, transparent 70%), radial-gradient(ellipse 50% 30% at 80% 60%, hsla(196,100%,50%,0.08) 0%, transparent 70%)",
           }}
         />
 
-        <div style={{ position: "relative", maxWidth: "800px", margin: "0 auto" }}>
-          <span className="badge badge-purple" style={{ marginBottom: "1.5rem" }}>
-            #1 Game Top-Up Platform
+        {/* Content */}
+        <div style={{ position: "relative", zIndex: 1, padding: "2rem 2.5rem", flex: 1 }}>
+          <span
+            style={{
+              display: "inline-block",
+              padding: "0.2rem 0.65rem",
+              borderRadius: "9999px",
+              background: "rgba(124,58,237,0.25)",
+              border: "1px solid rgba(124,58,237,0.45)",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              color: "#a78bfa",
+              letterSpacing: "0.1em",
+              marginBottom: "0.75rem",
+            }}
+          >
+            WEEKEND SPECIAL
           </span>
-
-          <h1
-            className="font-orbitron"
-            style={{
-              fontSize: "clamp(2.5rem, 6vw, 4rem)",
-              fontWeight: 800,
-              lineHeight: 1.1,
-              marginBottom: "1.5rem",
-              color: "hsl(210, 40%, 95%)",
-            }}
-          >
-            Power Up Your{" "}
-            <span className="gradient-text">Game Experience</span>
-          </h1>
-
-          <p
-            style={{
-              fontSize: "1.125rem",
-              color: "hsl(220, 10%, 60%)",
-              maxWidth: "560px",
-              margin: "0 auto 2.5rem",
-              lineHeight: 1.7,
-            }}
-          >
-            Instant top-ups for your favorite games. Fast, secure, and affordable — over 50+ games supported.
-          </p>
-
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/products" className="btn-primary" data-testid="link-shop-now">
-              Shop Now <ArrowRight size={16} />
-            </Link>
-            <Link href="/login" className="btn-secondary" data-testid="link-create-account">
-              Create Account
-            </Link>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "2.5rem",
-              justifyContent: "center",
-              marginTop: "3rem",
-              flexWrap: "wrap",
-            }}
-          >
-            {[
-              { value: "50+", label: "Games" },
-              { value: "10K+", label: "Customers" },
-              { value: "<60s", label: "Delivery" },
-            ].map(({ value, label }) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <div
-                  className="font-orbitron"
-                  style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(258, 90%, 70%)" }}
-                >
-                  {value}
-                </div>
-                <div style={{ fontSize: "0.8rem", color: "hsl(220, 10%, 55%)", marginTop: "0.25rem" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      {featured.length > 0 && (
-        <section style={{ padding: "4rem 1.5rem", maxWidth: "1280px", margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
-              <h2
-                className="font-orbitron"
-                style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210, 40%, 95%)", marginBottom: "0.4rem" }}
-              >
-                Popular Games
-              </h2>
-              <p style={{ fontSize: "0.875rem", color: "hsl(220, 10%, 55%)" }}>Top up your favorite games instantly</p>
-            </div>
-            <Link
-              href="/products"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.25rem",
-                fontSize: "0.875rem",
-                color: "hsl(258, 90%, 70%)",
-                textDecoration: "none",
-                fontWeight: 600,
-              }}
-              data-testid="link-view-all-products"
-            >
-              View All <ChevronRight size={16} />
-            </Link>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: "1.25rem",
-            }}
-          >
-            {featured.map((product) => (
-              <Link
-                key={product.id}
-                href="/products"
-                className="game-card"
-                data-testid={`card-product-${product.id}`}
-                style={{ textDecoration: "none", display: "block", overflow: "hidden" }}
-              >
-                <div
-                  style={{
-                    height: "140px",
-                    background: "linear-gradient(135deg, hsl(258,40%,18%), hsl(220,30%,12%))",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.title}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <Zap size={40} style={{ color: "hsla(258,90%,66%,0.4)" }} />
-                  )}
-                </div>
-                <div style={{ padding: "1rem" }}>
-                  <h3
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 600,
-                      color: "hsl(210, 40%, 92%)",
-                      marginBottom: "0.4rem",
-                    }}
-                  >
-                    {product.title}
-                  </h3>
-                  <span className="badge badge-purple">{product.category.replace("_", " ")}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Features */}
-      <section
-        style={{
-          padding: "4rem 1.5rem",
-          background: "hsl(220, 20%, 7%)",
-          borderTop: "1px solid hsl(220, 15%, 14%)",
-          borderBottom: "1px solid hsl(220, 15%, 14%)",
-        }}
-      >
-        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <h2
             className="font-orbitron"
             style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              textAlign: "center",
-              marginBottom: "2.5rem",
-              color: "hsl(210, 40%, 95%)",
+              fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
+              fontWeight: 900,
+              color: "#e5e7eb",
+              lineHeight: 1.1,
+              marginBottom: "0.75rem",
             }}
           >
-            Why Choose Nexcoin?
+            GET{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              20% BONUS
+            </span>{" "}
+            CREDITS
           </h2>
+          <p style={{ fontSize: "0.825rem", color: "rgba(229,231,235,0.6)", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
+            Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.
+          </p>
+          <Link
+            href="/products"
+            data-testid="link-claim-bonus"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.6rem 1.25rem",
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+              color: "white",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              textDecoration: "none",
+              boxShadow: "0 0 16px rgba(124,58,237,0.4)",
+              transition: "box-shadow 0.2s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 28px rgba(124,58,237,0.65)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 16px rgba(124,58,237,0.4)"; }}
+          >
+            Claim Now <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        {/* Right image */}
+        <div
+          style={{
+            width: "300px",
+            height: "180px",
+            flexShrink: 0,
+            overflow: "hidden",
+            position: "relative",
+          }}
+          className="bonus-img"
+        >
+          <img
+            src={game2Img}
+            alt=""
+            aria-hidden
+            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }}
+          />
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "1.5rem",
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(90deg, #0f0c29 0%, transparent 40%)",
             }}
-          >
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                style={{
-                  background: "hsl(220, 20%, 9%)",
-                  border: "1px solid hsl(220, 15%, 16%)",
-                  borderRadius: "0.75rem",
-                  padding: "1.75rem",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    width: "52px",
-                    height: "52px",
-                    borderRadius: "0.75rem",
-                    background: "hsla(258, 90%, 66%, 0.12)",
-                    border: "1px solid hsla(258, 90%, 66%, 0.2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto 1.25rem",
-                  }}
-                >
-                  <Icon size={24} style={{ color: "hsl(258, 90%, 70%)" }} />
-                </div>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210, 40%, 92%)", marginBottom: "0.5rem" }}>{title}</h3>
-                <p style={{ fontSize: "0.875rem", color: "hsl(220, 10%, 55%)", lineHeight: 1.6 }}>{desc}</p>
-              </div>
-            ))}
-          </div>
+          />
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Reviews */}
-      <section style={{ padding: "4rem 1.5rem", maxWidth: "1280px", margin: "0 auto" }}>
-        <h2
-          className="font-orbitron"
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            textAlign: "center",
-            marginBottom: "2.5rem",
-            color: "hsl(210, 40%, 95%)",
-          }}
-        >
-          What Players Say
-        </h2>
+// ─── Footer ───────────────────────────────────────────────────────────────────
+function Footer() {
+  const MARKETPLACE = ["All Games", "Gift Cards", "Mobile Games", "PC Games"];
+  const SUPPORT = ["FAQ", "How to Buy", "Order Status", "Refund Policy"];
+  const LEGAL = ["Terms & Conditions", "Privacy Policy", "Refund Policy", "Contact"];
+
+  return (
+    <footer
+      style={{
+        background: "#070b14",
+        borderTop: "1px solid rgba(124,58,237,0.15)",
+        padding: "3.5rem 1.5rem 1.5rem",
+      }}
+    >
+      <div style={{ maxWidth: "1320px", margin: "0 auto" }}>
+        {/* Top grid */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "1.25rem",
+            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gap: "3rem",
+            marginBottom: "3rem",
           }}
+          className="footer-grid"
         >
-          {REVIEWS.map((review) => (
-            <div
-              key={review.name}
+          {/* Brand */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "7px",
+                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Zap size={14} color="white" />
+              </div>
+              <span
+                className="font-orbitron"
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 800,
+                  background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                NEXCOIN
+              </span>
+            </div>
+            <p style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
+              The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide.
+            </p>
+            {/* Social icons */}
+            <div style={{ display: "flex", gap: "0.6rem" }}>
+              {[
+                { icon: Facebook, label: "Facebook" },
+                { icon: Twitter, label: "Twitter" },
+                { icon: Instagram, label: "Instagram" },
+                { icon: Youtube, label: "YouTube" },
+              ].map(({ icon: Icon, label }) => (
+                <button
+                  key={label}
+                  aria-label={label}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "7px",
+                    background: "rgba(124,58,237,0.1)",
+                    border: "1px solid rgba(124,58,237,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "rgba(148,163,184,0.6)",
+                    transition: "border-color 0.2s, color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
+                    e.currentTarget.style.color = "#a78bfa";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(124,58,237,0.2)";
+                    e.currentTarget.style.color = "rgba(148,163,184,0.6)";
+                  }}
+                >
+                  <Icon size={14} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Marketplace */}
+          <div>
+            <h4
               style={{
-                background: "hsl(220, 20%, 9%)",
-                border: "1px solid hsl(220, 15%, 16%)",
-                borderRadius: "0.75rem",
-                padding: "1.5rem",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "#e5e7eb",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: "1rem",
               }}
             >
-              <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem" }}>
-                {Array.from({ length: review.rating }).map((_, i) => (
-                  <Star key={i} size={14} fill="hsl(40, 100%, 55%)" style={{ color: "hsl(40, 100%, 55%)" }} />
-                ))}
-              </div>
-              <p style={{ fontSize: "0.875rem", color: "hsl(220, 10%, 70%)", lineHeight: 1.6, marginBottom: "1rem" }}>
-                "{review.text}"
-              </p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(210, 40%, 88%)" }}>{review.name}</span>
-                <span className="badge badge-cyan">{review.game}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              Marketplace
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              {MARKETPLACE.map((item) => (
+                <li key={item}>
+                  <Link
+                    href="/products"
+                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {/* CTA */}
-      <section
-        style={{
-          padding: "4rem 1.5rem",
-          textAlign: "center",
-          background: "hsl(220, 20%, 7%)",
-          borderTop: "1px solid hsl(220, 15%, 14%)",
-        }}
-      >
-        <div style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <h2
-            className="font-orbitron"
-            style={{ fontSize: "1.75rem", fontWeight: 800, color: "hsl(210, 40%, 95%)", marginBottom: "1rem" }}
-          >
-            Ready to Power Up?
-          </h2>
-          <p style={{ fontSize: "0.9rem", color: "hsl(220, 10%, 55%)", marginBottom: "2rem", lineHeight: 1.7 }}>
-            Join thousands of gamers who trust Nexcoin for fast and secure top-ups.
-          </p>
-          <Link href="/products" className="btn-primary" data-testid="link-cta-shop">
-            Browse All Games <ArrowRight size={16} />
-          </Link>
+          {/* Support */}
+          <div>
+            <h4
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "#e5e7eb",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: "1rem",
+              }}
+            >
+              Support
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              {SUPPORT.map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "#e5e7eb",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: "1rem",
+              }}
+            >
+              Legal
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              {LEGAL.map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </section>
+
+        {/* Bottom bar */}
+        <div
+          style={{
+            borderTop: "1px solid rgba(124,58,237,0.12)",
+            paddingTop: "1.5rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)" }}>
+            © 2025 Nexcoin. All rights reserved.
+          </p>
+          <div style={{ display: "flex", gap: "1.5rem" }}>
+            {["Terms", "Privacy", "Cookies"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.4)"; }}
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Home page ─────────────────────────────────────────────────────────────────
+export default function Home() {
+  return (
+    <div style={{ minHeight: "100vh", background: "#070b14" }}>
+      <HeroSlider />
+      <FeaturesStrip />
+      <TrendingGames />
+      <BonusBanner />
+      <Footer />
     </div>
   );
 }
