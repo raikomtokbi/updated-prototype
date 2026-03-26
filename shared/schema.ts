@@ -1,26 +1,18 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  pgTable, text, varchar, boolean, integer, numeric,
-  timestamp, pgEnum,
-} from "drizzle-orm/pg-core";
+  mysqlTable, text, varchar, boolean, int, decimal,
+  timestamp, mysqlEnum,
+} from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
-export const userRoleEnum = pgEnum("user_role", ["super_admin", "admin", "staff", "user"]);
-export const productCategoryEnum = pgEnum("product_category", ["game_currency", "gift_card", "voucher", "subscription"]);
-export const orderStatusEnum = pgEnum("order_status", ["pending", "processing", "completed", "failed", "refunded"]);
-export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "success", "failed", "refunded"]);
-export const ticketStatusEnum = pgEnum("ticket_status", ["open", "in_progress", "resolved", "closed"]);
-export const ticketPriorityEnum = pgEnum("ticket_priority", ["low", "medium", "high", "urgent"]);
-
 // ─── Users ────────────────────────────────────────────────────────────────────
-export const users = pgTable("users", {
+export const users = mysqlTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(),
   username: varchar("username", { length: 191 }).notNull().unique(),
   email: varchar("email", { length: 191 }).unique(),
   password: text("password").notNull(),
-  role: userRoleEnum("role").notNull().default("user"),
+  role: mysqlEnum("role", ["super_admin", "admin", "staff", "user"]).notNull().default("user"),
   fullName: varchar("full_name", { length: 191 }),
   phone: varchar("phone", { length: 50 }),
   avatarUrl: text("avatar_url"),
@@ -33,7 +25,7 @@ export const users = pgTable("users", {
 });
 
 // ─── Games ────────────────────────────────────────────────────────────────────
-export const games = pgTable("games", {
+export const games = mysqlTable("games", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   slug: varchar("slug", { length: 191 }).notNull().unique(),
@@ -42,120 +34,120 @@ export const games = pgTable("games", {
   bannerUrl: text("banner_url"),
   category: varchar("category", { length: 100 }).notNull().default("game_currency"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
-  sortOrder: integer("sort_order").notNull().default(0),
+  sortOrder: int("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Services (top-up options per game) ───────────────────────────────────────
-export const services = pgTable("services", {
+export const services = mysqlTable("services", {
   id: varchar("id", { length: 36 }).primaryKey(),
   gameId: varchar("game_id", { length: 36 }).notNull().references(() => games.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 191 }).notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  discountPercent: numeric("discount_percent", { precision: 5, scale: 2 }).notNull().default("0"),
-  finalPrice: numeric("final_price", { precision: 10, scale: 2 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  discountPercent: decimal("discount_percent", { precision: 5, scale: 2 }).notNull().default("0"),
+  finalPrice: decimal("final_price", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
-  sortOrder: integer("sort_order").notNull().default(0),
+  sortOrder: int("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Products ─────────────────────────────────────────────────────────────────
-export const products = pgTable("products", {
+export const products = mysqlTable("products", {
   id: varchar("id", { length: 36 }).primaryKey(),
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
-  category: productCategoryEnum("category").notNull().default("game_currency"),
+  category: mysqlEnum("category", ["game_currency", "gift_card", "voucher", "subscription"]).notNull().default("game_currency"),
   imageUrl: text("image_url"),
   isActive: boolean("is_active").notNull().default(true),
-  sortOrder: integer("sort_order").notNull().default(0),
+  sortOrder: int("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const productPackages = pgTable("product_packages", {
+export const productPackages = mysqlTable("product_packages", {
   id: varchar("id", { length: 36 }).primaryKey(),
   productId: varchar("product_id", { length: 36 }).notNull().references(() => products.id, { onDelete: "cascade" }),
   label: varchar("label", { length: 191 }).notNull(),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  originalPrice: numeric("original_price", { precision: 10, scale: 2 }),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
-export const orders = pgTable("orders", {
+export const orders = mysqlTable("orders", {
   id: varchar("id", { length: 36 }).primaryKey(),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   orderNumber: varchar("order_number", { length: 191 }).notNull().unique(),
-  status: orderStatusEnum("status").notNull().default("pending"),
-  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "completed", "failed", "refunded"]).notNull().default("pending"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const orderItems = pgTable("order_items", {
+export const orderItems = mysqlTable("order_items", {
   id: varchar("id", { length: 36 }).primaryKey(),
   orderId: varchar("order_id", { length: 36 }).notNull().references(() => orders.id, { onDelete: "cascade" }),
   productId: varchar("product_id", { length: 36 }).references(() => products.id),
   packageId: varchar("package_id", { length: 36 }).references(() => productPackages.id),
   productTitle: varchar("product_title", { length: 191 }).notNull(),
   packageLabel: varchar("package_label", { length: 191 }),
-  quantity: integer("quantity").notNull().default(1),
-  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
-  totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
+  quantity: int("quantity").notNull().default(1),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
 });
 
 // ─── Transactions ─────────────────────────────────────────────────────────────
-export const transactions = pgTable("transactions", {
+export const transactions = mysqlTable("transactions", {
   id: varchar("id", { length: 36 }).primaryKey(),
   orderId: varchar("order_id", { length: 36 }).references(() => orders.id),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   paymentMethod: varchar("payment_method", { length: 100 }).notNull(),
   gateway: varchar("gateway", { length: 100 }),
   gatewayRef: varchar("gateway_ref", { length: 191 }),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
-  status: transactionStatusEnum("status").notNull().default("pending"),
+  status: mysqlEnum("status", ["pending", "success", "failed", "refunded"]).notNull().default("pending"),
   failureReason: text("failure_reason"),
   isRefund: boolean("is_refund").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Coupons ──────────────────────────────────────────────────────────────────
-export const coupons = pgTable("coupons", {
+export const coupons = mysqlTable("coupons", {
   id: varchar("id", { length: 36 }).primaryKey(),
   code: varchar("code", { length: 100 }).notNull().unique(),
   description: text("description"),
   discountType: varchar("discount_type", { length: 50 }).notNull().default("percentage"),
-  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
-  minOrderAmount: numeric("min_order_amount", { precision: 10, scale: 2 }),
-  maxUses: integer("max_uses"),
-  usedCount: integer("used_count").notNull().default(0),
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }),
+  maxUses: int("max_uses"),
+  usedCount: int("used_count").notNull().default(0),
   isActive: boolean("is_active").notNull().default(true),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Support Tickets ──────────────────────────────────────────────────────────
-export const tickets = pgTable("tickets", {
+export const tickets = mysqlTable("tickets", {
   id: varchar("id", { length: 36 }).primaryKey(),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   subject: varchar("subject", { length: 255 }).notNull(),
   message: text("message").notNull(),
-  status: ticketStatusEnum("status").notNull().default("open"),
-  priority: ticketPriorityEnum("priority").notNull().default("medium"),
+  status: mysqlEnum("status", ["open", "in_progress", "resolved", "closed"]).notNull().default("open"),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).notNull().default("medium"),
   assignedTo: varchar("assigned_to", { length: 36 }).references(() => users.id),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const ticketReplies = pgTable("ticket_replies", {
+export const ticketReplies = mysqlTable("ticket_replies", {
   id: varchar("id", { length: 36 }).primaryKey(),
   ticketId: varchar("ticket_id", { length: 36 }).notNull().references(() => tickets.id, { onDelete: "cascade" }),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
@@ -165,7 +157,7 @@ export const ticketReplies = pgTable("ticket_replies", {
 });
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
-export const campaigns = pgTable("campaigns", {
+export const campaigns = mysqlTable("campaigns", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   description: text("description"),
@@ -177,18 +169,18 @@ export const campaigns = pgTable("campaigns", {
 });
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────
-export const reviews = pgTable("reviews", {
+export const reviews = mysqlTable("reviews", {
   id: varchar("id", { length: 36 }).primaryKey(),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   productId: varchar("product_id", { length: 36 }).references(() => products.id),
-  rating: integer("rating").notNull(),
+  rating: int("rating").notNull(),
   comment: text("comment"),
   isApproved: boolean("is_approved").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Payment Methods ──────────────────────────────────────────────────────────
-export const paymentMethods = pgTable("payment_methods", {
+export const paymentMethods = mysqlTable("payment_methods", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   type: varchar("type", { length: 50 }).notNull(),
@@ -200,7 +192,7 @@ export const paymentMethods = pgTable("payment_methods", {
   supportedCurrencies: text("supported_currencies"),
   isActive: boolean("is_active").notNull().default(true),
   config: text("config"),
-  sortOrder: integer("sort_order").notNull().default(0),
+  sortOrder: int("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
