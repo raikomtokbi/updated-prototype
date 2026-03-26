@@ -1,13 +1,13 @@
 import { defineConfig } from "drizzle-kit";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set. Example: postgresql://user:pass@localhost:5432/dbname");
+  throw new Error("DATABASE_URL must be set. Example: mysql://user:password@host:3306/database");
 }
 
 export default defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
-  dialect: "postgresql",
+  dialect: "mysql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
