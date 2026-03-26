@@ -21,7 +21,7 @@ server/         Express backend
   index.ts      Entry point, middleware setup
   routes.ts     API endpoints
   storage.ts    Data access layer (DatabaseStorage)
-  db.ts         PostgreSQL connection (Neon serverless)
+  db.ts         PostgreSQL connection (node-postgres / pg)
 shared/
   schema.ts     Drizzle ORM schema (PostgreSQL)
 ```
