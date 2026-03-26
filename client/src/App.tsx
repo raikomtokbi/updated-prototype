@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -35,16 +35,7 @@ import ApiIntegration from "./pages/admin/ApiIntegration";
 import ChooseTheme from "./pages/admin/ChooseTheme";
 import EditContent from "./pages/admin/EditContent";
 
-function PublicLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">{children}</main>
-    </div>
-  );
-}
-
-export default function App() {
+function AdminRoutes() {
   return (
     <Switch>
       <Route path="/admin" component={AdminDashboard} />
@@ -65,30 +56,40 @@ export default function App() {
       <Route path="/admin/api-integration" component={ApiIntegration} />
       <Route path="/admin/choose-theme" component={ChooseTheme} />
       <Route path="/admin/edit-content" component={EditContent} />
-
-      <Route>
-        {() => (
-          <PublicLayout>
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/products" component={Products} />
-              <Route path="/product/:id" component={ProductDetails} />
-              <Route path="/categories" component={Categories} />
-              <Route path="/cart" component={Cart} />
-              <Route path="/orders" component={Orders} />
-              <Route path="/login" component={Login} />
-              <Route path="/register" component={Register} />
-              <Route path="/account" component={Account} />
-              <Route path="/support" component={Support} />
-              <Route path="/about" component={About} />
-              <Route path="/contact" component={Contact} />
-              <Route path="/privacy" component={Privacy} />
-              <Route path="/terms" component={Terms} />
-              <Route component={NotFound} />
-            </Switch>
-          </PublicLayout>
-        )}
-      </Route>
+      <Route component={NotFound} />
     </Switch>
   );
+}
+
+function PublicRoutes() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/products" component={Products} />
+          <Route path="/product/:id" component={ProductDetails} />
+          <Route path="/categories" component={Categories} />
+          <Route path="/cart" component={Cart} />
+          <Route path="/orders" component={Orders} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/account" component={Account} />
+          <Route path="/support" component={Support} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/terms" component={Terms} />
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  const [location] = useLocation();
+  const isAdmin = location === "/admin" || location.startsWith("/admin/");
+  return isAdmin ? <AdminRoutes /> : <PublicRoutes />;
 }
