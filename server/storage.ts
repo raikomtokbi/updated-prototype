@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 import {
   type User, type InsertUser,
+  type Game, type InsertGame,
+  type Service, type InsertService,
   type Product, type InsertProduct,
   type Order,
   type Transaction,
@@ -10,11 +12,11 @@ import {
   type Campaign,
   type Review,
   type PaymentMethod,
-  users, products, productPackages, orders, orderItems,
+  users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, reviews, paymentMethods,
 } from "@shared/schema";
-import { eq, desc, count, sum, sql } from "drizzle-orm";
+import { eq, desc, count, sum } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -28,6 +30,20 @@ export interface IStorage {
   deleteUser(id: string): Promise<void>;
   countUsers(): Promise<number>;
   getSubscribedUsers(): Promise<User[]>;
+
+  // Games
+  getAllGames(): Promise<Game[]>;
+  getGame(id: string): Promise<Game | undefined>;
+  createGame(data: InsertGame): Promise<Game>;
+  updateGame(id: string, data: Partial<Game>): Promise<Game | undefined>;
+  deleteGame(id: string): Promise<void>;
+
+  // Services
+  getAllServices(gameId?: string): Promise<Service[]>;
+  getService(id: string): Promise<Service | undefined>;
+  createService(data: InsertService): Promise<Service>;
+  updateService(id: string, data: Partial<Service>): Promise<Service | undefined>;
+  deleteService(id: string): Promise<void>;
 
   // Products
   getAllProducts(): Promise<Product[]>;
@@ -87,7 +103,7 @@ export interface IStorage {
   }>;
 }
 
-// ─── Helper: fetch-after-write (MySQL has no RETURNING) ──────────────────────
+// ─── Helper: fetch-after-write (no RETURNING needed) ─────────────────────────
 async function fetchAfter<T>(
   table: any,
   id: string,
@@ -132,6 +148,53 @@ export class DatabaseStorage implements IStorage {
   }
   async getSubscribedUsers() {
     return db.select().from(users).where(eq(users.isSubscribed, true)).orderBy(desc(users.createdAt));
+  }
+
+  // ── Games ──────────────────────────────────────────────────────────────────
+  async getAllGames() {
+    return db.select().from(games).orderBy(games.sortOrder, desc(games.createdAt));
+  }
+  async getGame(id: string) {
+    const [g] = await db.select().from(games).where(eq(games.id, id));
+    return g;
+  }
+  async createGame(data: InsertGame) {
+    const id = randomUUID();
+    await db.insert(games).values({ ...data, id });
+    return fetchAfter<Game>(games, id, games.id);
+  }
+  async updateGame(id: string, data: Partial<Game>) {
+    await db.update(games).set({ ...data, updatedAt: new Date() }).where(eq(games.id, id));
+    return fetchAfter<Game>(games, id, games.id);
+  }
+  async deleteGame(id: string) {
+    await db.delete(games).where(eq(games.id, id));
+  }
+
+  // ── Services ───────────────────────────────────────────────────────────────
+  async getAllServices(gameId?: string) {
+    if (gameId) {
+      return db.select().from(services)
+        .where(eq(services.gameId, gameId))
+        .orderBy(services.sortOrder, desc(services.createdAt));
+    }
+    return db.select().from(services).orderBy(services.sortOrder, desc(services.createdAt));
+  }
+  async getService(id: string) {
+    const [s] = await db.select().from(services).where(eq(services.id, id));
+    return s;
+  }
+  async createService(data: InsertService) {
+    const id = randomUUID();
+    await db.insert(services).values({ ...data, id });
+    return fetchAfter<Service>(services, id, services.id);
+  }
+  async updateService(id: string, data: Partial<Service>) {
+    await db.update(services).set(data).where(eq(services.id, id));
+    return fetchAfter<Service>(services, id, services.id);
+  }
+  async deleteService(id: string) {
+    await db.delete(services).where(eq(services.id, id));
   }
 
   // ── Products ───────────────────────────────────────────────────────────────

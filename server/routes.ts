@@ -35,6 +35,36 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(p);
   });
 
+  // ── Public games routes ────────────────────────────────────────────────────
+  app.get("/api/games", async (_req, res) => {
+    const all = await storage.getAllGames();
+    res.json(all.filter((g) => g.status === "active"));
+  });
+
+  app.get("/api/games/:id", async (req, res) => {
+    const g = await storage.getGame(req.params.id);
+    if (!g) return res.status(404).json({ message: "Not found" });
+    res.json(g);
+  });
+
+  // ── Public services routes ─────────────────────────────────────────────────
+  app.get("/api/services", async (req, res) => {
+    const gameId = req.query.gameId as string | undefined;
+    const all = await storage.getAllServices(gameId);
+    res.json(all.filter((s) => s.status === "active"));
+  });
+
+  // ── Public payment methods ─────────────────────────────────────────────────
+  app.get("/api/payment-methods", async (_req, res) => {
+    const all = await storage.getAllPaymentMethods();
+    // Return only safe public fields (no keys)
+    res.json(
+      all
+        .filter((p) => p.isActive)
+        .map(({ secretKey: _sk, webhookSecret: _ws, publicKey: _pk, ...safe }) => safe),
+    );
+  });
+
   // ── Auth / login ───────────────────────────────────────────────────────────
   app.post("/api/auth/login", async (req, res) => {
     const { username, password } = req.body ?? {};
@@ -49,10 +79,91 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     return res.json({ user: safeUser });
   });
 
+  app.post("/api/auth/register", async (req, res) => {
+    const { username, email, password } = req.body ?? {};
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
+    }
+    const existing = await storage.getUserByUsername(username);
+    if (existing) {
+      return res.status(409).json({ message: "Username already taken" });
+    }
+    try {
+      const user = await storage.createUser({ username, email, password, role: "user" });
+      const { password: _pw, ...safeUser } = user;
+      return res.status(201).json({ user: safeUser });
+    } catch (e: any) {
+      return res.status(400).json({ message: e.message });
+    }
+  });
+
   // ── Dashboard stats ────────────────────────────────────────────────────────
   app.get("/api/admin/stats", requireAdmin, async (_req, res) => {
     const stats = await storage.getDashboardStats();
     res.json(stats);
+  });
+
+  // ── Admin Games ────────────────────────────────────────────────────────────
+  app.get("/api/admin/games", requireAdmin, async (_req, res) => {
+    res.json(await storage.getAllGames());
+  });
+
+  app.post("/api/admin/games", requireAdmin, async (req, res) => {
+    try {
+      const g = await storage.createGame(req.body);
+      res.status(201).json(g);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
+  });
+
+  app.put("/api/admin/games/:id", requireAdmin, async (req, res) => {
+    const g = await storage.updateGame(req.params.id, req.body);
+    if (!g) return res.status(404).json({ message: "Not found" });
+    res.json(g);
+  });
+
+  app.patch("/api/admin/games/:id", requireAdmin, async (req, res) => {
+    const g = await storage.updateGame(req.params.id, req.body);
+    if (!g) return res.status(404).json({ message: "Not found" });
+    res.json(g);
+  });
+
+  app.delete("/api/admin/games/:id", requireAdmin, async (req, res) => {
+    await storage.deleteGame(req.params.id);
+    res.json({ ok: true });
+  });
+
+  // ── Admin Services ─────────────────────────────────────────────────────────
+  app.get("/api/admin/services", requireAdmin, async (req, res) => {
+    const gameId = req.query.gameId as string | undefined;
+    res.json(await storage.getAllServices(gameId));
+  });
+
+  app.post("/api/admin/services", requireAdmin, async (req, res) => {
+    try {
+      const s = await storage.createService(req.body);
+      res.status(201).json(s);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
+  });
+
+  app.put("/api/admin/services/:id", requireAdmin, async (req, res) => {
+    const s = await storage.updateService(req.params.id, req.body);
+    if (!s) return res.status(404).json({ message: "Not found" });
+    res.json(s);
+  });
+
+  app.patch("/api/admin/services/:id", requireAdmin, async (req, res) => {
+    const s = await storage.updateService(req.params.id, req.body);
+    if (!s) return res.status(404).json({ message: "Not found" });
+    res.json(s);
+  });
+
+  app.delete("/api/admin/services/:id", requireAdmin, async (req, res) => {
+    await storage.deleteService(req.params.id);
+    res.json({ ok: true });
   });
 
   // ── Users ──────────────────────────────────────────────────────────────────
@@ -237,6 +348,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.patch("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
+    const p = await storage.updatePaymentMethod(req.params.id, req.body);
+    if (!p) return res.status(404).json({ message: "Not found" });
+    res.json(p);
+  });
+
+  app.put("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     const p = await storage.updatePaymentMethod(req.params.id, req.body);
     if (!p) return res.status(404).json({ message: "Not found" });
     res.json(p);

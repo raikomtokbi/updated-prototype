@@ -32,6 +32,37 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// ─── Games ────────────────────────────────────────────────────────────────────
+export const games = pgTable("games", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 191 }).notNull(),
+  slug: varchar("slug", { length: 191 }).notNull().unique(),
+  description: text("description"),
+  logoUrl: text("logo_url"),
+  bannerUrl: text("banner_url"),
+  category: varchar("category", { length: 100 }).notNull().default("game_currency"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// ─── Services (top-up options per game) ───────────────────────────────────────
+export const services = pgTable("services", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  gameId: varchar("game_id", { length: 36 }).notNull().references(() => games.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 191 }).notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  discountPercent: numeric("discount_percent", { precision: 5, scale: 2 }).notNull().default("0"),
+  finalPrice: numeric("final_price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 // ─── Products ─────────────────────────────────────────────────────────────────
 export const products = pgTable("products", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -161,6 +192,12 @@ export const paymentMethods = pgTable("payment_methods", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   type: varchar("type", { length: 50 }).notNull(),
+  provider: varchar("provider", { length: 100 }),
+  publicKey: text("public_key"),
+  secretKey: text("secret_key"),
+  webhookSecret: text("webhook_secret"),
+  mode: varchar("mode", { length: 20 }).notNull().default("test"),
+  supportedCurrencies: text("supported_currencies"),
   isActive: boolean("is_active").notNull().default(true),
   config: text("config"),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -173,6 +210,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
   tickets: many(tickets),
   reviews: many(reviews),
+}));
+
+export const gamesRelations = relations(games, ({ many }) => ({
+  services: many(services),
+}));
+
+export const servicesRelations = relations(services, ({ one }) => ({
+  game: one(games, { fields: [services.gameId], references: [games.id] }),
 }));
 
 export const productsRelations = relations(products, ({ many }) => ({
@@ -195,6 +240,8 @@ export const ticketsRelations = relations(tickets, ({ one, many }) => ({
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true, email: true, password: true, role: true, fullName: true,
 });
+export const insertGameSchema = createInsertSchema(games).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertServiceSchema = createInsertSchema(services).omit({ id: true, createdAt: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true });
@@ -204,6 +251,10 @@ export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Game = typeof games.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;
+export type Service = typeof services.$inferSelect;
+export type InsertService = z.infer<typeof insertServiceSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type ProductPackage = typeof productPackages.$inferSelect;

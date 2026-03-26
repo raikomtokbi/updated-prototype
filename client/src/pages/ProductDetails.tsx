@@ -4,15 +4,7 @@ import { useState } from "react";
 import { Zap, ShoppingCart, ArrowLeft } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
-import type { Product } from "@shared/schema";
-
-const MOCK_PACKAGES = [
-  { id: "pkg-1", label: "Starter Pack", price: 2.99, originalPrice: undefined },
-  { id: "pkg-2", label: "Basic Pack", price: 5.99, originalPrice: 7.99 },
-  { id: "pkg-3", label: "Popular Pack", price: 12.99, originalPrice: 15.99 },
-  { id: "pkg-4", label: "Premium Pack", price: 24.99, originalPrice: 29.99 },
-  { id: "pkg-5", label: "Ultimate Pack", price: 49.99, originalPrice: 59.99 },
-];
+import type { Product, Service } from "@shared/schema";
 
 const CATEGORY_LABELS: Record<string, string> = {
   game_currency: "Game Currency",
@@ -27,7 +19,7 @@ export default function ProductDetails() {
   const { user } = useAuthStore();
   const addItem = useCartStore((s) => s.addItem);
 
-  const [selectedPkg, setSelectedPkg] = useState<string | null>(null);
+  const [selectedSvc, setSelectedSvc] = useState<string | null>(null);
   const [userId, setUserId] = useState(user?.id ?? "");
   const [zoneId, setZoneId] = useState("");
   const [added, setAdded] = useState(false);
@@ -37,17 +29,28 @@ export default function ProductDetails() {
     enabled: !!params.id,
   });
 
+  // Load real services for this product (using product id as gameId for now)
+  const { data: services = [], isLoading: svcsLoading } = useQuery<Service[]>({
+    queryKey: [`/api/services?gameId=${params.id}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/services?gameId=${params.id}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!params.id,
+  });
+
   function handleAddToCart() {
     if (!product) return;
-    const pkg = MOCK_PACKAGES.find((p) => p.id === selectedPkg);
-    if (!pkg || !userId.trim()) return;
+    const svc = services.find((s) => s.id === selectedSvc);
+    if (!svc || !userId.trim()) return;
     addItem({
       productId: product.id,
       productTitle: product.title,
       productImage: product.imageUrl ?? "",
-      packageId: pkg.id,
-      packageName: pkg.label,
-      price: pkg.price,
+      packageId: svc.id,
+      packageName: svc.name,
+      price: parseFloat(String(svc.finalPrice)),
       userId: userId.trim(),
       zoneId: product.category === "game_currency" ? zoneId.trim() : undefined,
       quantity: 1,
@@ -59,29 +62,14 @@ export default function ProductDetails() {
   if (isLoading) {
     return (
       <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
-        <div
-          style={{
-            height: "400px",
-            background: "hsl(220,20%,9%)",
-            border: "1px solid hsl(220,15%,14%)",
-            borderRadius: "1rem",
-            animation: "pulse 1.5s infinite",
-          }}
-        />
+        <div style={{ height: "400px", background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,14%)", borderRadius: "1rem", animation: "pulse 1.5s infinite" }} />
       </div>
     );
   }
 
   if (isError || !product) {
     return (
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "2.5rem 1.5rem",
-          textAlign: "center",
-        }}
-      >
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2.5rem 1.5rem", textAlign: "center" }}>
         <Zap size={48} style={{ color: "hsl(258,90%,66%)", opacity: 0.3, marginBottom: "1rem" }} />
         <h2 style={{ color: "hsl(210,40%,80%)", marginBottom: "0.5rem" }}>Product not found</h2>
         <button className="btn-secondary" onClick={() => navigate("/products")}>
@@ -92,14 +80,11 @@ export default function ProductDetails() {
   }
 
   const needsZone = product.category === "game_currency";
+  const hasServices = services.length > 0;
 
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
-      <button
-        className="btn-secondary"
-        onClick={() => navigate("/products")}
-        style={{ marginBottom: "1.5rem" }}
-      >
+      <button className="btn-secondary" onClick={() => navigate("/products")} style={{ marginBottom: "1.5rem" }}>
         <ArrowLeft size={16} /> Back to Products
       </button>
 
@@ -125,11 +110,7 @@ export default function ProductDetails() {
           }}
         >
           {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            <img src={product.imageUrl} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <Zap size={64} style={{ color: "hsla(258,90%,66%,0.35)" }} />
           )}
@@ -143,10 +124,7 @@ export default function ProductDetails() {
                 {CATEGORY_LABELS[product.category] ?? product.category}
               </span>
             </div>
-            <h1
-              className="font-orbitron"
-              style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
-            >
+            <h1 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}>
               {product.title}
             </h1>
             {product.description && (
@@ -156,67 +134,68 @@ export default function ProductDetails() {
             )}
           </div>
 
-          {/* Package selection */}
+          {/* Package / service selection */}
           <div>
-            <p
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                color: "hsl(220,10%,65%)",
-                marginBottom: "0.6rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
+            <p style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.6rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Select Package
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {MOCK_PACKAGES.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  onClick={() => setSelectedPkg(pkg.id)}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "0.55rem 0.85rem",
-                    borderRadius: "0.5rem",
-                    background:
-                      selectedPkg === pkg.id ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,11%)",
-                    border: `1px solid ${
-                      selectedPkg === pkg.id
-                        ? "hsla(258,90%,66%,0.5)"
-                        : "hsl(220,15%,18%)"
-                    }`,
-                    cursor: "pointer",
-                    color: "hsl(210,40%,90%)",
-                    fontSize: "0.82rem",
-                    fontWeight: 500,
-                    textAlign: "left",
-                    width: "100%",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <span>{pkg.label}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                    {pkg.originalPrice && (
-                      <span
-                        style={{
-                          fontSize: "0.72rem",
-                          color: "hsl(220,10%,45%)",
-                          textDecoration: "line-through",
-                        }}
-                      >
-                        ${pkg.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                    <span style={{ color: "hsl(258,90%,72%)", fontWeight: 700 }}>
-                      ${pkg.price.toFixed(2)}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
+
+            {svcsLoading ? (
+              <div style={{ padding: "1rem", textAlign: "center", color: "hsl(220,10%,45%)", fontSize: "13px" }}>
+                Loading packages...
+              </div>
+            ) : !hasServices ? (
+              <div style={{ padding: "1rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "13px", border: "1px dashed hsl(220,15%,18%)", borderRadius: "8px" }}>
+                No packages available yet.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                {services.map((svc) => {
+                  const price = parseFloat(String(svc.finalPrice));
+                  const orig = parseFloat(String(svc.price));
+                  const hasDiscount = parseFloat(String(svc.discountPercent)) > 0;
+                  return (
+                    <button
+                      key={svc.id}
+                      onClick={() => setSelectedSvc(svc.id)}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "0.55rem 0.85rem",
+                        borderRadius: "0.5rem",
+                        background: selectedSvc === svc.id ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,11%)",
+                        border: `1px solid ${selectedSvc === svc.id ? "hsla(258,90%,66%,0.5)" : "hsl(220,15%,18%)"}`,
+                        cursor: "pointer",
+                        color: "hsl(210,40%,90%)",
+                        fontSize: "0.82rem",
+                        fontWeight: 500,
+                        textAlign: "left",
+                        width: "100%",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <span>{svc.name}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        {hasDiscount && (
+                          <span style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>
+                            {svc.currency} {orig.toFixed(2)}
+                          </span>
+                        )}
+                        <span style={{ color: "hsl(258,90%,72%)", fontWeight: 700 }}>
+                          {svc.currency} {price.toFixed(2)}
+                        </span>
+                        {hasDiscount && (
+                          <span style={{ fontSize: "0.65rem", background: "rgba(74,222,128,0.12)", color: "hsl(142,71%,55%)", padding: "1px 5px", borderRadius: "3px", fontWeight: 600 }}>
+                            -{svc.discountPercent}%
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Player info */}
@@ -241,7 +220,7 @@ export default function ProductDetails() {
             className="btn-primary"
             style={{ width: "100%" }}
             onClick={handleAddToCart}
-            disabled={!selectedPkg || !userId.trim() || added}
+            disabled={!selectedSvc || !userId.trim() || added || !hasServices}
           >
             <ShoppingCart size={16} />
             {added ? "Added to Cart!" : "Add to Cart"}

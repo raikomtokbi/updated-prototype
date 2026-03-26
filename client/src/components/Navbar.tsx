@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Zap, Menu, X, Search, Gamepad2 } from "lucide-react";
-import { useState } from "react";
+import { ShoppingCart, User, Zap, Menu, X, Search } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 
@@ -14,16 +14,25 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [location] = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user } = useAuthStore();
+
+  // Close drawer on route change
+  useEffect(() => { setDrawerOpen(false); }, [location]);
+  // Lock scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
 
   return (
     <>
       <nav
         style={{
-          background: "rgba(7, 11, 20, 0.92)",
+          background: "rgba(7, 11, 20, 0.95)",
           borderBottom: "1px solid rgba(124, 58, 237, 0.18)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
@@ -38,37 +47,38 @@ export default function Navbar() {
           style={{
             maxWidth: "1320px",
             margin: "0 auto",
-            padding: "0 1.5rem",
+            padding: "0 1rem",
             display: "flex",
             alignItems: "center",
-            height: "64px",
-            gap: "1.25rem",
+            height: "60px",
+            gap: "0.75rem",
           }}
         >
           {/* Logo */}
           <Link
             href="/"
-            style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}
+            style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.45rem", flexShrink: 0 }}
             data-testid="link-home"
           >
             <div
               style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
+                width: "30px",
+                height: "30px",
+                borderRadius: "7px",
                 background: "linear-gradient(135deg, #7c3aed, #9333ea)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 0 12px rgba(124, 58, 237, 0.5)",
+                boxShadow: "0 0 10px rgba(124, 58, 237, 0.5)",
+                flexShrink: 0,
               }}
             >
-              <Zap size={16} color="white" />
+              <Zap size={15} color="white" />
             </div>
             <span
               className="font-orbitron"
               style={{
-                fontSize: "1.1rem",
+                fontSize: "1rem",
                 fontWeight: 800,
                 letterSpacing: "0.05em",
                 background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
@@ -81,23 +91,19 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Search bar */}
+          {/* Desktop: search bar */}
           <div
-            style={{
-              flex: 1,
-              maxWidth: "360px",
-              position: "relative",
-            }}
             className="search-bar-desktop"
+            style={{ flex: 1, maxWidth: "360px", position: "relative" }}
           >
             <Search
-              size={14}
+              size={13}
               style={{
                 position: "absolute",
-                left: "0.85rem",
+                left: "0.8rem",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "rgba(148, 163, 184, 0.6)",
+                color: "rgba(148, 163, 184, 0.5)",
                 pointerEvents: "none",
               }}
             />
@@ -109,49 +115,70 @@ export default function Navbar() {
               data-testid="input-navbar-search"
               style={{
                 width: "100%",
-                padding: "0.45rem 1rem 0.45rem 2.25rem",
+                padding: "0.42rem 1rem 0.42rem 2.1rem",
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(124, 58, 237, 0.2)",
                 borderRadius: "8px",
                 color: "#e5e7eb",
-                fontSize: "0.8rem",
+                fontSize: "0.78rem",
                 outline: "none",
-                transition: "border-color 0.2s",
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.6)"; }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.55)"; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
             />
           </div>
 
-          {/* Nav links */}
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "0.125rem" }}
-            className="nav-links-desktop"
-          >
+          {/* Desktop: nav links */}
+          <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: "0.1rem" }}>
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 style={{
-                  padding: "0.4rem 0.85rem",
+                  padding: "0.38rem 0.8rem",
                   borderRadius: "6px",
                   textDecoration: "none",
-                  fontSize: "0.8rem",
+                  fontSize: "0.78rem",
                   fontWeight: 500,
-                  color: "rgba(148, 163, 184, 0.9)",
-                  transition: "color 0.15s",
+                  color: location === link.href ? "#a78bfa" : "rgba(148, 163, 184, 0.85)",
                   whiteSpace: "nowrap",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148, 163, 184, 0.9)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = location === link.href ? "#a78bfa" : "rgba(148, 163, 184, 0.85)"; }}
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Right section */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginLeft: "auto" }}>
+          {/* Spacer */}
+          <div style={{ flex: 1 }} className="nav-links-desktop" />
+
+          {/* Right actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
+
+            {/* Mobile: search icon toggle */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="mobile-only"
+              aria-label="Search"
+              style={{
+                display: "none",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "34px",
+                height: "34px",
+                borderRadius: "8px",
+                background: "rgba(124,58,237,0.08)",
+                border: "1px solid rgba(124,58,237,0.22)",
+                color: "#a78bfa",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <Search size={15} />
+            </button>
+
             {/* Cart */}
             <Link
               href="/cart"
@@ -161,14 +188,14 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "36px",
-                height: "36px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "8px",
                 border: "1px solid rgba(124, 58, 237, 0.25)",
                 background: "rgba(124, 58, 237, 0.08)",
                 color: "rgba(148, 163, 184, 0.85)",
                 textDecoration: "none",
-                transition: "border-color 0.2s, color 0.2s",
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(124, 58, 237, 0.6)";
@@ -179,7 +206,7 @@ export default function Navbar() {
                 (e.currentTarget as HTMLElement).style.color = "rgba(148, 163, 184, 0.85)";
               }}
             >
-              <ShoppingCart size={16} />
+              <ShoppingCart size={15} />
               {itemCount > 0 && (
                 <span
                   data-testid="badge-cart-count"
@@ -189,16 +216,15 @@ export default function Navbar() {
                     right: "-5px",
                     background: "#7c3aed",
                     color: "white",
-                    fontSize: "0.6rem",
+                    fontSize: "0.58rem",
                     fontWeight: 700,
                     borderRadius: "9999px",
-                    minWidth: "16px",
-                    height: "16px",
+                    minWidth: "15px",
+                    height: "15px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "0 3px",
-                    boxShadow: "0 0 8px rgba(124, 58, 237, 0.6)",
+                    padding: "0 2px",
                   }}
                 >
                   {itemCount}
@@ -206,27 +232,28 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Auth */}
+            {/* Desktop: auth buttons */}
             {isAuthenticated ? (
               <Link
                 href="/account"
                 data-testid="link-account"
+                className="desktop-only"
                 style={{
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
-                  gap: "0.4rem",
-                  padding: "0.4rem 0.85rem",
+                  gap: "0.35rem",
+                  padding: "0.38rem 0.85rem",
                   borderRadius: "8px",
                   background: "rgba(124, 58, 237, 0.12)",
                   border: "1px solid rgba(124, 58, 237, 0.35)",
                   color: "#a78bfa",
-                  fontSize: "0.78rem",
+                  fontSize: "0.76rem",
                   fontWeight: 600,
                   textDecoration: "none",
                   whiteSpace: "nowrap",
                 }}
               >
-                <User size={13} />
+                <User size={12} />
                 {user?.username}
               </Link>
             ) : (
@@ -234,29 +261,22 @@ export default function Navbar() {
                 <Link
                   href="/register"
                   data-testid="link-register"
+                  className="desktop-only"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "0.35rem",
-                    padding: "0.45rem 1rem",
+                    padding: "0.38rem 0.9rem",
                     borderRadius: "8px",
                     background: "transparent",
-                    border: "1px solid rgba(124, 58, 237, 0.45)",
+                    border: "1px solid rgba(124, 58, 237, 0.42)",
                     color: "#a78bfa",
-                    fontSize: "0.78rem",
+                    fontSize: "0.76rem",
                     fontWeight: 600,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
-                    transition: "border-color 0.2s, color 0.2s",
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.8)";
-                    e.currentTarget.style.color = "#c4b5fd";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.45)";
-                    e.currentTarget.style.color = "#a78bfa";
-                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.8)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.42)"; }}
                 >
                   Register
                 </Link>
@@ -266,104 +286,241 @@ export default function Navbar() {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "0.35rem",
-                    padding: "0.45rem 1rem",
+                    gap: "0.3rem",
+                    padding: "0.38rem 0.9rem",
                     borderRadius: "8px",
                     background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
                     color: "white",
-                    fontSize: "0.78rem",
+                    fontSize: "0.76rem",
                     fontWeight: 700,
                     textDecoration: "none",
-                    boxShadow: "0 0 14px rgba(124, 58, 237, 0.35)",
                     whiteSpace: "nowrap",
-                    transition: "opacity 0.2s",
+                    boxShadow: "0 0 12px rgba(124, 58, 237, 0.3)",
+                    flexShrink: 0,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
                 >
-                  <User size={13} />
+                  <User size={12} />
                   Login
                 </Link>
               </>
             )}
 
-            {/* Mobile menu toggle */}
+            {/* Hamburger — mobile only */}
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={() => setDrawerOpen(true)}
               data-testid="button-mobile-menu"
               className="mobile-menu-btn"
+              aria-label="Open menu"
               style={{
                 display: "none",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "36px",
-                height: "36px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "8px",
                 background: "rgba(124,58,237,0.1)",
                 border: "1px solid rgba(124,58,237,0.25)",
                 color: "#a78bfa",
                 cursor: "pointer",
+                flexShrink: 0,
               }}
             >
-              {menuOpen ? <X size={16} /> : <Menu size={16} />}
+              <Menu size={17} />
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        {menuOpen && (
+        {/* Mobile: expandable search bar */}
+        {searchOpen && (
           <div
+            className="mobile-only"
             style={{
-              borderTop: "1px solid rgba(124, 58, 237, 0.15)",
-              padding: "1rem 1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
+              padding: "0.6rem 1rem",
+              borderTop: "1px solid rgba(124,58,237,0.12)",
             }}
           >
             <input
               type="text"
-              placeholder="Search games..."
+              placeholder="Search games, gift cards..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              autoFocus
               style={{
                 width: "100%",
-                padding: "0.6rem 1rem",
+                padding: "0.55rem 1rem",
                 background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(124, 58, 237, 0.25)",
+                border: "1px solid rgba(124, 58, 237, 0.3)",
                 borderRadius: "8px",
                 color: "#e5e7eb",
                 fontSize: "0.85rem",
                 outline: "none",
-                marginBottom: "0.25rem",
+                boxSizing: "border-box",
               }}
             />
-            {NAV_LINKS.map((link) => (
+          </div>
+        )}
+      </nav>
+
+      {/* Spacer */}
+      <div style={{ height: "60px" }} />
+
+      {/* Drawer backdrop */}
+      {drawerOpen && (
+        <div
+          onClick={() => setDrawerOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            zIndex: 1100,
+            backdropFilter: "blur(2px)",
+          }}
+        />
+      )}
+
+      {/* Slide-from-right drawer */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "min(320px, 88vw)",
+          background: "hsl(220, 22%, 8%)",
+          borderLeft: "1px solid rgba(124,58,237,0.2)",
+          zIndex: 1200,
+          display: "flex",
+          flexDirection: "column",
+          transform: drawerOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* Drawer header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "1rem 1.25rem",
+            borderBottom: "1px solid rgba(124,58,237,0.15)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+            <div
+              style={{
+                width: "26px",
+                height: "26px",
+                borderRadius: "6px",
+                background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Zap size={13} color="white" />
+            </div>
+            <span
+              className="font-orbitron"
+              style={{
+                fontSize: "0.9rem",
+                fontWeight: 800,
+                background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              NEXCOIN
+            </span>
+          </div>
+          <button
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close menu"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              borderRadius: "7px",
+              background: "rgba(124,58,237,0.1)",
+              border: "1px solid rgba(124,58,237,0.2)",
+              color: "#a78bfa",
+              cursor: "pointer",
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Drawer nav links */}
+        <nav style={{ padding: "0.75rem 0.75rem 0", flex: 1, overflowY: "auto" }}>
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => setDrawerOpen(false)}
+              style={{
+                display: "block",
+                padding: "0.75rem 0.9rem",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontSize: "0.92rem",
+                fontWeight: 500,
+                color: location === link.href ? "#a78bfa" : "rgba(203, 213, 225, 0.85)",
+                background: location === link.href ? "rgba(124,58,237,0.1)" : "transparent",
+                marginBottom: "2px",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.08)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = location === link.href ? "rgba(124,58,237,0.1)" : "transparent"; }}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {/* Auth links in drawer */}
+          <div
+            style={{
+              marginTop: "1rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid rgba(124,58,237,0.12)",
+            }}
+          >
+            {isAuthenticated ? (
               <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
+                href="/account"
+                onClick={() => setDrawerOpen(false)}
                 style={{
-                  padding: "0.65rem 0.9rem",
-                  borderRadius: "6px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 0.9rem",
+                  borderRadius: "8px",
                   textDecoration: "none",
                   fontSize: "0.9rem",
-                  fontWeight: 500,
-                  color: "rgba(148, 163, 184, 0.9)",
+                  fontWeight: 600,
+                  color: "#a78bfa",
+                  background: "rgba(124,58,237,0.1)",
+                  border: "1px solid rgba(124,58,237,0.25)",
                 }}
               >
-                {link.label}
+                <User size={15} />
+                {user?.username ?? "My Account"}
               </Link>
-            ))}
-            {!isAuthenticated && (
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <Link
                   href="/register"
-                  onClick={() => setMenuOpen(false)}
+                  data-testid="drawer-link-register"
+                  onClick={() => setDrawerOpen(false)}
                   style={{
-                    flex: 1,
-                    padding: "0.6rem 0.9rem",
-                    borderRadius: "6px",
+                    display: "block",
+                    padding: "0.7rem 0.9rem",
+                    borderRadius: "8px",
                     textDecoration: "none",
-                    fontSize: "0.875rem",
+                    fontSize: "0.88rem",
                     fontWeight: 600,
                     color: "#a78bfa",
                     border: "1px solid rgba(124,58,237,0.4)",
@@ -374,17 +531,19 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/login"
-                  onClick={() => setMenuOpen(false)}
+                  data-testid="drawer-link-login"
+                  onClick={() => setDrawerOpen(false)}
                   style={{
-                    flex: 1,
-                    padding: "0.6rem 0.9rem",
-                    borderRadius: "6px",
+                    display: "block",
+                    padding: "0.7rem 0.9rem",
+                    borderRadius: "8px",
                     textDecoration: "none",
-                    fontSize: "0.875rem",
+                    fontSize: "0.88rem",
                     fontWeight: 700,
                     color: "white",
                     background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
                     textAlign: "center",
+                    boxShadow: "0 0 12px rgba(124,58,237,0.25)",
                   }}
                 >
                   Login
@@ -392,11 +551,24 @@ export default function Navbar() {
               </div>
             )}
           </div>
-        )}
-      </nav>
+        </nav>
+      </div>
 
-      {/* Spacer for fixed navbar */}
-      <div style={{ height: "64px" }} />
+      {/* CSS for show/hide on mobile vs desktop */}
+      <style>{`
+        @media (max-width: 768px) {
+          .search-bar-desktop { display: none !important; }
+          .nav-links-desktop { display: none !important; }
+          .desktop-only { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+          .mobile-only { display: block !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-menu-btn { display: none !important; }
+          .mobile-only { display: none !important; }
+          .desktop-only { display: inline-flex !important; }
+        }
+      `}</style>
     </>
   );
 }
