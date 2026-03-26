@@ -16,29 +16,79 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
-export default function App() {
+import AdminDashboard from "./pages/admin/Dashboard";
+import TopupOrders from "./pages/admin/TopupOrders";
+import VoucherOrders from "./pages/admin/VoucherOrders";
+import Payments from "./pages/admin/Payments";
+import Refunds from "./pages/admin/Refunds";
+import SupportTickets from "./pages/admin/SupportTickets";
+import Games from "./pages/admin/Games";
+import AdminVouchers from "./pages/admin/Vouchers";
+import Subscriptions from "./pages/admin/Subscriptions";
+import Users from "./pages/admin/Users";
+import Subscribers from "./pages/admin/Subscribers";
+import Campaigns from "./pages/admin/Campaigns";
+import Coupons from "./pages/admin/Coupons";
+import ControlPanel from "./pages/admin/ControlPanel";
+import PaymentMethod from "./pages/admin/PaymentMethod";
+import ApiIntegration from "./pages/admin/ApiIntegration";
+import ChooseTheme from "./pages/admin/ChooseTheme";
+import EditContent from "./pages/admin/EditContent";
+
+function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1">
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/products" component={Products} />
-          <Route path="/product/:id" component={ProductDetails} />
-          <Route path="/categories" component={Categories} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/orders" component={Orders} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/account" component={Account} />
-          <Route path="/support" component={Support} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/privacy" component={Privacy} />
-          <Route path="/terms" component={Terms} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
+      <main className="flex-1">{children}</main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Switch>
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/topup-orders" component={TopupOrders} />
+      <Route path="/admin/voucher-orders" component={VoucherOrders} />
+      <Route path="/admin/payments" component={Payments} />
+      <Route path="/admin/refunds" component={Refunds} />
+      <Route path="/admin/support-tickets" component={SupportTickets} />
+      <Route path="/admin/games" component={Games} />
+      <Route path="/admin/vouchers" component={AdminVouchers} />
+      <Route path="/admin/subscriptions" component={Subscriptions} />
+      <Route path="/admin/users" component={Users} />
+      <Route path="/admin/subscribers" component={Subscribers} />
+      <Route path="/admin/campaigns" component={Campaigns} />
+      <Route path="/admin/coupons" component={Coupons} />
+      <Route path="/admin/control-panel" component={ControlPanel} />
+      <Route path="/admin/payment-method" component={PaymentMethod} />
+      <Route path="/admin/api-integration" component={ApiIntegration} />
+      <Route path="/admin/choose-theme" component={ChooseTheme} />
+      <Route path="/admin/edit-content" component={EditContent} />
+
+      <Route>
+        {() => (
+          <PublicLayout>
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/products" component={Products} />
+              <Route path="/product/:id" component={ProductDetails} />
+              <Route path="/categories" component={Categories} />
+              <Route path="/cart" component={Cart} />
+              <Route path="/orders" component={Orders} />
+              <Route path="/login" component={Login} />
+              <Route path="/register" component={Register} />
+              <Route path="/account" component={Account} />
+              <Route path="/support" component={Support} />
+              <Route path="/about" component={About} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/privacy" component={Privacy} />
+              <Route path="/terms" component={Terms} />
+              <Route component={NotFound} />
+            </Switch>
+          </PublicLayout>
+        )}
+      </Route>
+    </Switch>
   );
 }
