@@ -197,10 +197,10 @@ export default function Login() {
           <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
             Don't have an account?{" "}
             <Link
-              href="/products"
+              href="/register"
               style={{ color: "hsl(258,90%,70%)", textDecoration: "none", fontWeight: 600 }}
             >
-              Browse as guest
+              Register
             </Link>
           </p>
         </div>

@@ -5,9 +5,11 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 
 const NAV_LINKS = [
+  { href: "/", label: "Home" },
   { href: "/products", label: "Games" },
-  { href: "/products", label: "Gift Cards" },
-  { href: "/", label: "Support" },
+  { href: "/categories", label: "Categories" },
+  { href: "/support", label: "Support" },
+  { href: "/about", label: "About" },
 ];
 
 export default function Navbar() {
@@ -228,30 +230,61 @@ export default function Navbar() {
                 {user?.username}
               </Link>
             ) : (
-              <Link
-                href="/login"
-                data-testid="link-login"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
-                  padding: "0.45rem 1rem",
-                  borderRadius: "8px",
-                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
-                  color: "white",
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  boxShadow: "0 0 14px rgba(124, 58, 237, 0.35)",
-                  whiteSpace: "nowrap",
-                  transition: "opacity 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-              >
-                <User size={13} />
-                Login
-              </Link>
+              <>
+                <Link
+                  href="/register"
+                  data-testid="link-register"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    padding: "0.45rem 1rem",
+                    borderRadius: "8px",
+                    background: "transparent",
+                    border: "1px solid rgba(124, 58, 237, 0.45)",
+                    color: "#a78bfa",
+                    fontSize: "0.78rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                    transition: "border-color 0.2s, color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.8)";
+                    e.currentTarget.style.color = "#c4b5fd";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.45)";
+                    e.currentTarget.style.color = "#a78bfa";
+                  }}
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/login"
+                  data-testid="link-login"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    padding: "0.45rem 1rem",
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    color: "white",
+                    fontSize: "0.78rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    boxShadow: "0 0 14px rgba(124, 58, 237, 0.35)",
+                    whiteSpace: "nowrap",
+                    transition: "opacity 0.2s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                >
+                  <User size={13} />
+                  Login
+                </Link>
+              </>
             )}
 
             {/* Mobile menu toggle */}
@@ -320,6 +353,44 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {!isAuthenticated && (
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    flex: 1,
+                    padding: "0.6rem 0.9rem",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: "#a78bfa",
+                    border: "1px solid rgba(124,58,237,0.4)",
+                    textAlign: "center",
+                  }}
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    flex: 1,
+                    padding: "0.6rem 0.9rem",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    fontWeight: 700,
+                    color: "white",
+                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    textAlign: "center",
+                  }}
+                >
+                  Login
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </nav>

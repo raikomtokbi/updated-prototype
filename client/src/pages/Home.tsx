@@ -744,9 +744,18 @@ function BonusBanner() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
-  const MARKETPLACE = ["All Games", "Gift Cards", "Mobile Games", "PC Games"];
-  const SUPPORT = ["FAQ", "How to Buy", "Order Status", "Refund Policy"];
-  const LEGAL = ["Terms & Conditions", "Privacy Policy", "Refund Policy", "Contact"];
+  const MARKETPLACE = [
+    { label: "All Games", href: "/products" },
+    { label: "Gift Cards", href: "/products?category=gift_card" },
+    { label: "Mobile Games", href: "/products?category=mobile" },
+    { label: "PC Games", href: "/products?category=pc" },
+  ];
+  const SUPPORT_LINKS = [
+    { label: "Support", href: "/support" },
+    { label: "Contact", href: "/contact" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+  ];
 
   return (
     <footer
@@ -761,7 +770,7 @@ function Footer() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gridTemplateColumns: "2fr 1fr 1fr",
             gap: "3rem",
             marginBottom: "3rem",
           }}
@@ -855,14 +864,14 @@ function Footer() {
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {MARKETPLACE.map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    href="/products"
+                    href={item.href}
                     style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -884,46 +893,16 @@ function Footer() {
               Support
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-              {SUPPORT.map((item) => (
-                <li key={item}>
-                  <a
-                    href="#"
+              {SUPPORT_LINKS.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
                     style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4
-              style={{
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                color: "#e5e7eb",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: "1rem",
-              }}
-            >
-              Legal
-            </h4>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-              {LEGAL.map((item) => (
-                <li key={item}>
-                  <a
-                    href="#"
-                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
-                  >
-                    {item}
-                  </a>
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -946,16 +925,19 @@ function Footer() {
             © 2025 Nexcoin. All rights reserved.
           </p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
-            {["Terms", "Privacy", "Cookies"].map((item) => (
-              <a
-                key={item}
-                href="#"
+            {[
+              { label: "Terms", href: "/terms" },
+              { label: "Privacy", href: "/privacy" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
                 style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)", textDecoration: "none", transition: "color 0.15s" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.4)"; }}
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             ))}
           </div>
         </div>
