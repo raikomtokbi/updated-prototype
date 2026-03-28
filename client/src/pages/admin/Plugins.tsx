@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { UploadCloud, FileArchive, CheckCircle } from "lucide-react";
+import { UploadCloud, FileArchive } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { card } from "@/components/admin/shared";
 
@@ -7,7 +7,7 @@ export default function Plugins() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "ready" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "ready">("idle");
 
   function handleFile(file: File | null) {
     if (!file) return;
@@ -31,12 +31,6 @@ export default function Plugins() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     handleFile(e.target.files?.[0] ?? null);
     if (fileRef.current) fileRef.current.value = "";
-  }
-
-  function handleInstall() {
-    setStatus("done");
-    setTimeout(() => setStatus("idle"), 3000);
-    setFileName(null);
   }
 
   return (
@@ -116,27 +110,11 @@ export default function Plugins() {
               <UploadCloud size={13} /> Browse File
             </button>
 
-            {/* Install button shown only when a file is selected */}
+            {/* File selected notice */}
             {status === "ready" && (
-              <button
-                type="button"
-                onClick={handleInstall}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "6px",
-                  padding: "7px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
-                  background: "rgba(74,222,128,0.12)", color: "hsl(142,71%,48%)",
-                  border: "1px solid rgba(74,222,128,0.25)", cursor: "pointer",
-                }}
-              >
-                Install Plugin
-              </button>
-            )}
-
-            {/* Success status */}
-            {status === "done" && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(142,71%,48%)" }}>
-                <CheckCircle size={14} /> Plugin queued — full installation support coming soon.
-              </div>
+              <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", margin: 0, textAlign: "center" }}>
+                File selected. Plugin installation is not yet available — support is coming soon.
+              </p>
             )}
 
             <p style={{ fontSize: "11px", color: "hsl(220,10%,35%)", margin: 0, textAlign: "center", lineHeight: 1.6 }}>
