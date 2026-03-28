@@ -265,6 +265,27 @@ export const plugins = pgTable("plugins", {
 
 export const insertPluginSchema = createInsertSchema(plugins).omit({ id: true, createdAt: true, updatedAt: true });
 
+// ─── Notifications ────────────────────────────────────────────────────────────
+export const notifications = pgTable("notifications", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  type: varchar("type", { length: 50 }).notNull().default("info"),
+  title: varchar("title", { length: 191 }).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  metadata: text("metadata"),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+export const siteSettings = pgTable("site_settings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Game = typeof games.$inferSelect;
@@ -288,3 +309,6 @@ export type Review = typeof reviews.$inferSelect;
 export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export type Plugin = typeof plugins.$inferSelect;
 export type InsertPlugin = z.infer<typeof insertPluginSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type SiteSetting = typeof siteSettings.$inferSelect;

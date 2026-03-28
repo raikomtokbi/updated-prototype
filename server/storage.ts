@@ -13,9 +13,12 @@ import {
   type Review,
   type PaymentMethod,
   type Plugin,
+  type Notification,
+  type SiteSetting,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, reviews, paymentMethods, plugins,
+  notifications, siteSettings,
 } from "@shared/schema";
 import { eq, desc, count, sum } from "drizzle-orm";
 import { db } from "./db";
@@ -101,6 +104,19 @@ export interface IStorage {
   getPlugin(slug: string): Promise<Plugin | undefined>;
   upsertPlugin(slug: string, data: Partial<Plugin>): Promise<Plugin>;
   deletePlugin(slug: string): Promise<void>;
+
+  // Notifications
+  getAllNotifications(limit?: number): Promise<Notification[]>;
+  createNotification(data: Partial<Notification>): Promise<Notification>;
+  markNotificationRead(id: string): Promise<void>;
+  markAllNotificationsRead(): Promise<void>;
+  getUnreadNotificationCount(): Promise<number>;
+
+  // Site Settings
+  getAllSiteSettings(): Promise<SiteSetting[]>;
+  getSiteSetting(key: string): Promise<SiteSetting | undefined>;
+  upsertSiteSetting(key: string, value: string): Promise<SiteSetting>;
+  upsertSiteSettings(settings: Record<string, string>): Promise<void>;
 
   // Dashboard
   getDashboardStats(): Promise<{
@@ -369,6 +385,49 @@ export class DatabaseStorage implements IStorage {
   }
   async deletePlugin(slug: string) {
     await db.delete(plugins).where(eq(plugins.slug, slug));
+  }
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  async getAllNotifications(limit = 30) {
+    return db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(limit);
+  }
+  async createNotification(data: Partial<Notification>) {
+    const id = randomUUID();
+    await db.insert(notifications).values({ id, type: "info", title: "Notification", message: "", ...data } as any);
+    return fetchAfter<Notification>(notifications, id, notifications.id);
+  }
+  async markNotificationRead(id: string) {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
+  }
+  async markAllNotificationsRead() {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.isRead, false));
+  }
+  async getUnreadNotificationCount() {
+    const [r] = await db.select({ count: count() }).from(notifications).where(eq(notifications.isRead, false));
+    return r.count;
+  }
+
+  // ── Site Settings ──────────────────────────────────────────────────────────
+  async getAllSiteSettings() {
+    return db.select().from(siteSettings);
+  }
+  async getSiteSetting(key: string) {
+    const [s] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    return s;
+  }
+  async upsertSiteSetting(key: string, value: string) {
+    const existing = await this.getSiteSetting(key);
+    if (existing) {
+      await db.update(siteSettings).set({ value, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+      return fetchAfter<SiteSetting>(siteSettings, existing.id, siteSettings.id);
+    } else {
+      const id = randomUUID();
+      await db.insert(siteSettings).values({ id, key, value });
+      return fetchAfter<SiteSetting>(siteSettings, id, siteSettings.id);
+    }
+  }
+  async upsertSiteSettings(settings: Record<string, string>) {
+    await Promise.all(Object.entries(settings).map(([k, v]) => this.upsertSiteSetting(k, v)));
   }
 
   // ── Dashboard Stats ────────────────────────────────────────────────────────

@@ -1,0 +1,136 @@
+Implement missing Settings, Control Panel structure, and Payment configuration.
+Do NOT duplicate features that already exist. Only add missing ones.
+
+GLOBAL UI CHANGE
+1. Add Notification button before Site Status button in top header.
+- Bell icon button placed before Status button.
+- Clicking shows dropdown of latest system notifications.
+- Notifications include:
+  - new user registration
+  - new order placed
+  - new payment
+  - support ticket created
+  - system alerts
+- Notifications should update in real time or auto refresh.
+- Include mark as read option.
+- Store notifications in database.
+- Show unread count badge on bell icon.
+
+CONTROL PANEL STRUCTURE
+Organize settings into clear sections inside Control Panel.
+
+Rename section:
+- rename "Theme" section divider to "Appearance"
+
+Add the following sections if not already present:
+
+General / Global Settings
+- localisation settings:
+  - default timezone
+  - date format
+  - time format
+  - default currency
+  - default language
+
+User & Access Management
+- registration settings:
+  - require admin approval option
+  - invite only option
+- authentication security:
+  - enable/disable 2FA option
+  - password strength rules
+  - social login providers option:
+    allow adding login providers such as:
+    - google
+    - facebook
+    - other providers
+- session settings:
+  - auto logout time for inactive admin
+  - session timeout duration
+
+Security & Compliance
+- audit log:
+  - record admin actions (create, update, delete, login attempts)
+  - show timestamp and IP address
+- data privacy settings:
+  - cookie consent toggle
+  - user data deletion request option
+- backups:
+  - manual backup button
+  - schedule automatic backups option
+- cron jobs:
+  - manage scheduled background tasks
+- IP whitelist / blacklist:
+  - allow blocking IP addresses
+  - allow restricting admin panel access to specific IPs
+
+Notifications System
+- push notifications for admin dashboard
+- notifications appear in notification bell icon
+- notification triggers:
+  - new order
+  - new user
+  - payment update
+  - support ticket
+  - important system alert
+
+PAYMENT PAGE IMPROVEMENTS
+Do NOT modify existing gateway integration.
+
+Add:
+- tax settings:
+  - tax name
+  - tax percentage
+  - enable/disable tax
+  - option to select which payment methods tax applies to
+  - option to exclude specific payment methods from tax
+
+- invoicing settings:
+  - invoice prefix
+  - company name (optional, not required)
+  - company address (optional)
+  - tax ID (optional)
+  - invoice notes
+  - auto generate invoice number option
+
+EDIT CONTENT SECTION
+Add content management controls:
+
+site identity:
+- site name
+- tagline
+- short description
+- typography/font selection option
+
+media assets:
+- upload logo
+- upload dark mode logo
+- upload favicon
+
+contact information:
+- primary support email
+- phone number
+- business address
+
+LEGAL CONTENT EDITORS (inside control panel page)
+Provide edit buttons for:
+- Terms and Conditions
+- Privacy Policy
+- Refund Policy
+
+FOOTER SETTINGS (inside control panel page)
+- footer copyright text field
+- allow editing copyright text
+example:
+© 2026 Your Company Name. All rights reserved.
+
+IMPORTANT
+- keep UI consistent with dark theme
+- maintain responsive layout
+- ensure all buttons are functional
+- connect all settings to database
+- create reusable components
+- avoid duplicate settings pages
+- include validation where needed
+- include save/update buttons
+- load existing saved values automatically

@@ -1,5 +1,6 @@
 import { Link, useLocation, Redirect } from "wouter";
 import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -23,9 +24,16 @@ import {
   ChevronDown,
   LogOut,
   User,
+  Bell,
+  CheckCheck,
+  ShoppingBag,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useSiteStore, type SiteStatus } from "@/lib/store/siteStore";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { Notification } from "@shared/schema";
 
 interface NavItem {
   label: string;
@@ -226,6 +234,259 @@ function useDropdown() {
     return () => document.removeEventListener("mousedown", handle);
   }, []);
   return { open, setOpen, ref };
+}
+
+function notifIcon(type: string) {
+  const s = { flexShrink: 0 };
+  if (type === "order") return <ShoppingBag size={13} style={s} />;
+  if (type === "user") return <User size={13} style={s} />;
+  if (type === "alert" || type === "warning") return <AlertTriangle size={13} style={s} />;
+  return <Info size={13} style={s} />;
+}
+
+function notifColor(type: string) {
+  if (type === "order") return "hsl(142, 71%, 45%)";
+  if (type === "user") return "hsl(258, 90%, 66%)";
+  if (type === "alert" || type === "warning") return "hsl(38, 92%, 50%)";
+  return "hsl(200, 80%, 55%)";
+}
+
+function timeAgo(dateStr: string | Date | null | undefined) {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function NotificationBell() {
+  const qc = useQueryClient();
+  const { open, setOpen, ref } = useDropdown();
+
+  const { data: notifications = [] } = useQuery<Notification[]>({
+    queryKey: ["/api/admin/notifications"],
+    queryFn: () => adminApi.get("/notifications?limit=15"),
+    refetchInterval: 30000,
+  });
+
+  const { data: countData } = useQuery<{ count: number }>({
+    queryKey: ["/api/admin/notifications/unread-count"],
+    queryFn: () => adminApi.get("/notifications/unread-count"),
+    refetchInterval: 30000,
+  });
+
+  const unread = countData?.count ?? 0;
+
+  const markOne = useMutation({
+    mutationFn: (id: string) => adminApi.patch(`/notifications/${id}/read`, {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications/unread-count"] });
+    },
+  });
+
+  const markAll = useMutation({
+    mutationFn: () => adminApi.patch("/notifications/read-all", {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications/unread-count"] });
+    },
+  });
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        data-testid="button-notifications"
+        onClick={() => setOpen(!open)}
+        style={{
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "34px",
+          height: "34px",
+          background: "hsl(220, 20%, 11%)",
+          border: "1px solid hsl(220, 15%, 18%)",
+          borderRadius: "6px",
+          cursor: "pointer",
+          color: "hsl(210, 40%, 75%)",
+        }}
+      >
+        <Bell size={15} />
+        {unread > 0 && (
+          <span
+            style={{
+              position: "absolute",
+              top: "-4px",
+              right: "-4px",
+              minWidth: "16px",
+              height: "16px",
+              borderRadius: "8px",
+              background: "hsl(0, 72%, 55%)",
+              color: "white",
+              fontSize: "9px",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 3px",
+              lineHeight: 1,
+            }}
+          >
+            {unread > 99 ? "99+" : unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            right: 0,
+            width: "340px",
+            background: "hsl(220, 20%, 10%)",
+            border: "1px solid hsl(220, 15%, 18%)",
+            borderRadius: "8px",
+            overflow: "hidden",
+            zIndex: 200,
+            boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 16px",
+              borderBottom: "1px solid hsl(220, 15%, 15%)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Bell size={14} style={{ color: "hsl(258, 90%, 66%)" }} />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 90%)" }}>Notifications</span>
+              {unread > 0 && (
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    background: "rgba(239, 68, 68, 0.15)",
+                    color: "hsl(0, 72%, 60%)",
+                    padding: "1px 6px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {unread} new
+                </span>
+              )}
+            </div>
+            {unread > 0 && (
+              <button
+                data-testid="button-mark-all-read"
+                onClick={() => markAll.mutate()}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "11px",
+                  color: "hsl(258, 90%, 66%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "2px 4px",
+                }}
+              >
+                <CheckCheck size={12} />
+                Mark all read
+              </button>
+            )}
+          </div>
+
+          <div style={{ maxHeight: "360px", overflowY: "auto" }}>
+            {notifications.length === 0 ? (
+              <div style={{ padding: "32px 20px", textAlign: "center", color: "hsl(220, 10%, 38%)", fontSize: "12px" }}>
+                No notifications yet
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <div
+                  key={n.id}
+                  data-testid={`notification-${n.id}`}
+                  onClick={() => { if (!n.isRead) markOne.mutate(n.id); }}
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    padding: "12px 16px",
+                    borderBottom: "1px solid hsl(220, 15%, 12%)",
+                    background: n.isRead ? "transparent" : "rgba(139, 92, 246, 0.05)",
+                    cursor: n.isRead ? "default" : "pointer",
+                    transition: "background 0.15s",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: `${notifColor(n.type ?? "info")}18`,
+                      border: `1px solid ${notifColor(n.type ?? "info")}40`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      color: notifColor(n.type ?? "info"),
+                      marginTop: "1px",
+                    }}
+                  >
+                    {notifIcon(n.type ?? "info")}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "2px" }}>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: n.isRead ? 400 : 600,
+                          color: n.isRead ? "hsl(220, 10%, 60%)" : "hsl(210, 40%, 90%)",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {n.title}
+                      </span>
+                      {!n.isRead && (
+                        <span
+                          style={{
+                            width: "7px",
+                            height: "7px",
+                            borderRadius: "50%",
+                            background: "hsl(258, 90%, 66%)",
+                            flexShrink: 0,
+                            marginTop: "3px",
+                          }}
+                        />
+                      )}
+                    </div>
+                    <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "4px", lineHeight: 1.4 }}>
+                      {n.message}
+                    </p>
+                    <span style={{ fontSize: "10px", color: "hsl(220, 10%, 35%)" }}>
+                      {timeAgo(n.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div style={{ padding: "10px 16px", borderTop: "1px solid hsl(220, 15%, 14%)", textAlign: "center" }}>
+            <span style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>Showing last {notifications.length} notifications</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function StatusButton() {
@@ -490,6 +751,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
             {title}
           </h1>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <NotificationBell />
             <StatusButton />
             <AdminAccountButton />
           </div>

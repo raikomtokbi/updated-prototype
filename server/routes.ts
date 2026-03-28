@@ -130,6 +130,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const user = await storage.createUser({ username, email, password, role: "user" });
       const { password: _pw, ...safeUser } = user;
+      storage.createNotification({ type: "user", title: "New User Registered", message: `${username} just created an account.` }).catch(() => {});
       return res.status(201).json({ user: safeUser });
     } catch (e: any) {
       return res.status(400).json({ message: e.message });
@@ -431,6 +432,45 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!g) return res.status(404).json({ message: "Not found" });
     const updated = await storage.updateGame(req.params.id, { isTrending: !g.isTrending });
     res.json(updated);
+  });
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  app.get("/api/admin/notifications", requireAdmin, async (req, res) => {
+    const limit = parseInt(req.query.limit as string) || 30;
+    res.json(await storage.getAllNotifications(limit));
+  });
+
+  app.get("/api/admin/notifications/unread-count", requireAdmin, async (_req, res) => {
+    const count = await storage.getUnreadNotificationCount();
+    res.json({ count });
+  });
+
+  app.post("/api/admin/notifications", requireAdmin, async (req, res) => {
+    const n = await storage.createNotification(req.body);
+    res.status(201).json(n);
+  });
+
+  app.patch("/api/admin/notifications/:id/read", requireAdmin, async (req, res) => {
+    await storage.markNotificationRead(req.params.id);
+    res.json({ ok: true });
+  });
+
+  app.patch("/api/admin/notifications/read-all", requireAdmin, async (_req, res) => {
+    await storage.markAllNotificationsRead();
+    res.json({ ok: true });
+  });
+
+  // ── Site Settings ──────────────────────────────────────────────────────────
+  app.get("/api/admin/settings", requireAdmin, async (_req, res) => {
+    const rows = await storage.getAllSiteSettings();
+    const obj: Record<string, string> = {};
+    rows.forEach((r) => { obj[r.key] = r.value ?? ""; });
+    res.json(obj);
+  });
+
+  app.put("/api/admin/settings", requireAdmin, async (req, res) => {
+    await storage.upsertSiteSettings(req.body);
+    res.json({ ok: true });
   });
 
   return httpServer;
