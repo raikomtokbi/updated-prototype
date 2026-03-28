@@ -77,6 +77,7 @@ const navSections: NavSection[] = [
     title: "PRODUCT",
     items: [
       { label: "Games", icon: <Gamepad2 size={15} />, path: "/admin/games" },
+      { label: "Gift Cards", icon: <Package size={15} />, path: "/admin/gift-cards" },
       { label: "Vouchers", icon: <Ticket size={15} />, path: "/admin/vouchers" },
       { label: "Subscription", icon: <RefreshCcw size={15} />, path: "/admin/subscriptions" },
     ],

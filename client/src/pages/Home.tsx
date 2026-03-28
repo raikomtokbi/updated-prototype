@@ -25,7 +25,7 @@ const SLIDES = [
     highlight: 2,
     sub: "The fastest, safest way to top up your favorite games. Get game credits, diamonds, and gift cards instantly.",
     cta1: { label: "Browse Games", href: "/products" },
-    cta2: { label: "View Offers", href: "/products" },
+    cta2: { label: "View Offers", href: "/offers" },
   },
   {
     id: 2,
@@ -45,7 +45,7 @@ const SLIDES = [
     highlight: 0,
     sub: "Explore new worlds with instant in-game currency. No delays, no hassle — just gaming.",
     cta1: { label: "Shop Now", href: "/products" },
-    cta2: { label: "View Deals", href: "/products" },
+    cta2: { label: "View Deals", href: "/offers" },
   },
 ];
 
@@ -485,7 +485,7 @@ function TrendingGames() {
           trendingGames.map((game, idx) => (
             <Link
               key={game.id}
-              href={`/products`}
+              href={`/products/${game.slug}`}
               data-testid={`card-game-${idx}`}
               style={{
                 flexShrink: 0,
@@ -605,7 +605,7 @@ function BonusBanner() {
             Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.
           </p>
           <Link
-            href="/products"
+            href="/offers"
             data-testid="link-claim-bonus"
             style={{
               display: "inline-flex",

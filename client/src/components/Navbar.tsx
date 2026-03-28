@@ -1,12 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { ShoppingCart, User, Zap, Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Games" },
+  { href: "/offers", label: "Offers" },
   { href: "/categories", label: "Categories" },
   { href: "/support", label: "Support" },
   { href: "/about", label: "About" },
@@ -19,6 +21,12 @@ export default function Navbar() {
   const [searchVal, setSearchVal] = useState("");
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user } = useAuthStore();
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 60_000,
+  });
+  const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
 
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [location]);
@@ -87,7 +95,7 @@ export default function Navbar() {
                 backgroundClip: "text",
               }}
             >
-              NEXCOIN
+              {siteName}
             </span>
           </Link>
 

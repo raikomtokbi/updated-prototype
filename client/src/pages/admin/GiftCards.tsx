@@ -47,7 +47,9 @@ function PackageManager({ productId }: { productId: string }) {
 
   const addPkg = useMutation({
     mutationFn: () => adminApi.post(`/products/${productId}/packages`, {
-      label: newLabel, price: newPrice, originalPrice: newOrigPrice || undefined,
+      label: newLabel,
+      price: newPrice,
+      originalPrice: newOrigPrice || undefined,
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] });
@@ -63,33 +65,47 @@ function PackageManager({ productId }: { productId: string }) {
   return (
     <div style={{ marginTop: "1rem" }}>
       <label style={labelStyle}>Price Packages</label>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", marginBottom: "0.6rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.6rem" }}>
         {packages.map((pkg) => (
           <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
             <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
+              {pkg.originalPrice && (
+                <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>
+              )}
               <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
-              <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+              <button
+                onClick={() => delPkg.mutate(pkg.id)}
+                style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}
+              >
+                <X size={10} />
+              </button>
             </div>
           </div>
         ))}
-        {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No packages yet.</p>}
+        {packages.length === 0 && (
+          <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No packages yet.</p>
+        )}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px auto", gap: "0.4rem", alignItems: "end" }}>
         <div>
           <label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label>
-          <input style={inputStyle} placeholder="e.g. $10 Voucher" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+          <input style={inputStyle} placeholder="e.g. $25 Gift Card" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
         </div>
         <div>
           <label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label>
-          <input style={inputStyle} type="number" placeholder="10.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+          <input style={inputStyle} type="number" placeholder="25.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
         </div>
         <div>
           <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig Price</label>
           <input style={inputStyle} type="number" placeholder="Optional" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
         </div>
-        <button type="button" onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }} disabled={!newLabel || !newPrice || addPkg.isPending} style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}>
+        <button
+          type="button"
+          onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }}
+          disabled={!newLabel || !newPrice || addPkg.isPending}
+          style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}
+        >
           <PlusCircle size={14} />
         </button>
       </div>
@@ -97,7 +113,7 @@ function PackageManager({ productId }: { productId: string }) {
   );
 }
 
-function ProductForm({
+function GiftCardForm({
   initial,
   onSubmit,
   loading,
@@ -116,10 +132,10 @@ function ProductForm({
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...form, category: "voucher" }); }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...form, category: "gift_card" }); }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
       <div>
         <label style={labelStyle}>Title *</label>
-        <input style={inputStyle} required value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Netflix Voucher" />
+        <input style={inputStyle} required value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Netflix Gift Card" />
       </div>
       <div>
         <label style={labelStyle}>Description</label>
@@ -141,55 +157,56 @@ function ProductForm({
       <ImageUploadField label="Image" value={form.imageUrl} onChange={(url) => set("imageUrl", url)} inputStyle={inputStyle} labelStyle={labelStyle} />
       {initial.id && <PackageManager productId={initial.id} />}
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
-        {loading ? "Saving..." : "Save Voucher"}
+        {loading ? "Saving..." : "Save Gift Card"}
       </button>
     </form>
   );
 }
 
-export default function Vouchers() {
+export default function GiftCards() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showAdd, setShowAdd] = useState(false);
-  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [editItem, setEditItem] = useState<Product | null>(null);
 
   const { data: allProducts = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/admin/products"],
     queryFn: () => adminApi.get("/products"),
   });
 
-  const vouchers = useMemo(() => allProducts.filter((p) => p.category === "voucher"), [allProducts]);
+  const giftCards = useMemo(() => allProducts.filter((p) => p.category === "gift_card"), [allProducts]);
 
   const addMut = useMutation({
     mutationFn: (d: any) => adminApi.post("/products", d),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/products"] }); setShowAdd(false); },
   });
+
   const editMut = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.patch(`/products/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/products"] }); setEditProduct(null); },
+    mutationFn: ({ id, ...d }: any) => adminApi.patch(`/products/${id}`, d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/products"] }); setEditItem(null); },
   });
-  const delMut = useMutation({
+
+  const deleteMut = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/products/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products"] }),
   });
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return vouchers.filter((p) => {
-      const matchSearch = !q || p.title.toLowerCase().includes(q);
+    return giftCards.filter((p) => {
+      const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
       const matchStatus = !statusFilter || (statusFilter === "active" ? p.isActive : !p.isActive);
       return matchSearch && matchStatus;
     });
-  }, [vouchers, search, statusFilter]);
+  }, [giftCards, search, statusFilter]);
 
   return (
-    <AdminLayout title="Vouchers">
+    <AdminLayout title="Gift Cards">
       <Toolbar>
-        <SearchInput value={search} onChange={setSearch} placeholder="Search vouchers..." />
+        <SearchInput value={search} onChange={setSearch} placeholder="Search gift cards..." />
         <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-        <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-voucher">
-          <Plus size={14} /> Add Voucher
+        <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-gift-card">
+          <Plus size={14} /> Add Gift Card
         </button>
       </Toolbar>
 
@@ -206,10 +223,10 @@ export default function Vouchers() {
             {isLoading ? (
               <tr><td colSpan={5} style={{ ...tdStyle, textAlign: "center", color: "hsl(220,10%,45%)", padding: "2rem" }}>Loading…</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={5}><EmptyState message={vouchers.length === 0 ? "No vouchers yet. Click Add Voucher to create one." : "No vouchers match your filters."} /></td></tr>
+              <tr><td colSpan={5}><EmptyState message="No gift cards found." /></td></tr>
             ) : (
               filtered.map((p) => (
-                <tr key={p.id} data-testid={`row-voucher-${p.id}`} style={{ borderBottom: "1px solid hsl(220,15%,12%)" }}>
+                <tr key={p.id} data-testid={`row-giftcard-${p.id}`} style={{ borderBottom: "1px solid hsl(220,15%,12%)" }}>
                   <td style={tdStyle}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                       {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", border: "1px solid hsl(220,15%,18%)" }} />}
@@ -221,8 +238,12 @@ export default function Vouchers() {
                   <td style={{ ...tdStyle, color: "hsl(220,10%,45%)", fontSize: "12px" }}>{fmtDate(p.createdAt)}</td>
                   <td style={tdStyle}>
                     <div style={{ display: "flex", gap: "0.4rem" }}>
-                      <button style={btnEdit} onClick={() => setEditProduct(p)} data-testid={`button-edit-${p.id}`}><Pencil size={13} /></button>
-                      <button style={btnDanger} onClick={() => { if (confirm(`Delete "${p.title}"?`)) delMut.mutate(p.id); }} data-testid={`button-delete-${p.id}`}><Trash2 size={13} /></button>
+                      <button style={btnEdit} onClick={() => setEditItem(p)} data-testid={`button-edit-${p.id}`}>
+                        <Pencil size={13} />
+                      </button>
+                      <button style={btnDanger} onClick={() => { if (confirm("Delete this gift card?")) deleteMut.mutate(p.id); }} data-testid={`button-delete-${p.id}`}>
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -233,13 +254,14 @@ export default function Vouchers() {
       </div>
 
       {showAdd && (
-        <Modal title="Add Voucher" onClose={() => setShowAdd(false)}>
-          <ProductForm initial={{}} onSubmit={(d) => addMut.mutate(d)} loading={addMut.isPending} />
+        <Modal title="Add Gift Card" onClose={() => setShowAdd(false)}>
+          <GiftCardForm initial={{}} onSubmit={(d) => addMut.mutate(d)} loading={addMut.isPending} />
         </Modal>
       )}
-      {editProduct && (
-        <Modal title="Edit Voucher" onClose={() => setEditProduct(null)}>
-          <ProductForm initial={editProduct} onSubmit={(d) => editMut.mutate({ id: editProduct.id, data: d })} loading={editMut.isPending} />
+
+      {editItem && (
+        <Modal title="Edit Gift Card" onClose={() => setEditItem(null)}>
+          <GiftCardForm initial={editItem} onSubmit={(d) => editMut.mutate({ id: editItem.id, ...d })} loading={editMut.isPending} />
         </Modal>
       )}
     </AdminLayout>

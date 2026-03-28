@@ -14,6 +14,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -24,6 +25,7 @@ import Refunds from "./pages/admin/Refunds";
 import SupportTickets from "./pages/admin/SupportTickets";
 import Games from "./pages/admin/Games";
 import AdminVouchers from "./pages/admin/Vouchers";
+import GiftCards from "./pages/admin/GiftCards";
 import Subscriptions from "./pages/admin/Subscriptions";
 import Users from "./pages/admin/Users";
 import Subscribers from "./pages/admin/Subscribers";
@@ -46,6 +48,7 @@ function AdminRoutes() {
       <Route path="/admin/refunds" component={Refunds} />
       <Route path="/admin/support-tickets" component={SupportTickets} />
       <Route path="/admin/games" component={Games} />
+      <Route path="/admin/gift-cards" component={GiftCards} />
       <Route path="/admin/vouchers" component={AdminVouchers} />
       <Route path="/admin/subscriptions" component={Subscriptions} />
       <Route path="/admin/users" component={Users} />
@@ -71,7 +74,8 @@ function PublicRoutes() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/products" component={Products} />
-          <Route path="/product/:id" component={ProductDetails} />
+          <Route path="/products/:slug" component={ProductDetails} />
+          <Route path="/offers" component={Offers} />
           <Route path="/categories" component={Categories} />
           <Route path="/cart" component={Cart} />
           <Route path="/orders" component={Orders} />

@@ -1,64 +1,58 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Search, Zap, ShoppingCart, ChevronDown } from "lucide-react";
-import { useCartStore } from "@/lib/store/cartStore";
-import { useAuthStore } from "@/lib/store/authstore";
-import type { Product } from "@shared/schema";
+import { Search, Zap, Gamepad2, Gift, Ticket, RefreshCcw } from "lucide-react";
+import { Link } from "wouter";
+import type { Game, Product } from "@shared/schema";
 
 const CATEGORIES = [
-  { value: "all", label: "All Games" },
-  { value: "game_currency", label: "Game Currency" },
-  { value: "gift_card", label: "Gift Cards" },
-  { value: "voucher", label: "Vouchers" },
-  { value: "subscription", label: "Subscriptions" },
+  { value: "all", label: "All", icon: null },
+  { value: "games", label: "Games", icon: Gamepad2 },
+  { value: "gift_card", label: "Gift Cards", icon: Gift },
+  { value: "voucher", label: "Vouchers", icon: Ticket },
+  { value: "subscription", label: "Subscriptions", icon: RefreshCcw },
 ];
 
-const MOCK_PACKAGES: Record<string, { id: string; label: string; price: number; originalPrice?: number }[]> = {};
+type UnifiedItem =
+  | { kind: "game"; data: Game }
+  | { kind: "product"; data: Product };
 
-function ProductCard({ product }: { product: Product }) {
-  const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState("");
-  const [zoneId, setZoneId] = useState("");
-  const [selectedPkg, setSelectedPkg] = useState<string | null>(null);
-  const addItem = useCartStore((s) => s.addItem);
-  const { user } = useAuthStore();
+function categoryLabel(cat: string) {
+  if (cat === "gift_card") return "Gift Card";
+  if (cat === "voucher") return "Voucher";
+  if (cat === "subscription") return "Subscription";
+  return cat;
+}
 
-  const mockPkgs = [
-    { id: "pkg-1", label: "Starter Pack", price: 2.99 },
-    { id: "pkg-2", label: "Basic Pack", price: 5.99, originalPrice: 7.99 },
-    { id: "pkg-3", label: "Popular Pack", price: 12.99, originalPrice: 15.99 },
-    { id: "pkg-4", label: "Premium Pack", price: 24.99, originalPrice: 29.99 },
-  ];
-
-  const needsZone = product.category === "game_currency";
-
-  function handleAddToCart() {
-    const pkg = mockPkgs.find((p) => p.id === selectedPkg);
-    if (!pkg || !userId.trim()) return;
-    addItem({
-      productId: product.id,
-      productTitle: product.title,
-      productImage: product.imageUrl ?? "",
-      packageId: pkg.id,
-      packageName: pkg.label,
-      price: pkg.price,
-      userId: userId.trim(),
-      zoneId: needsZone ? zoneId.trim() : undefined,
-      quantity: 1,
-    });
-    setOpen(false);
-    setSelectedPkg(null);
-    setUserId(user?.id ?? "");
-    setZoneId("");
-  }
-
+function GameCard({ game }: { game: Game }) {
   return (
-    <div className="game-card" data-testid={`card-product-${product.id}`}>
+    <Link
+      href={`/products/${game.slug}`}
+      data-testid={`card-game-${game.id}`}
+      style={{
+        display: "block",
+        borderRadius: "0.75rem",
+        overflow: "hidden",
+        border: "1px solid rgba(124,58,237,0.15)",
+        background: "hsl(220,20%,9%)",
+        textDecoration: "none",
+        transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
+        cursor: "pointer",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.5)";
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(124,58,237,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+      }}
+    >
       <div
         style={{
           height: "160px",
           background: "linear-gradient(135deg, hsl(258,35%,16%), hsl(220,28%,10%))",
-          borderRadius: "0.75rem 0.75rem 0 0",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -66,109 +60,119 @@ function ProductCard({ product }: { product: Product }) {
           position: "relative",
         }}
       >
+        {game.logoUrl ? (
+          <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <Gamepad2 size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(7,11,20,0.7) 0%, transparent 55%)" }} />
+        {game.isTrending && (
+          <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", padding: "0.15rem 0.45rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
+            HOT
+          </span>
+        )}
+      </div>
+      <div style={{ padding: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)", flex: 1 }}>
+            {game.name}
+          </h3>
+          <span className="badge badge-purple" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>Game</span>
+        </div>
+        {game.description && (
+          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,50%)", lineHeight: 1.5 }}>
+            {game.description.length > 70 ? game.description.slice(0, 70) + "…" : game.description}
+          </p>
+        )}
+        <div
+          style={{
+            marginTop: "0.75rem",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.35rem",
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            color: "hsl(258,90%,72%)",
+          }}
+        >
+          Top Up <Zap size={12} />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function ProductCard({ product }: { product: Product }) {
+  return (
+    <Link
+      href={`/products/${product.id}`}
+      data-testid={`card-product-${product.id}`}
+      style={{
+        display: "block",
+        borderRadius: "0.75rem",
+        overflow: "hidden",
+        border: "1px solid rgba(124,58,237,0.15)",
+        background: "hsl(220,20%,9%)",
+        textDecoration: "none",
+        transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
+        cursor: "pointer",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.5)";
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(124,58,237,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+      }}
+    >
+      <div
+        style={{
+          height: "160px",
+          background: "linear-gradient(135deg, hsl(258,35%,16%), hsl(220,28%,10%))",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        }}
+      >
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <Zap size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
+          <Gift size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
         )}
       </div>
-
-      <div style={{ padding: "1.1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.5rem" }}>
-          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210, 40%, 92%)", flex: 1 }}>
+      <div style={{ padding: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)", flex: 1 }}>
             {product.title}
           </h3>
-          <span className="badge badge-purple">{product.category.replace("_", " ")}</span>
+          <span className="badge badge-purple" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>
+            {categoryLabel(product.category)}
+          </span>
         </div>
         {product.description && (
-          <p style={{ fontSize: "0.78rem", color: "hsl(220, 10%, 50%)", marginBottom: "0.75rem", lineHeight: 1.5 }}>
-            {product.description.length > 80 ? product.description.slice(0, 80) + "…" : product.description}
+          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,50%)", lineHeight: 1.5 }}>
+            {product.description.length > 70 ? product.description.slice(0, 70) + "…" : product.description}
           </p>
         )}
-
-        <button
-          className="btn-primary"
-          style={{ width: "100%", fontSize: "0.8rem", padding: "0.5rem" }}
-          onClick={() => setOpen(!open)}
-          data-testid={`button-select-package-${product.id}`}
+        <div
+          style={{
+            marginTop: "0.75rem",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.35rem",
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            color: "hsl(258,90%,72%)",
+          }}
         >
-          <ShoppingCart size={14} />
-          {open ? "Close" : "Select Package"}
-          <ChevronDown size={14} style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
-        </button>
-
-        {open && (
-          <div style={{ marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            {/* Package selection */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {mockPkgs.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  onClick={() => setSelectedPkg(pkg.id)}
-                  data-testid={`button-package-${pkg.id}`}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "0.5rem 0.75rem",
-                    borderRadius: "0.4rem",
-                    background: selectedPkg === pkg.id ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,11%)",
-                    border: `1px solid ${selectedPkg === pkg.id ? "hsla(258,90%,66%,0.5)" : "hsl(220,15%,18%)"}`,
-                    cursor: "pointer",
-                    color: "hsl(210,40%,90%)",
-                    fontSize: "0.8rem",
-                    fontWeight: 500,
-                    textAlign: "left",
-                    width: "100%",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <span>{pkg.label}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                    {pkg.originalPrice && (
-                      <span style={{ fontSize: "0.7rem", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>
-                        ${pkg.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                    <span style={{ color: "hsl(258,90%,72%)", fontWeight: 700 }}>${pkg.price.toFixed(2)}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* User info */}
-            <input
-              className="input-field"
-              placeholder="Player ID / Username"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              data-testid="input-player-id"
-              style={{ marginTop: "0.25rem" }}
-            />
-            {needsZone && (
-              <input
-                className="input-field"
-                placeholder="Zone ID (if required)"
-                value={zoneId}
-                onChange={(e) => setZoneId(e.target.value)}
-                data-testid="input-zone-id"
-              />
-            )}
-
-            <button
-              className="btn-primary"
-              style={{ width: "100%", fontSize: "0.8rem", padding: "0.5rem", marginTop: "0.25rem" }}
-              onClick={handleAddToCart}
-              disabled={!selectedPkg || !userId.trim()}
-              data-testid="button-add-to-cart"
-            >
-              <ShoppingCart size={14} />
-              Add to Cart
-            </button>
-          </div>
-        )}
+          View Packages <Zap size={12} />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -176,12 +180,29 @@ export default function Products() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
-  const { data: products = [], isLoading } = useQuery<Product[]>({ queryKey: ["/api/products"] });
+  const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
+    queryKey: ["/api/games"],
+  });
 
-  const filtered = products.filter((p) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    const matchCat = category === "all" || p.category === category;
-    return matchSearch && matchCat;
+  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const isLoading = gamesLoading || productsLoading;
+
+  const unified: UnifiedItem[] = [
+    ...games.map((g): UnifiedItem => ({ kind: "game", data: g })),
+    ...products.filter((p) => p.isActive).map((p): UnifiedItem => ({ kind: "product", data: p })),
+  ];
+
+  const filtered = unified.filter((item) => {
+    const name = item.kind === "game" ? item.data.name : item.data.title;
+    const matchSearch = name.toLowerCase().includes(search.toLowerCase());
+    if (!matchSearch) return false;
+    if (category === "all") return true;
+    if (category === "games") return item.kind === "game";
+    if (item.kind === "product") return item.data.category === category;
+    return false;
   });
 
   return (
@@ -189,22 +210,22 @@ export default function Products() {
       <div style={{ marginBottom: "2rem" }}>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210, 40%, 95%)", marginBottom: "0.5rem" }}
+          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
         >
           All Products
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(220, 10%, 55%)" }}>
-          Choose your game and select a package to top up instantly.
+        <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)" }}>
+          Game top-ups, gift cards, vouchers, and subscription plans — all in one place.
         </p>
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
           <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "hsl(220,10%,45%)", pointerEvents: "none" }} />
           <input
             className="input-field"
-            placeholder="Search games..."
+            placeholder="Search games, gift cards..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ paddingLeft: "2.25rem" }}
@@ -213,29 +234,43 @@ export default function Products() {
         </div>
 
         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setCategory(cat.value)}
-              data-testid={`button-filter-${cat.value}`}
-              style={{
-                padding: "0.45rem 0.9rem",
-                borderRadius: "0.5rem",
-                border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(220,15%,20%)"}`,
-                background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
-                color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(220,10%,55%)",
-                fontSize: "0.8rem",
-                fontWeight: 500,
-                cursor: "pointer",
-                transition: "all 0.15s",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.value}
+                onClick={() => setCategory(cat.value)}
+                data-testid={`button-filter-${cat.value}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.3rem",
+                  padding: "0.45rem 0.9rem",
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(220,15%,20%)"}`,
+                  background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
+                  color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(220,10%,55%)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {Icon && <Icon size={13} />}
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Count */}
+      {!isLoading && (
+        <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,40%)", marginBottom: "1.25rem" }}>
+          {filtered.length} {filtered.length === 1 ? "item" : "items"} found
+        </p>
+      )}
 
       {/* Grid */}
       {isLoading ? (
@@ -245,8 +280,8 @@ export default function Products() {
               key={i}
               style={{
                 height: "280px",
-                background: "hsl(220, 20%, 9%)",
-                border: "1px solid hsl(220, 15%, 14%)",
+                background: "hsl(220,20%,9%)",
+                border: "1px solid hsl(220,15%,14%)",
                 borderRadius: "0.75rem",
                 animation: "pulse 1.5s infinite",
               }}
@@ -254,15 +289,9 @@ export default function Products() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "5rem 1rem",
-            color: "hsl(220, 10%, 45%)",
-          }}
-        >
+        <div style={{ textAlign: "center", padding: "5rem 1rem", color: "hsl(220,10%,45%)" }}>
           <Zap size={48} style={{ marginBottom: "1rem", opacity: 0.3 }} />
-          <p style={{ fontSize: "1rem" }}>No products found.</p>
+          <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>No products found.</p>
           {search && (
             <button
               className="btn-secondary"
@@ -276,26 +305,13 @@ export default function Products() {
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.25rem" }}>
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && products.length === 0 && (
-        <div
-          style={{
-            marginTop: "2rem",
-            padding: "2rem",
-            background: "hsl(220, 20%, 9%)",
-            border: "1px solid hsl(220, 15%, 16%)",
-            borderRadius: "0.75rem",
-            textAlign: "center",
-          }}
-        >
-          <p style={{ color: "hsl(220, 10%, 55%)", fontSize: "0.9rem" }}>
-            No products in the catalog yet. Check back soon or contact an admin to add products.
-          </p>
+          {filtered.map((item) =>
+            item.kind === "game" ? (
+              <GameCard key={`game-${item.data.id}`} game={item.data} />
+            ) : (
+              <ProductCard key={`product-${item.data.id}`} product={item.data} />
+            )
+          )}
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ import {
   type Game, type InsertGame,
   type Service, type InsertService,
   type Product, type InsertProduct,
+  type ProductPackage,
   type Order,
   type Transaction,
   type Coupon, type InsertCoupon,
@@ -39,6 +40,7 @@ export interface IStorage {
   getAllGames(): Promise<Game[]>;
   getTrendingGames(): Promise<Game[]>;
   getGame(id: string): Promise<Game | undefined>;
+  getGameBySlug(slug: string): Promise<Game | undefined>;
   createGame(data: InsertGame): Promise<Game>;
   updateGame(id: string, data: Partial<Game>): Promise<Game | undefined>;
   deleteGame(id: string): Promise<void>;
@@ -56,6 +58,11 @@ export interface IStorage {
   createProduct(data: InsertProduct): Promise<Product>;
   updateProduct(id: string, data: Partial<Product>): Promise<Product | undefined>;
   deleteProduct(id: string): Promise<void>;
+
+  // Product Packages
+  getProductPackages(productId: string): Promise<ProductPackage[]>;
+  createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean }): Promise<ProductPackage>;
+  deleteProductPackage(id: string): Promise<void>;
 
   // Orders
   getAllOrders(limit?: number, offset?: number): Promise<Order[]>;
@@ -199,6 +206,10 @@ export class DatabaseStorage implements IStorage {
   async deleteGame(id: string) {
     await db.delete(games).where(eq(games.id, id));
   }
+  async getGameBySlug(slug: string) {
+    const [g] = await db.select().from(games).where(eq(games.slug, slug));
+    return g;
+  }
 
   // ── Services ───────────────────────────────────────────────────────────────
   async getAllServices(gameId?: string) {
@@ -245,6 +256,21 @@ export class DatabaseStorage implements IStorage {
   }
   async deleteProduct(id: string) {
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  // ── Product Packages ───────────────────────────────────────────────────────
+  async getProductPackages(productId: string) {
+    return db.select().from(productPackages)
+      .where(eq(productPackages.productId, productId))
+      .orderBy(productPackages.createdAt);
+  }
+  async createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean }) {
+    const id = randomUUID();
+    await db.insert(productPackages).values({ id, ...data, isActive: data.isActive ?? true });
+    return fetchAfter<ProductPackage>(productPackages, id, productPackages.id);
+  }
+  async deleteProductPackage(id: string) {
+    await db.delete(productPackages).where(eq(productPackages.id, id));
   }
 
   // ── Orders ─────────────────────────────────────────────────────────────────

@@ -48,10 +48,23 @@ function injectAdminRole(req: Request, _res: Response, next: NextFunction) {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   app.use("/api/admin", injectAdminRole);
 
+  // ── Public site settings (read-only for storefront) ───────────────────────
+  app.get("/api/site-settings", async (_req, res) => {
+    const settings = await storage.getAllSiteSettings();
+    const obj: Record<string, string> = {};
+    settings.forEach((s) => { obj[s.key] = s.value; });
+    res.json(obj);
+  });
+
   // ── Public product routes ──────────────────────────────────────────────────
   app.get("/api/products", async (_req, res) => {
     const prods = await storage.getAllProducts();
     res.json(prods);
+  });
+
+  app.get("/api/products/:id/packages", async (req, res) => {
+    const pkgs = await storage.getProductPackages(req.params.id);
+    res.json(pkgs);
   });
 
   app.get("/api/products/:id", async (req, res) => {
@@ -69,6 +82,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/games/trending", async (_req, res) => {
     const all = await storage.getTrendingGames();
     res.json(all.filter((g) => g.status === "active"));
+  });
+
+  app.get("/api/games/by-slug/:slug", async (req, res) => {
+    const g = await storage.getGameBySlug(req.params.slug);
+    if (!g) return res.status(404).json({ message: "Not found" });
+    res.json(g);
   });
 
   app.get("/api/games/:id", async (req, res) => {
@@ -263,6 +282,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
     await storage.deleteProduct(req.params.id);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/products/:id/packages", requireAdmin, async (req, res) => {
+    res.json(await storage.getProductPackages(req.params.id));
+  });
+
+  app.post("/api/admin/products/:id/packages", requireAdmin, async (req, res) => {
+    try {
+      const pkg = await storage.createProductPackage({ ...req.body, productId: req.params.id });
+      res.status(201).json(pkg);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
+  });
+
+  app.delete("/api/admin/products/:id/packages/:pkgId", requireAdmin, async (req, res) => {
+    await storage.deleteProductPackage(req.params.pkgId);
     res.json({ ok: true });
   });
 

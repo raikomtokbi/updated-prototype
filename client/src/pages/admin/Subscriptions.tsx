@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, PlusCircle, X } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
-import type { Product } from "@shared/schema";
+import type { Product, ProductPackage } from "@shared/schema";
 import {
   card, thStyle, tdStyle, btnPrimary, btnEdit, btnDanger,
   SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
@@ -22,6 +22,69 @@ const labelStyle: React.CSSProperties = {
   fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
+
+function fmtDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  const y = dt.getFullYear();
+  const mo = String(dt.getMonth() + 1).padStart(2, "0");
+  const day = String(dt.getDate()).padStart(2, "0");
+  const h = String(dt.getHours()).padStart(2, "0");
+  const mi = String(dt.getMinutes()).padStart(2, "0");
+  return `${y}-${mo}-${day} ${h}:${mi}`;
+}
+
+function PackageManager({ productId }: { productId: string }) {
+  const qc = useQueryClient();
+  const [newLabel, setNewLabel] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newOrigPrice, setNewOrigPrice] = useState("");
+
+  const { data: packages = [] } = useQuery<ProductPackage[]>({
+    queryKey: ["/api/admin/products", productId, "packages"],
+    queryFn: () => adminApi.get(`/products/${productId}/packages`),
+  });
+
+  const addPkg = useMutation({
+    mutationFn: () => adminApi.post(`/products/${productId}/packages`, {
+      label: newLabel, price: newPrice, originalPrice: newOrigPrice || undefined,
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] });
+      setNewLabel(""); setNewPrice(""); setNewOrigPrice("");
+    },
+  });
+
+  const delPkg = useMutation({
+    mutationFn: (pkgId: string) => adminApi.delete(`/products/${productId}/packages/${pkgId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] }),
+  });
+
+  return (
+    <div style={{ marginTop: "1rem" }}>
+      <label style={labelStyle}>Billing Tiers</label>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", marginBottom: "0.6rem" }}>
+        {packages.map((pkg) => (
+          <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
+            <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
+              <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+            </div>
+          </div>
+        ))}
+        {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No tiers yet.</p>}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px auto", gap: "0.4rem", alignItems: "end" }}>
+        <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label><input style={inputStyle} placeholder="Monthly" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} /></div>
+        <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label><input style={inputStyle} type="number" placeholder="9.99" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} /></div>
+        <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label><input style={inputStyle} type="number" placeholder="Optional" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} /></div>
+        <button type="button" onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }} disabled={!newLabel || !newPrice || addPkg.isPending} style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}><PlusCircle size={14} /></button>
+      </div>
+    </div>
+  );
+}
 
 function SubForm({ initial, onSubmit, loading }: { initial: Partial<Product>; onSubmit: (d: any) => void; loading: boolean }) {
   const [form, setForm] = useState({
@@ -63,6 +126,7 @@ function SubForm({ initial, onSubmit, loading }: { initial: Partial<Product>; on
         inputStyle={inputStyle}
         labelStyle={labelStyle}
       />
+      {initial.id && <PackageManager productId={initial.id} />}
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? "Saving..." : "Save Plan"}
       </button>
@@ -96,11 +160,6 @@ export default function Subscriptions() {
     mutationFn: (id: string) => adminApi.delete(`/products/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products"] }),
   });
-  const toggleMut = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => adminApi.patch(`/products/${id}`, { isActive }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products"] }),
-  });
-
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return plans.filter((p) => {
@@ -134,7 +193,7 @@ export default function Subscriptions() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
-                  {["Plan Name", "Description", "Status", "Sort", "Actions"].map((h) => (
+                  {["Plan Name", "Description", "Status", "Sort", "Created", "Actions"].map((h) => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
@@ -150,16 +209,10 @@ export default function Subscriptions() {
                     </td>
                     <td style={tdStyle}><StatusBadge value={p.isActive ? "active" : "inactive"} /></td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220,10%,46%)" }}>{p.sortOrder}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220,10%,45%)" }}>{fmtDate(p.createdAt)}</td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", gap: "5px" }}>
-                        <button style={btnEdit} onClick={() => setEditItem(p)}><Pencil size={11} /> Edit</button>
-                        <button
-                          style={p.isActive ? btnDanger : { ...btnDanger, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.25)", color: "hsl(142,71%,48%)" }}
-                          onClick={() => toggleMut.mutate({ id: p.id, isActive: !p.isActive })}
-                          disabled={toggleMut.isPending}
-                        >
-                          {p.isActive ? "Disable" : "Enable"}
-                        </button>
+                        <button style={btnEdit} onClick={() => setEditItem(p)}><Pencil size={11} /></button>
                         <button style={btnDanger} onClick={() => { if (confirm(`Delete "${p.title}"?`)) delMut.mutate(p.id); }}><Trash2 size={11} /></button>
                       </div>
                     </td>

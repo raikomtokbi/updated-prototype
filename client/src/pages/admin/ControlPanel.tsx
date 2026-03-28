@@ -270,7 +270,7 @@ export default function ControlPanel() {
               value={local.site_timezone ?? "UTC"}
               onChange={(e) => set("site_timezone", e.target.value)}
             >
-              {["UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"].map((tz) => (
+              {["UTC", "America/New_York", "America/Chicago", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Europe/Berlin", "Africa/Nairobi", "Asia/Kolkata", "Asia/Dhaka", "Asia/Jakarta", "Asia/Singapore", "Asia/Manila", "Asia/Karachi", "Asia/Dubai", "Asia/Tokyo", "Australia/Sydney"].map((tz) => (
                 <option key={tz} value={tz}>{tz}</option>
               ))}
             </select>
@@ -296,7 +296,7 @@ export default function ControlPanel() {
               value={local.default_currency ?? "USD"}
               onChange={(e) => set("default_currency", e.target.value)}
             >
-              {["USD", "EUR", "GBP", "SGD", "MYR", "IDR", "PHP"].map((c) => (
+              {["USD", "EUR", "GBP", "INR", "SGD", "MYR", "IDR", "PHP", "BDT", "PKR", "LKR", "THB", "VND", "AED", "SAR"].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
