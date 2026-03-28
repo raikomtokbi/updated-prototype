@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import type { Game, Service } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -116,14 +117,20 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
         <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "70px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-        <div>
-          <label style={labelStyle}>Logo URL</label>
-          <input style={inputStyle} value={form.logoUrl ?? ""} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://..." />
-        </div>
-        <div>
-          <label style={labelStyle}>Banner URL</label>
-          <input style={inputStyle} value={form.bannerUrl ?? ""} onChange={(e) => set("bannerUrl", e.target.value)} placeholder="https://..." />
-        </div>
+        <ImageUploadField
+          label="Logo URL"
+          value={form.logoUrl ?? ""}
+          onChange={(url) => set("logoUrl", url)}
+          inputStyle={inputStyle}
+          labelStyle={labelStyle}
+        />
+        <ImageUploadField
+          label="Banner URL"
+          value={form.bannerUrl ?? ""}
+          onChange={(url) => set("bannerUrl", url)}
+          inputStyle={inputStyle}
+          labelStyle={labelStyle}
+        />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
         <div>

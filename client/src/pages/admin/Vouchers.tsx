@@ -9,6 +9,7 @@ import {
   SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
   inputStyle as sharedInputStyle,
 } from "@/components/admin/shared";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 const CATEGORY_OPTIONS = [
   { value: "", label: "All Categories" },
@@ -87,10 +88,13 @@ function ProductForm({
           </select>
         </div>
       </div>
-      <div>
-        <label style={labelStyle}>Image URL</label>
-        <input style={inputStyle} value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://..." />
-      </div>
+      <ImageUploadField
+        label="Image URL"
+        value={form.imageUrl}
+        onChange={(url) => set("imageUrl", url)}
+        inputStyle={inputStyle}
+        labelStyle={labelStyle}
+      />
       <div>
         <label style={labelStyle}>Sort Order</label>
         <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />

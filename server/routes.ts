@@ -1,6 +1,31 @@
 import type { Express, Request, Response, NextFunction } from "express";
+import express from "express";
 import type { Server } from "http";
+import path from "path";
+import fs from "fs";
+import multer from "multer";
 import { storage } from "./storage";
+
+// ─── Multer setup ─────────────────────────────────────────────────────────────
+const uploadsDir = path.resolve(process.cwd(), "public/uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 // ─── Middleware helpers ───────────────────────────────────────────────────────
 
@@ -68,6 +93,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         .filter((p) => p.isActive)
         .map(({ secretKey: _sk, webhookSecret: _ws, publicKey: _pk, ...safe }) => safe),
     );
+  });
+
+  // ── File upload ────────────────────────────────────────────────────────────
+  app.use("/uploads", express.static(uploadsDir));
+
+  app.post("/api/admin/upload", injectAdminRole, requireAdmin, upload.single("file"), (req: any, res) => {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url });
   });
 
   // ── Auth / login ───────────────────────────────────────────────────────────

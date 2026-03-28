@@ -9,6 +9,7 @@ import {
   SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
   inputStyle as sharedInput,
 } from "@/components/admin/shared";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Status" },
@@ -55,10 +56,13 @@ function SubForm({ initial, onSubmit, loading }: { initial: Partial<Product>; on
           <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
       </div>
-      <div>
-        <label style={labelStyle}>Image URL</label>
-        <input style={inputStyle} value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://..." />
-      </div>
+      <ImageUploadField
+        label="Image URL"
+        value={form.imageUrl}
+        onChange={(url) => set("imageUrl", url)}
+        inputStyle={inputStyle}
+        labelStyle={labelStyle}
+      />
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? "Saving..." : "Save Plan"}
       </button>
