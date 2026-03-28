@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
   Facebook, Twitter, Instagram, Youtube, Gamepad2, Gift, HeadphonesIcon,
+  Wrench,
 } from "lucide-react";
 import type { Product } from "@shared/schema";
+import { useSiteStore } from "@/lib/store/siteStore";
 
 import heroBannerImg from "@assets/hero-banner_1774458324894.png";
 import mlbbBannerImg from "@assets/mlbb-banner_1774458324929.png";
@@ -947,7 +949,82 @@ function Footer() {
 }
 
 // ─── Home page ─────────────────────────────────────────────────────────────────
+function MaintenancePage() {
+  return (
+    <div
+      style={{
+        minHeight: "calc(100vh - 64px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#070b14",
+        padding: "2rem",
+      }}
+    >
+      <div style={{ textAlign: "center", maxWidth: "480px" }}>
+        <div
+          style={{
+            width: "72px",
+            height: "72px",
+            borderRadius: "16px",
+            background: "hsla(38, 92%, 50%, 0.1)",
+            border: "1px solid hsla(38, 92%, 50%, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 1.5rem",
+          }}
+        >
+          <Wrench size={32} style={{ color: "hsl(38, 92%, 55%)" }} />
+        </div>
+        <h1
+          style={{
+            fontSize: "2rem",
+            fontWeight: 800,
+            color: "hsl(210, 40%, 95%)",
+            marginBottom: "0.75rem",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Under Maintenance
+        </h1>
+        <p style={{ fontSize: "0.95rem", color: "hsl(220, 10%, 52%)", lineHeight: 1.7, marginBottom: "2rem" }}>
+          We're currently performing scheduled maintenance to improve your experience.
+          We'll be back online shortly. Thank you for your patience.
+        </p>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 18px",
+            background: "hsla(38, 92%, 50%, 0.08)",
+            border: "1px solid hsla(38, 92%, 50%, 0.25)",
+            borderRadius: "999px",
+            fontSize: "13px",
+            color: "hsl(38, 92%, 60%)",
+            fontWeight: 500,
+          }}
+        >
+          <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "hsl(38, 92%, 50%)", boxShadow: "0 0 6px hsl(38,92%,50%)", animation: "pulse 2s infinite", flexShrink: 0 }} />
+          Maintenance Mode Active
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
+  const { status } = useSiteStore();
+
+  if (status === "maintenance") {
+    return (
+      <div style={{ minHeight: "100vh", background: "#070b14" }}>
+        <MaintenancePage />
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: "#070b14" }}>
       <HeroSlider />
