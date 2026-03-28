@@ -126,7 +126,8 @@ function AdminSidebar() {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          padding: "16px 20px",
+          padding: "0 20px",
+          height: "52px",
           borderBottom: "1px solid hsl(220, 15%, 13%)",
           flexShrink: 0,
         }}
