@@ -1,55 +1,115 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { Order } from "@shared/schema";
+import {
+  card, thStyle, tdStyle, btnSuccess, btnDanger, btnNeutral,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
+} from "@/components/admin/shared";
 
-const mockOrders = [
-  { id: "#VO-0008", user: "sara.j", voucher: "Netflix 1 Month", amount: "$15.99", status: "completed", date: "2024-12-01" },
-  { id: "#VO-0007", user: "tom.h", voucher: "Spotify Premium", amount: "$9.99", status: "completed", date: "2024-12-01" },
-  { id: "#VO-0006", user: "lisa.m", voucher: "Steam $20", amount: "$20.00", status: "pending", date: "2024-11-30" },
-  { id: "#VO-0005", user: "kevin.b", voucher: "iTunes $50", amount: "$50.00", status: "failed", date: "2024-11-29" },
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "completed", label: "Completed" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
 ];
 
-const statusColor: Record<string, string> = {
-  completed: "hsl(142, 71%, 45%)",
-  pending: "hsl(38, 92%, 50%)",
-  failed: "hsl(0, 72%, 51%)",
-};
-
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default function VoucherOrders() {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const { data: orders = [], isLoading } = useQuery<Order[]>({
+    queryKey: ["/api/admin/orders"],
+    queryFn: () => adminApi.get("/orders?limit=200"),
+  });
+
+  const statusMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      adminApi.patch(`/orders/${id}/status`, { status }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return orders.filter((o) => {
+      const matchSearch =
+        !q ||
+        o.orderNumber.toLowerCase().includes(q) ||
+        (o.userId ?? "").toLowerCase().includes(q) ||
+        o.productTitle.toLowerCase().includes(q);
+      const matchStatus = !statusFilter || o.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [orders, search, statusFilter]);
+
   return (
     <AdminLayout title="Voucher Orders">
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Recent Voucher Orders</span>
-        </div>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search order #, user, or product..." />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} order{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["Order ID", "User", "Voucher", "Amount", "Status", "Date"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockOrders.map((order) => (
-                <tr key={order.id} data-testid={`row-voucher-order-${order.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px", color: "hsl(258, 90%, 70%)" }}>{order.id}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(210, 40%, 85%)" }}>{order.user}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(220, 10%, 58%)" }}>{order.voucher}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{order.amount}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: `${statusColor[order.status]}20`, color: statusColor[order.status] }}>{order.status}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{order.date}</td>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading orders...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={orders.length === 0 ? "No voucher orders yet." : "No orders match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Order #", "User ID", "Product", "Amount", "Status", "Date", "Actions"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((o) => (
+                  <tr key={o.id}>
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: "12px", color: "hsl(258, 90%, 70%)" }}>{o.orderNumber}</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>{o.userId ?? "—"}</td>
+                    <td style={{ ...tdStyle, color: "hsl(220, 10%, 60%)", maxWidth: "180px" }}>
+                      <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.productTitle}</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>${Number(o.totalAmount).toFixed(2)}</td>
+                    <td style={tdStyle}><StatusBadge value={o.status} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(o.createdAt)}</td>
+                    <td style={tdStyle}>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        {o.status === "pending" && (
+                          <>
+                            <button style={btnSuccess} onClick={() => statusMut.mutate({ id: o.id, status: "completed" })} disabled={statusMut.isPending}>Approve</button>
+                            <button style={btnDanger} onClick={() => statusMut.mutate({ id: o.id, status: "failed" })} disabled={statusMut.isPending}>Reject</button>
+                          </>
+                        )}
+                        {o.status === "completed" && (
+                          <button style={btnNeutral} onClick={() => statusMut.mutate({ id: o.id, status: "refunded" })} disabled={statusMut.isPending}>Refund</button>
+                        )}
+                        {(o.status === "failed" || o.status === "refunded") && (
+                          <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </AdminLayout>

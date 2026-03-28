@@ -1,55 +1,89 @@
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { Transaction } from "@shared/schema";
+import {
+  card, thStyle, tdStyle,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
+} from "@/components/admin/shared";
 
-const mockRefunds = [
-  { id: "#REF-001", user: "nina.k", reason: "Item not received", amount: "$14.99", status: "approved", date: "2024-11-30" },
-  { id: "#REF-002", user: "lisa.m", reason: "Duplicate charge", amount: "$20.00", status: "pending", date: "2024-11-29" },
-  { id: "#REF-003", user: "tom.h", reason: "Wrong product", amount: "$9.99", status: "rejected", date: "2024-11-28" },
-  { id: "#REF-004", user: "kevin.b", reason: "Technical issue", amount: "$50.00", status: "approved", date: "2024-11-27" },
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "refunded", label: "Refunded" },
+  { value: "pending", label: "Pending" },
+  { value: "failed", label: "Failed" },
 ];
 
-const statusColor: Record<string, string> = {
-  approved: "hsl(142, 71%, 45%)",
-  pending: "hsl(38, 92%, 50%)",
-  rejected: "hsl(0, 72%, 51%)",
-};
-
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default function Refunds() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const { data: refunds = [], isLoading } = useQuery<Transaction[]>({
+    queryKey: ["/api/admin/transactions/refunds"],
+    queryFn: () => adminApi.get("/transactions/refunds"),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return refunds.filter((r) => {
+      const matchSearch =
+        !q ||
+        r.id.toLowerCase().includes(q) ||
+        (r.userId ?? "").toLowerCase().includes(q) ||
+        (r.gatewayRef ?? "").toLowerCase().includes(q);
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [refunds, search, statusFilter]);
+
   return (
-    <AdminLayout title="Refund Transactions">
+    <AdminLayout title="Refund Requests">
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Refund Requests</span>
-        </div>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search transaction or user..." />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} request{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["Refund ID", "User", "Reason", "Amount", "Status", "Date"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockRefunds.map((r) => (
-                <tr key={r.id} data-testid={`row-refund-${r.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px", color: "hsl(258, 90%, 70%)" }}>{r.id}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(210, 40%, 85%)" }}>{r.user}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(220, 10%, 58%)" }}>{r.reason}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{r.amount}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: `${statusColor[r.status]}20`, color: statusColor[r.status] }}>{r.status}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{r.date}</td>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading refund requests...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={refunds.length === 0 ? "No refund requests yet." : "No refunds match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Transaction ID", "User ID", "Method", "Gateway Ref", "Amount", "Status", "Date"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((r) => (
+                  <tr key={r.id}>
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>{r.id.slice(0, 16)}…</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>{r.userId ?? "—"}</td>
+                    <td style={{ ...tdStyle, color: "hsl(220, 10%, 60%)" }}>{r.paymentMethod}</td>
+                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(220, 10%, 50%)" }}>{r.gatewayRef ?? "—"}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>${Number(r.amount).toFixed(2)}</td>
+                    <td style={tdStyle}><StatusBadge value={r.status} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(r.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </AdminLayout>

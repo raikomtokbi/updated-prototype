@@ -1,59 +1,206 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { Campaign } from "@shared/schema";
+import {
+  card, thStyle, tdStyle, btnPrimary, btnEdit, btnDanger,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
+  inputStyle as sharedInput,
+} from "@/components/admin/shared";
 
-const mockCampaigns = [
-  { id: 1, name: "Year End Sale", type: "Discount", reach: "12,400", startDate: "2024-12-01", endDate: "2024-12-31", status: "active" },
-  { id: 2, name: "New User Welcome", type: "Email", reach: "3,200", startDate: "2024-11-01", endDate: "2025-01-01", status: "active" },
-  { id: 3, name: "Flash Sale Nov", type: "Discount", reach: "8,900", startDate: "2024-11-15", endDate: "2024-11-16", status: "ended" },
-  { id: 4, name: "Referral Boost", type: "Referral", reach: "5,600", startDate: "2024-10-01", endDate: "2024-10-31", status: "ended" },
-  { id: 5, name: "VIP Loyalty Q1", type: "Loyalty", reach: "2,100", startDate: "2025-01-01", endDate: "2025-03-31", status: "draft" },
+const TYPE_OPTIONS = [
+  { value: "", label: "All Types" },
+  { value: "banner", label: "Banner" },
+  { value: "email", label: "Email" },
+  { value: "discount", label: "Discount" },
+  { value: "referral", label: "Referral" },
+  { value: "loyalty", label: "Loyalty" },
 ];
 
-const statusColor: Record<string, string> = {
-  active: "hsl(142, 71%, 45%)",
-  ended: "hsl(220, 10%, 45%)",
-  draft: "hsl(38, 92%, 50%)",
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+
+const inputStyle: React.CSSProperties = { ...sharedInput, padding: "7px 10px", fontSize: "13px" };
+const labelStyle: React.CSSProperties = {
+  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
+  display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaign>; onSubmit: (d: any) => void; loading: boolean }) {
+  const toInput = (d: Date | string | null | undefined) => {
+    if (!d) return "";
+    return new Date(d).toISOString().slice(0, 16);
+  };
+  const [form, setForm] = useState({
+    name: initial.name ?? "",
+    description: initial.description ?? "",
+    type: initial.type ?? "banner",
+    isActive: initial.isActive !== false,
+    startsAt: toInput(initial.startsAt),
+    endsAt: toInput(initial.endsAt),
+  });
+  const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
 
-export default function Campaigns() {
   return (
-    <AdminLayout title="Campaigns">
-      <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>All Campaigns</span>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      onSubmit({ ...form, startsAt: form.startsAt || null, endsAt: form.endsAt || null });
+    }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+      <div>
+        <label style={labelStyle}>Campaign Name *</label>
+        <input style={inputStyle} required value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Year End Sale" />
+      </div>
+      <div>
+        <label style={labelStyle}>Description</label>
+        <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "60px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <div>
+          <label style={labelStyle}>Type</label>
+          <select style={inputStyle} value={form.type} onChange={(e) => set("type", e.target.value)}>
+            <option value="banner">Banner</option>
+            <option value="email">Email</option>
+            <option value="discount">Discount</option>
+            <option value="referral">Referral</option>
+            <option value="loyalty">Loyalty</option>
+          </select>
         </div>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["#", "Campaign Name", "Type", "Reach", "Start", "End", "Status"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockCampaigns.map((c) => (
-                <tr key={c.id} data-testid={`row-campaign-${c.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>{c.id}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{c.name}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(196, 100%, 50%)" }}>{c.type}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(210, 40%, 80%)" }}>{c.reach}</td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{c.startDate}</td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{c.endDate}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, textTransform: "capitalize", background: `${statusColor[c.status]}20`, color: statusColor[c.status] }}>{c.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div>
+          <label style={labelStyle}>Status</label>
+          <select style={inputStyle} value={form.isActive ? "active" : "inactive"} onChange={(e) => set("isActive", e.target.value === "active")}>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
       </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <div>
+          <label style={labelStyle}>Start Date</label>
+          <input style={inputStyle} type="datetime-local" value={form.startsAt} onChange={(e) => set("startsAt", e.target.value)} />
+        </div>
+        <div>
+          <label style={labelStyle}>End Date</label>
+          <input style={inputStyle} type="datetime-local" value={form.endsAt} onChange={(e) => set("endsAt", e.target.value)} />
+        </div>
+      </div>
+      <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
+        {loading ? "Saving..." : "Save Campaign"}
+      </button>
+    </form>
+  );
+}
+
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+export default function Campaigns() {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [editItem, setEditItem] = useState<Campaign | null>(null);
+
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
+    queryKey: ["/api/admin/campaigns"],
+    queryFn: () => adminApi.get("/campaigns"),
+  });
+
+  const addMut = useMutation({
+    mutationFn: (d: any) => adminApi.post("/campaigns", d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] }); setShowAdd(false); },
+  });
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: any) => adminApi.patch(`/campaigns/${id}`, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] }); setEditItem(null); },
+  });
+  const delMut = useMutation({
+    mutationFn: (id: string) => adminApi.delete(`/campaigns/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] }),
+  });
+  const toggleMut = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => adminApi.patch(`/campaigns/${id}`, { isActive }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] }),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return campaigns.filter((c) => {
+      const matchSearch = !q || c.name.toLowerCase().includes(q);
+      const matchType = !typeFilter || c.type === typeFilter;
+      const matchStatus = !statusFilter || (statusFilter === "active" ? c.isActive : !c.isActive);
+      return matchSearch && matchType && matchStatus;
+    });
+  }, [campaigns, search, typeFilter, statusFilter]);
+
+  return (
+    <AdminLayout title="Campaigns">
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
+        <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> New Campaign</button>
+      </div>
+
+      <div style={card}>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search campaign name..." />
+          <FilterSelect value={typeFilter} onChange={setTypeFilter} options={TYPE_OPTIONS} />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} campaign{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
+        <div style={{ overflowX: "auto" }}>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading campaigns...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={campaigns.length === 0 ? "No campaigns yet. Create your first campaign." : "No campaigns match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Name", "Type", "Start", "End", "Status", "Actions"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((c) => (
+                  <tr key={c.id}>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{c.name}</td>
+                    <td style={tdStyle}><StatusBadge value={c.type} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.startsAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.endsAt)}</td>
+                    <td style={tdStyle}><StatusBadge value={c.isActive ? "active" : "inactive"} /></td>
+                    <td style={tdStyle}>
+                      <div style={{ display: "flex", gap: "5px" }}>
+                        <button style={btnEdit} onClick={() => setEditItem(c)}><Pencil size={11} /> Edit</button>
+                        <button
+                          style={c.isActive ? btnDanger : { ...btnDanger, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.25)", color: "hsl(142,71%,48%)" }}
+                          onClick={() => toggleMut.mutate({ id: c.id, isActive: !c.isActive })}
+                          disabled={toggleMut.isPending}
+                        >
+                          {c.isActive ? "Deactivate" : "Activate"}
+                        </button>
+                        <button style={btnDanger} onClick={() => { if (confirm(`Delete "${c.name}"?`)) delMut.mutate(c.id); }}><Trash2 size={11} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {showAdd && <Modal title="New Campaign" onClose={() => setShowAdd(false)}><CampaignForm initial={{}} onSubmit={(d) => addMut.mutate(d)} loading={addMut.isPending} /></Modal>}
+      {editItem && <Modal title="Edit Campaign" onClose={() => setEditItem(null)}><CampaignForm initial={editItem} onSubmit={(d) => editMut.mutate({ id: editItem.id, data: d })} loading={editMut.isPending} /></Modal>}
     </AdminLayout>
   );
 }
