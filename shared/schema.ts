@@ -42,6 +42,7 @@ export const games = pgTable("games", {
   bannerUrl: text("banner_url"),
   category: varchar("category", { length: 100 }).notNull().default("game_currency"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
+  isTrending: boolean("is_trending").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -249,6 +250,21 @@ export const insertTicketSchema = createInsertSchema(tickets).omit({ id: true, c
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true });
 export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({ id: true, createdAt: true });
 
+// ─── Plugins ──────────────────────────────────────────────────────────────────
+export const plugins = pgTable("plugins", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  name: varchar("name", { length: 191 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }).notNull().default("integration"),
+  isEnabled: boolean("is_enabled").notNull().default(false),
+  config: text("config"),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertPluginSchema = createInsertSchema(plugins).omit({ id: true, createdAt: true, updatedAt: true });
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Game = typeof games.$inferSelect;
@@ -270,3 +286,5 @@ export type TicketReply = typeof ticketReplies.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type Plugin = typeof plugins.$inferSelect;
+export type InsertPlugin = z.infer<typeof insertPluginSchema>;

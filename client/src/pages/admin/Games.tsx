@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Game, Service } from "@shared/schema";
@@ -337,6 +337,10 @@ export default function Games() {
     mutationFn: (id: string) => adminApi.delete(`/games/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
   });
+  const trendingMut = useMutation({
+    mutationFn: (id: string) => adminApi.patch(`/games/${id}/trending`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
+  });
 
   return (
     <AdminLayout title="Games">
@@ -389,6 +393,16 @@ export default function Games() {
                   <span style={statusBadge(g.status === "active")}>{g.status}</span>
 
                   <div style={{ display: "flex", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      style={g.isTrending
+                        ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
+                        : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }}
+                      onClick={() => trendingMut.mutate(g.id)}
+                      disabled={trendingMut.isPending}
+                      title={g.isTrending ? "Remove from Trending" : "Add to Trending"}
+                    >
+                      <TrendingUp size={11} /> {g.isTrending ? "Trending" : "Trend"}
+                    </button>
                     <button style={btnEdit} onClick={() => setEditGame(g)}><Pencil size={11} /> Edit</button>
                     <button style={btnDanger} onClick={() => { if (confirm(`Delete "${g.name}"? This will also delete all its services.`)) delMut.mutate(g.id); }}>
                       <Trash2 size={11} />

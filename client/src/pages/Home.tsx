@@ -6,15 +6,14 @@ import {
   Facebook, Twitter, Instagram, Youtube, Gamepad2, Gift, HeadphonesIcon,
   Wrench,
 } from "lucide-react";
-import type { Product } from "@shared/schema";
+
 import { useSiteStore } from "@/lib/store/siteStore";
 
 import heroBannerImg from "@assets/hero-banner_1774458324894.png";
 import mlbbBannerImg from "@assets/mlbb-banner_1774458324929.png";
 import game1Img from "@assets/game-1_1774458324765.png";
 import game2Img from "@assets/game-2_1774458324828.png";
-import game3Img from "@assets/game-3_1774458324856.png";
-import mlbbLogoImg from "@assets/mlbb-logo_1774458324950.png";
+
 
 // ─── Slider data ──────────────────────────────────────────────────────────────
 const SLIDES = [
@@ -48,16 +47,6 @@ const SLIDES = [
     cta1: { label: "Shop Now", href: "/products" },
     cta2: { label: "View Deals", href: "/products" },
   },
-];
-
-// ─── Trending games ───────────────────────────────────────────────────────────
-const TRENDING_GAMES = [
-  { name: "Valorant", img: game1Img, badge: "HOT", badgeColor: "#ef4444" },
-  { name: "League of Legends", img: game2Img, badge: "NEW", badgeColor: "#22d3ee" },
-  { name: "Genshin Impact", img: game3Img, badge: null, badgeColor: null },
-  { name: "Mobile Legends", img: mlbbLogoImg, badge: "TOP", badgeColor: "#7c3aed" },
-  { name: "PUBG Mobile", img: game1Img, badge: null, badgeColor: null },
-  { name: "Free Fire", img: game3Img, badge: "SALE", badgeColor: "#f59e0b" },
 ];
 
 // ─── Features ─────────────────────────────────────────────────────────────────
@@ -422,7 +411,10 @@ function FeaturesStrip() {
 // ─── Trending Games ───────────────────────────────────────────────────────────
 function TrendingGames() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { data: products = [] } = useQuery<Product[]>({ queryKey: ["/api/products"] });
+  const { data: trendingGames = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/games/trending"],
+    refetchInterval: 30000,
+  });
 
   return (
     <section style={{ padding: "3.5rem 0", maxWidth: "1320px", margin: "0 auto" }}>
@@ -479,140 +471,62 @@ function TrendingGames() {
           msOverflowStyle: "none",
         }}
       >
-        {TRENDING_GAMES.map((game, idx) => (
-          <Link
-            key={game.name}
-            href="/products"
-            data-testid={`card-game-${idx}`}
-            style={{
-              flexShrink: 0,
-              width: "155px",
-              borderRadius: "10px",
-              overflow: "hidden",
-              textDecoration: "none",
-              display: "block",
-              position: "relative",
-              border: "1px solid rgba(124,58,237,0.15)",
-              background: "#0b1020",
-              transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-            }}
-          >
-            {/* Image */}
-            <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative" }}>
-              <img
-                src={game.img}
-                alt={game.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              {/* Dark gradient bottom */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(0deg, rgba(11,16,32,0.85) 0%, transparent 55%)",
-                }}
-              />
-              {/* Badge */}
-              {game.badge && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "0.4rem",
-                    left: "0.4rem",
-                    padding: "0.15rem 0.4rem",
-                    borderRadius: "4px",
-                    background: game.badgeColor!,
-                    color: "white",
-                    fontSize: "0.6rem",
-                    fontWeight: 800,
-                    letterSpacing: "0.05em",
-                    boxShadow: `0 0 8px ${game.badgeColor}60`,
-                  }}
-                >
-                  {game.badge}
-                </span>
-              )}
-            </div>
-            {/* Name */}
-            <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
-              <p
-                style={{
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                  color: "#e5e7eb",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {game.name}
-              </p>
-            </div>
-          </Link>
-        ))}
-
-        {/* DB products if any */}
-        {products.map((p) => (
-          <Link
-            key={p.id}
-            href="/products"
-            data-testid={`card-db-game-${p.id}`}
-            style={{
-              flexShrink: 0,
-              width: "155px",
-              borderRadius: "10px",
-              overflow: "hidden",
-              textDecoration: "none",
-              display: "block",
-              border: "1px solid rgba(124,58,237,0.15)",
-              background: "#0b1020",
-              transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-            }}
-          >
-            <div
+        {isLoading ? (
+          <div style={{ display: "flex", gap: "1rem" }}>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} style={{ flexShrink: 0, width: "155px", height: "168px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+            ))}
+          </div>
+        ) : trendingGames.length === 0 ? (
+          <div style={{ padding: "2.5rem 0", color: "rgba(148,163,184,0.4)", fontSize: "0.82rem" }}>
+            No trending games yet. Enable trending in the admin panel.
+          </div>
+        ) : (
+          trendingGames.map((game, idx) => (
+            <Link
+              key={game.id}
+              href={`/products`}
+              data-testid={`card-game-${idx}`}
               style={{
-                width: "100%",
-                height: "120px",
-                background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(11,16,32,0.9))",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                flexShrink: 0,
+                width: "155px",
+                borderRadius: "10px",
                 overflow: "hidden",
+                textDecoration: "none",
+                display: "block",
+                position: "relative",
+                border: "1px solid rgba(124,58,237,0.15)",
+                background: "#0b1020",
+                transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
               }}
             >
-              {p.imageUrl ? (
-                <img src={p.imageUrl} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <Gamepad2 size={36} style={{ color: "rgba(167,139,250,0.3)" }} />
-              )}
-            </div>
-            <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
-              <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {p.title}
-              </p>
-            </div>
-          </Link>
-        ))}
+              <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(11,16,32,0.9))", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {game.logoUrl ? (
+                  <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
+                )}
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(11,16,32,0.85) 0%, transparent 55%)" }} />
+                <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
+              </div>
+              <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
+                <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {game.name}
+                </p>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
     </section>
   );

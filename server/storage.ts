@@ -12,9 +12,10 @@ import {
   type Campaign,
   type Review,
   type PaymentMethod,
+  type Plugin,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
-  campaigns, reviews, paymentMethods,
+  campaigns, reviews, paymentMethods, plugins,
 } from "@shared/schema";
 import { eq, desc, count, sum } from "drizzle-orm";
 import { db } from "./db";
@@ -33,6 +34,7 @@ export interface IStorage {
 
   // Games
   getAllGames(): Promise<Game[]>;
+  getTrendingGames(): Promise<Game[]>;
   getGame(id: string): Promise<Game | undefined>;
   createGame(data: InsertGame): Promise<Game>;
   updateGame(id: string, data: Partial<Game>): Promise<Game | undefined>;
@@ -94,6 +96,12 @@ export interface IStorage {
   updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod | undefined>;
   deletePaymentMethod(id: string): Promise<void>;
 
+  // Plugins
+  getAllPlugins(): Promise<Plugin[]>;
+  getPlugin(slug: string): Promise<Plugin | undefined>;
+  upsertPlugin(slug: string, data: Partial<Plugin>): Promise<Plugin>;
+  deletePlugin(slug: string): Promise<void>;
+
   // Dashboard
   getDashboardStats(): Promise<{
     totalUsers: number;
@@ -153,6 +161,11 @@ export class DatabaseStorage implements IStorage {
   // ── Games ──────────────────────────────────────────────────────────────────
   async getAllGames() {
     return db.select().from(games).orderBy(games.sortOrder, desc(games.createdAt));
+  }
+  async getTrendingGames() {
+    return db.select().from(games)
+      .where(eq(games.isTrending, true))
+      .orderBy(games.sortOrder, desc(games.createdAt));
   }
   async getGame(id: string) {
     const [g] = await db.select().from(games).where(eq(games.id, id));
@@ -333,6 +346,29 @@ export class DatabaseStorage implements IStorage {
   }
   async deletePaymentMethod(id: string) {
     await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+  }
+
+  // ── Plugins ────────────────────────────────────────────────────────────────
+  async getAllPlugins() {
+    return db.select().from(plugins).orderBy(plugins.name);
+  }
+  async getPlugin(slug: string) {
+    const [p] = await db.select().from(plugins).where(eq(plugins.slug, slug));
+    return p;
+  }
+  async upsertPlugin(slug: string, data: Partial<Plugin>) {
+    const existing = await this.getPlugin(slug);
+    if (existing) {
+      await db.update(plugins).set({ ...data, updatedAt: new Date() }).where(eq(plugins.slug, slug));
+      return fetchAfter<Plugin>(plugins, existing.id, plugins.id);
+    } else {
+      const id = randomUUID();
+      await db.insert(plugins).values({ id, slug, name: data.name ?? slug, ...data });
+      return fetchAfter<Plugin>(plugins, id, plugins.id);
+    }
+  }
+  async deletePlugin(slug: string) {
+    await db.delete(plugins).where(eq(plugins.slug, slug));
   }
 
   // ── Dashboard Stats ────────────────────────────────────────────────────────

@@ -41,6 +41,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(all.filter((g) => g.status === "active"));
   });
 
+  app.get("/api/games/trending", async (_req, res) => {
+    const all = await storage.getTrendingGames();
+    res.json(all.filter((g) => g.status === "active"));
+  });
+
   app.get("/api/games/:id", async (req, res) => {
     const g = await storage.getGame(req.params.id);
     if (!g) return res.status(404).json({ message: "Not found" });
@@ -362,6 +367,36 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.delete("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     await storage.deletePaymentMethod(req.params.id);
     res.json({ ok: true });
+  });
+
+  // ── Admin Plugins ──────────────────────────────────────────────────────────
+  app.get("/api/admin/plugins", requireAdmin, async (_req, res) => {
+    res.json(await storage.getAllPlugins());
+  });
+
+  app.put("/api/admin/plugins/:slug", requireAdmin, async (req, res) => {
+    const p = await storage.upsertPlugin(req.params.slug, req.body);
+    res.json(p);
+  });
+
+  app.patch("/api/admin/plugins/:slug/toggle", requireAdmin, async (req, res) => {
+    const existing = await storage.getPlugin(req.params.slug);
+    const current = existing?.isEnabled ?? false;
+    const p = await storage.upsertPlugin(req.params.slug, { ...req.body, isEnabled: !current });
+    res.json(p);
+  });
+
+  app.delete("/api/admin/plugins/:slug", requireAdmin, async (req, res) => {
+    await storage.deletePlugin(req.params.slug);
+    res.json({ ok: true });
+  });
+
+  // ── Admin Games trending toggle ────────────────────────────────────────────
+  app.patch("/api/admin/games/:id/trending", requireAdmin, async (req, res) => {
+    const g = await storage.getGame(req.params.id);
+    if (!g) return res.status(404).json({ message: "Not found" });
+    const updated = await storage.updateGame(req.params.id, { isTrending: !g.isTrending });
+    res.json(updated);
   });
 
   return httpServer;

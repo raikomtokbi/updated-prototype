@@ -17,6 +17,7 @@ import {
   Settings,
   Wallet,
   Plug,
+  Package,
   Palette,
   FileEdit,
   ChevronDown,
@@ -92,6 +93,7 @@ const navSections: NavSection[] = [
       { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel" },
       { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method" },
       { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration" },
+      { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins" },
     ],
   },
   {
