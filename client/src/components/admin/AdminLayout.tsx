@@ -115,7 +115,7 @@ function AdminSidebar() {
         width: "256px",
         height: "100vh",
         background: "hsl(220, 20%, 7%)",
-        borderRight: "1px solid hsl(220, 15%, 13%)",
+        borderRight: "none",
         display: "flex",
         flexDirection: "column",
         zIndex: 50,
@@ -464,6 +464,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           flexDirection: "column",
           overflowY: "auto",
           minHeight: "100vh",
+          borderLeft: "1px solid hsl(220, 15%, 13%)",
         }}
       >
         <header

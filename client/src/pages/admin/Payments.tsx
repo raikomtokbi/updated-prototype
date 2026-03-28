@@ -1,56 +1,90 @@
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { Transaction } from "@shared/schema";
+import {
+  card, thStyle, tdStyle,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
+} from "@/components/admin/shared";
 
-const mockPayments = [
-  { id: "#PAY-001", user: "alex.smith", method: "Credit Card", amount: "$29.99", status: "success", date: "2024-12-01" },
-  { id: "#PAY-002", user: "jade.wong", method: "PayPal", amount: "$9.99", status: "success", date: "2024-12-01" },
-  { id: "#PAY-003", user: "carlos.r", method: "Bank Transfer", amount: "$49.99", status: "pending", date: "2024-11-30" },
-  { id: "#PAY-004", user: "nina.k", method: "Credit Card", amount: "$14.99", status: "failed", date: "2024-11-30" },
-  { id: "#PAY-005", user: "mark.t", method: "Crypto", amount: "$99.99", status: "success", date: "2024-11-29" },
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "pending", label: "Pending" },
+  { value: "success", label: "Success" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
 ];
 
-const statusColor: Record<string, string> = {
-  success: "hsl(142, 71%, 45%)",
-  pending: "hsl(38, 92%, 50%)",
-  failed: "hsl(0, 72%, 51%)",
-};
-
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default function Payments() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
+    queryKey: ["/api/admin/transactions"],
+    queryFn: () => adminApi.get("/transactions?limit=200"),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return transactions.filter((t) => {
+      const matchSearch =
+        !q ||
+        t.id.toLowerCase().includes(q) ||
+        (t.userId ?? "").toLowerCase().includes(q) ||
+        (t.gatewayRef ?? "").toLowerCase().includes(q);
+      const matchStatus = !statusFilter || t.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [transactions, search, statusFilter]);
+
   return (
     <AdminLayout title="Payment Transactions">
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Payment History</span>
-        </div>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search transaction ID or user..." />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} transaction{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["Transaction ID", "User", "Method", "Amount", "Status", "Date"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockPayments.map((p) => (
-                <tr key={p.id} data-testid={`row-payment-${p.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px", color: "hsl(258, 90%, 70%)" }}>{p.id}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(210, 40%, 85%)" }}>{p.user}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(220, 10%, 58%)" }}>{p.method}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{p.amount}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: `${statusColor[p.status]}20`, color: statusColor[p.status] }}>{p.status}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{p.date}</td>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading transactions...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={transactions.length === 0 ? "No transactions yet." : "No transactions match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Transaction ID", "User ID", "Method", "Gateway Ref", "Amount", "Status", "Date"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((t) => (
+                  <tr key={t.id}>
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>{t.id.slice(0, 16)}…</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>{t.userId ?? "—"}</td>
+                    <td style={{ ...tdStyle, color: "hsl(220, 10%, 60%)" }}>{t.paymentMethod}</td>
+                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(220, 10%, 50%)" }}>{t.gatewayRef ?? "—"}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>${Number(t.amount).toFixed(2)}</td>
+                    <td style={tdStyle}><StatusBadge value={t.status} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(t.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </AdminLayout>

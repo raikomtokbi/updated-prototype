@@ -1,66 +1,178 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import { useAuthStore } from "@/lib/store/authstore";
+import type { Ticket } from "@shared/schema";
+import {
+  card, thStyle, tdStyle, btnSuccess, btnNeutral, btnDanger,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
+} from "@/components/admin/shared";
 
-const mockTickets = [
-  { id: "#TKT-012", user: "alex.smith", subject: "Payment not received", priority: "high", status: "open", date: "2024-12-01" },
-  { id: "#TKT-011", user: "jade.wong", subject: "Account locked", priority: "medium", status: "in-progress", date: "2024-12-01" },
-  { id: "#TKT-010", user: "carlos.r", subject: "Wrong game code", priority: "low", status: "resolved", date: "2024-11-30" },
-  { id: "#TKT-009", user: "nina.k", subject: "Refund not processed", priority: "high", status: "open", date: "2024-11-30" },
-  { id: "#TKT-008", user: "mark.t", subject: "Subscription issue", priority: "medium", status: "resolved", date: "2024-11-29" },
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "open", label: "Open" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
+  { value: "closed", label: "Closed" },
 ];
 
-const priorityColor: Record<string, string> = {
-  high: "hsl(0, 72%, 51%)",
-  medium: "hsl(38, 92%, 50%)",
-  low: "hsl(142, 71%, 45%)",
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 10px",
+  background: "hsl(220, 20%, 11%)",
+  border: "1px solid hsl(220, 15%, 18%)",
+  borderRadius: "6px",
+  color: "hsl(210, 40%, 90%)",
+  fontSize: "13px",
+  outline: "none",
+  resize: "vertical",
+  minHeight: "90px",
+  boxSizing: "border-box",
 };
 
-const statusColor: Record<string, string> = {
-  open: "hsl(196, 100%, 50%)",
-  "in-progress": "hsl(38, 92%, 50%)",
-  resolved: "hsl(142, 71%, 45%)",
-};
+function ReplyModal({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { user } = useAuthStore();
+  const [message, setMessage] = useState("");
 
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+  const replyMut = useMutation({
+    mutationFn: () => adminApi.post(`/tickets/${ticket.id}/reply`, { userId: user?.id, message }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/tickets"] });
+      onClose();
+    },
+  });
+
+  return (
+    <Modal title={`Reply — ${ticket.subject}`} onClose={onClose}>
+      <div style={{ marginBottom: "10px" }}>
+        <StatusBadge value={ticket.status} />
+        <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)", marginLeft: "8px" }}>
+          {ticket.subject}
+        </span>
+      </div>
+      <textarea
+        style={inputStyle as any}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Write your reply..."
+      />
+      <div style={{ display: "flex", gap: "8px", marginTop: "12px", justifyContent: "flex-end" }}>
+        <button onClick={onClose} style={{ ...btnNeutral, padding: "7px 16px" }}>Cancel</button>
+        <button
+          disabled={!message.trim() || replyMut.isPending}
+          onClick={() => replyMut.mutate()}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "6px", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "white", fontSize: "12px", fontWeight: 600, cursor: "pointer", border: "none" }}
+        >
+          {replyMut.isPending ? "Sending..." : "Send Reply"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
 export default function SupportTickets() {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [replyTicket, setReplyTicket] = useState<Ticket | null>(null);
+
+  const { data: tickets = [], isLoading } = useQuery<Ticket[]>({
+    queryKey: ["/api/admin/tickets"],
+    queryFn: () => adminApi.get("/tickets?limit=200"),
+  });
+
+  const statusMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      adminApi.patch(`/tickets/${id}/status`, { status }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/tickets"] }),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return tickets.filter((t) => {
+      const matchSearch = !q || t.subject.toLowerCase().includes(q) || (t.userId ?? "").toLowerCase().includes(q) || t.id.toLowerCase().includes(q);
+      const matchStatus = !statusFilter || t.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [tickets, search, statusFilter]);
+
   return (
     <AdminLayout title="Support Tickets">
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>All Support Tickets</span>
-        </div>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search subject or user..." />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} ticket{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["Ticket ID", "User", "Subject", "Priority", "Status", "Date"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockTickets.map((t) => (
-                <tr key={t.id} data-testid={`row-ticket-${t.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "12px", color: "hsl(258, 90%, 70%)" }}>{t.id}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(210, 40%, 85%)" }}>{t.user}</td>
-                  <td style={{ padding: "12px 16px", color: "hsl(220, 10%, 58%)" }}>{t.subject}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: `${priorityColor[t.priority]}20`, color: priorityColor[t.priority] }}>{t.priority}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: `${statusColor[t.status]}20`, color: statusColor[t.status] }}>{t.status}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{t.date}</td>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading tickets...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={tickets.length === 0 ? "No support tickets yet." : "No tickets match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Ticket ID", "User ID", "Subject", "Priority", "Status", "Date", "Actions"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((t) => (
+                  <tr key={t.id}>
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>{t.id.slice(0, 14)}…</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>{t.userId ?? "—"}</td>
+                    <td style={{ ...tdStyle, color: "hsl(210, 40%, 90%)", maxWidth: "220px" }}>
+                      <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.subject}</span>
+                    </td>
+                    <td style={tdStyle}><StatusBadge value={t.priority} /></td>
+                    <td style={tdStyle}><StatusBadge value={t.status} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(t.createdAt)}</td>
+                    <td style={tdStyle}>
+                      <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+                        <button style={btnNeutral} onClick={() => setReplyTicket(t)}>Reply</button>
+                        {t.status !== "resolved" && t.status !== "closed" && (
+                          <button
+                            style={btnSuccess}
+                            onClick={() => statusMut.mutate({ id: t.id, status: "resolved" })}
+                            disabled={statusMut.isPending}
+                          >
+                            Resolve
+                          </button>
+                        )}
+                        {t.status !== "closed" && (
+                          <button
+                            style={btnDanger}
+                            onClick={() => statusMut.mutate({ id: t.id, status: "closed" })}
+                            disabled={statusMut.isPending}
+                          >
+                            Close
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
+
+      {replyTicket && <ReplyModal ticket={replyTicket} onClose={() => setReplyTicket(null)} />}
     </AdminLayout>
   );
 }

@@ -1,62 +1,119 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { adminApi } from "@/lib/store/useAdmin";
+import type { User } from "@shared/schema";
+import {
+  card, thStyle, tdStyle, btnSuccess, btnDanger,
+  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
+} from "@/components/admin/shared";
 
-const mockUsers = [
-  { id: 1, username: "alex.smith", email: "alex@example.com", role: "user", joined: "2024-01-15", active: true },
-  { id: 2, username: "jade.wong", email: "jade@example.com", role: "admin", joined: "2024-02-20", active: true },
-  { id: 3, username: "carlos.r", email: "carlos@example.com", role: "user", joined: "2024-03-10", active: true },
-  { id: 4, username: "nina.k", email: "nina@example.com", role: "staff", joined: "2024-04-05", active: true },
-  { id: 5, username: "mark.t", email: "mark@example.com", role: "user", joined: "2024-05-22", active: false },
-  { id: 6, username: "lisa.m", email: "lisa@example.com", role: "user", joined: "2024-06-18", active: true },
+const ROLE_OPTIONS = [
+  { value: "", label: "All Roles" },
+  { value: "super_admin", label: "Super Admin" },
+  { value: "admin", label: "Admin" },
+  { value: "staff", label: "Staff" },
+  { value: "user", label: "User" },
 ];
 
-const roleColor: Record<string, string> = {
-  super_admin: "hsl(258, 90%, 66%)",
-  admin: "hsl(196, 100%, 50%)",
-  staff: "hsl(38, 92%, 50%)",
-  user: "hsl(220, 10%, 55%)",
-};
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "active", label: "Active" },
+  { value: "disabled", label: "Disabled" },
+];
 
-const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
-  border: "1px solid hsl(220, 15%, 13%)",
-  borderRadius: "8px",
-};
+function formatDate(d: string | Date | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default function Users() {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const { data: users = [], isLoading } = useQuery<Omit<User, "password">[]>({
+    queryKey: ["/api/admin/users"],
+    queryFn: () => adminApi.get("/users?limit=200"),
+  });
+
+  const toggleMut = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      adminApi.patch(`/users/${id}`, { isActive }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/users"] }),
+  });
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return users.filter((u) => {
+      const matchSearch = !q || u.username.toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q);
+      const matchRole = !roleFilter || u.role === roleFilter;
+      const matchStatus = !statusFilter || (statusFilter === "active" ? u.isActive : !u.isActive);
+      return matchSearch && matchRole && matchStatus;
+    });
+  }, [users, search, roleFilter, statusFilter]);
+
   return (
     <AdminLayout title="User Manager">
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>All Users</span>
-        </div>
+        <Toolbar>
+          <SearchInput value={search} onChange={setSearch} placeholder="Search username or email..." />
+          <FilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} />
+          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+            {filtered.length} user{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </Toolbar>
+
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr>
-                {["#", "Username", "Email", "Role", "Joined", "Status"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "12px 16px", fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "hsl(220, 10%, 42%)", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mockUsers.map((u) => (
-                <tr key={u.id} data-testid={`row-user-${u.id}`} style={{ borderBottom: "1px solid hsl(220, 15%, 11%)" }}>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>{u.id}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{u.username}</td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, textTransform: "capitalize", background: `${roleColor[u.role]}20`, color: roleColor[u.role] }}>{u.role}</span>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{u.joined}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: u.active ? "rgba(74, 222, 128, 0.12)" : "rgba(239, 68, 68, 0.12)", color: u.active ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)" }}>
-                      {u.active ? "Active" : "Banned"}
-                    </span>
-                  </td>
+          {isLoading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading users...</div>
+          ) : filtered.length === 0 ? (
+            <EmptyState message={users.length === 0 ? "No users yet." : "No users match your filters."} />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr>
+                  {["Username", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((u) => (
+                  <tr key={u.id}>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{u.username}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>
+                    <td style={tdStyle}><StatusBadge value={u.role} /></td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(u.createdAt)}</td>
+                    <td style={tdStyle}>
+                      <StatusBadge value={u.isActive ? "active" : "inactive"} />
+                    </td>
+                    <td style={tdStyle}>
+                      {u.isActive ? (
+                        <button
+                          style={btnDanger}
+                          onClick={() => toggleMut.mutate({ id: u.id, isActive: false })}
+                          disabled={toggleMut.isPending}
+                        >
+                          Disable
+                        </button>
+                      ) : (
+                        <button
+                          style={btnSuccess}
+                          onClick={() => toggleMut.mutate({ id: u.id, isActive: true })}
+                          disabled={toggleMut.isPending}
+                        >
+                          Enable
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </AdminLayout>
