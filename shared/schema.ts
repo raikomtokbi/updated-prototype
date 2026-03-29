@@ -171,9 +171,27 @@ export const campaigns = pgTable("campaigns", {
   name: varchar("name", { length: 191 }).notNull(),
   description: text("description"),
   type: varchar("type", { length: 50 }).notNull().default("banner"),
+  bannerUrl: text("banner_url"),
   isActive: boolean("is_active").notNull().default(true),
   startsAt: timestamp("starts_at"),
   endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// ─── Hero Sliders ─────────────────────────────────────────────────────────────
+export const heroSliders = pgTable("hero_sliders", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  title: varchar("title", { length: 191 }).notNull(),
+  subtitle: text("subtitle"),
+  bannerUrl: text("banner_url"),
+  buttonText: varchar("button_text", { length: 100 }),
+  buttonLink: varchar("button_link", { length: 500 }),
+  linkedGameId: varchar("linked_game_id", { length: 36 }).references(() => games.id, { onDelete: "set null" }),
+  linkedProductId: varchar("linked_product_id", { length: 36 }).references(() => products.id, { onDelete: "set null" }),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -248,6 +266,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, cre
 export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true });
 export const insertTicketSchema = createInsertSchema(tickets).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true });
+export const insertHeroSliderSchema = createInsertSchema(heroSliders).omit({ id: true, createdAt: true });
 export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({ id: true, createdAt: true });
 
 // ─── Plugins ──────────────────────────────────────────────────────────────────
@@ -305,6 +324,8 @@ export type Ticket = typeof tickets.$inferSelect;
 export type InsertTicket = z.infer<typeof insertTicketSchema>;
 export type TicketReply = typeof ticketReplies.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
+export type HeroSlider = typeof heroSliders.$inferSelect;
+export type InsertHeroSlider = z.infer<typeof insertHeroSliderSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export type Plugin = typeof plugins.$inferSelect;

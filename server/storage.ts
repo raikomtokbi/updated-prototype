@@ -11,6 +11,7 @@ import {
   type Ticket, type InsertTicket,
   type TicketReply,
   type Campaign,
+  type HeroSlider,
   type Review,
   type PaymentMethod,
   type Plugin,
@@ -18,10 +19,10 @@ import {
   type SiteSetting,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
-  campaigns, reviews, paymentMethods, plugins,
+  campaigns, heroSliders, reviews, paymentMethods, plugins,
   notifications, siteSettings,
 } from "@shared/schema";
-import { eq, desc, count, sum } from "drizzle-orm";
+import { eq, desc, asc, count, sum, and } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -91,9 +92,18 @@ export interface IStorage {
 
   // Campaigns
   getAllCampaigns(): Promise<Campaign[]>;
+  getActiveCampaigns(): Promise<Campaign[]>;
   createCampaign(data: Partial<Campaign>): Promise<Campaign>;
   updateCampaign(id: string, data: Partial<Campaign>): Promise<Campaign | undefined>;
   deleteCampaign(id: string): Promise<void>;
+
+  // Hero Sliders
+  getAllHeroSliders(): Promise<HeroSlider[]>;
+  getActiveHeroSliders(): Promise<HeroSlider[]>;
+  getHeroSlider(id: string): Promise<HeroSlider | undefined>;
+  createHeroSlider(data: Partial<HeroSlider>): Promise<HeroSlider>;
+  updateHeroSlider(id: string, data: Partial<HeroSlider>): Promise<HeroSlider | undefined>;
+  deleteHeroSlider(id: string): Promise<void>;
 
   // Reviews
   getAllReviews(): Promise<Review[]>;
@@ -348,6 +358,15 @@ export class DatabaseStorage implements IStorage {
   async getAllCampaigns() {
     return db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
   }
+  async getActiveCampaigns() {
+    const now = new Date();
+    const all = await db.select().from(campaigns).where(eq(campaigns.isActive, true)).orderBy(desc(campaigns.createdAt));
+    return all.filter((c) => {
+      if (c.startsAt && c.startsAt > now) return false;
+      if (c.endsAt && c.endsAt < now) return false;
+      return true;
+    });
+  }
   async createCampaign(data: Partial<Campaign>) {
     const id = randomUUID();
     await db.insert(campaigns).values({ ...(data as any), id });
@@ -359,6 +378,36 @@ export class DatabaseStorage implements IStorage {
   }
   async deleteCampaign(id: string) {
     await db.delete(campaigns).where(eq(campaigns.id, id));
+  }
+
+  // ── Hero Sliders ───────────────────────────────────────────────────────────
+  async getAllHeroSliders() {
+    return db.select().from(heroSliders).orderBy(asc(heroSliders.sortOrder));
+  }
+  async getActiveHeroSliders() {
+    const now = new Date();
+    const all = await db.select().from(heroSliders).where(eq(heroSliders.isActive, true)).orderBy(asc(heroSliders.sortOrder));
+    return all.filter((s) => {
+      if (s.startsAt && s.startsAt > now) return false;
+      if (s.endsAt && s.endsAt < now) return false;
+      return true;
+    });
+  }
+  async getHeroSlider(id: string) {
+    const [s] = await db.select().from(heroSliders).where(eq(heroSliders.id, id));
+    return s;
+  }
+  async createHeroSlider(data: Partial<HeroSlider>) {
+    const id = randomUUID();
+    await db.insert(heroSliders).values({ ...(data as any), id });
+    return fetchAfter<HeroSlider>(heroSliders, id, heroSliders.id);
+  }
+  async updateHeroSlider(id: string, data: Partial<HeroSlider>) {
+    await db.update(heroSliders).set(data as any).where(eq(heroSliders.id, id));
+    return fetchAfter<HeroSlider>(heroSliders, id, heroSliders.id);
+  }
+  async deleteHeroSlider(id: string) {
+    await db.delete(heroSliders).where(eq(heroSliders.id, id));
   }
 
   // ── Reviews ────────────────────────────────────────────────────────────────

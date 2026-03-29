@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Lock, Users, DollarSign, FileText, ToggleLeft } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 const card: React.CSSProperties = {
   background: "hsl(220, 20%, 9%)",
@@ -43,6 +44,22 @@ const selectStyle: React.CSSProperties = {
     outline: "none",
     boxSizing: "border-box" as const,
   },
+};
+
+const textareaStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 12px",
+  background: "hsl(220, 20%, 11%)",
+  border: "1px solid hsl(220, 15%, 18%)",
+  borderRadius: "6px",
+  color: "hsl(210, 40%, 92%)",
+  fontSize: "13px",
+  outline: "none",
+  boxSizing: "border-box",
+  resize: "vertical",
+  minHeight: "72px",
+  lineHeight: "1.5",
+  fontFamily: "inherit",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -117,6 +134,9 @@ const DEFAULTS: SettingsMap = {
   // General
   site_name: "Nexcoin",
   site_tagline: "Level Up Your Gaming Experience",
+  site_description: "We are a premier digital marketplace for gamers worldwide, offering instant top-ups, vouchers, and subscriptions.",
+  site_logo: "",
+  site_favicon: "",
   site_timezone: "UTC",
   date_format: "DD/MM/YYYY",
   default_currency: "USD",
@@ -150,6 +170,18 @@ const DEFAULTS: SettingsMap = {
   // Footer
   footer_copyright: "© 2024 Nexcoin. All rights reserved.",
   footer_support_email: "support@nexcoin.gg",
+  // Contact
+  contact_email: "support@nexcoin.gg",
+  contact_phone: "+1 (800) 123-4567",
+  contact_address: "123 Gaming Ave, Singapore",
+  social_twitter: "",
+  social_facebook: "",
+  social_instagram: "",
+  social_discord: "",
+  // SEO
+  seo_title: "Nexcoin — Game Top-Ups, Vouchers & Subscriptions",
+  seo_description: "Buy game credits, vouchers, and subscriptions instantly. Fast, secure & affordable.",
+  seo_keywords: "game top-up, game credits, mobile legends, free fire, voucher",
 };
 
 export default function ControlPanel() {
@@ -237,6 +269,165 @@ export default function ControlPanel() {
         </button>
       </div>
 
+      {/* ── Site Identity ───────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Site Identity</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>Site Name</label>
+              <input
+                data-testid="input-site-name"
+                style={inputStyle}
+                value={local.site_name ?? ""}
+                onChange={(e) => set("site_name", e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Tagline</label>
+              <input
+                data-testid="input-tagline"
+                style={inputStyle}
+                value={local.site_tagline ?? ""}
+                onChange={(e) => set("site_tagline", e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Short Description</label>
+            <textarea
+              data-testid="input-site-description"
+              style={textareaStyle as React.CSSProperties}
+              value={local.site_description ?? ""}
+              onChange={(e) => set("site_description", e.target.value)}
+            />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            <ImageUploadField
+              label="Site Logo"
+              value={local.site_logo ?? ""}
+              onChange={(url) => set("site_logo", url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="square"
+            />
+            <ImageUploadField
+              label="Favicon"
+              value={local.site_favicon ?? ""}
+              onChange={(url) => set("site_favicon", url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="square"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Contact & Social ────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Phone size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Contact & Social</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>Support Email</label>
+              <input
+                data-testid="input-contact-email"
+                type="email"
+                style={inputStyle}
+                value={local.contact_email ?? ""}
+                onChange={(e) => set("contact_email", e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Phone Number</label>
+              <input
+                data-testid="input-contact-phone"
+                style={inputStyle}
+                value={local.contact_phone ?? ""}
+                onChange={(e) => set("contact_phone", e.target.value)}
+              />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={labelStyle}>Address</label>
+              <input
+                data-testid="input-contact-address"
+                style={inputStyle}
+                value={local.contact_address ?? ""}
+                onChange={(e) => set("contact_address", e.target.value)}
+              />
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid hsl(220, 15%, 12%)", paddingTop: "14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 50%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Social Links
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {[
+                { key: "social_twitter", label: "Twitter / X" },
+                { key: "social_facebook", label: "Facebook" },
+                { key: "social_instagram", label: "Instagram" },
+                { key: "social_discord", label: "Discord" },
+              ].map((item) => (
+                <div key={item.key}>
+                  <label style={labelStyle}>{item.label}</label>
+                  <input
+                    data-testid={`input-${item.key}`}
+                    style={inputStyle}
+                    value={local[item.key] ?? ""}
+                    onChange={(e) => set(item.key, e.target.value)}
+                    placeholder="https://…"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── SEO ─────────────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Search size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>SEO Settings</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Meta Title</label>
+            <input
+              data-testid="input-seo-title"
+              style={inputStyle}
+              value={local.seo_title ?? ""}
+              onChange={(e) => set("seo_title", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Meta Description</label>
+            <textarea
+              data-testid="input-seo-description"
+              style={{ ...textareaStyle, minHeight: "70px" } as React.CSSProperties}
+              value={local.seo_description ?? ""}
+              onChange={(e) => set("seo_description", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Keywords (comma-separated)</label>
+            <input
+              data-testid="input-seo-keywords"
+              style={inputStyle}
+              value={local.seo_keywords ?? ""}
+              onChange={(e) => set("seo_keywords", e.target.value)}
+              placeholder="game top-up, game credits, voucher…"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* ── General ─────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
@@ -244,24 +435,6 @@ export default function ControlPanel() {
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>General Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-          <div>
-            <label style={labelStyle}>Site Name</label>
-            <input
-              data-testid="input-site-name"
-              style={inputStyle}
-              value={local.site_name ?? ""}
-              onChange={(e) => set("site_name", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Tagline</label>
-            <input
-              data-testid="input-tagline"
-              style={inputStyle}
-              value={local.site_tagline ?? ""}
-              onChange={(e) => set("site_tagline", e.target.value)}
-            />
-          </div>
           <div>
             <label style={labelStyle}>Timezone</label>
             <select

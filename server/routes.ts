@@ -103,6 +103,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(all.filter((s) => s.status === "active"));
   });
 
+  // ── Public campaigns ──────────────────────────────────────────────────────
+  app.get("/api/campaigns/active", async (_req, res) => {
+    res.json(await storage.getActiveCampaigns());
+  });
+
+  // ── Public hero sliders ────────────────────────────────────────────────────
+  app.get("/api/hero-sliders/active", async (_req, res) => {
+    res.json(await storage.getActiveHeroSliders());
+  });
+
   // ── Public payment methods ─────────────────────────────────────────────────
   app.get("/api/payment-methods", async (_req, res) => {
     const all = await storage.getAllPaymentMethods();
@@ -121,6 +131,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     const url = `/uploads/${req.file.filename}`;
     res.json({ url });
+  });
+
+  app.delete("/api/admin/upload", injectAdminRole, requireAdmin, (req, res) => {
+    const fileUrl = req.body?.url as string | undefined;
+    if (!fileUrl) return res.status(400).json({ message: "No url provided" });
+    const filename = path.basename(fileUrl);
+    const filePath = path.join(uploadsDir, filename);
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      res.json({ ok: true });
+    } catch {
+      res.status(500).json({ message: "Failed to delete file" });
+    }
   });
 
   // ── Auth / login ───────────────────────────────────────────────────────────
@@ -375,6 +398,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/admin/tickets/:id/reply", requireAdmin, async (req, res) => {
     const reply = await storage.replyToTicket(req.params.id, req.body.userId, req.body.message, true);
     res.status(201).json(reply);
+  });
+
+  // ── Admin Hero Sliders ─────────────────────────────────────────────────────
+  app.get("/api/admin/hero-sliders", requireAdmin, async (_req, res) => {
+    res.json(await storage.getAllHeroSliders());
+  });
+
+  app.post("/api/admin/hero-sliders", requireAdmin, async (req, res) => {
+    const s = await storage.createHeroSlider(req.body);
+    res.status(201).json(s);
+  });
+
+  app.patch("/api/admin/hero-sliders/:id", requireAdmin, async (req, res) => {
+    const s = await storage.updateHeroSlider(req.params.id, req.body);
+    if (!s) return res.status(404).json({ message: "Not found" });
+    res.json(s);
+  });
+
+  app.delete("/api/admin/hero-sliders/:id", requireAdmin, async (req, res) => {
+    await storage.deleteHeroSlider(req.params.id);
+    res.json({ ok: true });
   });
 
   // ── Campaigns ──────────────────────────────────────────────────────────────

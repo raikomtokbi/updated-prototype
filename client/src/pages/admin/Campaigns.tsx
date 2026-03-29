@@ -9,6 +9,7 @@ import {
   SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar, Modal,
   inputStyle as sharedInput,
 } from "@/components/admin/shared";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 const TYPE_OPTIONS = [
   { value: "", label: "All Types" },
@@ -43,6 +44,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
     isActive: initial.isActive !== false,
     startsAt: toInput(initial.startsAt),
     endsAt: toInput(initial.endsAt),
+    bannerUrl: initial.bannerUrl ?? "",
   });
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -59,6 +61,15 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
         <label style={labelStyle}>Description</label>
         <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "60px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
       </div>
+      <ImageUploadField
+        label="Banner Image"
+        value={form.bannerUrl}
+        onChange={(url) => set("bannerUrl", url)}
+        inputStyle={inputStyle}
+        labelStyle={labelStyle}
+        ratio="banner"
+        showRatioSelector={false}
+      />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Type</label>

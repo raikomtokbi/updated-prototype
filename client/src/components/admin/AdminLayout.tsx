@@ -106,10 +106,10 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "THEME",
+    title: "APPEARANCE",
     items: [
-      { label: "Choose theme", icon: <Palette size={15} />, path: "/admin/choose-theme" },
-      { label: "Edit Content", icon: <FileEdit size={15} />, path: "/admin/edit-content" },
+      { label: "Theme", icon: <Palette size={15} />, path: "/admin/choose-theme" },
+      { label: "Content", icon: <FileEdit size={15} />, path: "/admin/edit-content" },
     ],
   },
 ];

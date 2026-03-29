@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
+
+type AspectRatio = "any" | "square" | "banner";
 
 interface ImageUploadFieldProps {
   label: string;
@@ -9,6 +11,8 @@ interface ImageUploadFieldProps {
   placeholder?: string;
   inputStyle: React.CSSProperties;
   labelStyle: React.CSSProperties;
+  ratio?: AspectRatio;
+  showRatioSelector?: boolean;
 }
 
 export function ImageUploadField({
@@ -18,10 +22,17 @@ export function ImageUploadField({
   placeholder = "https://...",
   inputStyle,
   labelStyle,
+  ratio: externalRatio,
+  showRatioSelector = false,
 }: ImageUploadFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ratio, setRatio] = useState<AspectRatio>(externalRatio ?? "any");
+
+  const previewAspect =
+    ratio === "square" ? "1 / 1" : ratio === "banner" ? "16 / 5" : undefined;
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,7 +51,7 @@ export function ImageUploadField({
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       onChange(data.url);
-    } catch (err: any) {
+    } catch {
       setError("Upload failed");
     } finally {
       setUploading(false);
@@ -48,9 +59,71 @@ export function ImageUploadField({
     }
   }
 
+  async function handleDelete() {
+    if (!value) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const { user } = useAuthStore.getState();
+      await fetch("/api/admin/upload", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-role": user?.role ?? "super_admin",
+        },
+        body: JSON.stringify({ url: value }),
+      });
+      onChange("");
+    } catch {
+      setError("Delete failed");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const btnBase: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "5px",
+    padding: "6px 10px",
+    borderRadius: "6px",
+    fontSize: "11px",
+    fontWeight: 600,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+    border: "1px solid",
+  };
+
   return (
     <div>
       <label style={labelStyle}>{label}</label>
+
+      {showRatioSelector && (
+        <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
+          {(["any", "square", "banner"] as AspectRatio[]).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRatio(r)}
+              style={{
+                padding: "2px 10px",
+                borderRadius: "4px",
+                border: `1px solid ${ratio === r ? "rgba(124,58,237,0.6)" : "rgba(124,58,237,0.2)"}`,
+                background: ratio === r ? "rgba(124,58,237,0.18)" : "transparent",
+                color: ratio === r ? "#a78bfa" : "rgba(148,163,184,0.6)",
+                fontSize: "10px",
+                fontWeight: 600,
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {r === "any" ? "Free" : r === "square" ? "Square" : "Banner (16:5)"}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
         <input
           style={{ ...inputStyle, flex: 1 }}
@@ -61,28 +134,38 @@ export function ImageUploadField({
         <button
           type="button"
           title="Upload image"
-          disabled={uploading}
+          disabled={uploading || deleting}
           onClick={() => fileRef.current?.click()}
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-            padding: "6px 10px",
-            borderRadius: "6px",
+            ...btnBase,
             background: "rgba(124,58,237,0.12)",
-            border: "1px solid rgba(124,58,237,0.3)",
+            borderColor: "rgba(124,58,237,0.3)",
             color: "#a78bfa",
-            fontSize: "11px",
-            fontWeight: 600,
-            cursor: uploading ? "not-allowed" : "pointer",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-            opacity: uploading ? 0.7 : 1,
+            opacity: uploading || deleting ? 0.7 : 1,
+            cursor: uploading || deleting ? "not-allowed" : "pointer",
           }}
         >
           {uploading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Upload size={12} />}
           {uploading ? "Uploading..." : "Upload"}
         </button>
+        {value && (
+          <button
+            type="button"
+            title="Remove image"
+            disabled={uploading || deleting}
+            onClick={handleDelete}
+            style={{
+              ...btnBase,
+              background: "rgba(239,68,68,0.08)",
+              borderColor: "rgba(239,68,68,0.25)",
+              color: "hsl(0,72%,60%)",
+              opacity: uploading || deleting ? 0.7 : 1,
+              cursor: uploading || deleting ? "not-allowed" : "pointer",
+            }}
+          >
+            {deleting ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Trash2 size={12} />}
+          </button>
+        )}
         <input
           ref={fileRef}
           type="file"
@@ -92,11 +175,20 @@ export function ImageUploadField({
         />
       </div>
       {error && <p style={{ fontSize: "11px", color: "hsl(0,72%,55%)", margin: "3px 0 0" }}>{error}</p>}
-      {value && value.startsWith("/uploads/") && (
+      {value && (
         <img
           src={value}
           alt="preview"
-          style={{ marginTop: "6px", height: "40px", borderRadius: "4px", border: "1px solid hsl(220,15%,16%)", objectFit: "cover" }}
+          style={{
+            marginTop: "6px",
+            borderRadius: "6px",
+            border: "1px solid hsl(220,15%,16%)",
+            objectFit: "cover",
+            display: "block",
+            ...(previewAspect
+              ? { width: "100%", aspectRatio: previewAspect }
+              : { height: "60px", width: "auto", maxWidth: "100%" }),
+          }}
         />
       )}
     </div>

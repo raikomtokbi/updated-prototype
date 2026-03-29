@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Globe, Image, Phone, FileText } from "lucide-react";
+import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import type { HeroSlider } from "@shared/schema";
 
 const card: React.CSSProperties = {
   background: "hsl(220, 20%, 9%)",
@@ -33,21 +34,19 @@ const inputStyle: React.CSSProperties = {
 };
 
 const textareaStyle: React.CSSProperties = {
-  ...{
-    width: "100%",
-    padding: "8px 12px",
-    background: "hsl(220, 20%, 11%)",
-    border: "1px solid hsl(220, 15%, 18%)",
-    borderRadius: "6px",
-    color: "hsl(210, 40%, 92%)",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box" as const,
-    resize: "vertical" as const,
-    minHeight: "80px",
-    lineHeight: "1.5",
-    fontFamily: "inherit",
-  },
+  width: "100%",
+  padding: "8px 12px",
+  background: "hsl(220, 20%, 11%)",
+  border: "1px solid hsl(220, 15%, 18%)",
+  borderRadius: "6px",
+  color: "hsl(210, 40%, 92%)",
+  fontSize: "13px",
+  outline: "none",
+  boxSizing: "border-box",
+  resize: "vertical",
+  minHeight: "80px",
+  lineHeight: "1.5",
+  fontFamily: "inherit",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -63,39 +62,322 @@ const labelStyle: React.CSSProperties = {
 type SettingsMap = Record<string, string>;
 
 const DEFAULTS: SettingsMap = {
-  // Site identity
-  site_name: "Nexcoin",
-  site_tagline: "Level Up Your Gaming Experience",
-  site_description: "We are a premier digital marketplace for gamers worldwide, offering instant top-ups, vouchers, and subscriptions.",
-  site_logo: "",
-  site_favicon: "",
-  // Homepage
   hero_title: "Level Up Your Gaming Experience",
   hero_subtitle: "Buy game credits, vouchers & subscriptions instantly — safe, fast, and affordable.",
   announcement_text: "Year-end sale! Get up to 20% off on all game credits!",
   announcement_enabled: "true",
-  // Contact
-  contact_email: "support@nexcoin.gg",
-  contact_phone: "+1 (800) 123-4567",
-  contact_address: "123 Gaming Ave, Singapore",
-  social_twitter: "https://twitter.com/nexcoin",
-  social_facebook: "https://facebook.com/nexcoin",
-  social_instagram: "https://instagram.com/nexcoin",
-  social_discord: "https://discord.gg/nexcoin",
-  // SEO
-  seo_title: "Nexcoin — Game Top-Ups, Vouchers & Subscriptions",
-  seo_description: "Buy game credits, vouchers, and subscriptions instantly. Fast, secure & affordable.",
-  seo_keywords: "game top-up, game credits, mobile legends, free fire, voucher",
+  hero_bg_image: "",
+  og_image: "",
+  about_banner: "",
 };
+
+// ─── Slider form ──────────────────────────────────────────────────────────────
+function SliderForm({
+  initial,
+  onSubmit,
+  loading,
+  onCancel,
+}: {
+  initial: Partial<HeroSlider>;
+  onSubmit: (d: any) => void;
+  loading: boolean;
+  onCancel: () => void;
+}) {
+  const toInput = (d: Date | string | null | undefined) =>
+    d ? new Date(d).toISOString().slice(0, 16) : "";
+
+  const [form, setForm] = useState({
+    title: initial.title ?? "",
+    subtitle: initial.subtitle ?? "",
+    bannerUrl: initial.bannerUrl ?? "",
+    buttonText: initial.buttonText ?? "",
+    buttonLink: initial.buttonLink ?? "",
+    startsAt: toInput(initial.startsAt),
+    endsAt: toInput(initial.endsAt),
+    isActive: initial.isActive !== false,
+    sortOrder: String(initial.sortOrder ?? 0),
+  });
+
+  const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit({
+          ...form,
+          sortOrder: parseInt(form.sortOrder) || 0,
+          startsAt: form.startsAt || null,
+          endsAt: form.endsAt || null,
+        });
+      }}
+      style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+    >
+      <div>
+        <label style={labelStyle}>Title *</label>
+        <input
+          style={inputStyle}
+          required
+          value={form.title}
+          onChange={(e) => set("title", e.target.value)}
+          placeholder="Level Up Your Gameplay"
+        />
+      </div>
+      <div>
+        <label style={labelStyle}>Subtitle</label>
+        <textarea
+          style={{ ...textareaStyle, minHeight: "64px" }}
+          value={form.subtitle}
+          onChange={(e) => set("subtitle", e.target.value)}
+          placeholder="Short description under the title…"
+        />
+      </div>
+      <ImageUploadField
+        label="Banner Image"
+        value={form.bannerUrl}
+        onChange={(url) => set("bannerUrl", url)}
+        inputStyle={inputStyle}
+        labelStyle={labelStyle}
+        ratio="banner"
+        showRatioSelector={false}
+      />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div>
+          <label style={labelStyle}>Button Text</label>
+          <input
+            style={inputStyle}
+            value={form.buttonText}
+            onChange={(e) => set("buttonText", e.target.value)}
+            placeholder="Browse Games"
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Button Link</label>
+          <input
+            style={inputStyle}
+            value={form.buttonLink}
+            onChange={(e) => set("buttonLink", e.target.value)}
+            placeholder="/products"
+          />
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+        <div>
+          <label style={labelStyle}>Start Date</label>
+          <input
+            style={inputStyle}
+            type="datetime-local"
+            value={form.startsAt}
+            onChange={(e) => set("startsAt", e.target.value)}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>End Date</label>
+          <input
+            style={inputStyle}
+            type="datetime-local"
+            value={form.endsAt}
+            onChange={(e) => set("endsAt", e.target.value)}
+          />
+        </div>
+        <div>
+          <label style={labelStyle}>Sort Order</label>
+          <input
+            style={inputStyle}
+            type="number"
+            min="0"
+            value={form.sortOrder}
+            onChange={(e) => set("sortOrder", e.target.value)}
+          />
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <label style={{ ...labelStyle, marginBottom: 0 }}>Active</label>
+        <button
+          type="button"
+          onClick={() => set("isActive", !form.isActive)}
+          style={{
+            padding: "3px 12px",
+            borderRadius: "4px",
+            border: `1px solid ${form.isActive ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
+            background: form.isActive ? "rgba(124,58,237,0.15)" : "transparent",
+            color: form.isActive ? "hsl(258,90%,70%)" : "hsl(220,10%,50%)",
+            fontSize: "12px",
+            cursor: "pointer",
+          }}
+        >
+          {form.isActive ? "Enabled" : "Disabled"}
+        </button>
+      </div>
+      <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            padding: "7px 16px",
+            borderRadius: "6px",
+            background: "transparent",
+            border: "1px solid hsl(220,15%,20%)",
+            color: "hsl(220,10%,55%)",
+            fontSize: "12px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "7px 18px",
+            borderRadius: "6px",
+            background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+            color: "white",
+            fontSize: "12px",
+            fontWeight: 600,
+            border: "none",
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={12} />}
+          Save Slider
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ─── Hero Slider list item ────────────────────────────────────────────────────
+function SliderItem({
+  slider,
+  onEdit,
+  onDelete,
+  deleting,
+}: {
+  slider: HeroSlider;
+  onEdit: (s: HeroSlider) => void;
+  onDelete: (id: string) => void;
+  deleting: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "10px 12px",
+        background: "hsl(220,20%,11%)",
+        border: "1px solid hsl(220,15%,16%)",
+        borderRadius: "6px",
+      }}
+    >
+      {slider.bannerUrl ? (
+        <img
+          src={slider.bannerUrl}
+          alt=""
+          style={{ width: "72px", height: "36px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "72px",
+            height: "36px",
+            borderRadius: "4px",
+            background: "hsl(220,20%,14%)",
+            border: "1px dashed hsl(220,15%,22%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Image size={14} style={{ color: "hsl(220,10%,35%)" }} />
+        </div>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {slider.title}
+        </div>
+        <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+          Order: {slider.sortOrder} &middot; {slider.isActive ? "Active" : "Inactive"}
+          {slider.endsAt && ` · Ends ${new Date(slider.endsAt).toLocaleDateString()}`}
+        </div>
+      </div>
+      <div
+        style={{
+          padding: "2px 8px",
+          borderRadius: "4px",
+          fontSize: "10px",
+          fontWeight: 700,
+          background: slider.isActive ? "rgba(74,222,128,0.1)" : "rgba(220,38,38,0.1)",
+          color: slider.isActive ? "hsl(142,71%,48%)" : "hsl(0,72%,55%)",
+          border: `1px solid ${slider.isActive ? "rgba(74,222,128,0.25)" : "rgba(220,38,38,0.25)"}`,
+          flexShrink: 0,
+        }}
+      >
+        {slider.isActive ? "Active" : "Inactive"}
+      </div>
+      <button
+        onClick={() => onEdit(slider)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
+          padding: "5px 10px",
+          borderRadius: "5px",
+          background: "rgba(124,58,237,0.1)",
+          border: "1px solid rgba(124,58,237,0.25)",
+          color: "#a78bfa",
+          fontSize: "11px",
+          fontWeight: 600,
+          cursor: "pointer",
+          flexShrink: 0,
+        }}
+      >
+        <Pencil size={11} /> Edit
+      </button>
+      <button
+        onClick={() => { if (confirm(`Delete "${slider.title}"?`)) onDelete(slider.id); }}
+        disabled={deleting}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "5px 8px",
+          borderRadius: "5px",
+          background: "rgba(239,68,68,0.08)",
+          border: "1px solid rgba(239,68,68,0.25)",
+          color: "hsl(0,72%,60%)",
+          fontSize: "11px",
+          cursor: deleting ? "not-allowed" : "pointer",
+          flexShrink: 0,
+          opacity: deleting ? 0.6 : 1,
+        }}
+      >
+        <Trash2 size={11} />
+      </button>
+    </div>
+  );
+}
 
 export default function EditContent() {
   const qc = useQueryClient();
   const [local, setLocal] = useState<SettingsMap>({ ...DEFAULTS });
   const [saved, setSaved] = useState(false);
+  const [showAddSlider, setShowAddSlider] = useState(false);
+  const [editSlider, setEditSlider] = useState<HeroSlider | null>(null);
 
   const { data: remoteSettings, isLoading } = useQuery<SettingsMap>({
     queryKey: ["/api/admin/settings"],
     queryFn: () => adminApi.get("/settings"),
+  });
+
+  const { data: sliders = [], isLoading: slidersLoading } = useQuery<HeroSlider[]>({
+    queryKey: ["/api/admin/hero-sliders"],
+    queryFn: () => adminApi.get("/hero-sliders"),
   });
 
   useEffect(() => {
@@ -113,6 +395,27 @@ export default function EditContent() {
     },
   });
 
+  const addSlider = useMutation({
+    mutationFn: (d: any) => adminApi.post("/hero-sliders", d),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      setShowAddSlider(false);
+    },
+  });
+
+  const updateSlider = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => adminApi.patch(`/hero-sliders/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      setEditSlider(null);
+    },
+  });
+
+  const deleteSlider = useMutation({
+    mutationFn: (id: string) => adminApi.delete(`/hero-sliders/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] }),
+  });
+
   function set(key: string, value: string) {
     setLocal((prev) => ({ ...prev, [key]: value }));
   }
@@ -125,13 +428,9 @@ export default function EditContent() {
     setLocal((prev) => ({ ...prev, [key]: prev[key] === "true" ? "false" : "true" }));
   }
 
-  function handleSave() {
-    save.mutate(local);
-  }
-
   if (isLoading) {
     return (
-      <AdminLayout title="Edit Content">
+      <AdminLayout title="Content">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px", gap: "10px", color: "hsl(220, 10%, 45%)" }}>
           <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
           <span style={{ fontSize: "13px" }}>Loading content…</span>
@@ -141,14 +440,14 @@ export default function EditContent() {
   }
 
   return (
-    <AdminLayout title="Edit Content">
+    <AdminLayout title="Content">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", gap: "12px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
-          Manage your storefront content, branding, and SEO settings
+          Manage homepage content, hero sliders, and media assets
         </p>
         <button
           data-testid="button-save-content"
-          onClick={handleSave}
+          onClick={() => save.mutate(local)}
           disabled={save.isPending}
           style={{
             display: "inline-flex",
@@ -171,60 +470,111 @@ export default function EditContent() {
         </button>
       </div>
 
-      {/* ── Site Identity ──────────────────────────────────────────────────── */}
+      {/* ── Hero Sliders ──────────────────────────────────────────────────── */}
       <div style={card}>
-        <div style={sectionHeader}>
-          <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Site Identity</span>
+        <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Hero Sliders</span>
+            <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>({sliders.length} slides)</span>
+          </div>
+          {!showAddSlider && !editSlider && (
+            <button
+              onClick={() => setShowAddSlider(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                color: "white",
+                fontSize: "12px",
+                fontWeight: 600,
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <Plus size={12} /> Add Slide
+            </button>
+          )}
         </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-            <div>
-              <label style={labelStyle}>Site Name</label>
-              <input
-                data-testid="input-site-name"
-                style={inputStyle}
-                value={local.site_name ?? ""}
-                onChange={(e) => set("site_name", e.target.value)}
+
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+          {/* Add form */}
+          {showAddSlider && !editSlider && (
+            <div
+              style={{
+                background: "hsl(220,20%,8%)",
+                border: "1px solid hsl(220,15%,16%)",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "8px",
+              }}
+            >
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,80%)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                New Slide
+              </div>
+              <SliderForm
+                initial={{}}
+                onSubmit={(d) => addSlider.mutate(d)}
+                loading={addSlider.isPending}
+                onCancel={() => setShowAddSlider(false)}
               />
             </div>
-            <div>
-              <label style={labelStyle}>Tagline</label>
-              <input
-                data-testid="input-site-tagline"
-                style={inputStyle}
-                value={local.site_tagline ?? ""}
-                onChange={(e) => set("site_tagline", e.target.value)}
-              />
+          )}
+
+          {/* Slider list */}
+          {slidersLoading ? (
+            <div style={{ textAlign: "center", padding: "24px", color: "hsl(220,10%,42%)", fontSize: "12px" }}>
+              Loading slides…
             </div>
-          </div>
-          <div>
-            <label style={labelStyle}>Site Description</label>
-            <textarea
-              data-testid="input-site-description"
-              style={textareaStyle}
-              value={local.site_description ?? ""}
-              onChange={(e) => set("site_description", e.target.value)}
-            />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-            <div>
-              <label style={labelStyle}>Site Logo</label>
-              <ImageUploadField
-                value={local.site_logo ?? ""}
-                onChange={(url) => set("site_logo", url)}
-                label="Upload Logo"
-              />
+          ) : sliders.length === 0 && !showAddSlider ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "32px",
+                color: "hsl(220,10%,38%)",
+                fontSize: "13px",
+                border: "1px dashed hsl(220,15%,18%)",
+                borderRadius: "6px",
+              }}
+            >
+              No hero slides yet. Click "Add Slide" to create your first one.
             </div>
-            <div>
-              <label style={labelStyle}>Favicon</label>
-              <ImageUploadField
-                value={local.site_favicon ?? ""}
-                onChange={(url) => set("site_favicon", url)}
-                label="Upload Favicon"
-              />
-            </div>
-          </div>
+          ) : (
+            sliders.map((s) =>
+              editSlider?.id === s.id ? (
+                <div
+                  key={s.id}
+                  style={{
+                    background: "hsl(220,20%,8%)",
+                    border: "1px solid rgba(124,58,237,0.3)",
+                    borderRadius: "8px",
+                    padding: "16px",
+                  }}
+                >
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,80%)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    Edit Slide
+                  </div>
+                  <SliderForm
+                    initial={editSlider}
+                    onSubmit={(d) => updateSlider.mutate({ id: editSlider.id, data: d })}
+                    loading={updateSlider.isPending}
+                    onCancel={() => setEditSlider(null)}
+                  />
+                </div>
+              ) : (
+                <SliderItem
+                  key={s.id}
+                  slider={s}
+                  onEdit={setEditSlider}
+                  onDelete={(id) => deleteSlider.mutate(id)}
+                  deleting={deleteSlider.isPending}
+                />
+              )
+            )
+          )}
         </div>
       </div>
 
@@ -236,7 +586,7 @@ export default function EditContent() {
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
-            <label style={labelStyle}>Hero Title</label>
+            <label style={labelStyle}>Default Hero Title (fallback when no sliders)</label>
             <input
               data-testid="input-hero-title"
               style={inputStyle}
@@ -245,7 +595,7 @@ export default function EditContent() {
             />
           </div>
           <div>
-            <label style={labelStyle}>Hero Subtitle</label>
+            <label style={labelStyle}>Default Hero Subtitle</label>
             <textarea
               data-testid="input-hero-subtitle"
               style={{ ...textareaStyle, minHeight: "60px" }}
@@ -284,128 +634,27 @@ export default function EditContent() {
       </div>
 
       {/* ── Media Assets ───────────────────────────────────────────────────── */}
-      <div style={card}>
+      <div style={{ ...card, marginBottom: 0 }}>
         <div style={sectionHeader}>
           <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Media Assets</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
           {[
-            { key: "hero_bg_image", label: "Hero Background" },
+            { key: "hero_bg_image", label: "Hero Background (fallback)" },
             { key: "og_image", label: "OG / Share Image" },
             { key: "about_banner", label: "About Page Banner" },
           ].map((item) => (
-            <div key={item.key}>
-              <label style={labelStyle}>{item.label}</label>
-              <ImageUploadField
-                value={local[item.key] ?? ""}
-                onChange={(url) => set(item.key, url)}
-                label={`Upload ${item.label}`}
-              />
-            </div>
+            <ImageUploadField
+              key={item.key}
+              label={item.label}
+              value={local[item.key] ?? ""}
+              onChange={(url) => set(item.key, url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="banner"
+            />
           ))}
-        </div>
-      </div>
-
-      {/* ── Contact & Social ───────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Phone size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Contact & Social</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
-            <div>
-              <label style={labelStyle}>Support Email</label>
-              <input
-                data-testid="input-contact-email"
-                type="email"
-                style={inputStyle}
-                value={local.contact_email ?? ""}
-                onChange={(e) => set("contact_email", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Phone Number</label>
-              <input
-                data-testid="input-contact-phone"
-                style={inputStyle}
-                value={local.contact_phone ?? ""}
-                onChange={(e) => set("contact_phone", e.target.value)}
-              />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Address</label>
-              <input
-                data-testid="input-contact-address"
-                style={inputStyle}
-                value={local.contact_address ?? ""}
-                onChange={(e) => set("contact_address", e.target.value)}
-              />
-            </div>
-          </div>
-          <div style={{ borderTop: "1px solid hsl(220, 15%, 12%)", paddingTop: "14px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 50%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Social Links
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              {[
-                { key: "social_twitter", label: "Twitter / X" },
-                { key: "social_facebook", label: "Facebook" },
-                { key: "social_instagram", label: "Instagram" },
-                { key: "social_discord", label: "Discord" },
-              ].map((item) => (
-                <div key={item.key}>
-                  <label style={labelStyle}>{item.label}</label>
-                  <input
-                    data-testid={`input-${item.key}`}
-                    style={inputStyle}
-                    value={local[item.key] ?? ""}
-                    onChange={(e) => set(item.key, e.target.value)}
-                    placeholder="https://…"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── SEO ───────────────────────────────────────────────────────────── */}
-      <div style={{ ...card, marginBottom: 0 }}>
-        <div style={sectionHeader}>
-          <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>SEO Settings</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div>
-            <label style={labelStyle}>Meta Title</label>
-            <input
-              data-testid="input-seo-title"
-              style={inputStyle}
-              value={local.seo_title ?? ""}
-              onChange={(e) => set("seo_title", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Meta Description</label>
-            <textarea
-              data-testid="input-seo-description"
-              style={{ ...textareaStyle, minHeight: "70px" }}
-              value={local.seo_description ?? ""}
-              onChange={(e) => set("seo_description", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Keywords (comma-separated)</label>
-            <input
-              data-testid="input-seo-keywords"
-              style={inputStyle}
-              value={local.seo_keywords ?? ""}
-              onChange={(e) => set("seo_keywords", e.target.value)}
-              placeholder="game top-up, game credits, voucher…"
-            />
-          </div>
         </div>
       </div>
     </AdminLayout>

@@ -1,228 +1,272 @@
 import { Link } from "wouter";
-import { Tag, Zap, ArrowRight, Clock, Gift, Gamepad2, RefreshCcw } from "lucide-react";
+import { Tag, Zap, ArrowRight, Clock, Gift, Gamepad2, RefreshCcw, Loader2, Megaphone } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { Campaign } from "@shared/schema";
 
-const OFFERS = [
-  {
-    id: 1,
-    badge: "LIMITED TIME",
-    title: "Weekend 20% Bonus Credits",
-    desc: "Top up any supported game this weekend and receive 20% bonus in-game credits. Valid for all payment methods.",
-    category: "Game Top-Up",
-    discount: "20% BONUS",
-    expires: "Ends Sunday",
-    icon: Gamepad2,
-    color: "hsl(258,90%,66%)",
-    link: "/products",
-    cta: "Browse Games",
-  },
-  {
-    id: 2,
-    badge: "FLASH SALE",
-    title: "Gift Cards at 15% Off",
-    desc: "Get your favorite gift cards — Netflix, Steam, Google Play — at 15% off the face value. Limited stock.",
-    category: "Gift Cards",
-    discount: "15% OFF",
-    expires: "48 hours only",
-    icon: Gift,
-    color: "hsl(142,71%,45%)",
-    link: "/products?cat=gift_card",
-    cta: "Shop Gift Cards",
-  },
-  {
-    id: 3,
-    badge: "BUNDLE DEAL",
-    title: "Double Diamond Mobile Legends",
-    desc: "Purchase any ML diamond package above 500 diamonds and receive 2x the amount credited to your account.",
-    category: "Game Top-Up",
-    discount: "2× DIAMONDS",
-    expires: "This weekend",
-    icon: Gamepad2,
-    color: "hsl(38,92%,50%)",
-    link: "/products/mobile-legends",
-    cta: "Top Up Now",
-  },
-  {
-    id: 4,
-    badge: "NEW USER",
-    title: "First Purchase Bonus",
-    desc: "New to Nexcoin? Get 10% off your very first order, no minimum spend required. One-time use per account.",
-    category: "All Products",
-    discount: "10% OFF",
-    expires: "No expiry",
-    icon: Zap,
-    color: "hsl(200,80%,55%)",
-    link: "/register",
-    cta: "Create Account",
-  },
-  {
-    id: 5,
-    badge: "SUBSCRIPTION",
-    title: "3-Month Plan: Save 25%",
-    desc: "Subscribe to any plan for 3 months and save 25% compared to monthly billing. Cancel any time.",
-    category: "Subscriptions",
-    discount: "25% SAVINGS",
-    expires: "Ongoing",
-    icon: RefreshCcw,
-    color: "hsl(315,80%,60%)",
-    link: "/products?cat=subscription",
-    cta: "View Subscriptions",
-  },
-  {
-    id: 6,
-    badge: "VOUCHERS",
-    title: "Buy 2 Get 1 Free Vouchers",
-    desc: "Purchase any two vouchers of equal value and receive a third one for free — automatically applied at checkout.",
-    category: "Vouchers",
-    discount: "BUY 2 GET 1",
-    expires: "While stocks last",
-    icon: Tag,
-    color: "hsl(258,60%,65%)",
-    link: "/products?cat=voucher",
-    cta: "Browse Vouchers",
-  },
-];
+function formatExpiry(c: Campaign) {
+  if (!c.endsAt) return "Ongoing";
+  const diff = new Date(c.endsAt).getTime() - Date.now();
+  if (diff < 0) return "Expired";
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return "Ends today";
+  if (days === 1) return "Ends tomorrow";
+  return `Ends in ${days} days`;
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  banner: "hsl(258,90%,66%)",
+  email: "hsl(200,80%,55%)",
+  discount: "hsl(38,92%,50%)",
+  referral: "hsl(142,71%,45%)",
+  loyalty: "hsl(315,80%,60%)",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  banner: "PROMOTION",
+  email: "NEWSLETTER",
+  discount: "DISCOUNT",
+  referral: "REFERRAL",
+  loyalty: "LOYALTY",
+};
 
 export default function Offers() {
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
+    queryKey: ["/api/campaigns/active"],
+  });
+
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
       {/* Header */}
       <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.9rem", borderRadius: "9999px", background: "rgba(124,58,237,0.18)", border: "1px solid rgba(124,58,237,0.38)", marginBottom: "1rem" }}>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.3rem 0.9rem",
+            borderRadius: "9999px",
+            background: "rgba(124,58,237,0.18)",
+            border: "1px solid rgba(124,58,237,0.38)",
+            marginBottom: "1rem",
+          }}
+        >
           <Tag size={13} style={{ color: "#a78bfa" }} />
-          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>EXCLUSIVE DEALS</span>
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+            EXCLUSIVE DEALS
+          </span>
         </div>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 900, color: "hsl(210,40%,95%)", marginBottom: "0.75rem", lineHeight: 1.1 }}
+          style={{
+            fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+            fontWeight: 900,
+            color: "hsl(210,40%,95%)",
+            marginBottom: "0.75rem",
+            lineHeight: 1.1,
+          }}
         >
           Current{" "}
-          <span style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+          <span
+            style={{
+              background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
             Offers
           </span>
         </h1>
-        <p style={{ fontSize: "0.9rem", color: "hsl(220,10%,55%)", maxWidth: "520px", margin: "0 auto", lineHeight: 1.6 }}>
-          Time-limited deals, bonus credits, and exclusive discounts on top-ups, gift cards, and subscriptions.
+        <p style={{ fontSize: "0.9rem", color: "hsl(220,10%,50%)", maxWidth: "520px", margin: "0 auto" }}>
+          Limited-time promotions, bonuses, and deals — updated regularly.
         </p>
       </div>
 
-      {/* Offers grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.5rem" }}>
-        {OFFERS.map((offer) => {
-          const Icon = offer.icon;
-          return (
-            <div
-              key={offer.id}
-              data-testid={`card-offer-${offer.id}`}
-              style={{
-                background: "hsl(220,20%,9%)",
-                border: "1px solid hsl(220,15%,15%)",
-                borderRadius: "1rem",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                transition: "border-color 0.2s, transform 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = `${offer.color}40`;
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "hsl(220,15%,15%)";
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-              }}
-            >
-              {/* Card header strip */}
+      {/* Loading */}
+      {isLoading && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            padding: "4rem",
+            color: "hsl(220,10%,42%)",
+          }}
+        >
+          <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
+          <span style={{ fontSize: "13px" }}>Loading offers…</span>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && campaigns.length === 0 && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "5rem 2rem",
+            background: "rgba(124,58,237,0.04)",
+            border: "1px dashed rgba(124,58,237,0.2)",
+            borderRadius: "12px",
+          }}
+        >
+          <Megaphone size={40} style={{ color: "hsl(258,90%,66%)", opacity: 0.4, marginBottom: "1rem" }} />
+          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(210,40%,75%)", marginBottom: "0.5rem" }}>
+            No Active Offers Right Now
+          </h3>
+          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,42%)" }}>
+            Check back soon — new deals are added regularly.
+          </p>
+        </div>
+      )}
+
+      {/* Offer cards */}
+      {!isLoading && campaigns.length > 0 && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gap: "1.25rem",
+          }}
+        >
+          {campaigns.map((campaign) => {
+            const color = TYPE_COLORS[campaign.type] ?? "hsl(258,90%,66%)";
+            const badge = TYPE_LABELS[campaign.type] ?? "PROMOTION";
+            const expiry = formatExpiry(campaign);
+            const expired = expiry === "Expired";
+
+            return (
               <div
+                key={campaign.id}
+                data-testid={`card-offer-${campaign.id}`}
                 style={{
-                  background: `linear-gradient(135deg, ${offer.color}22, ${offer.color}08)`,
-                  borderBottom: `1px solid ${offer.color}25`,
-                  padding: "1.25rem 1.25rem 1rem",
+                  background: "hsl(220,20%,9%)",
+                  border: "1px solid hsl(220,15%,14%)",
+                  borderRadius: "12px",
+                  overflow: "hidden",
                   display: "flex",
-                  alignItems: "flex-start",
-                  gap: "0.75rem",
+                  flexDirection: "column",
+                  opacity: expired ? 0.55 : 1,
                 }}
               >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "8px",
-                    background: `${offer.color}18`,
-                    border: `1px solid ${offer.color}35`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon size={18} style={{ color: offer.color }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.6rem", fontWeight: 800, color: offer.color, letterSpacing: "0.08em", border: `1px solid ${offer.color}50`, padding: "0.1rem 0.45rem", borderRadius: "9999px", background: `${offer.color}12` }}>
-                      {offer.badge}
+                {/* Banner image */}
+                {campaign.bannerUrl ? (
+                  <img
+                    src={campaign.bannerUrl}
+                    alt={campaign.name}
+                    style={{ width: "100%", height: "140px", objectFit: "cover" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      height: "80px",
+                      background: `linear-gradient(135deg, ${color}22, ${color}08)`,
+                      borderBottom: `1px solid ${color}22`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Megaphone size={28} style={{ color, opacity: 0.5 }} />
+                  </div>
+                )}
+
+                {/* Content */}
+                <div style={{ padding: "1rem 1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                  {/* Badge row */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: "0.6rem",
+                      flexWrap: "wrap",
+                      gap: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.65rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.1em",
+                        padding: "0.2rem 0.5rem",
+                        borderRadius: "4px",
+                        background: `${color}20`,
+                        border: `1px solid ${color}40`,
+                        color,
+                      }}
+                    >
+                      {badge}
                     </span>
-                    <span style={{ fontSize: "0.68rem", color: "hsl(220,10%,45%)" }}>{offer.category}</span>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.25rem",
+                        fontSize: "0.7rem",
+                        color: expired ? "hsl(0,72%,55%)" : "hsl(220,10%,45%)",
+                      }}
+                    >
+                      <Clock size={10} />
+                      {expiry}
+                    </span>
                   </div>
-                  <h2 style={{ fontSize: "0.95rem", fontWeight: 700, color: "hsl(210,40%,93%)", lineHeight: 1.3 }}>
-                    {offer.title}
-                  </h2>
-                </div>
-                <div
-                  style={{
-                    flexShrink: 0,
-                    padding: "0.3rem 0.65rem",
-                    borderRadius: "6px",
-                    background: offer.color,
-                    color: "white",
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    letterSpacing: "0.02em",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {offer.discount}
-                </div>
-              </div>
 
-              {/* Card body */}
-              <div style={{ padding: "1rem 1.25rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,52%)", lineHeight: 1.6, flex: 1 }}>
-                  {offer.desc}
-                </p>
+                  {/* Title */}
+                  <h3
+                    style={{
+                      fontSize: "0.95rem",
+                      fontWeight: 700,
+                      color: "hsl(210,40%,92%)",
+                      marginBottom: "0.5rem",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {campaign.name}
+                  </h3>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.72rem", color: "hsl(220,10%,40%)" }}>
-                    <Clock size={11} />
-                    {offer.expires}
-                  </div>
+                  {/* Description */}
+                  {campaign.description && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "hsl(220,10%,50%)",
+                        lineHeight: 1.6,
+                        marginBottom: "1rem",
+                        flex: 1,
+                      }}
+                    >
+                      {campaign.description}
+                    </p>
+                  )}
+
+                  {/* CTA */}
                   <Link
-                    href={offer.link}
-                    data-testid={`link-offer-cta-${offer.id}`}
+                    href="/products"
+                    data-testid={`link-offer-cta-${campaign.id}`}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       gap: "0.35rem",
                       padding: "0.4rem 0.9rem",
                       borderRadius: "6px",
-                      background: offer.color,
+                      background: color,
                       color: "white",
                       fontSize: "0.78rem",
                       fontWeight: 700,
                       textDecoration: "none",
-                      transition: "opacity 0.15s",
+                      alignSelf: "flex-start",
+                      marginTop: "auto",
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
                   >
-                    {offer.cta} <ArrowRight size={12} />
+                    Browse Games <ArrowRight size={12} />
                   </Link>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Bottom CTA */}
       <div

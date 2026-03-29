@@ -15,10 +15,10 @@ import game1Img from "@assets/game-1_1774458324765.png";
 import game2Img from "@assets/game-2_1774458324828.png";
 
 
-// ─── Slider data ──────────────────────────────────────────────────────────────
-const SLIDES = [
+// ─── Fallback slider data (used when no API sliders exist) ────────────────────
+const FALLBACK_SLIDES = [
   {
-    id: 1,
+    id: "fallback-1",
     bg: heroBannerImg,
     badge: "WEEKEND SPECIAL",
     title: ["LEVEL UP", "YOUR", "GAMEPLAY"],
@@ -28,7 +28,7 @@ const SLIDES = [
     cta2: { label: "View Offers", href: "/offers" },
   },
   {
-    id: 2,
+    id: "fallback-2",
     bg: mlbbBannerImg,
     badge: "LIMITED TIME",
     title: ["DOUBLE", "DIAMOND", "WEEKEND"],
@@ -38,7 +38,7 @@ const SLIDES = [
     cta2: { label: "Learn More", href: "/" },
   },
   {
-    id: 3,
+    id: "fallback-3",
     bg: game2Img,
     badge: "NEW GAME",
     title: ["FANTASY", "REALMS", "AWAIT"],
@@ -61,6 +61,24 @@ function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const { data: apiSliders = [] } = useQuery<any[]>({
+    queryKey: ["/api/hero-sliders/active"],
+    staleTime: 60_000,
+  });
+
+  const SLIDES = apiSliders.length > 0
+    ? apiSliders.map((s: any) => ({
+        id: s.id,
+        bg: s.bannerUrl || heroBannerImg,
+        badge: "FEATURED",
+        title: [s.title],
+        highlight: 0,
+        sub: s.subtitle || "",
+        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+        cta2: { label: "View Offers", href: "/offers" },
+      }))
+    : FALLBACK_SLIDES;
+
   function startTimer() {
     timerRef.current = setInterval(() => {
       setCurrent((c) => (c + 1) % SLIDES.length);
@@ -68,9 +86,10 @@ function HeroSlider() {
   }
 
   useEffect(() => {
+    setCurrent(0);
     startTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
+  }, [SLIDES.length]);
 
   function goTo(idx: number) {
     setCurrent(idx);
@@ -78,7 +97,7 @@ function HeroSlider() {
     startTimer();
   }
 
-  const slide = SLIDES[current];
+  const slide = SLIDES[current] ?? SLIDES[0];
 
   return (
     <section
@@ -660,6 +679,12 @@ function BonusBanner() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 60_000,
+  });
+  const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
+
   const MARKETPLACE = [
     { label: "All Games", href: "/products" },
     { label: "Gift Cards", href: "/products?category=gift_card" },
@@ -719,7 +744,7 @@ function Footer() {
                   backgroundClip: "text",
                 }}
               >
-                NEXCOIN
+                {siteName}
               </span>
             </div>
             <p style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
@@ -838,7 +863,7 @@ function Footer() {
           }}
         >
           <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)" }}>
-            © 2025 Nexcoin. All rights reserved.
+            © {new Date().getFullYear()} {siteSettings?.site_name || "Nexcoin"}. All rights reserved.
           </p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             {[

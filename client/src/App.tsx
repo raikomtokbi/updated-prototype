@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
-import Categories from "./pages/Categories";
 import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import About from "./pages/About";
@@ -76,7 +75,6 @@ function PublicRoutes() {
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetails} />
           <Route path="/offers" component={Offers} />
-          <Route path="/categories" component={Categories} />
           <Route path="/cart" component={Cart} />
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
