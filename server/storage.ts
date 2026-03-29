@@ -22,7 +22,7 @@ import {
   campaigns, heroSliders, reviews, paymentMethods, plugins,
   notifications, siteSettings,
 } from "@shared/schema";
-import { eq, desc, asc, count, sum, and } from "drizzle-orm";
+import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -141,6 +141,10 @@ export interface IStorage {
     totalOrders: number;
     totalRevenue: number;
     openTickets: number;
+  }>;
+  getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month"): Promise<{
+    salesTrend: { label: string; sales: number }[];
+    orderStatus: { name: string; value: number }[];
   }>;
 }
 
@@ -517,6 +521,59 @@ export class DatabaseStorage implements IStorage {
       totalRevenue: parseFloat((revenueRow.total as string | null) ?? "0"),
       openTickets: ticketCount.count,
     };
+  }
+
+  // ── Analytics ──────────────────────────────────────────────────────────────
+  async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month") {
+    const trunc =
+      groupBy === "hour" ? sql`date_trunc('hour', ${orders.createdAt})`
+      : groupBy === "day" ? sql`date_trunc('day', ${orders.createdAt})`
+      : groupBy === "week" ? sql`date_trunc('week', ${orders.createdAt})`
+      : sql`date_trunc('month', ${orders.createdAt})`;
+
+    const trendRows = await db
+      .select({
+        period: trunc.as("period"),
+        revenue: sql<string>`COALESCE(SUM(${orders.totalAmount}), 0)`.as("revenue"),
+      })
+      .from(orders)
+      .where(and(gte(orders.createdAt, from), lte(orders.createdAt, to)))
+      .groupBy(trunc)
+      .orderBy(trunc);
+
+    function fmtLabel(period: unknown, gb: string) {
+      const d = new Date(period as string);
+      if (gb === "hour") return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+      if (gb === "day") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (gb === "week") return `W${Math.ceil(d.getDate() / 7)} ${d.toLocaleDateString("en-US", { month: "short" })}`;
+      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    }
+
+    const salesTrend = trendRows.map((r) => ({
+      label: fmtLabel(r.period, groupBy),
+      sales: parseFloat(String(r.revenue)),
+    }));
+
+    const statusRows = await db
+      .select({ status: orders.status, cnt: count() })
+      .from(orders)
+      .where(and(gte(orders.createdAt, from), lte(orders.createdAt, to)))
+      .groupBy(orders.status);
+
+    const totalOrds = statusRows.reduce((s, r) => s + r.cnt, 0);
+    const statusMap: Record<string, string> = {
+      completed: "Successful",
+      refunded: "Refunded",
+      failed: "Failed",
+      pending: "Pending",
+      processing: "Processing",
+    };
+    const orderStatus = statusRows.map((r) => ({
+      name: statusMap[r.status] ?? r.status,
+      value: totalOrds > 0 ? Math.round((r.cnt / totalOrds) * 100) : 0,
+    }));
+
+    return { salesTrend, orderStatus };
   }
 }
 

@@ -1,6 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Wrench } from "lucide-react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -116,9 +117,36 @@ function SiteHead() {
   return null;
 }
 
+function MaintenancePage() {
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 30_000,
+  });
+  const siteName = siteSettings?.site_name || "Nexcoin";
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(220,20%,7%)", flexDirection: "column", gap: "16px", padding: "2rem", textAlign: "center" }}>
+      <Wrench size={48} style={{ opacity: 0.4, color: "hsl(210,40%,70%)" }} />
+      <h1 style={{ fontSize: "24px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{siteName} is under maintenance</h1>
+      <p style={{ fontSize: "14px", color: "hsl(220,10%,50%)", maxWidth: "400px", margin: 0 }}>We are currently performing scheduled maintenance. We will be back shortly. Thank you for your patience.</p>
+    </div>
+  );
+}
+
 export default function App() {
   const [location] = useLocation();
   const isAdmin = location === "/admin" || location.startsWith("/admin/");
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 30_000,
+  });
+
+  const maintenanceMode = siteSettings?.maintenance_mode === "true";
+
+  if (maintenanceMode && !isAdmin) {
+    return <MaintenancePage />;
+  }
+
   return (
     <>
       <SiteHead />

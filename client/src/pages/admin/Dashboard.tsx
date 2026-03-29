@@ -1,52 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { Loader2, Database, DollarSign, ShoppingBag, CheckCircle, RotateCcw, Calendar, ChevronDown } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { DollarSign, ShoppingBag, CheckCircle, RotateCcw, Calendar, ChevronDown } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
 import { adminApi } from "@/lib/store/useAdmin";
 
-// ─── Data per range ───────────────────────────────────────────────────────────
-const salesByRange: Record<string, { label: string; sales: number }[]> = {
-  today: [
-    { label: "12am", sales: 320 }, { label: "2am", sales: 180 }, { label: "4am", sales: 90 },
-    { label: "6am", sales: 410 }, { label: "8am", sales: 860 }, { label: "10am", sales: 1240 },
-    { label: "12pm", sales: 1580 }, { label: "2pm", sales: 1320 }, { label: "4pm", sales: 1750 },
-    { label: "6pm", sales: 2100 }, { label: "8pm", sales: 1890 }, { label: "10pm", sales: 1200 },
-  ],
-  "7days": [
-    { label: "Mon", sales: 2400 }, { label: "Tue", sales: 3100 }, { label: "Wed", sales: 2800 },
-    { label: "Thu", sales: 3900 }, { label: "Fri", sales: 4500 }, { label: "Sat", sales: 5200 }, { label: "Sun", sales: 4100 },
-  ],
-  "30days": [
-    { label: "W1", sales: 12400 }, { label: "W2", sales: 15800 }, { label: "W3", sales: 13200 }, { label: "W4", sales: 18600 },
-  ],
-  "6months": [
-    { label: "Aug", sales: 38000 }, { label: "Sep", sales: 42000 }, { label: "Oct", sales: 39500 },
-    { label: "Nov", sales: 51000 }, { label: "Dec", sales: 68000 }, { label: "Jan", sales: 55000 },
-  ],
-  "12months": [
-    { label: "Jan", sales: 4200 }, { label: "Feb", sales: 5800 }, { label: "Mar", sales: 4900 },
-    { label: "Apr", sales: 7200 }, { label: "May", sales: 6100 }, { label: "Jun", sales: 8400 },
-    { label: "Jul", sales: 9100 }, { label: "Aug", sales: 7800 }, { label: "Sep", sales: 10200 },
-    { label: "Oct", sales: 9500 }, { label: "Nov", sales: 11400 }, { label: "Dec", sales: 13200 },
-  ],
-};
-
-const pieByRange: Record<string, { name: string; value: number }[]> = {
-  today: [{ name: "Successful", value: 72 }, { name: "Refunded", value: 8 }, { name: "Unsuccessful", value: 20 }],
-  "7days": [{ name: "Successful", value: 65 }, { name: "Refunded", value: 15 }, { name: "Unsuccessful", value: 20 }],
-  "30days": [{ name: "Successful", value: 68 }, { name: "Refunded", value: 12 }, { name: "Unsuccessful", value: 20 }],
-  "6months": [{ name: "Successful", value: 71 }, { name: "Refunded", value: 10 }, { name: "Unsuccessful", value: 19 }],
-  "12months": [{ name: "Successful", value: 68 }, { name: "Refunded", value: 12 }, { name: "Unsuccessful", value: 20 }],
-};
-
-const COLORS = ["hsl(258, 90%, 66%)", "hsl(196, 100%, 50%)", "hsl(220, 15%, 30%)"];
+const COLORS = ["hsl(258, 90%, 66%)", "hsl(196, 100%, 50%)", "hsl(0, 72%, 51%)", "hsl(38, 92%, 55%)", "hsl(142, 71%, 45%)"];
 
 const rangeOptions = [
   { key: "today", label: "Today" },
@@ -66,17 +31,6 @@ const card: React.CSSProperties = {
 
 function formatDateShort(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-function generateCustomData(range: DateRange) {
-  if (!range.from) return [];
-  const from = range.from;
-  const to = range.to ?? range.from;
-  const days = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
-  return Array.from({ length: Math.min(days, 12) }, (_, i) => {
-    const d = new Date(from);
-    d.setDate(from.getDate() + Math.floor((i / Math.min(days, 12)) * days));
-    return { label: formatDateShort(d), sales: Math.floor(1000 + Math.random() * 8000) };
-  });
 }
 
 // ─── Date Range Filter ────────────────────────────────────────────────────────
@@ -131,19 +85,52 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
 }
 
 export default function Dashboard() {
+  const qc = useQueryClient();
   const [rangeKey, setRangeKey] = useState("12months");
   const [customRange, setCustomRange] = useState<DateRange | undefined>(undefined);
+  const [seedDone, setSeedDone] = useState(false);
 
   const { data: stats } = useQuery<{ totalUsers: number; totalOrders: number; totalRevenue: number; openTickets: number }>({
     queryKey: ["/api/admin/stats"],
     queryFn: () => adminApi.get("/stats"),
   });
 
-  const chartData = rangeKey === "custom" && customRange?.from
-    ? generateCustomData(customRange)
-    : (salesByRange[rangeKey] ?? salesByRange["12months"]);
+  const { data: gameList = [] } = useQuery<{ id: string }[]>({
+    queryKey: ["/api/admin/games"],
+    queryFn: () => adminApi.get("/games"),
+  });
 
-  const pieData = pieByRange[rangeKey] ?? pieByRange["12months"];
+  const seedMut = useMutation({
+    mutationFn: () => adminApi.post("/seed", {}),
+    onSuccess: () => {
+      setSeedDone(true);
+      qc.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+    },
+  });
+
+  const analyticsQueryKey = rangeKey === "custom" && customRange?.from
+    ? ["/api/admin/analytics", rangeKey, customRange.from?.toISOString(), customRange.to?.toISOString()]
+    : ["/api/admin/analytics", rangeKey];
+
+  const analyticsUrl = rangeKey === "custom" && customRange?.from
+    ? `/analytics?range=custom&from=${customRange.from.toISOString()}&to=${(customRange.to ?? customRange.from).toISOString()}`
+    : `/analytics?range=${rangeKey}`;
+
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<{
+    salesTrend: { label: string; sales: number }[];
+    orderStatus: { name: string; value: number }[];
+  }>({
+    queryKey: analyticsQueryKey,
+    queryFn: () => adminApi.get(analyticsUrl),
+    staleTime: 60000,
+  });
+
+  const chartData = analytics?.salesTrend ?? [];
+  const pieData = analytics?.orderStatus ?? [];
 
   const statCards = [
     {
@@ -199,7 +186,36 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Date range filter row — affects all charts below */}
+        {/* Setup / Seed demo data */}
+        {gameList.length === 0 && !seedDone && (
+          <div style={{ background: "hsl(258,70%,10%)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "8px", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ width: "38px", height: "38px", borderRadius: "8px", background: "rgba(124,58,237,0.15)", color: "hsl(258,90%,66%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Database size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)" }}>No data yet — Load sample data to get started</div>
+                <div style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginTop: "2px" }}>Adds 4 games, pricing options, 3 hero sliders, and 2 campaigns for testing</div>
+              </div>
+            </div>
+            <button
+              onClick={() => seedMut.mutate()}
+              disabled={seedMut.isPending}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "6px", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "white", fontSize: "12px", fontWeight: 600, cursor: seedMut.isPending ? "not-allowed" : "pointer", border: "none", whiteSpace: "nowrap", flexShrink: 0 }}
+              data-testid="button-seed-data"
+            >
+              {seedMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Database size={13} />}
+              {seedMut.isPending ? "Loading sample data..." : "Load Sample Data"}
+            </button>
+          </div>
+        )}
+        {seedDone && (
+          <div style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "8px", padding: "12px 18px", fontSize: "13px", color: "hsl(142,71%,48%)" }}>
+            Sample data loaded successfully. Refresh the page to see it on the storefront.
+          </div>
+        )}
+
+        {/* Date range filter row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
           <span style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>Showing data for:</span>
           <DateRangeFilter
@@ -214,11 +230,16 @@ export default function Dashboard() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "16px" }}>
           <div style={{ ...card, padding: "20px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Sales Trend</span>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Revenue Trend</span>
               <span style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{rangeOptions.find((r) => r.key === rangeKey)?.label ?? "Custom range"}</span>
             </div>
-            {chartData.length === 0 ? (
-              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px" }}>No data available yet.</div>
+            {analyticsLoading ? (
+              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px" }}>Loading...</div>
+            ) : chartData.length === 0 ? (
+              <div style={{ height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
+                <span style={{ fontSize: "24px", opacity: 0.3 }}>📊</span>
+                No data available for this period.
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
@@ -231,7 +252,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 13%)" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(220, 10%, 42%)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "hsl(220, 10%, 42%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
-                  <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`$${value.toLocaleString()}`, "Sales"]} />
+                  <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]} />
                   <Area type="monotone" dataKey="sales" stroke="hsl(258, 90%, 66%)" strokeWidth={2} fill="url(#salesGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -240,29 +261,41 @@ export default function Dashboard() {
 
           <div style={{ ...card, padding: "20px" }}>
             <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", marginBottom: "8px" }}>Order Status</div>
-            <ResponsiveContainer width="100%" height={190}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
-                  {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`${value}%`, ""]} />
-                <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(220, 10%, 52%)" }}>{value}</span>} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              {pieData.map((item, i) => (
-                <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i] }} />
-                    <span style={{ fontSize: "12px", color: "hsl(220, 10%, 52%)" }}>{item.name}</span>
-                  </div>
-                  <span style={{ fontSize: "12px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{item.value}%</span>
+            {analyticsLoading ? (
+              <div style={{ height: 190, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px" }}>Loading...</div>
+            ) : pieData.length === 0 ? (
+              <div style={{ height: 190, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
+                <span style={{ fontSize: "20px", opacity: 0.3 }}>🥧</span>
+                No orders yet.
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height={190}>
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                      {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`${value}%`, ""]} />
+                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(220, 10%, 52%)" }}>{value}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {pieData.map((item, i) => (
+                    <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length] }} />
+                        <span style={{ fontSize: "12px", color: "hsl(220, 10%, 52%)" }}>{item.name}</span>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{item.value}%</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>
     </AdminLayout>
   );
 }
+
