@@ -67,7 +67,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
         onChange={(url) => set("bannerUrl", url)}
         inputStyle={inputStyle}
         labelStyle={labelStyle}
-        ratio="banner"
+        ratio="rectangle"
         showRatioSelector={false}
       />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>

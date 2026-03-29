@@ -1,4 +1,6 @@
 import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -92,8 +94,35 @@ function PublicRoutes() {
   );
 }
 
+function SiteHead() {
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 60_000,
+  });
+
+  useEffect(() => {
+    const favicon = siteSettings?.site_favicon;
+    if (favicon) {
+      let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = favicon;
+    }
+  }, [siteSettings?.site_favicon]);
+
+  return null;
+}
+
 export default function App() {
   const [location] = useLocation();
   const isAdmin = location === "/admin" || location.startsWith("/admin/");
-  return isAdmin ? <AdminRoutes /> : <PublicRoutes />;
+  return (
+    <>
+      <SiteHead />
+      {isAdmin ? <AdminRoutes /> : <PublicRoutes />}
+    </>
+  );
 }

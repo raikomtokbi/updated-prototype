@@ -26,6 +26,7 @@ export default function Navbar() {
     staleTime: 60_000,
   });
   const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
+  const siteLogo = siteSettings?.site_logo || "";
 
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [location]);
@@ -67,21 +68,29 @@ export default function Navbar() {
             style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.45rem", flexShrink: 0 }}
             data-testid="link-home"
           >
-            <div
-              style={{
-                width: "30px",
-                height: "30px",
-                borderRadius: "7px",
-                background: "linear-gradient(135deg, #7c3aed, #9333ea)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 0 10px rgba(124, 58, 237, 0.5)",
-                flexShrink: 0,
-              }}
-            >
-              <Zap size={15} color="white" />
-            </div>
+            {siteLogo ? (
+              <img
+                src={siteLogo}
+                alt={siteName}
+                style={{ width: "30px", height: "30px", borderRadius: "7px", objectFit: "contain", flexShrink: 0 }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "7px",
+                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 0 10px rgba(124, 58, 237, 0.5)",
+                  flexShrink: 0,
+                }}
+              >
+                <Zap size={15} color="white" />
+              </div>
+            )}
             <span
               className="font-orbitron"
               style={{
@@ -414,19 +423,27 @@ export default function Navbar() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-            <div
-              style={{
-                width: "26px",
-                height: "26px",
-                borderRadius: "6px",
-                background: "linear-gradient(135deg, #7c3aed, #9333ea)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Zap size={13} color="white" />
-            </div>
+            {siteLogo ? (
+              <img
+                src={siteLogo}
+                alt={siteName}
+                style={{ width: "26px", height: "26px", borderRadius: "6px", objectFit: "contain" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "26px",
+                  height: "26px",
+                  borderRadius: "6px",
+                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Zap size={13} color="white" />
+              </div>
+            )}
             <span
               className="font-orbitron"
               style={{
@@ -438,7 +455,7 @@ export default function Navbar() {
                 backgroundClip: "text",
               }}
             >
-              NEXCOIN
+              {siteName}
             </span>
           </div>
           <button

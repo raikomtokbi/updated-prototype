@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Upload, Loader2, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 
-type AspectRatio = "any" | "square" | "banner";
+export type AspectRatio = "any" | "square" | "rectangle";
 
 interface ImageUploadFieldProps {
   label: string;
@@ -32,7 +32,7 @@ export function ImageUploadField({
   const [ratio, setRatio] = useState<AspectRatio>(externalRatio ?? "any");
 
   const previewAspect =
-    ratio === "square" ? "1 / 1" : ratio === "banner" ? "16 / 5" : undefined;
+    ratio === "square" ? "1 / 1" : ratio === "rectangle" ? "16 / 5" : undefined;
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -65,7 +65,7 @@ export function ImageUploadField({
     setError(null);
     try {
       const { user } = useAuthStore.getState();
-      await fetch("/api/admin/upload", {
+      const res = await fetch("/api/admin/upload", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -73,6 +73,7 @@ export function ImageUploadField({
         },
         body: JSON.stringify({ url: value }),
       });
+      if (!res.ok) throw new Error(await res.text());
       onChange("");
     } catch {
       setError("Delete failed");
@@ -101,7 +102,7 @@ export function ImageUploadField({
 
       {showRatioSelector && (
         <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
-          {(["any", "square", "banner"] as AspectRatio[]).map((r) => (
+          {(["any", "square", "rectangle"] as AspectRatio[]).map((r) => (
             <button
               key={r}
               type="button"
@@ -118,7 +119,7 @@ export function ImageUploadField({
                 textTransform: "capitalize",
               }}
             >
-              {r === "any" ? "Free" : r === "square" ? "Square" : "Banner (16:5)"}
+              {r === "any" ? "Free" : r === "square" ? "Square (1:1)" : "Rectangle (16:5)"}
             </button>
           ))}
         </div>

@@ -71,17 +71,24 @@ const DEFAULTS: SettingsMap = {
   about_banner: "",
 };
 
+type GameOption = { id: string; name: string };
+type ProductOption = { id: string; name: string };
+
 // ─── Slider form ──────────────────────────────────────────────────────────────
 function SliderForm({
   initial,
   onSubmit,
   loading,
   onCancel,
+  games = [],
+  products = [],
 }: {
   initial: Partial<HeroSlider>;
   onSubmit: (d: any) => void;
   loading: boolean;
   onCancel: () => void;
+  games?: GameOption[];
+  products?: ProductOption[];
 }) {
   const toInput = (d: Date | string | null | undefined) =>
     d ? new Date(d).toISOString().slice(0, 16) : "";
@@ -96,6 +103,8 @@ function SliderForm({
     endsAt: toInput(initial.endsAt),
     isActive: initial.isActive !== false,
     sortOrder: String(initial.sortOrder ?? 0),
+    linkedGameId: initial.linkedGameId ?? "",
+    linkedProductId: initial.linkedProductId ?? "",
   });
 
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
@@ -138,7 +147,7 @@ function SliderForm({
         onChange={(url) => set("bannerUrl", url)}
         inputStyle={inputStyle}
         labelStyle={labelStyle}
-        ratio="banner"
+        ratio="rectangle"
         showRatioSelector={false}
       />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
@@ -191,6 +200,40 @@ function SliderForm({
           />
         </div>
       </div>
+      {(games.length > 0 || products.length > 0) && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          {games.length > 0 && (
+            <div>
+              <label style={labelStyle}>Linked Game (optional)</label>
+              <select
+                style={inputStyle}
+                value={form.linkedGameId}
+                onChange={(e) => set("linkedGameId", e.target.value)}
+              >
+                <option value="">— None —</option>
+                {games.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {products.length > 0 && (
+            <div>
+              <label style={labelStyle}>Linked Product (optional)</label>
+              <select
+                style={inputStyle}
+                value={form.linkedProductId}
+                onChange={(e) => set("linkedProductId", e.target.value)}
+              >
+                <option value="">— None —</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <label style={{ ...labelStyle, marginBottom: 0 }}>Active</label>
         <button
@@ -256,11 +299,19 @@ function SliderItem({
   slider,
   onEdit,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
   deleting,
 }: {
   slider: HeroSlider;
   onEdit: (s: HeroSlider) => void;
   onDelete: (id: string) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
   deleting: boolean;
 }) {
   return (
@@ -321,6 +372,44 @@ function SliderItem({
       >
         {slider.isActive ? "Active" : "Inactive"}
       </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
+        <button
+          onClick={onMoveUp}
+          disabled={isFirst}
+          title="Move up"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2px 5px",
+            borderRadius: "4px",
+            background: "hsl(220,20%,14%)",
+            border: "1px solid hsl(220,15%,20%)",
+            color: isFirst ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
+            cursor: isFirst ? "not-allowed" : "pointer",
+          }}
+        >
+          <ChevronUp size={12} />
+        </button>
+        <button
+          onClick={onMoveDown}
+          disabled={isLast}
+          title="Move down"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2px 5px",
+            borderRadius: "4px",
+            background: "hsl(220,20%,14%)",
+            border: "1px solid hsl(220,15%,20%)",
+            color: isLast ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
+            cursor: isLast ? "not-allowed" : "pointer",
+          }}
+        >
+          <ChevronDown size={12} />
+        </button>
+      </div>
       <button
         onClick={() => onEdit(slider)}
         style={{
@@ -380,6 +469,21 @@ export default function EditContent() {
     queryFn: () => adminApi.get("/hero-sliders"),
   });
 
+  const { data: games = [] } = useQuery<GameOption[]>({
+    queryKey: ["/api/admin/games"],
+    queryFn: () => adminApi.get("/games").then((res: any[]) =>
+      res.map((g) => ({ id: g.id, name: g.name }))
+    ),
+  });
+
+  const { data: products = [] } = useQuery<ProductOption[]>({
+    queryKey: ["/api/admin/products"],
+    queryFn: () => adminApi.get("/products").then((res: any) => {
+      const items = Array.isArray(res) ? res : (res?.products ?? []);
+      return items.map((p: any) => ({ id: p.id, name: p.name }));
+    }),
+  });
+
   useEffect(() => {
     if (remoteSettings) {
       setLocal((prev) => ({ ...prev, ...remoteSettings }));
@@ -399,6 +503,7 @@ export default function EditContent() {
     mutationFn: (d: any) => adminApi.post("/hero-sliders", d),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      qc.invalidateQueries({ queryKey: ["/api/hero-sliders/active"] });
       setShowAddSlider(false);
     },
   });
@@ -407,14 +512,47 @@ export default function EditContent() {
     mutationFn: ({ id, data }: { id: string; data: any }) => adminApi.patch(`/hero-sliders/${id}`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      qc.invalidateQueries({ queryKey: ["/api/hero-sliders/active"] });
       setEditSlider(null);
     },
   });
 
   const deleteSlider = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/hero-sliders/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      qc.invalidateQueries({ queryKey: ["/api/hero-sliders/active"] });
+    },
   });
+
+  const reorderSlider = useMutation({
+    mutationFn: ({ id, sortOrder }: { id: string; sortOrder: number }) =>
+      adminApi.patch(`/hero-sliders/${id}`, { sortOrder }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
+      qc.invalidateQueries({ queryKey: ["/api/hero-sliders/active"] });
+    },
+  });
+
+  function handleMoveUp(index: number) {
+    if (index === 0) return;
+    const current = sliders[index];
+    const prev = sliders[index - 1];
+    const currentOrder = current.sortOrder ?? index;
+    const prevOrder = prev.sortOrder ?? (index - 1);
+    reorderSlider.mutate({ id: current.id, sortOrder: prevOrder });
+    reorderSlider.mutate({ id: prev.id, sortOrder: currentOrder });
+  }
+
+  function handleMoveDown(index: number) {
+    if (index >= sliders.length - 1) return;
+    const current = sliders[index];
+    const next = sliders[index + 1];
+    const currentOrder = current.sortOrder ?? index;
+    const nextOrder = next.sortOrder ?? (index + 1);
+    reorderSlider.mutate({ id: current.id, sortOrder: nextOrder });
+    reorderSlider.mutate({ id: next.id, sortOrder: currentOrder });
+  }
 
   function set(key: string, value: string) {
     setLocal((prev) => ({ ...prev, [key]: value }));
@@ -520,6 +658,8 @@ export default function EditContent() {
                 onSubmit={(d) => addSlider.mutate(d)}
                 loading={addSlider.isPending}
                 onCancel={() => setShowAddSlider(false)}
+                games={games}
+                products={products}
               />
             </div>
           )}
@@ -543,7 +683,7 @@ export default function EditContent() {
               No hero slides yet. Click "Add Slide" to create your first one.
             </div>
           ) : (
-            sliders.map((s) =>
+            sliders.map((s, idx) =>
               editSlider?.id === s.id ? (
                 <div
                   key={s.id}
@@ -562,6 +702,8 @@ export default function EditContent() {
                     onSubmit={(d) => updateSlider.mutate({ id: editSlider.id, data: d })}
                     loading={updateSlider.isPending}
                     onCancel={() => setEditSlider(null)}
+                    games={games}
+                    products={products}
                   />
                 </div>
               ) : (
@@ -570,6 +712,10 @@ export default function EditContent() {
                   slider={s}
                   onEdit={setEditSlider}
                   onDelete={(id) => deleteSlider.mutate(id)}
+                  onMoveUp={() => handleMoveUp(idx)}
+                  onMoveDown={() => handleMoveDown(idx)}
+                  isFirst={idx === 0}
+                  isLast={idx === sliders.length - 1}
                   deleting={deleteSlider.isPending}
                 />
               )
@@ -652,7 +798,7 @@ export default function EditContent() {
               onChange={(url) => set(item.key, url)}
               inputStyle={inputStyle}
               labelStyle={labelStyle}
-              ratio="banner"
+              ratio="rectangle"
             />
           ))}
         </div>

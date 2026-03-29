@@ -204,6 +204,7 @@ export default function ControlPanel() {
     mutationFn: (settings: SettingsMap) => adminApi.put("/settings", settings),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
