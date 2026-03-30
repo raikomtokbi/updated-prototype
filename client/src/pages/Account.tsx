@@ -86,6 +86,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
   });
 
   const fields = [
+    { key: "id", label: "Member ID", value: user.id, editable: false },
     { key: "username", label: "Username", value: user.username, editable: false },
     { key: "fullName", label: "Full Name", value: user.fullName || "—", editable: true, placeholder: "Enter your full name" },
     { key: "email", label: "Email Address", value: user.email || "—", editable: true, placeholder: "Enter your email" },
@@ -178,10 +179,24 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
             padding: "0.9rem 1.5rem", borderBottom: "1px solid hsl(220,15%,12%)", gap: "1rem", flexWrap: "wrap",
           }}>
             <span style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", minWidth: "120px" }}>{label}</span>
-            <span style={{ fontSize: "0.875rem", color: "hsl(210,40%,85%)", fontWeight: 500, wordBreak: "break-all" }}
-              data-testid={`text-${key}`}>
-              {value}
-            </span>
+            {key === "id" ? (
+              <span
+                data-testid="text-member-id"
+                style={{
+                  fontFamily: "monospace", fontSize: "0.9rem", fontWeight: 700,
+                  color: "hsl(196,100%,60%)", letterSpacing: "0.08em",
+                  background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.2)",
+                  borderRadius: "4px", padding: "2px 8px",
+                }}
+              >
+                #{value}
+              </span>
+            ) : (
+              <span style={{ fontSize: "0.875rem", color: "hsl(210,40%,85%)", fontWeight: 500, wordBreak: "break-all" }}
+                data-testid={`text-${key}`}>
+                {value}
+              </span>
+            )}
           </div>
         ))}
         <div style={{
@@ -642,9 +657,14 @@ export default function Account() {
           {user.email && (
             <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", marginBottom: "0.4rem" }}>{user.email}</p>
           )}
-          <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
-            {roleInfo.label}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
+              {roleInfo.label}
+            </span>
+            <span style={{ fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
+              #{user.id}
+            </span>
+          </div>
         </div>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {isStaff() && (

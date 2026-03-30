@@ -309,7 +309,7 @@ export default function Users() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
-                  {["Username", "Full Name", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (
+                  {["ID", "Username", "Full Name", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
@@ -317,6 +317,7 @@ export default function Users() {
               <tbody>
                 {filtered.map((u) => (
                   <tr key={u.id}>
+                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(196,100%,55%)", letterSpacing: "0.05em" }}>{u.id}</td>
                     <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{u.username}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 70%)" }}>{u.fullName ?? "—"}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>

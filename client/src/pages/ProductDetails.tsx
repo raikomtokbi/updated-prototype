@@ -169,7 +169,7 @@ function GameDetailView({ game }: { game: Game }) {
   const { user } = useAuthStore();
   const addItem = useCartStore((s) => s.addItem);
   const [selectedSvc, setSelectedSvc] = useState<string | null>(null);
-  const [userId, setUserId] = useState(user?.id ?? "");
+  const [userId, setUserId] = useState("");
   const [zoneId, setZoneId] = useState("");
   const [added, setAdded] = useState(false);
 
@@ -273,7 +273,7 @@ function ProductDetailView({ product }: { product: Product }) {
   const { user } = useAuthStore();
   const addItem = useCartStore((s) => s.addItem);
   const [selectedPkg, setSelectedPkg] = useState<string | null>(null);
-  const [userId, setUserId] = useState(user?.id ?? "");
+  const [userId, setUserId] = useState("");
   const [added, setAdded] = useState(false);
 
   const { data: packages = [] } = useQuery<ProductPackage[]>({

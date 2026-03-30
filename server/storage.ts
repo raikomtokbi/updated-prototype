@@ -174,7 +174,14 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   async createUser(insertUser: InsertUser) {
-    const id = randomUUID();
+    // Generate sequential numeric ID padded to minimum 6 digits
+    const allIds = await db.select({ id: users.id }).from(users);
+    const maxNum = allIds
+      .filter((u) => /^\d+$/.test(u.id))
+      .map((u) => parseInt(u.id, 10))
+      .reduce((max, n) => Math.max(max, n), 0);
+    const nextNum = maxNum + 1;
+    const id = String(nextNum).padStart(6, "0");
     await db.insert(users).values({ ...insertUser, id });
     return fetchAfter<User>(users, id, users.id);
   }
