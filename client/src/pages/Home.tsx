@@ -693,8 +693,8 @@ function Footer() {
     { label: "Subscriptions", href: "/products?category=subscription" },
   ];
   const LEGAL_LINKS = [
-    { label: "Support", href: "/support" },
     { label: "About Us", href: "/about" },
+    { label: "Support", href: "/support" },
     { label: "Terms & Services", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Refund Policy", href: "/refund-policy" },
