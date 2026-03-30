@@ -89,7 +89,7 @@ const statusBadge = (active: boolean): React.CSSProperties => ({
   color: active ? "hsl(142,71%,45%)" : "hsl(0,72%,51%)",
 });
 
-const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0, requiredFields: "userId" };
+const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0, requiredFields: "userId", instantDelivery: true };
 const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0 };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
@@ -287,7 +287,7 @@ function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v
 // ─── Game Form ────────────────────────────────────────────────────────────────
 function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; onSubmit: (d: any) => void; loading: boolean }) {
   const [form, setForm] = useState(initial);
-  const set = (k: string, v: string | number) => setForm((p) => ({ ...p, [k]: v }));
+  const set = (k: string, v: string | number | boolean) => setForm((p) => ({ ...p, [k]: v }));
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
@@ -339,6 +339,38 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
         value={form.requiredFields ?? "userId"}
         onChange={(v) => set("requiredFields", v)}
       />
+
+      {/* Instant Delivery toggle */}
+      <div>
+        <label style={labelStyle}>Instant Delivery</label>
+        <button
+          type="button"
+          onClick={() => set("instantDelivery", !form.instantDelivery)}
+          style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            width: "100%", padding: "10px 12px",
+            background: form.instantDelivery ? "rgba(74,222,128,0.08)" : "rgba(239,68,68,0.08)",
+            border: `1px solid ${form.instantDelivery ? "rgba(74,222,128,0.25)" : "rgba(239,68,68,0.25)"}`,
+            borderRadius: "7px", cursor: "pointer",
+          }}
+        >
+          <span style={{
+            width: "36px", height: "20px", borderRadius: "10px", flexShrink: 0,
+            background: form.instantDelivery ? "hsl(142,71%,45%)" : "hsl(220,10%,30%)",
+            position: "relative", transition: "background 0.2s",
+          }}>
+            <span style={{
+              position: "absolute", top: "3px",
+              left: form.instantDelivery ? "19px" : "3px",
+              width: "14px", height: "14px", borderRadius: "50%",
+              background: "white", transition: "left 0.2s",
+            }} />
+          </span>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: form.instantDelivery ? "hsl(142,71%,52%)" : "hsl(220,10%,55%)" }}>
+            {form.instantDelivery ? "Instant Delivery Enabled" : "Instant Delivery Disabled"}
+          </span>
+        </button>
+      </div>
 
       <button type="submit" style={{ ...btnPrimary, marginTop: "0.25rem", justifyContent: "center" }} disabled={loading}>
         {loading ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
@@ -659,7 +691,7 @@ export default function Games() {
       {editGame && (
         <Modal title="Edit Game" onClose={() => setEditGame(null)}>
           <GameForm
-            initial={{ name: editGame.name, slug: editGame.slug, description: editGame.description ?? "", logoUrl: editGame.logoUrl ?? "", bannerUrl: editGame.bannerUrl ?? "", category: editGame.category, status: editGame.status, sortOrder: editGame.sortOrder, requiredFields: editGame.requiredFields ?? "userId" }}
+            initial={{ name: editGame.name, slug: editGame.slug, description: editGame.description ?? "", logoUrl: editGame.logoUrl ?? "", bannerUrl: editGame.bannerUrl ?? "", category: editGame.category, status: editGame.status, sortOrder: editGame.sortOrder, requiredFields: editGame.requiredFields ?? "userId", instantDelivery: editGame.instantDelivery !== false }}
             onSubmit={(d) => editMut.mutate({ id: editGame.id, data: d })}
             loading={editMut.isPending}
           />

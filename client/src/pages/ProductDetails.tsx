@@ -297,14 +297,16 @@ function GameDetailView({ game }: { game: Game }) {
               </h1>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: "4px",
-                background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
-                border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
-                fontSize: "11px", fontWeight: 600, padding: "3px 9px",
-              }}>
-                <Zap size={10} /> Instant Delivery Supported
-              </span>
+              {game.instantDelivery && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "4px",
+                  background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
+                  border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
+                  fontSize: "11px", fontWeight: 600, padding: "3px 9px",
+                }}>
+                  <Zap size={10} /> Instant Delivery
+                </span>
+              )}
               <span className="badge badge-purple">Game Top-Up</span>
             </div>
           </div>
@@ -336,14 +338,16 @@ function GameDetailView({ game }: { game: Game }) {
               {game.name}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: "4px",
-                background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
-                border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
-                fontSize: "11px", fontWeight: 600, padding: "3px 9px",
-              }}>
-                <Zap size={10} /> Instant Delivery Supported
-              </span>
+              {game.instantDelivery && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "4px",
+                  background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
+                  border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
+                  fontSize: "11px", fontWeight: 600, padding: "3px 9px",
+                }}>
+                  <Zap size={10} /> Instant Delivery
+                </span>
+              )}
               <span className="badge badge-purple">Game Top-Up</span>
             </div>
           </div>
@@ -620,14 +624,16 @@ function ProductDetailView({ product }: { product: Product }) {
               {product.title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: "4px",
-                background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
-                border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
-                fontSize: "11px", fontWeight: 600, padding: "3px 9px",
-              }}>
-                <Zap size={10} /> Instant Delivery Supported
-              </span>
+              {product.instantDelivery && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "4px",
+                  background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
+                  border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
+                  fontSize: "11px", fontWeight: 600, padding: "3px 9px",
+                }}>
+                  <Zap size={10} /> Instant Delivery
+                </span>
+              )}
               <span className="badge badge-purple">{categoryLabel}</span>
             </div>
           </div>
@@ -659,14 +665,16 @@ function ProductDetailView({ product }: { product: Product }) {
               {product.title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: "4px",
-                background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
-                border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
-                fontSize: "11px", fontWeight: 600, padding: "3px 9px",
-              }}>
-                <Zap size={10} /> Instant Delivery Supported
-              </span>
+              {product.instantDelivery && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: "4px",
+                  background: "rgba(74,222,128,0.1)", color: "hsl(142,71%,52%)",
+                  border: "1px solid rgba(74,222,128,0.25)", borderRadius: "20px",
+                  fontSize: "11px", fontWeight: 600, padding: "3px 9px",
+                }}>
+                  <Zap size={10} /> Instant Delivery
+                </span>
+              )}
               <span className="badge badge-purple">{categoryLabel}</span>
             </div>
           </div>

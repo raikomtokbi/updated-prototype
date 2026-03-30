@@ -111,6 +111,7 @@ function ProductForm({
     description: initial.description ?? "",
     imageUrl: initial.imageUrl ?? "",
     isActive: initial.isActive !== false,
+    instantDelivery: initial.instantDelivery !== false,
     sortOrder: initial.sortOrder ?? 0,
   });
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
@@ -139,6 +140,39 @@ function ProductForm({
         </div>
       </div>
       <ImageUploadField label="Image" value={form.imageUrl} onChange={(url) => set("imageUrl", url)} inputStyle={inputStyle} labelStyle={labelStyle} />
+
+      {/* Instant Delivery toggle */}
+      <div>
+        <label style={labelStyle}>Instant Delivery</label>
+        <button
+          type="button"
+          onClick={() => set("instantDelivery", !form.instantDelivery)}
+          style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            width: "100%", padding: "10px 12px",
+            background: form.instantDelivery ? "rgba(74,222,128,0.08)" : "rgba(239,68,68,0.08)",
+            border: `1px solid ${form.instantDelivery ? "rgba(74,222,128,0.25)" : "rgba(239,68,68,0.25)"}`,
+            borderRadius: "7px", cursor: "pointer",
+          }}
+        >
+          <span style={{
+            width: "36px", height: "20px", borderRadius: "10px", flexShrink: 0,
+            background: form.instantDelivery ? "hsl(142,71%,45%)" : "hsl(220,10%,30%)",
+            position: "relative", transition: "background 0.2s",
+          }}>
+            <span style={{
+              position: "absolute", top: "3px",
+              left: form.instantDelivery ? "19px" : "3px",
+              width: "14px", height: "14px", borderRadius: "50%",
+              background: "white", transition: "left 0.2s",
+            }} />
+          </span>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: form.instantDelivery ? "hsl(142,71%,52%)" : "hsl(220,10%,55%)" }}>
+            {form.instantDelivery ? "Instant Delivery Enabled" : "Instant Delivery Disabled"}
+          </span>
+        </button>
+      </div>
+
       {initial.id && <PackageManager productId={initial.id} />}
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? "Saving..." : "Save Voucher"}
