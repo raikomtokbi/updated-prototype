@@ -170,10 +170,9 @@ export default function Subscriptions() {
   }, [plans, search, statusFilter]);
 
   return (
-    <AdminLayout title="Subscription Plans">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
-        <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> Add Plan</button>
-      </div>
+    <AdminLayout title="Subscription Plans" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> Add Plan</button>
+    }>
 
       <div style={card}>
         <Toolbar>

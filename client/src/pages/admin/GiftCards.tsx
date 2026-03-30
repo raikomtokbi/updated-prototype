@@ -201,13 +201,14 @@ export default function GiftCards() {
   }, [giftCards, search, statusFilter]);
 
   return (
-    <AdminLayout title="Gift Cards">
+    <AdminLayout title="Gift Cards" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-gift-card">
+        <Plus size={14} /> Add Gift Card
+      </button>
+    }>
       <Toolbar>
         <SearchInput value={search} onChange={setSearch} placeholder="Search gift cards..." />
         <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-        <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-gift-card">
-          <Plus size={14} /> Add Gift Card
-        </button>
       </Toolbar>
 
       <div style={card}>

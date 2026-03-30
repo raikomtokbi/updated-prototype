@@ -29,11 +29,24 @@ import {
   ShoppingBag,
   AlertTriangle,
   Info,
+  Menu,
+  X,
 } from "lucide-react";
+
 import { useAuthStore } from "@/lib/store/authstore";
 import { useSiteStore, type SiteStatus } from "@/lib/store/siteStore";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Notification } from "@shared/schema";
+
+export function useMobile(breakpoint = 1024) {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < breakpoint);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 interface NavItem {
   label: string;
@@ -114,7 +127,7 @@ const navSections: NavSection[] = [
   },
 ];
 
-function AdminSidebar() {
+function AdminSidebar({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
 
   return (
@@ -126,10 +139,10 @@ function AdminSidebar() {
         width: "256px",
         height: "100vh",
         background: "hsl(220, 20%, 7%)",
-        borderRight: "none",
+        borderRight: "1px solid hsl(220, 15%, 12%)",
         display: "flex",
         flexDirection: "column",
-        zIndex: 50,
+        zIndex: 200,
       }}
     >
       <div
@@ -137,7 +150,7 @@ function AdminSidebar() {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          padding: "0 20px",
+          padding: "0 16px",
           height: "52px",
           borderBottom: "1px solid hsl(220, 15%, 13%)",
           flexShrink: 0,
@@ -157,9 +170,29 @@ function AdminSidebar() {
         >
           <LayoutDashboard size={14} color="white" />
         </div>
-        <span style={{ fontWeight: 600, fontSize: "14px", color: "hsl(210, 40%, 95%)", letterSpacing: "0.02em" }}>
+        <span style={{ fontWeight: 600, fontSize: "14px", color: "hsl(210, 40%, 95%)", letterSpacing: "0.02em", flex: 1 }}>
           Admin Panel
         </span>
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "28px",
+              height: "28px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "hsl(220, 10%, 50%)",
+              borderRadius: "4px",
+              flexShrink: 0,
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
@@ -490,7 +523,7 @@ function NotificationBell() {
   );
 }
 
-function StatusButton() {
+function StatusButton({ compact = false }: { compact?: boolean }) {
   const { status, setStatus } = useSiteStore();
   const { open, setOpen, ref } = useDropdown();
 
@@ -510,8 +543,8 @@ function StatusButton() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "7px",
-          padding: "6px 12px",
+          gap: compact ? "0" : "7px",
+          padding: compact ? "6px" : "6px 12px",
           background: "hsl(220, 20%, 11%)",
           border: "1px solid hsl(220, 15%, 18%)",
           borderRadius: "6px",
@@ -520,11 +553,14 @@ function StatusButton() {
           fontSize: "12px",
           fontWeight: 500,
           whiteSpace: "nowrap",
+          minWidth: compact ? "34px" : undefined,
+          height: "34px",
+          justifyContent: compact ? "center" : undefined,
         }}
       >
-        <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: dotColor, flexShrink: 0, boxShadow: `0 0 5px ${dotColor}` }} />
-        {label}
-        <ChevronDown size={13} style={{ opacity: 0.5, marginLeft: "2px" }} />
+        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: dotColor, flexShrink: 0, boxShadow: `0 0 6px ${dotColor}` }} />
+        {!compact && label}
+        {!compact && <ChevronDown size={13} style={{ opacity: 0.5, marginLeft: "2px" }} />}
       </button>
 
       {open && (
@@ -575,7 +611,7 @@ function StatusButton() {
   );
 }
 
-function AdminAccountButton() {
+function AdminAccountButton({ compact = false }: { compact?: boolean }) {
   const { user, logout } = useAuthStore();
   const [, navigate] = useLocation();
   const { open, setOpen, ref } = useDropdown();
@@ -598,19 +634,20 @@ function AdminAccountButton() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          padding: "5px 10px 5px 5px",
+          gap: compact ? "0" : "8px",
+          padding: compact ? "3px" : "5px 10px 5px 5px",
           background: "hsl(220, 20%, 11%)",
           border: "1px solid hsl(220, 15%, 18%)",
           borderRadius: "6px",
           cursor: "pointer",
           color: "hsl(210, 40%, 90%)",
+          height: "34px",
         }}
       >
         <div
           style={{
-            width: "28px",
-            height: "28px",
+            width: "26px",
+            height: "26px",
             borderRadius: "50%",
             background: "hsl(258, 90%, 30%)",
             border: "1.5px solid hsl(258, 90%, 66%)",
@@ -625,10 +662,14 @@ function AdminAccountButton() {
         >
           {initials}
         </div>
-        <span style={{ fontSize: "12px", fontWeight: 500, maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {displayName}
-        </span>
-        <ChevronDown size={13} style={{ opacity: 0.5 }} />
+        {!compact && (
+          <>
+            <span style={{ fontSize: "12px", fontWeight: 500, maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {displayName}
+            </span>
+            <ChevronDown size={13} style={{ opacity: 0.5 }} />
+          </>
+        )}
       </button>
 
       {open && (
@@ -705,10 +746,17 @@ function AdminAccountButton() {
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
+  actions?: React.ReactNode;
 }
 
-export default function AdminLayout({ children, title }: AdminLayoutProps) {
+export default function AdminLayout({ children, title, actions }: AdminLayoutProps) {
   const { isStaff, isAuthenticated } = useAuthStore();
+  const isMobile = useMobile(1024);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isMobile) setSidebarOpen(false);
+  }, [isMobile]);
 
   if (!isAuthenticated) {
     return <Redirect to="/login" />;
@@ -720,44 +768,126 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "hsl(220, 20%, 6%)" }}>
-      <AdminSidebar />
+      {/* Desktop sidebar */}
+      {!isMobile && <AdminSidebar />}
+
+      {/* Mobile sidebar overlay + drawer */}
+      {isMobile && sidebarOpen && (
+        <>
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 190,
+              background: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(2px)",
+            }}
+          />
+          <AdminSidebar onClose={() => setSidebarOpen(false)} />
+        </>
+      )}
+
       <div
         style={{
-          marginLeft: "256px",
+          marginLeft: isMobile ? 0 : "256px",
           flex: 1,
           display: "flex",
           flexDirection: "column",
           overflowY: "auto",
           minHeight: "100vh",
-          borderLeft: "1px solid hsl(220, 15%, 13%)",
+          borderLeft: isMobile ? "none" : "1px solid hsl(220, 15%, 13%)",
+          minWidth: 0,
         }}
       >
-        <header
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 40,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 24px",
-            background: "hsl(220, 20%, 7%)",
-            borderBottom: "1px solid hsl(220, 15%, 13%)",
-            minHeight: "52px",
-            flexShrink: 0,
-            gap: "12px",
-          }}
-        >
-          <h1 style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flexShrink: 0 }}>
-            {title}
-          </h1>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <NotificationBell />
-            <StatusButton />
-            <AdminAccountButton />
-          </div>
-        </header>
-        <main style={{ flex: 1, padding: "24px" }}>
+        {/* ── Mobile header ── */}
+        {isMobile ? (
+          <header
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 14px",
+              background: "hsl(220, 20%, 7%)",
+              borderBottom: "1px solid hsl(220, 15%, 13%)",
+              height: "52px",
+              flexShrink: 0,
+              gap: "10px",
+            }}
+          >
+            <button
+              data-testid="button-mobile-menu"
+              onClick={() => setSidebarOpen(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "34px",
+                height: "34px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "hsl(258, 90%, 66%)",
+                flexShrink: 0,
+              }}
+            >
+              <Menu size={20} />
+            </button>
+
+            <h1 style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flex: 1, textAlign: "center", margin: 0 }}>
+              {title}
+            </h1>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+              <NotificationBell />
+              <StatusButton compact />
+              <AdminAccountButton compact />
+            </div>
+          </header>
+        ) : (
+          /* ── Desktop header ── */
+          <header
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 24px",
+              background: "hsl(220, 20%, 7%)",
+              borderBottom: "1px solid hsl(220, 15%, 13%)",
+              minHeight: "52px",
+              flexShrink: 0,
+              gap: "12px",
+            }}
+          >
+            <h1 style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flexShrink: 0 }}>
+              {title}
+            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "auto" }}>
+              {actions && (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingRight: "4px", borderRight: "1px solid hsl(220, 15%, 18%)", marginRight: "2px" }}>
+                  {actions}
+                </div>
+              )}
+              <NotificationBell />
+              <StatusButton />
+              <AdminAccountButton />
+            </div>
+          </header>
+        )}
+
+        <main style={{ flex: 1, padding: isMobile ? "16px" : "24px" }}>
+          {/* Mobile action buttons strip */}
+          {isMobile && actions && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+              {actions}
+            </div>
+          )}
           {children}
         </main>
       </div>

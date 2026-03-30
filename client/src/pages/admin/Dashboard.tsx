@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import AdminLayout from "@/components/admin/AdminLayout";
-import { Loader2, Database, DollarSign, ShoppingBag, CheckCircle, RotateCcw, Calendar, ChevronDown } from "lucide-react";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
+import { Loader2, Database, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown } from "lucide-react";
+import { useAuthStore } from "@/lib/store/authstore";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -132,66 +133,95 @@ export default function Dashboard() {
   const chartData = analytics?.salesTrend ?? [];
   const pieData = analytics?.orderStatus ?? [];
 
+  const isMobile = useMobile();
+  const { user } = useAuthStore();
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+  const displayName = user?.fullName || user?.username || "Admin";
+
   const statCards = [
     {
-      label: "Total Revenue",
+      label: "Sales",
       value: stats ? `$${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
-      icon: <DollarSign size={17} />,
+      icon: <DollarSign size={18} />,
       color: "hsl(258, 90%, 66%)",
-      sub: "All time",
+      sub: "Total revenue",
       testId: "stat-total-sales",
     },
     {
-      label: "Total Orders",
+      label: "Orders",
       value: stats ? stats.totalOrders.toLocaleString() : "—",
-      icon: <ShoppingBag size={17} />,
+      icon: <ShoppingBag size={18} />,
       color: "hsl(196, 100%, 50%)",
       sub: "All time",
       testId: "stat-total-orders",
     },
     {
-      label: "Total Users",
-      value: stats ? stats.totalUsers.toLocaleString() : "—",
-      icon: <CheckCircle size={17} />,
-      color: "hsl(142, 71%, 45%)",
-      sub: "Registered accounts",
-      testId: "stat-successful-orders",
+      label: "Tickets",
+      value: stats ? stats.openTickets.toLocaleString() : "—",
+      icon: <LifeBuoy size={18} />,
+      color: "hsl(38, 92%, 55%)",
+      sub: "Open tickets",
+      testId: "stat-open-tickets",
     },
     {
-      label: "Open Tickets",
-      value: stats ? stats.openTickets.toLocaleString() : "—",
-      icon: <RotateCcw size={17} />,
-      color: "hsl(0, 72%, 51%)",
-      sub: "Awaiting response",
-      testId: "stat-refund-orders",
+      label: "Users",
+      value: stats ? stats.totalUsers.toLocaleString() : "—",
+      icon: <Users size={18} />,
+      color: "hsl(142, 71%, 45%)",
+      sub: "Registered accounts",
+      testId: "stat-total-users",
     },
   ];
 
   return (
     <AdminLayout title="Dashboard">
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        {/* Stat cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "20px" }}>
+
+        {/* ── Greeting ──────────────────────────────────────────────── */}
+        {!isMobile && (
+          <div style={{ paddingBottom: "4px" }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0, lineHeight: 1.3 }}>
+              {greeting}, {displayName}
+            </h2>
+            <p style={{ fontSize: "13px", color: "hsl(220, 10%, 45%)", marginTop: "4px" }}>
+              Here's what's happening with your store today.
+            </p>
+          </div>
+        )}
+
+        {/* ── Stat cards ─────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+            gap: isMobile ? "12px" : "16px",
+          }}
+        >
           {statCards.map((sc) => (
-            <div key={sc.label} data-testid={sc.testId} style={card}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-                <span style={{ fontSize: "12px", color: "hsl(220, 10%, 50%)" }}>{sc.label}</span>
-                <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: `${sc.color}20`, color: sc.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={sc.label} data-testid={sc.testId} style={{ ...card, padding: isMobile ? "14px" : "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 48%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
+                <div style={{ width: "32px", height: "32px", borderRadius: "7px", background: `${sc.color}18`, color: sc.color, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${sc.color}28` }}>
                   {sc.icon}
                 </div>
               </div>
-              <div style={{ fontSize: "22px", fontWeight: 700, color: "hsl(210, 40%, 95%)", marginBottom: "4px" }}>{sc.value}</div>
-              <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{sc.sub}</div>
+              <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: 700, color: "hsl(210, 40%, 95%)", marginBottom: "4px", lineHeight: 1.1 }}>{sc.value}</div>
+              <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>{sc.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Setup / Seed demo data */}
+        {/* ── Setup / Seed demo data ──────────────────────────────────── */}
         {gameList.length === 0 && !seedDone && (
-          <div style={{ background: "hsl(258,70%,10%)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "8px", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+          <div style={{ background: "hsl(258,70%,10%)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "8px", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "38px", height: "38px", borderRadius: "8px", background: "rgba(124,58,237,0.15)", color: "hsl(258,90%,66%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Database size={18} />
+              <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "rgba(124,58,237,0.15)", color: "hsl(258,90%,66%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Database size={17} />
               </div>
               <div>
                 <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)" }}>No data yet — Load sample data to get started</div>
@@ -205,39 +235,42 @@ export default function Dashboard() {
               data-testid="button-seed-data"
             >
               {seedMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Database size={13} />}
-              {seedMut.isPending ? "Loading sample data..." : "Load Sample Data"}
+              {seedMut.isPending ? "Loading..." : "Load Sample Data"}
             </button>
           </div>
         )}
         {seedDone && (
           <div style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "8px", padding: "12px 18px", fontSize: "13px", color: "hsl(142,71%,48%)" }}>
-            Sample data loaded successfully. Refresh the page to see it on the storefront.
+            Sample data loaded. Refresh the page to see it on the storefront.
           </div>
         )}
 
-        {/* Date range filter row */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
-          <span style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>Showing data for:</span>
-          <DateRangeFilter
-            selected={rangeKey}
-            onSelect={setRangeKey}
-            customRange={customRange}
-            onCustomRange={setCustomRange}
-          />
-        </div>
-
-        {/* Charts */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "16px" }}>
+        {/* ── Charts ─────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 340px",
+            gap: isMobile ? "14px" : "16px",
+          }}
+        >
+          {/* Sales Trend */}
           <div style={{ ...card, padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Revenue Trend</span>
-              <span style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{rangeOptions.find((r) => r.key === rangeKey)?.label ?? "Custom range"}</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "8px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Sales Trend</span>
+              <DateRangeFilter
+                selected={rangeKey}
+                onSelect={setRangeKey}
+                customRange={customRange}
+                onCustomRange={setCustomRange}
+              />
             </div>
             {analyticsLoading ? (
-              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px" }}>Loading...</div>
+              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
+                <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                <span style={{ fontSize: "13px" }}>Loading...</span>
+              </div>
             ) : chartData.length === 0 ? (
               <div style={{ height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
-                <span style={{ fontSize: "24px", opacity: 0.3 }}>📊</span>
                 No data available for this period.
               </div>
             ) : (
@@ -259,13 +292,24 @@ export default function Dashboard() {
             )}
           </div>
 
+          {/* Order Status */}
           <div style={{ ...card, padding: "20px" }}>
-            <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", marginBottom: "8px" }}>Order Status</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "8px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Order Status</span>
+              <DateRangeFilter
+                selected={rangeKey}
+                onSelect={setRangeKey}
+                customRange={customRange}
+                onCustomRange={setCustomRange}
+              />
+            </div>
             {analyticsLoading ? (
-              <div style={{ height: 190, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px" }}>Loading...</div>
+              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
+                <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+                <span style={{ fontSize: "13px" }}>Loading...</span>
+              </div>
             ) : pieData.length === 0 ? (
-              <div style={{ height: 190, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
-                <span style={{ fontSize: "20px", opacity: 0.3 }}>🥧</span>
+              <div style={{ height: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
                 No orders yet.
               </div>
             ) : (
@@ -279,14 +323,14 @@ export default function Dashboard() {
                     <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(220, 10%, 52%)" }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "7px" }}>
                   {pieData.map((item, i) => (
                     <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length] }} />
+                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
                         <span style={{ fontSize: "12px", color: "hsl(220, 10%, 52%)" }}>{item.name}</span>
                       </div>
-                      <span style={{ fontSize: "12px", fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{item.value}%</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 90%)" }}>{item.value}%</span>
                     </div>
                   ))}
                 </div>

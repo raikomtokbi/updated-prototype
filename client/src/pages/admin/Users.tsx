@@ -284,16 +284,11 @@ export default function Users() {
   }, [users, search, roleFilter, statusFilter]);
 
   return (
-    <AdminLayout title="User Manager">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <div>
-          <h2 style={{ fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>All Users</h2>
-          <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", margin: "2px 0 0" }}>{users.length} user{users.length !== 1 ? "s" : ""} registered</p>
-        </div>
-        <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-user">
-          <Plus size={14} /> Add User
-        </button>
-      </div>
+    <AdminLayout title="User Manager" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-user">
+        <Plus size={14} /> Add User
+      </button>
+    }>
 
       <div style={card}>
         <Toolbar>

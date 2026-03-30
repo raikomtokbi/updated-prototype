@@ -350,16 +350,11 @@ export default function Games() {
   });
 
   return (
-    <AdminLayout title="Games">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <div>
-          <h2 style={{ fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>All Games</h2>
-          <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", margin: "2px 0 0" }}>{gameList.length} game{gameList.length !== 1 ? "s" : ""} total</p>
-        </div>
-        <button style={btnPrimary} onClick={() => setShowAdd(true)}>
-          <Plus size={14} /> Add Game
-        </button>
-      </div>
+    <AdminLayout title="Games" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)}>
+        <Plus size={14} /> Add Game
+      </button>
+    }>
 
       <div style={card}>
         {isLoading ? (

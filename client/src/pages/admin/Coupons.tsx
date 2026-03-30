@@ -154,10 +154,9 @@ export default function Coupons() {
   }, [coupons, search, typeFilter, statusFilter]);
 
   return (
-    <AdminLayout title="Coupons">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
-        <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> New Coupon</button>
-      </div>
+    <AdminLayout title="Coupons" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> New Coupon</button>
+    }>
 
       <div style={card}>
         <Toolbar>

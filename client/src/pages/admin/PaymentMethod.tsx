@@ -217,16 +217,11 @@ export default function PaymentMethodPage() {
   });
 
   return (
-    <AdminLayout title="Payment Methods">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <div>
-          <h2 style={{ fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>Payment Gateways</h2>
-          <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", margin: "2px 0 0" }}>{methods.length} gateway{methods.length !== 1 ? "s" : ""} configured</p>
-        </div>
-        <button style={btnPrimary} onClick={() => setShowAdd(true)}>
-          <Plus size={14} /> Add Gateway
-        </button>
-      </div>
+    <AdminLayout title="Payment Methods" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)}>
+        <Plus size={14} /> Add Gateway
+      </button>
+    }>
 
       {isLoading ? (
         <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading...</div>
