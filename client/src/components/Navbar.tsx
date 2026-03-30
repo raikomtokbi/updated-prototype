@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Zap, Menu, X, Search, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ShoppingCart, User, Zap, Menu, X, Search, LogOut, Gamepad2, Gift, Ticket, RefreshCcw } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
@@ -13,11 +13,164 @@ const NAV_LINKS = [
   { href: "/about", label: "About" },
 ];
 
+const CATEGORY_ICON: Record<string, React.ReactNode> = {
+  game_currency: <Gamepad2 size={13} />,
+  gift_card: <Gift size={13} />,
+  voucher: <Ticket size={13} />,
+  subscription: <RefreshCcw size={13} />,
+};
+
+const CATEGORY_LABEL: Record<string, string> = {
+  game_currency: "Games",
+  gift_card: "Gift Card",
+  voucher: "Voucher",
+  subscription: "Subscription",
+};
+
+interface SearchItem {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  imageUrl?: string;
+  type: "game" | "product";
+}
+
+function useSearchDropdown(searchVal: string, onClose: () => void) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [onClose]);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return containerRef;
+}
+
+function SearchDropdown({
+  results,
+  query,
+  onSelect,
+}: {
+  results: SearchItem[];
+  query: string;
+  onSelect: () => void;
+}) {
+  if (!query.trim() || results.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "calc(100% + 6px)",
+        left: 0,
+        right: 0,
+        background: "hsl(220, 22%, 9%)",
+        border: "1px solid rgba(124, 58, 237, 0.3)",
+        borderRadius: "10px",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.6)",
+        zIndex: 2000,
+        overflow: "hidden",
+        maxHeight: "360px",
+        overflowY: "auto",
+      }}
+    >
+      {results.slice(0, 8).map((item) => (
+        <Link
+          key={item.id}
+          href={`/products/${item.slug}`}
+          onClick={onSelect}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "9px 12px",
+            textDecoration: "none",
+            borderBottom: "1px solid rgba(124,58,237,0.08)",
+            transition: "background 0.12s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.1)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+        >
+          {/* Thumbnail */}
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              flexShrink: 0,
+              overflow: "hidden",
+              background: "rgba(124,58,237,0.12)",
+              border: "1px solid rgba(124,58,237,0.18)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "rgba(167,139,250,0.7)",
+            }}
+          >
+            {item.imageUrl ? (
+              <img
+                src={item.imageUrl}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              CATEGORY_ICON[item.category] ?? <Gamepad2 size={13} />
+            )}
+          </div>
+
+          {/* Info */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: "hsl(210,40%,90%)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {item.name}
+            </div>
+            <div style={{ fontSize: "0.7rem", color: "rgba(148,163,184,0.55)", marginTop: "1px" }}>
+              {CATEGORY_LABEL[item.category] ?? item.category}
+            </div>
+          </div>
+
+          {/* Arrow hint */}
+          <div style={{ color: "rgba(167,139,250,0.4)", fontSize: "0.7rem", flexShrink: 0 }}>→</div>
+        </Link>
+      ))}
+
+      {results.length === 0 && query.trim() && (
+        <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.78rem", color: "rgba(148,163,184,0.4)" }}>
+          No results for "{query}"
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const [location, navigate] = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user, logout } = useAuthStore();
 
@@ -27,6 +180,56 @@ export default function Navbar() {
   });
   const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
   const siteLogo = siteSettings?.site_logo || "";
+
+  const { data: games = [] } = useQuery<any[]>({
+    queryKey: ["/api/games"],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: products = [] } = useQuery<any[]>({
+    queryKey: ["/api/products"],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const searchItems: SearchItem[] = useMemo(() => {
+    const g: SearchItem[] = games
+      .filter((g: any) => g.status === "active")
+      .map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        slug: g.slug,
+        category: g.category ?? "game_currency",
+        imageUrl: g.logoUrl || "",
+        type: "game",
+      }));
+    const p: SearchItem[] = products
+      .filter((p: any) => p.isActive)
+      .map((p: any) => ({
+        id: p.id,
+        name: p.title,
+        slug: p.slug,
+        category: p.category,
+        imageUrl: p.imageUrl || "",
+        type: "product",
+      }));
+    return [...g, ...p];
+  }, [games, products]);
+
+  const filteredResults = useMemo(() => {
+    if (!searchVal.trim()) return [];
+    const q = searchVal.trim().toLowerCase();
+    return searchItems.filter((item) => item.name.toLowerCase().includes(q));
+  }, [searchItems, searchVal]);
+
+  const showDropdown = dropdownOpen && searchVal.trim().length > 0;
+
+  function handleSelect() {
+    setSearchVal("");
+    setDropdownOpen(false);
+    setSearchOpen(false);
+  }
+
+  const desktopRef = useSearchDropdown(searchVal, () => setDropdownOpen(false));
 
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [location]);
@@ -136,8 +339,9 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop: search bar */}
+          {/* Desktop: search bar with dropdown */}
           <div
+            ref={desktopRef}
             className="search-bar-desktop"
             style={{ flex: 1, maxWidth: "360px", position: "relative" }}
           >
@@ -150,18 +354,17 @@ export default function Navbar() {
                 transform: "translateY(-50%)",
                 color: "rgba(148, 163, 184, 0.5)",
                 pointerEvents: "none",
+                zIndex: 1,
               }}
             />
             <input
               type="text"
               placeholder="Search games, gift cards..."
               value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && searchVal.trim()) {
-                  navigate(`/products?search=${encodeURIComponent(searchVal)}`);
-                  setSearchVal("");
-                }
+              onChange={(e) => { setSearchVal(e.target.value); setDropdownOpen(true); }}
+              onFocus={() => setDropdownOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") { setDropdownOpen(false); setSearchVal(""); }
               }}
               data-testid="input-navbar-search"
               style={{
@@ -174,9 +377,17 @@ export default function Navbar() {
                 fontSize: "0.78rem",
                 outline: "none",
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.55)"; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.55)"; }}
+              onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
+              onBlurCapture={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
             />
+            {showDropdown && (
+              <SearchDropdown
+                results={filteredResults}
+                query={searchVal}
+                onSelect={handleSelect}
+              />
+            )}
           </div>
 
           {/* Desktop: nav links */}
@@ -210,7 +421,7 @@ export default function Navbar() {
 
             {/* Mobile: search icon toggle */}
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={() => { setSearchOpen(!searchOpen); setDropdownOpen(true); }}
               className="mobile-only"
               aria-label="Search"
               style={{
@@ -381,31 +592,39 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: expandable search bar */}
+        {/* Mobile: expandable search bar with dropdown */}
         {searchOpen && (
           <div
             className="mobile-only"
             style={{
               padding: "0.6rem 1rem",
               borderTop: "1px solid rgba(124,58,237,0.12)",
+              position: "relative",
             }}
           >
+            <Search
+              size={13}
+              style={{
+                position: "absolute",
+                left: "1.75rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(148, 163, 184, 0.45)",
+                pointerEvents: "none",
+              }}
+            />
             <input
               type="text"
               placeholder="Search games, gift cards..."
               value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && searchVal.trim()) {
-                  navigate(`/products?search=${encodeURIComponent(searchVal)}`);
-                  setSearchVal("");
-                  setSearchOpen(false);
-                }
+              onChange={(e) => { setSearchVal(e.target.value); setDropdownOpen(true); }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") { setDropdownOpen(false); setSearchVal(""); setSearchOpen(false); }
               }}
               autoFocus
               style={{
                 width: "100%",
-                padding: "0.55rem 1rem",
+                padding: "0.55rem 1rem 0.55rem 2.1rem",
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(124, 58, 237, 0.3)",
                 borderRadius: "8px",
@@ -415,6 +634,73 @@ export default function Navbar() {
                 boxSizing: "border-box",
               }}
             />
+            {/* Mobile dropdown */}
+            {showDropdown && filteredResults.length > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: "1rem",
+                  right: "1rem",
+                  background: "hsl(220, 22%, 9%)",
+                  border: "1px solid rgba(124, 58, 237, 0.3)",
+                  borderRadius: "10px",
+                  boxShadow: "0 16px 40px rgba(0,0,0,0.6)",
+                  zIndex: 2000,
+                  overflow: "hidden",
+                  maxHeight: "280px",
+                  overflowY: "auto",
+                }}
+              >
+                {filteredResults.slice(0, 6).map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/products/${item.slug}`}
+                    onClick={handleSelect}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "9px 12px",
+                      textDecoration: "none",
+                      borderBottom: "1px solid rgba(124,58,237,0.08)",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.1)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  >
+                    <div
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "6px",
+                        flexShrink: 0,
+                        overflow: "hidden",
+                        background: "rgba(124,58,237,0.12)",
+                        border: "1px solid rgba(124,58,237,0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "rgba(167,139,250,0.7)",
+                      }}
+                    >
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        CATEGORY_ICON[item.category] ?? <Gamepad2 size={12} />
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(210,40%,90%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {item.name}
+                      </div>
+                      <div style={{ fontSize: "0.7rem", color: "rgba(148,163,184,0.5)" }}>
+                        {CATEGORY_LABEL[item.category] ?? item.category}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </nav>
@@ -638,7 +924,6 @@ export default function Navbar() {
                     color: "white",
                     background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
                     textAlign: "center",
-                    boxShadow: "0 0 12px rgba(124,58,237,0.25)",
                   }}
                 >
                   Login
@@ -647,23 +932,19 @@ export default function Navbar() {
             )}
           </div>
         </nav>
-      </div>
 
-      {/* CSS for show/hide on mobile vs desktop */}
-      <style>{`
-        @media (max-width: 768px) {
-          .search-bar-desktop { display: none !important; }
-          .nav-links-desktop { display: none !important; }
-          .desktop-only { display: none !important; }
-          .mobile-menu-btn { display: flex !important; }
-          .mobile-only { display: block !important; }
-        }
-        @media (min-width: 769px) {
-          .mobile-menu-btn { display: none !important; }
-          .mobile-only { display: none !important; }
-          .desktop-only { display: inline-flex !important; }
-        }
-      `}</style>
+        {/* Drawer footer */}
+        <div
+          style={{
+            padding: "1rem 1.25rem",
+            borderTop: "1px solid rgba(124,58,237,0.12)",
+            fontSize: "0.72rem",
+            color: "rgba(148,163,184,0.35)",
+          }}
+        >
+          {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}
+        </div>
+      </div>
     </>
   );
 }
