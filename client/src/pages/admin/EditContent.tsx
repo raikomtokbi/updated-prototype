@@ -69,9 +69,6 @@ const DEFAULTS: SettingsMap = {
   hero_bg_image: "",
   og_image: "",
   about_banner: "",
-  about_headline: "",
-  about_tagline: "",
-  about_story: "",
   faq_items: "[]",
 };
 
@@ -621,6 +618,61 @@ export default function EditContent() {
         </p>
       </div>
 
+      {/* ── Homepage Content ───────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Default Hero Title (fallback when no sliders)</label>
+            <input
+              data-testid="input-hero-title"
+              style={inputStyle}
+              value={local.hero_title ?? ""}
+              onChange={(e) => set("hero_title", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Default Hero Subtitle</label>
+            <textarea
+              data-testid="input-hero-subtitle"
+              style={{ ...textareaStyle, minHeight: "60px" }}
+              value={local.hero_subtitle ?? ""}
+              onChange={(e) => set("hero_subtitle", e.target.value)}
+            />
+          </div>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Announcement Banner</label>
+              <button
+                data-testid="toggle-announcement"
+                onClick={() => toggleBool("announcement_enabled")}
+                style={{
+                  fontSize: "11px",
+                  padding: "3px 10px",
+                  borderRadius: "4px",
+                  background: bool("announcement_enabled") ? "rgba(139, 92, 246, 0.15)" : "hsl(220, 15%, 13%)",
+                  color: bool("announcement_enabled") ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 50%)",
+                  border: "1px solid hsl(220, 15%, 20%)",
+                  cursor: "pointer",
+                }}
+              >
+                {bool("announcement_enabled") ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+            <input
+              data-testid="input-announcement-text"
+              style={inputStyle}
+              value={local.announcement_text ?? ""}
+              onChange={(e) => set("announcement_text", e.target.value)}
+              placeholder="Announcement banner text…"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* ── Hero Sliders ──────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
@@ -737,132 +789,33 @@ export default function EditContent() {
         </div>
       </div>
 
-      {/* ── Homepage Content ───────────────────────────────────────────────── */}
+      {/* ── Media Assets ───────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content</span>
+          <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Media Assets</span>
         </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div>
-            <label style={labelStyle}>Default Hero Title (fallback when no sliders)</label>
-            <input
-              data-testid="input-hero-title"
-              style={inputStyle}
-              value={local.hero_title ?? ""}
-              onChange={(e) => set("hero_title", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Default Hero Subtitle</label>
-            <textarea
-              data-testid="input-hero-subtitle"
-              style={{ ...textareaStyle, minHeight: "60px" }}
-              value={local.hero_subtitle ?? ""}
-              onChange={(e) => set("hero_subtitle", e.target.value)}
-            />
-          </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Announcement Banner</label>
-              <button
-                data-testid="toggle-announcement"
-                onClick={() => toggleBool("announcement_enabled")}
-                style={{
-                  fontSize: "11px",
-                  padding: "3px 10px",
-                  borderRadius: "4px",
-                  background: bool("announcement_enabled") ? "rgba(139, 92, 246, 0.15)" : "hsl(220, 15%, 13%)",
-                  color: bool("announcement_enabled") ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 50%)",
-                  border: "1px solid hsl(220, 15%, 20%)",
-                  cursor: "pointer",
-                }}
-              >
-                {bool("announcement_enabled") ? "Enabled" : "Disabled"}
-              </button>
-            </div>
-            <input
-              data-testid="input-announcement-text"
-              style={inputStyle}
-              value={local.announcement_text ?? ""}
-              onChange={(e) => set("announcement_text", e.target.value)}
-              placeholder="Announcement banner text…"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Legal Pages ────────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Legal Pages</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "4px" }}>
-            Override the default static content for each legal page. Leave blank to use the built-in defaults.
-          </p>
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
           {[
-            { key: "terms_content", label: "Terms of Service" },
-            { key: "privacy_content", label: "Privacy Policy" },
-            { key: "refund_content", label: "Refund Policy" },
+            { key: "hero_bg_image", label: "Hero Background (fallback)" },
+            { key: "og_image", label: "OG / Share Image" },
+            { key: "about_banner", label: "About Page Banner" },
           ].map((item) => (
-            <div key={item.key}>
-              <label style={labelStyle}>{item.label}</label>
-              <textarea
-                data-testid={`input-${item.key}`}
-                style={{ ...textareaStyle, minHeight: "120px" }}
-                value={local[item.key] ?? ""}
-                onChange={(e) => set(item.key, e.target.value)}
-                placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
-              />
-            </div>
+            <ImageUploadField
+              key={item.key}
+              label={item.label}
+              value={local[item.key] ?? ""}
+              onChange={(url) => set(item.key, url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="rectangle"
+            />
           ))}
         </div>
       </div>
 
-      {/* ── About Page ─────────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>About Page</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "2px" }}>
-            Customize the public About Us page. Leave any field blank to use the built-in default.
-          </p>
-          <div>
-            <label style={labelStyle}>Page Headline</label>
-            <input
-              style={inputStyle}
-              value={local.about_headline ?? ""}
-              onChange={(e) => set("about_headline", e.target.value)}
-              placeholder="About Us (defaults to site name)"
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Tagline / Intro</label>
-            <textarea
-              style={{ ...textareaStyle, minHeight: "70px" }}
-              value={local.about_tagline ?? ""}
-              onChange={(e) => set("about_tagline", e.target.value)}
-              placeholder="Short intro paragraph shown under the headline…"
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Our Story</label>
-            <textarea
-              style={{ ...textareaStyle, minHeight: "130px" }}
-              value={local.about_story ?? ""}
-              onChange={(e) => set("about_story", e.target.value)}
-              placeholder="Tell visitors your story — how you started, your mission, etc…"
-            />
-          </div>
-        </div>
-      </div>
-
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
-      <div style={card}>
+      <div style={{ ...card, marginBottom: 0 }}>
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
@@ -949,31 +902,6 @@ export default function EditContent() {
               </div>
             ));
           })()}
-        </div>
-      </div>
-
-      {/* ── Media Assets ───────────────────────────────────────────────────── */}
-      <div style={{ ...card, marginBottom: 0 }}>
-        <div style={sectionHeader}>
-          <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Media Assets</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-          {[
-            { key: "hero_bg_image", label: "Hero Background (fallback)" },
-            { key: "og_image", label: "OG / Share Image" },
-            { key: "about_banner", label: "About Page Banner" },
-          ].map((item) => (
-            <ImageUploadField
-              key={item.key}
-              label={item.label}
-              value={local[item.key] ?? ""}
-              onChange={(url) => set(item.key, url)}
-              inputStyle={inputStyle}
-              labelStyle={labelStyle}
-              ratio="rectangle"
-            />
-          ))}
         </div>
       </div>
     </AdminLayout>

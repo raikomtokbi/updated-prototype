@@ -171,6 +171,14 @@ const DEFAULTS: SettingsMap = {
   // Footer
   footer_copyright: "© 2024 Nexcoin. All rights reserved.",
   footer_support_email: "support@nexcoin.gg",
+  // Legal page content
+  terms_content: "",
+  privacy_content: "",
+  refund_content: "",
+  // About page
+  about_headline: "",
+  about_tagline: "",
+  about_story: "",
   // Contact
   contact_email: "support@nexcoin.gg",
   contact_phone: "+1 (800) 123-4567",
@@ -786,43 +794,69 @@ export default function ControlPanel() {
             />
           </div>
         </div>
-        <div style={{ padding: "0 20px 6px" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220, 15%, 12%)", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+            Override the default content for each legal page. Leave blank to use the built-in defaults.
+          </p>
           {[
-            { key: "terms_of_service", label: "Terms of Service" },
-            { key: "privacy_policy", label: "Privacy Policy" },
-            { key: "refund_policy", label: "Refund Policy" },
-          ].map((doc) => (
-            <div
-              key={doc.key}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 0",
-                borderTop: "1px solid hsl(220, 15%, 12%)",
-                gap: "12px",
-              }}
-            >
-              <span style={{ fontSize: "13px", color: "hsl(210, 40%, 80%)" }}>{doc.label}</span>
-              <a
-                data-testid={`button-edit-${doc.key}`}
-                href="/admin/edit-content"
-                style={{
-                  padding: "5px 14px",
-                  borderRadius: "5px",
-                  fontSize: "12px",
-                  background: "hsl(220, 15%, 13%)",
-                  color: "hsl(210, 40%, 70%)",
-                  border: "1px solid hsl(220, 15%, 18%)",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  display: "inline-block",
-                }}
-              >
-                Edit
-              </a>
+            { key: "terms_content", label: "Terms of Service" },
+            { key: "privacy_content", label: "Privacy Policy" },
+            { key: "refund_content", label: "Refund Policy" },
+          ].map((item) => (
+            <div key={item.key}>
+              <label style={labelStyle}>{item.label}</label>
+              <textarea
+                data-testid={`input-${item.key}`}
+                style={{ ...textareaStyle, minHeight: "110px" }}
+                value={local[item.key] ?? ""}
+                onChange={(e) => set(item.key, e.target.value)}
+                placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
+              />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── About Us Page ───────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>About Us Page</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+            Customize the public About Us page. Leave any field blank to use the built-in default.
+          </p>
+          <div>
+            <label style={labelStyle}>Page Headline</label>
+            <input
+              data-testid="input-about-headline"
+              style={inputStyle}
+              value={local.about_headline ?? ""}
+              onChange={(e) => set("about_headline", e.target.value)}
+              placeholder="About Us (defaults to site name)"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Tagline / Intro</label>
+            <textarea
+              data-testid="input-about-tagline"
+              style={{ ...textareaStyle, minHeight: "70px" }}
+              value={local.about_tagline ?? ""}
+              onChange={(e) => set("about_tagline", e.target.value)}
+              placeholder="Short intro paragraph shown under the headline…"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Our Story</label>
+            <textarea
+              data-testid="input-about-story"
+              style={{ ...textareaStyle, minHeight: "130px" }}
+              value={local.about_story ?? ""}
+              onChange={(e) => set("about_story", e.target.value)}
+              placeholder="Tell visitors your story — how you started, your mission, etc…"
+            />
+          </div>
         </div>
       </div>
 
