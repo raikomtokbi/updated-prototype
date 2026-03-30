@@ -312,10 +312,6 @@ export default function Dashboard() {
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>
-            ) : chartData.length === 0 ? (
-              <div style={{ height: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
-                No data available for this period.
-              </div>
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
@@ -350,10 +346,6 @@ export default function Dashboard() {
               <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
-              </div>
-            ) : pieData.length === 0 ? (
-              <div style={{ height: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", fontSize: "13px", gap: "6px" }}>
-                No orders yet.
               </div>
             ) : (
               <>
