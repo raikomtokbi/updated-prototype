@@ -44,6 +44,7 @@ export const games = pgTable("games", {
   status: varchar("status", { length: 20 }).notNull().default("active"),
   isTrending: boolean("is_trending").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
+  pluginSlug: varchar("plugin_slug", { length: 100 }),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -61,6 +62,7 @@ export const services = pgTable("services", {
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
   sortOrder: integer("sort_order").notNull().default(0),
+  pluginSlug: varchar("plugin_slug", { length: 100 }),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

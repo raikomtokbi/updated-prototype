@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Unlink } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
-import type { Game, Service } from "@shared/schema";
+import type { Game, Service, Plugin } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
@@ -67,6 +67,19 @@ const btnEdit: React.CSSProperties = {
   fontSize: "11px",
   cursor: "pointer",
 };
+const btnMap: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "4px",
+  padding: "5px 10px",
+  borderRadius: "5px",
+  background: "rgba(34,211,238,0.08)",
+  border: "1px solid rgba(34,211,238,0.2)",
+  color: "hsl(187,100%,42%)",
+  fontSize: "11px",
+  cursor: "pointer",
+};
+
 const statusBadge = (active: boolean): React.CSSProperties => ({
   padding: "2px 8px",
   borderRadius: "4px",
@@ -90,6 +103,115 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
         </div>
         {children}
+      </div>
+    </div>
+  );
+}
+
+// ─── Map Plugin Modal ─────────────────────────────────────────────────────────
+type MapTarget = { type: "game" | "service"; id: string; name: string; currentSlug?: string | null };
+
+function MapPluginModal({
+  target,
+  onClose,
+  onMap,
+  loading,
+  description,
+}: {
+  target: MapTarget;
+  onClose: () => void;
+  onMap: (slug: string | null) => void;
+  loading: boolean;
+  description: string;
+}) {
+  const { data: plugins = [], isLoading } = useQuery<Plugin[]>({
+    queryKey: ["/api/admin/plugins"],
+    queryFn: () => adminApi.get("/plugins"),
+  });
+
+  const [selected, setSelected] = useState<string | null>(target.currentSlug ?? null);
+
+  const enabledPlugins = plugins.filter((p) => p.isEnabled);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
+      <div style={{ position: "relative", width: "100%", maxWidth: "460px", background: "hsl(220,22%,8%)", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "10px", padding: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Plug size={15} color="hsl(187,100%,42%)" />
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>Map Plugin</h3>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
+        </div>
+        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "16px", marginTop: "4px" }}>
+          <span style={{ color: "hsl(187,100%,42%)" }}>{target.name}</span> — {description}
+        </p>
+
+        {isLoading ? (
+          <div style={{ textAlign: "center", padding: "1.5rem", color: "hsl(220,10%,40%)", fontSize: "13px" }}>Loading plugins...</div>
+        ) : enabledPlugins.length === 0 ? (
+          <div style={{ padding: "1.25rem", background: "hsl(220,20%,10%)", borderRadius: "6px", border: "1px dashed hsl(220,15%,20%)", textAlign: "center" }}>
+            <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)", margin: 0 }}>No enabled plugins found.</p>
+            <p style={{ fontSize: "11px", color: "hsl(220,10%,30%)", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "260px", overflowY: "auto" }}>
+            {/* None option */}
+            <label
+              style={{
+                display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
+                borderRadius: "6px", cursor: "pointer",
+                background: selected === null ? "rgba(34,211,238,0.07)" : "hsl(220,20%,10%)",
+                border: `1px solid ${selected === null ? "rgba(34,211,238,0.3)" : "hsl(220,15%,16%)"}`,
+              }}
+            >
+              <input type="radio" name="plugin" checked={selected === null} onChange={() => setSelected(null)}
+                style={{ accentColor: "hsl(187,100%,42%)" }} />
+              <div>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,70%)" }}>No Plugin</div>
+                <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>Remove mapping</div>
+              </div>
+            </label>
+
+            {enabledPlugins.map((p) => (
+              <label
+                key={p.slug}
+                style={{
+                  display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
+                  borderRadius: "6px", cursor: "pointer",
+                  background: selected === p.slug ? "rgba(34,211,238,0.07)" : "hsl(220,20%,10%)",
+                  border: `1px solid ${selected === p.slug ? "rgba(34,211,238,0.3)" : "hsl(220,15%,16%)"}`,
+                }}
+              >
+                <input type="radio" name="plugin" checked={selected === p.slug} onChange={() => setSelected(p.slug)}
+                  style={{ accentColor: "hsl(187,100%,42%)" }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>{p.name}</div>
+                  <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", display: "flex", gap: "6px", alignItems: "center" }}>
+                    <code style={{ background: "hsl(220,20%,14%)", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
+                    {p.description && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description}</span>}
+                  </div>
+                </div>
+                {selected === p.slug && <span style={{ color: "hsl(187,100%,42%)", fontSize: "10px", fontWeight: 600, flexShrink: 0 }}>SELECTED</span>}
+              </label>
+            ))}
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
+          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(220,15%,16%)", color: "hsl(220,10%,50%)", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
+            Cancel
+          </button>
+          <button
+            onClick={() => onMap(selected)}
+            disabled={loading}
+            style={{ ...btnMap, padding: "7px 16px", fontSize: "12px", fontWeight: 600, opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Plug size={12} />}
+            {loading ? "Saving..." : "Apply Mapping"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -232,6 +354,7 @@ function ServicesPanel({ game }: { game: Game }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editSvc, setEditSvc] = useState<Service | null>(null);
+  const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
 
   const { data: svcs = [], isLoading } = useQuery<Service[]>({
     queryKey: [`/api/admin/services?gameId=${game.id}`],
@@ -249,6 +372,14 @@ function ServicesPanel({ game }: { game: Game }) {
   const delMut = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/services/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }),
+  });
+  const mapMut = useMutation({
+    mutationFn: ({ id, pluginSlug }: { id: string; pluginSlug: string | null }) =>
+      adminApi.patch(`/services/${id}`, { pluginSlug }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
+      setMapTarget(null);
+    },
   });
 
   return (
@@ -277,13 +408,28 @@ function ServicesPanel({ game }: { game: Game }) {
             <tbody>
               {svcs.map((s) => (
                 <tr key={s.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                  <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(210,40%,90%)" }}>{s.name}</td>
+                  <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(210,40%,90%)" }}>
+                    <div>{s.name}</div>
+                    {s.pluginSlug && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                        <Plug size={9} color="hsl(187,100%,42%)" />
+                        <span style={{ fontSize: "10px", color: "hsl(187,100%,42%)" }}>{s.pluginSlug}</span>
+                      </div>
+                    )}
+                  </td>
                   <td style={{ padding: "8px 10px", color: "hsl(210,40%,70%)" }}>{s.price}</td>
                   <td style={{ padding: "8px 10px", color: "hsl(220,10%,55%)" }}>{s.discountPercent}%</td>
                   <td style={{ padding: "8px 10px", color: "#a78bfa", fontWeight: 600 }}>{s.finalPrice}</td>
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
+                      <button
+                        style={{ ...btnMap, ...(s.pluginSlug ? {} : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }) }}
+                        onClick={() => setMapTarget({ type: "service", id: s.id, name: s.name, currentSlug: s.pluginSlug })}
+                        title={s.pluginSlug ? `Mapped to: ${s.pluginSlug}` : "Map to a plugin"}
+                      >
+                        {s.pluginSlug ? <Plug size={10} /> : <Plug size={10} />} Map
+                      </button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>
                       <button style={btnDanger} onClick={() => { if (confirm("Delete this service?")) delMut.mutate(s.id); }}><Trash2 size={11} /></button>
                     </div>
@@ -309,6 +455,15 @@ function ServicesPanel({ game }: { game: Game }) {
           />
         </Modal>
       )}
+      {mapTarget && (
+        <MapPluginModal
+          target={mapTarget}
+          description="Select a plugin to handle top-up delivery for this service."
+          loading={mapMut.isPending}
+          onClose={() => setMapTarget(null)}
+          onMap={(slug) => mapMut.mutate({ id: mapTarget.id, pluginSlug: slug })}
+        />
+      )}
     </div>
   );
 }
@@ -319,6 +474,7 @@ export default function Games() {
   const [showAdd, setShowAdd] = useState(false);
   const [editGame, setEditGame] = useState<Game | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
 
   const { data: gameList = [], isLoading } = useQuery<Game[]>({
     queryKey: ["/api/admin/games"],
@@ -340,6 +496,11 @@ export default function Games() {
   const trendingMut = useMutation({
     mutationFn: (id: string) => adminApi.patch(`/games/${id}/trending`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
+  });
+  const mapMut = useMutation({
+    mutationFn: ({ id, pluginSlug }: { id: string; pluginSlug: string | null }) =>
+      adminApi.patch(`/games/${id}`, { pluginSlug }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); setMapTarget(null); },
   });
 
   return (
@@ -387,7 +548,7 @@ export default function Games() {
 
                   <span style={statusBadge(g.status === "active")}>{g.status}</span>
 
-                  <div style={{ display: "flex", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
                     <button
                       style={g.isTrending
                         ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
@@ -397,6 +558,13 @@ export default function Games() {
                       title={g.isTrending ? "Remove from Trending" : "Add to Trending"}
                     >
                       <TrendingUp size={11} /> {g.isTrending ? "Trending" : "Trend"}
+                    </button>
+                    <button
+                      style={{ ...btnMap, ...(g.pluginSlug ? {} : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }) }}
+                      onClick={() => setMapTarget({ type: "game", id: g.id, name: g.name, currentSlug: g.pluginSlug })}
+                      title={g.pluginSlug ? `Plugin: ${g.pluginSlug}` : "Map lookup plugin"}
+                    >
+                      <Plug size={10} /> {g.pluginSlug ? g.pluginSlug : "Map"}
                     </button>
                     <button style={btnEdit} onClick={() => setEditGame(g)}><Pencil size={11} /> Edit</button>
                     <button style={btnDanger} onClick={() => { if (confirm(`Delete "${g.name}"? This will also delete all its services.`)) delMut.mutate(g.id); }}>
@@ -430,6 +598,15 @@ export default function Games() {
             loading={editMut.isPending}
           />
         </Modal>
+      )}
+      {mapTarget && (
+        <MapPluginModal
+          target={mapTarget}
+          description="Select a plugin to fetch user info when a player enters their game ID."
+          loading={mapMut.isPending}
+          onClose={() => setMapTarget(null)}
+          onMap={(slug) => mapMut.mutate({ id: mapTarget.id, pluginSlug: slug })}
+        />
       )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
