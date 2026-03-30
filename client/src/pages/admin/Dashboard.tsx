@@ -11,6 +11,7 @@ import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
 import { adminApi } from "@/lib/store/useAdmin";
+import { getCurrencySymbol } from "@/lib/currency";
 
 const COLORS = ["hsl(258, 90%, 66%)", "hsl(196, 100%, 50%)", "hsl(0, 72%, 51%)", "hsl(38, 92%, 55%)", "hsl(142, 71%, 45%)"];
 
@@ -201,7 +202,7 @@ export default function Dashboard() {
   const statCards = [
     {
       label: "Sales",
-      value: stats ? `${currency} ${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
+      value: stats ? `${getCurrencySymbol(currency)} ${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
       icon: <DollarSign size={18} />,
       color: "hsl(258, 90%, 66%)",
       sub: statsLabel,
