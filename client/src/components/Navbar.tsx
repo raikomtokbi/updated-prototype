@@ -157,6 +157,12 @@ export default function Navbar() {
               placeholder="Search games, gift cards..."
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && searchVal.trim()) {
+                  navigate(`/products?search=${encodeURIComponent(searchVal)}`);
+                  setSearchVal("");
+                }
+              }}
               data-testid="input-navbar-search"
               style={{
                 width: "100%",
@@ -389,6 +395,13 @@ export default function Navbar() {
               placeholder="Search games, gift cards..."
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && searchVal.trim()) {
+                  navigate(`/products?search=${encodeURIComponent(searchVal)}`);
+                  setSearchVal("");
+                  setSearchOpen(false);
+                }
+              }}
               autoFocus
               style={{
                 width: "100%",

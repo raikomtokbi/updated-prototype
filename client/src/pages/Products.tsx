@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Zap, Gamepad2, Gift, Ticket, RefreshCcw } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { Game, Product } from "@shared/schema";
 
 const CATEGORIES = [
@@ -177,8 +177,18 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export default function Products() {
+  const [location] = useLocation();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+
+  // Extract search query parameter from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.split("?")[1] || "");
+    const searchParam = params.get("search");
+    if (searchParam) {
+      setSearch(decodeURIComponent(searchParam));
+    }
+  }, [location]);
 
   const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({
     queryKey: ["/api/games"],
