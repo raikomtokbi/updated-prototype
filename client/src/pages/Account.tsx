@@ -102,48 +102,6 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Profile summary */}
-      <div style={{
-        background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
-        borderRadius: "0.75rem", padding: "1.5rem",
-        display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap",
-      }}>
-        <div style={{
-          width: "64px", height: "64px", borderRadius: "50%", flexShrink: 0,
-          background: "linear-gradient(135deg, hsl(258,90%,45%), hsl(196,100%,40%))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.username}
-              style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
-          ) : (
-            <span className="font-orbitron" style={{ fontSize: "1.4rem", fontWeight: 800, color: "white" }}>
-              {user.username.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="font-orbitron" style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.3rem" }}
-            data-testid="text-username">
-            {user.fullName || user.username}
-          </div>
-          {user.email && (
-            <div style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", marginBottom: "0.5rem" }}>{user.email}</div>
-          )}
-          <span className="badge" style={{
-            background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40`,
-          }}>{roleInfo.label}</span>
-        </div>
-        <button
-          onClick={() => { setEditing(!editing); if (!editing) setForm({ fullName: user.fullName ?? "", email: user.email ?? "", phone: "" }); }}
-          className="btn-secondary"
-          style={{ fontSize: "0.8rem" }}
-          data-testid="button-edit-profile"
-        >
-          <Settings size={14} />
-          {editing ? "Cancel" : "Edit Profile"}
-        </button>
-      </div>
 
       {/* Edit form */}
       {editing && (
@@ -200,10 +158,19 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
 
       {/* Info fields */}
       <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
           <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(220,10%,55%)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Account Details
           </h3>
+          <button
+            onClick={() => { setEditing(!editing); if (!editing) setForm({ fullName: user.fullName ?? "", email: user.email ?? "", phone: "" }); }}
+            className="btn-secondary"
+            style={{ fontSize: "0.75rem" }}
+            data-testid="button-edit-profile"
+          >
+            <Settings size={13} />
+            {editing ? "Cancel" : "Edit"}
+          </button>
         </div>
         {fields.map(({ key, label, value }) => (
           <div key={key} style={{
