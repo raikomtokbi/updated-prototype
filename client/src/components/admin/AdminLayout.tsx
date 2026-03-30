@@ -889,7 +889,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
         <main style={{ flex: 1, padding: isMobile ? "16px" : "24px" }}>
           {/* Mobile action buttons strip */}
           {isMobile && actions && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
               {actions}
             </div>
           )}
