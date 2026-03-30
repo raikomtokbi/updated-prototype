@@ -159,8 +159,23 @@ export default function Dashboard() {
     staleTime: 60000,
   });
 
-  const chartData = salesAnalytics?.salesTrend ?? [];
-  const pieData = orderAnalytics?.orderStatus ?? [];
+  const placeholderSalesData = [
+    { label: "Jan", sales: 0 },
+    { label: "Feb", sales: 0 },
+    { label: "Mar", sales: 0 },
+    { label: "Apr", sales: 0 },
+    { label: "May", sales: 0 },
+    { label: "Jun", sales: 0 },
+  ];
+
+  const placeholderPieData = [
+    { name: "Pending", value: 0 },
+    { name: "Completed", value: 0 },
+    { name: "Cancelled", value: 0 },
+  ];
+
+  const chartData = salesAnalytics?.salesTrend && salesAnalytics.salesTrend.length > 0 ? salesAnalytics.salesTrend : placeholderSalesData;
+  const pieData = orderAnalytics?.orderStatus && orderAnalytics.orderStatus.length > 0 ? orderAnalytics.orderStatus : placeholderPieData;
 
   const isMobile = useMobile();
   const { user } = useAuthStore();
