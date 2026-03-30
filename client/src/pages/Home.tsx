@@ -686,16 +686,16 @@ function Footer() {
   const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
 
   const MARKETPLACE = [
-    { label: "All Games", href: "/products" },
+    { label: "All Products", href: "/products" },
+    { label: "Games", href: "/products?category=game_currency" },
+    { label: "Vouchers", href: "/products?category=voucher" },
     { label: "Gift Cards", href: "/products?category=gift_card" },
-    { label: "Mobile Games", href: "/products?category=mobile" },
-    { label: "PC Games", href: "/products?category=pc" },
+    { label: "Subscriptions", href: "/products?category=subscription" },
   ];
-  const SUPPORT_LINKS = [
-    { label: "Support", href: "/support" },
-    { label: "Contact", href: "/contact" },
+  const LEGAL_LINKS = [
+    { label: "Terms & Services", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms", href: "/terms" },
+    { label: "Refund Policy", href: "/refund-policy" },
   ];
 
   return (
@@ -826,7 +826,7 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Legals */}
           <div>
             <h4
               style={{
@@ -838,10 +838,10 @@ function Footer() {
                 marginBottom: "1rem",
               }}
             >
-              Support
+              Legals
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-              {SUPPORT_LINKS.map((item) => (
+              {LEGAL_LINKS.map((item) => (
                 <li key={item.label}>
                   <Link
                     href={item.href}
@@ -862,32 +862,11 @@ function Footer() {
           style={{
             borderTop: "1px solid rgba(124,58,237,0.12)",
             paddingTop: "1.5rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "0.75rem",
           }}
         >
           <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)" }}>
             {siteSettings?.footer_copyright || `© ${new Date().getFullYear()} ${siteSettings?.site_name || "Nexcoin"}. All rights reserved.`}
           </p>
-          <div style={{ display: "flex", gap: "1.5rem" }}>
-            {[
-              { label: "Terms", href: "/terms" },
-              { label: "Privacy", href: "/privacy" },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)", textDecoration: "none", transition: "color 0.15s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.4)"; }}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

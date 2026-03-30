@@ -64,7 +64,7 @@ export default function Terms() {
           className="font-orbitron"
           style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
         >
-          Terms of Service
+          Terms & Services
         </h1>
         <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
           Last updated: {LAST_UPDATED}
