@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, X } from "lucide-react";
+import { useLocation } from "wouter";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -186,8 +187,10 @@ const DEFAULTS: SettingsMap = {
 
 export default function ControlPanel() {
   const qc = useQueryClient();
+  const [, setLocation] = useLocation();
   const [local, setLocal] = useState<SettingsMap>({ ...DEFAULTS });
   const [saved, setSaved] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const { data: remoteSettings, isLoading } = useQuery<SettingsMap>({
     queryKey: ["/api/admin/settings"],
@@ -200,12 +203,16 @@ export default function ControlPanel() {
     }
   }, [remoteSettings]);
 
+  const isDirty = remoteSettings && JSON.stringify(local) !== JSON.stringify(remoteSettings);
+
   const save = useMutation({
     mutationFn: (settings: SettingsMap) => adminApi.put("/settings", settings),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
+      qc.invalidateQueries({ queryKey: ["/stats"] });
       setSaved(true);
+      setShowConfirm(false);
       setTimeout(() => setSaved(false), 2500);
     },
   });
@@ -223,7 +230,20 @@ export default function ControlPanel() {
   }
 
   function handleSave() {
+    if (isDirty) {
+      setShowConfirm(true);
+    }
+  }
+
+  function confirmSave() {
     save.mutate(local);
+  }
+
+  function discardChanges() {
+    if (remoteSettings) {
+      setLocal({ ...remoteSettings });
+    }
+    setShowConfirm(false);
   }
 
   if (isLoading) {
@@ -248,18 +268,18 @@ export default function ControlPanel() {
         <button
           data-testid="button-save-settings"
           onClick={handleSave}
-          disabled={save.isPending}
+          disabled={save.isPending || !isDirty}
           style={{
             display: "inline-flex",
             alignItems: "center",
             gap: "7px",
             padding: "8px 18px",
             borderRadius: "6px",
-            background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
-            color: "white",
+            background: saved ? "hsl(142, 71%, 38%)" : isDirty ? "linear-gradient(135deg, #7c3aed, #6d28d9)" : "hsl(220, 10%, 25%)",
+            color: saved ? "white" : isDirty ? "white" : "hsl(220, 10%, 45%)",
             fontSize: "13px",
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: isDirty && !save.isPending ? "pointer" : "default",
             border: "none",
             flexShrink: 0,
             transition: "background 0.2s",
@@ -744,6 +764,114 @@ export default function ControlPanel() {
           ))}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "hsl(220, 20%, 12%)",
+              border: "1px solid hsl(220, 15%, 18%)",
+              borderRadius: "8px",
+              padding: "24px",
+              maxWidth: "400px",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.6)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: "hsl(38, 92%, 50%)",
+                  flexShrink: 0,
+                }}
+              >
+                <Save size={20} color="white" />
+              </div>
+              <div>
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "15px", fontWeight: 600, color: "white" }}>
+                  Save Changes?
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "hsl(220, 10%, 45%)" }}>
+                  You have unsaved changes. Would you like to save them?
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                data-testid="button-discard-changes"
+                onClick={discardChanges}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  backgroundColor: "hsl(220, 15%, 18%)",
+                  color: "hsl(220, 10%, 50%)",
+                  border: "1px solid hsl(220, 15%, 25%)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "hsl(220, 15%, 22%)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "hsl(220, 15%, 18%)";
+                }}
+              >
+                Discard
+              </button>
+              <button
+                data-testid="button-confirm-save"
+                onClick={confirmSave}
+                disabled={save.isPending}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  backgroundColor: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  color: "white",
+                  border: "none",
+                  cursor: save.isPending ? "not-allowed" : "pointer",
+                  transition: "all 0.2s",
+                  opacity: save.isPending ? 0.7 : 1,
+                }}
+              >
+                {save.isPending ? (
+                  <>
+                    <Loader2 size={13} style={{ display: "inline", animation: "spin 1s linear infinite", marginRight: "6px" }} />
+                    Saving…
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
