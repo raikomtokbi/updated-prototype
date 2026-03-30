@@ -95,14 +95,17 @@ function PublicRoutes() {
   );
 }
 
-function SiteHead() {
-  const { data: siteSettings } = useQuery<Record<string, string>>({
-    queryKey: ["/api/site-settings"],
-    staleTime: 60_000,
-  });
+function SiteHead({ siteName, seoTitle, seoDescription, favicon }: {
+  siteName?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  favicon?: string;
+}) {
+  useEffect(() => {
+    if (siteName) document.title = siteName;
+  }, [siteName]);
 
   useEffect(() => {
-    const favicon = siteSettings?.site_favicon;
     if (favicon) {
       let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
       if (!link) {
@@ -112,22 +115,50 @@ function SiteHead() {
       }
       link.href = favicon;
     }
-  }, [siteSettings?.site_favicon]);
+  }, [favicon]);
+
+  useEffect(() => {
+    if (seoDescription) {
+      let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.name = "description";
+        document.head.appendChild(meta);
+      }
+      meta.content = seoDescription;
+    }
+  }, [seoDescription]);
 
   return null;
 }
 
-function MaintenancePage() {
-  const { data: siteSettings } = useQuery<Record<string, string>>({
-    queryKey: ["/api/site-settings"],
-    staleTime: 30_000,
-  });
-  const siteName = siteSettings?.site_name || "Nexcoin";
+function MaintenancePage({ siteName }: { siteName?: string }) {
+  const name = siteName || "Nexcoin";
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(220,20%,7%)", flexDirection: "column", gap: "16px", padding: "2rem", textAlign: "center" }}>
-      <Wrench size={48} style={{ opacity: 0.4, color: "hsl(210,40%,70%)" }} />
-      <h1 style={{ fontSize: "24px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{siteName} is under maintenance</h1>
-      <p style={{ fontSize: "14px", color: "hsl(220,10%,50%)", maxWidth: "400px", margin: 0 }}>We are currently performing scheduled maintenance. We will be back shortly. Thank you for your patience.</p>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "hsl(220, 20%, 6%)",
+        flexDirection: "column",
+        gap: "20px",
+        padding: "2rem",
+        textAlign: "center",
+      }}
+    >
+      <Wrench size={52} style={{ opacity: 0.35, color: "hsl(258, 90%, 70%)" }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
+        <h1 style={{ fontSize: "26px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0, lineHeight: 1.2 }}>
+          {name} is under maintenance
+        </h1>
+        <p style={{ fontSize: "14px", color: "hsl(220, 10%, 48%)", maxWidth: "380px", margin: 0, lineHeight: 1.6 }}>
+          We are performing scheduled maintenance and will be back shortly. Thank you for your patience.
+        </p>
+      </div>
     </div>
   );
 }
@@ -136,21 +167,36 @@ export default function App() {
   const [location] = useLocation();
   const isAdmin = location === "/admin" || location.startsWith("/admin/");
 
-  const { data: siteSettings } = useQuery<Record<string, string>>({
+  const { data: siteSettings, isLoading: settingsLoading } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
 
   const maintenanceMode = siteSettings?.maintenance_mode === "true";
 
-  if (maintenanceMode && !isAdmin) {
-    return <MaintenancePage />;
+  if (isAdmin) {
+    return <AdminRoutes />;
+  }
+
+  if (settingsLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "hsl(220, 20%, 6%)" }} />
+    );
+  }
+
+  if (maintenanceMode) {
+    return <MaintenancePage siteName={siteSettings?.site_name} />;
   }
 
   return (
     <>
-      <SiteHead />
-      {isAdmin ? <AdminRoutes /> : <PublicRoutes />}
+      <SiteHead
+        siteName={siteSettings?.site_name}
+        seoTitle={siteSettings?.seo_title}
+        seoDescription={siteSettings?.seo_description}
+        favicon={siteSettings?.site_favicon}
+      />
+      <PublicRoutes />
     </>
   );
 }
