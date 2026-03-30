@@ -183,6 +183,51 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ── User middleware ─────────────────────────────────────────────────────────
+  async function requireUser(req: any, res: any, next: any) {
+    const username = req.headers["x-username"] as string | undefined;
+    if (!username) return res.status(401).json({ message: "Unauthorized" });
+    const user = await storage.getUserByUsername(username);
+    if (!user) return res.status(401).json({ message: "User not found" });
+    req.currentUser = user;
+    next();
+  }
+
+  // ── User profile & orders ───────────────────────────────────────────────────
+  app.get("/api/user/orders", requireUser, async (req: any, res) => {
+    const userOrders = await storage.getOrdersByUser(req.currentUser.id);
+    const ordersWithItems = await Promise.all(
+      userOrders.map(async (order) => {
+        const items = await storage.getOrderItemsByOrder(order.id);
+        return { ...order, items };
+      })
+    );
+    res.json(ordersWithItems);
+  });
+
+  app.patch("/api/user/profile", requireUser, async (req: any, res) => {
+    const { fullName, email, phone } = req.body ?? {};
+    const updated = await storage.updateUser(req.currentUser.id, { fullName, email, phone });
+    if (!updated) return res.status(404).json({ message: "User not found" });
+    const { password: _pw, ...safeUser } = updated;
+    res.json({ user: safeUser });
+  });
+
+  app.post("/api/user/change-password", requireUser, async (req: any, res) => {
+    const { currentPassword, newPassword } = req.body ?? {};
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password required" });
+    }
+    if (req.currentUser.password !== currentPassword) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+    await storage.updateUser(req.currentUser.id, { password: newPassword });
+    res.json({ ok: true });
+  });
+
   // ── Dashboard stats ────────────────────────────────────────────────────────
   app.get("/api/admin/stats", requireAdmin, async (_req, res) => {
     const stats = await storage.getDashboardStats();

@@ -68,6 +68,7 @@ export interface IStorage {
   // Orders
   getAllOrders(limit?: number, offset?: number): Promise<Order[]>;
   getOrdersByUser(userId: string): Promise<Order[]>;
+  getOrderItemsByOrder(orderId: string): Promise<any[]>;
   countOrders(): Promise<number>;
   getTotalRevenue(): Promise<number>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
@@ -293,6 +294,9 @@ export class DatabaseStorage implements IStorage {
   }
   async getOrdersByUser(userId: string) {
     return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+  }
+  async getOrderItemsByOrder(orderId: string) {
+    return db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
   async countOrders() {
     const [r] = await db.select({ count: count() }).from(orders);
