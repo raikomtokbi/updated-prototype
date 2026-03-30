@@ -645,7 +645,7 @@ export default function Account() {
   const roleInfo = ROLE_LABELS[user.role] ?? { label: user.role, color: "hsl(220,10%,60%)" };
 
   return (
-    <div style={{ maxWidth: "760px", margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
+    <div style={{ maxWidth: "760px", margin: "0 auto", padding: "3.5rem 1.25rem 4rem" }}>
       {/* Header */}
       <div style={{
         background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
