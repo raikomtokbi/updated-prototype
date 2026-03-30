@@ -213,7 +213,8 @@ export default function GiftCards() {
       </Toolbar>
 
       <div style={card}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", minWidth: "480px", borderCollapse: "collapse" }}>
           <thead>
             <tr>
               {["Title", "Status", "Sort", "Created", "Actions"].map((h) => (
@@ -253,6 +254,7 @@ export default function GiftCards() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {showAdd && (

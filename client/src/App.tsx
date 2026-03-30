@@ -2,6 +2,7 @@ import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
+import { applyThemeVars } from "@/lib/theme";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -182,6 +183,16 @@ export default function App() {
   });
 
   const maintenanceMode = siteSettings?.maintenance_mode === "true";
+
+  useEffect(() => {
+    if (siteSettings) {
+      applyThemeVars(
+        siteSettings.active_theme,
+        siteSettings.theme_custom_primary,
+        siteSettings.theme_custom_accent,
+      );
+    }
+  }, [siteSettings?.active_theme, siteSettings?.theme_custom_primary, siteSettings?.theme_custom_accent]);
 
   if (isAdmin) {
     return <AdminRoutes />;

@@ -175,7 +175,7 @@ export default function Coupons() {
           ) : filtered.length === 0 ? (
             <EmptyState message={coupons.length === 0 ? "No coupons yet. Create your first coupon." : "No coupons match your filters."} />
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+            <table style={{ width: "100%", minWidth: "680px", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
                   {["Code", "Type", "Value", "Min Order", "Uses / Max", "Expires", "Status", "Actions"].map((h) => (

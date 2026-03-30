@@ -307,7 +307,7 @@ export default function Users() {
           ) : filtered.length === 0 ? (
             <EmptyState message={users.length === 0 ? "No users yet. Create the first user." : "No users match your filters."} />
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+            <table style={{ width: "100%", minWidth: "640px", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
                   {["ID", "Username", "Full Name", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (

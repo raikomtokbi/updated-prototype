@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Upload, Loader2, Trash2 } from "lucide-react";
+import { Upload, Loader2, Trash2, ImageIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 
 export type AspectRatio = "any" | "square" | "rectangle";
@@ -96,6 +96,8 @@ export function ImageUploadField({
     border: "1px solid",
   };
 
+  const placeholderH = previewAspect ? undefined : "72px";
+
   return (
     <div>
       <label style={labelStyle}>{label}</label>
@@ -124,6 +126,53 @@ export function ImageUploadField({
           ))}
         </div>
       )}
+
+      {/* Preview area — always visible */}
+      <div
+        style={{
+          marginBottom: "6px",
+          borderRadius: "6px",
+          border: value ? "1px solid hsl(220,15%,16%)" : "1px dashed hsl(220,15%,22%)",
+          background: value ? "transparent" : "hsl(220,20%,8%)",
+          overflow: "hidden",
+          position: "relative",
+          ...(previewAspect
+            ? { width: "100%", aspectRatio: previewAspect }
+            : { height: placeholderH }),
+        }}
+      >
+        {value ? (
+          <img
+            src={value}
+            alt="preview"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              cursor: "pointer",
+            }}
+            onClick={() => fileRef.current?.click()}
+          >
+            <ImageIcon size={22} style={{ color: "hsl(220,10%,30%)" }} />
+            <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)", letterSpacing: "0.04em" }}>
+              No image
+            </span>
+          </div>
+        )}
+      </div>
 
       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
         <input
@@ -176,22 +225,6 @@ export function ImageUploadField({
         />
       </div>
       {error && <p style={{ fontSize: "11px", color: "hsl(0,72%,55%)", margin: "3px 0 0" }}>{error}</p>}
-      {value && (
-        <img
-          src={value}
-          alt="preview"
-          style={{
-            marginTop: "6px",
-            borderRadius: "6px",
-            border: "1px solid hsl(220,15%,16%)",
-            objectFit: "cover",
-            display: "block",
-            ...(previewAspect
-              ? { width: "100%", aspectRatio: previewAspect }
-              : { height: "60px", width: "auto", maxWidth: "100%" }),
-          }}
-        />
-      )}
     </div>
   );
 }

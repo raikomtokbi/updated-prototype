@@ -54,3 +54,6 @@ Schema uses PostgreSQL enums for: user roles, product categories, order status, 
 - Customer reviews with approval workflow
 - Payment method configuration
 - Admin dashboard with stats
+- Dynamic theme system (`client/src/lib/theme.ts`): preset + custom HSL color pickers, saved to site settings (`active_theme`, `theme_custom_primary`, `theme_custom_accent`), applied via CSS variable injection in App.tsx
+- ImageUploadField always shows a preview area (placeholder when empty, image when set)
+- Admin tables use `overflowX: "auto"` + `minWidth` for proper mobile scroll behavior

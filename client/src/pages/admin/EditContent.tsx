@@ -320,70 +320,76 @@ function SliderItem({
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: "10px",
+        flexDirection: "column",
+        gap: "8px",
         padding: "10px 12px",
         background: "hsl(220,20%,11%)",
         border: "1px solid hsl(220,15%,16%)",
         borderRadius: "6px",
       }}
     >
-      {slider.bannerUrl ? (
-        <img
-          src={slider.bannerUrl}
-          alt=""
-          style={{ width: "72px", height: "36px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }}
-        />
-      ) : (
+      {/* Top row: thumbnail + info + status */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {slider.bannerUrl ? (
+          <img
+            src={slider.bannerUrl}
+            alt=""
+            style={{ width: "72px", height: "36px", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "72px",
+              height: "36px",
+              borderRadius: "4px",
+              background: "hsl(220,20%,14%)",
+              border: "1px dashed hsl(220,15%,22%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Image size={14} style={{ color: "hsl(220,10%,35%)" }} />
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {slider.title}
+          </div>
+          <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+            Order: {slider.sortOrder} &middot; {slider.isActive ? "Active" : "Inactive"}
+            {slider.endsAt && ` · Ends ${new Date(slider.endsAt).toLocaleDateString()}`}
+          </div>
+        </div>
         <div
           style={{
-            width: "72px",
-            height: "36px",
+            padding: "2px 8px",
             borderRadius: "4px",
-            background: "hsl(220,20%,14%)",
-            border: "1px dashed hsl(220,15%,22%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: "10px",
+            fontWeight: 700,
+            background: slider.isActive ? "rgba(74,222,128,0.1)" : "rgba(220,38,38,0.1)",
+            color: slider.isActive ? "hsl(142,71%,48%)" : "hsl(0,72%,55%)",
+            border: `1px solid ${slider.isActive ? "rgba(74,222,128,0.25)" : "rgba(220,38,38,0.25)"}`,
             flexShrink: 0,
           }}
         >
-          <Image size={14} style={{ color: "hsl(220,10%,35%)" }} />
-        </div>
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {slider.title}
-        </div>
-        <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
-          Order: {slider.sortOrder} &middot; {slider.isActive ? "Active" : "Inactive"}
-          {slider.endsAt && ` · Ends ${new Date(slider.endsAt).toLocaleDateString()}`}
+          {slider.isActive ? "Active" : "Inactive"}
         </div>
       </div>
-      <div
-        style={{
-          padding: "2px 8px",
-          borderRadius: "4px",
-          fontSize: "10px",
-          fontWeight: 700,
-          background: slider.isActive ? "rgba(74,222,128,0.1)" : "rgba(220,38,38,0.1)",
-          color: slider.isActive ? "hsl(142,71%,48%)" : "hsl(0,72%,55%)",
-          border: `1px solid ${slider.isActive ? "rgba(74,222,128,0.25)" : "rgba(220,38,38,0.25)"}`,
-          flexShrink: 0,
-        }}
-      >
-        {slider.isActive ? "Active" : "Inactive"}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
+
+      {/* Bottom row: action buttons */}
+      <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+        {/* Reorder up/down */}
         <button
           onClick={onMoveUp}
           disabled={isFirst}
           title="Move up"
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "2px 5px",
+            padding: "4px 8px",
             borderRadius: "4px",
             background: "hsl(220,20%,14%)",
             border: "1px solid hsl(220,15%,20%)",
@@ -398,10 +404,10 @@ function SliderItem({
           disabled={isLast}
           title="Move down"
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "2px 5px",
+            padding: "4px 8px",
             borderRadius: "4px",
             background: "hsl(220,20%,14%)",
             border: "1px solid hsl(220,15%,20%)",
@@ -411,45 +417,47 @@ function SliderItem({
         >
           <ChevronDown size={12} />
         </button>
+
+        <div style={{ flex: 1 }} />
+
+        <button
+          onClick={() => onEdit(slider)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            padding: "5px 14px",
+            borderRadius: "5px",
+            background: "rgba(124,58,237,0.1)",
+            border: "1px solid rgba(124,58,237,0.25)",
+            color: "#a78bfa",
+            fontSize: "11px",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          <Pencil size={11} /> Edit
+        </button>
+        <button
+          onClick={() => { if (confirm(`Delete "${slider.title}"?`)) onDelete(slider.id); }}
+          disabled={deleting}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            padding: "5px 12px",
+            borderRadius: "5px",
+            background: "rgba(239,68,68,0.08)",
+            border: "1px solid rgba(239,68,68,0.25)",
+            color: "hsl(0,72%,60%)",
+            fontSize: "11px",
+            cursor: deleting ? "not-allowed" : "pointer",
+            opacity: deleting ? 0.6 : 1,
+          }}
+        >
+          <Trash2 size={11} /> Delete
+        </button>
       </div>
-      <button
-        onClick={() => onEdit(slider)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "4px",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          background: "rgba(124,58,237,0.1)",
-          border: "1px solid rgba(124,58,237,0.25)",
-          color: "#a78bfa",
-          fontSize: "11px",
-          fontWeight: 600,
-          cursor: "pointer",
-          flexShrink: 0,
-        }}
-      >
-        <Pencil size={11} /> Edit
-      </button>
-      <button
-        onClick={() => { if (confirm(`Delete "${slider.title}"?`)) onDelete(slider.id); }}
-        disabled={deleting}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          padding: "5px 8px",
-          borderRadius: "5px",
-          background: "rgba(239,68,68,0.08)",
-          border: "1px solid rgba(239,68,68,0.25)",
-          color: "hsl(0,72%,60%)",
-          fontSize: "11px",
-          cursor: deleting ? "not-allowed" : "pointer",
-          flexShrink: 0,
-          opacity: deleting ? 0.6 : 1,
-        }}
-      >
-        <Trash2 size={11} />
-      </button>
     </div>
   );
 }
