@@ -87,8 +87,10 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
 
 export default function Dashboard() {
   const qc = useQueryClient();
-  const [rangeKey, setRangeKey] = useState("12months");
-  const [customRange, setCustomRange] = useState<DateRange | undefined>(undefined);
+  const [salesRangeKey, setSalesRangeKey] = useState("today");
+  const [salesCustomRange, setSalesCustomRange] = useState<DateRange | undefined>(undefined);
+  const [orderRangeKey, setOrderRangeKey] = useState("today");
+  const [orderCustomRange, setOrderCustomRange] = useState<DateRange | undefined>(undefined);
   const [seedDone, setSeedDone] = useState(false);
 
   const { data: stats } = useQuery<{ totalUsers: number; totalOrders: number; totalRevenue: number; openTickets: number }>({
@@ -113,25 +115,42 @@ export default function Dashboard() {
     },
   });
 
-  const analyticsQueryKey = rangeKey === "custom" && customRange?.from
-    ? ["/api/admin/analytics", rangeKey, customRange.from?.toISOString(), customRange.to?.toISOString()]
-    : ["/api/admin/analytics", rangeKey];
+  const salesQueryKey = salesRangeKey === "custom" && salesCustomRange?.from
+    ? ["/api/admin/analytics", "sales", salesRangeKey, salesCustomRange.from?.toISOString(), salesCustomRange.to?.toISOString()]
+    : ["/api/admin/analytics", "sales", salesRangeKey];
 
-  const analyticsUrl = rangeKey === "custom" && customRange?.from
-    ? `/analytics?range=custom&from=${customRange.from.toISOString()}&to=${(customRange.to ?? customRange.from).toISOString()}`
-    : `/analytics?range=${rangeKey}`;
+  const salesUrl = salesRangeKey === "custom" && salesCustomRange?.from
+    ? `/analytics?range=custom&from=${salesCustomRange.from.toISOString()}&to=${(salesCustomRange.to ?? salesCustomRange.from).toISOString()}`
+    : `/analytics?range=${salesRangeKey}`;
 
-  const { data: analytics, isLoading: analyticsLoading } = useQuery<{
+  const { data: salesAnalytics, isLoading: salesLoading } = useQuery<{
     salesTrend: { label: string; sales: number }[];
     orderStatus: { name: string; value: number }[];
   }>({
-    queryKey: analyticsQueryKey,
-    queryFn: () => adminApi.get(analyticsUrl),
+    queryKey: salesQueryKey,
+    queryFn: () => adminApi.get(salesUrl),
     staleTime: 60000,
   });
 
-  const chartData = analytics?.salesTrend ?? [];
-  const pieData = analytics?.orderStatus ?? [];
+  const orderQueryKey = orderRangeKey === "custom" && orderCustomRange?.from
+    ? ["/api/admin/analytics", "orders", orderRangeKey, orderCustomRange.from?.toISOString(), orderCustomRange.to?.toISOString()]
+    : ["/api/admin/analytics", "orders", orderRangeKey];
+
+  const orderUrl = orderRangeKey === "custom" && orderCustomRange?.from
+    ? `/analytics?range=custom&from=${orderCustomRange.from.toISOString()}&to=${(orderCustomRange.to ?? orderCustomRange.from).toISOString()}`
+    : `/analytics?range=${orderRangeKey}`;
+
+  const { data: orderAnalytics, isLoading: orderLoading } = useQuery<{
+    salesTrend: { label: string; sales: number }[];
+    orderStatus: { name: string; value: number }[];
+  }>({
+    queryKey: orderQueryKey,
+    queryFn: () => adminApi.get(orderUrl),
+    staleTime: 60000,
+  });
+
+  const chartData = salesAnalytics?.salesTrend ?? [];
+  const pieData = orderAnalytics?.orderStatus ?? [];
 
   const isMobile = useMobile();
   const { user } = useAuthStore();
@@ -258,13 +277,13 @@ export default function Dashboard() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "8px" }}>
               <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Sales Trend</span>
               <DateRangeFilter
-                selected={rangeKey}
-                onSelect={setRangeKey}
-                customRange={customRange}
-                onCustomRange={setCustomRange}
+                selected={salesRangeKey}
+                onSelect={setSalesRangeKey}
+                customRange={salesCustomRange}
+                onCustomRange={setSalesCustomRange}
               />
             </div>
-            {analyticsLoading ? (
+            {salesLoading ? (
               <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
@@ -297,13 +316,13 @@ export default function Dashboard() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "8px" }}>
               <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Order Status</span>
               <DateRangeFilter
-                selected={rangeKey}
-                onSelect={setRangeKey}
-                customRange={customRange}
-                onCustomRange={setCustomRange}
+                selected={orderRangeKey}
+                onSelect={setOrderRangeKey}
+                customRange={orderCustomRange}
+                onCustomRange={setOrderCustomRange}
               />
             </div>
-            {analyticsLoading ? (
+            {orderLoading ? (
               <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
