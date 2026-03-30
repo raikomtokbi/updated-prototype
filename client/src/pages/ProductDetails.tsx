@@ -181,9 +181,16 @@ function GameDetailView({ game }: { game: Game }) {
   const [selectedSvc, setSelectedSvc] = useState<string | null>(null);
   const [userId, setUserId] = useState("");
   const [zoneId, setZoneId] = useState("");
+  const [email, setEmail] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Parse which fields are required for this game
+  const requiredFields = (game.requiredFields ?? "userId").split(",").filter(Boolean);
+  const needsUserId = requiredFields.includes("userId");
+  const needsZoneId = requiredFields.includes("zoneId");
+  const needsEmail = requiredFields.includes("email");
 
   const { data: services = [], isLoading: svcsLoading } = useQuery<Service[]>({
     queryKey: [`/api/services?gameId=${game.id}`],
@@ -199,46 +206,43 @@ function GameDetailView({ game }: { game: Game }) {
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!selectedSvc) errs.pkg = "Please select a package";
-    if (!userId.trim()) errs.userId = "User ID is required";
+    if (needsUserId && !userId.trim()) errs.userId = "User ID is required";
+    if (needsZoneId && !zoneId.trim()) errs.zoneId = "Zone / Server ID is required";
+    if (needsEmail && !email.trim()) errs.email = "Email is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
-  function handleAddToCart() {
-    if (!validate() || !selectedService) return;
-    addItem({
+  function buildCartPayload() {
+    return {
       productId: game.id,
       productTitle: game.name,
       productImage: game.logoUrl ?? "",
-      packageId: selectedService.id,
-      packageName: selectedService.name,
-      price: parseFloat(String(selectedService.finalPrice)),
-      userId: userId.trim(),
-      zoneId: zoneId.trim() || undefined,
+      packageId: selectedService!.id,
+      packageName: selectedService!.name,
+      price: parseFloat(String(selectedService!.finalPrice)),
+      userId: needsUserId ? userId.trim() : (needsEmail ? email.trim() : "-"),
+      zoneId: needsZoneId ? zoneId.trim() : undefined,
+      email: needsEmail ? email.trim() : undefined,
       quantity,
-    });
+    };
+  }
+
+  function handleAddToCart() {
+    if (!validate() || !selectedService) return;
+    addItem(buildCartPayload());
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   }
 
   function handleBuyNow() {
     if (!validate() || !selectedService) return;
-    addItem({
-      productId: game.id,
-      productTitle: game.name,
-      productImage: game.logoUrl ?? "",
-      packageId: selectedService.id,
-      packageName: selectedService.name,
-      price: parseFloat(String(selectedService.finalPrice)),
-      userId: userId.trim(),
-      zoneId: zoneId.trim() || undefined,
-      quantity,
-    });
+    addItem(buildCartPayload());
     navigate("/cart");
   }
 
   const infoItems = [
-    { text: "Enter your exact Game ID and Server ID — incorrect details may result in failed delivery." },
+    { text: "Enter your exact account details — incorrect information may result in failed delivery." },
     { text: "Top-ups are processed instantly after payment confirmation." },
     { text: "Keep your game account logged out during the top-up process for best results." },
   ];
@@ -382,36 +386,60 @@ function GameDetailView({ game }: { game: Game }) {
             {errors.pkg && <FieldError message={errors.pkg} />}
           </div>
 
-          {/* User ID */}
-          <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              User ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
-            </label>
-            <input
-              className="input-field"
-              placeholder="Enter User ID"
-              value={userId}
-              onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); }}
-              data-testid="input-player-id"
-              autoComplete="off"
-            />
-            {errors.userId && <FieldError message={errors.userId} />}
-          </div>
+          {/* User ID — only shown if required */}
+          {needsUserId && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                User ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                placeholder="Enter User ID"
+                value={userId}
+                onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); }}
+                data-testid="input-player-id"
+                autoComplete="off"
+              />
+              {errors.userId && <FieldError message={errors.userId} />}
+            </div>
+          )}
 
-          {/* Zone / Server ID */}
-          <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Server ID / Zone ID
-            </label>
-            <input
-              className="input-field"
-              placeholder="Enter Server ID or Zone ID"
-              value={zoneId}
-              onChange={(e) => setZoneId(e.target.value)}
-              data-testid="input-zone-id"
-              autoComplete="off"
-            />
-          </div>
+          {/* Zone / Server ID — only shown if required */}
+          {needsZoneId && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Zone / Server ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                placeholder="Enter Zone ID or Server ID"
+                value={zoneId}
+                onChange={(e) => { setZoneId(e.target.value); setErrors((p) => ({ ...p, zoneId: "" })); }}
+                data-testid="input-zone-id"
+                autoComplete="off"
+              />
+              {errors.zoneId && <FieldError message={errors.zoneId} />}
+            </div>
+          )}
+
+          {/* Email — only shown if required */}
+          {needsEmail && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Email <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                type="email"
+                placeholder="Enter account email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: "" })); }}
+                data-testid="input-email"
+                autoComplete="off"
+              />
+              {errors.email && <FieldError message={errors.email} />}
+            </div>
+          )}
 
           {/* Quantity + price summary */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>

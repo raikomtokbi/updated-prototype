@@ -89,7 +89,7 @@ const statusBadge = (active: boolean): React.CSSProperties => ({
   color: active ? "hsl(142,71%,45%)" : "hsl(0,72%,51%)",
 });
 
-const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0 };
+const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0, requiredFields: "userId" };
 const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0 };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
@@ -217,6 +217,73 @@ function MapPluginModal({
   );
 }
 
+// ─── Required Fields Picker ───────────────────────────────────────────────────
+const FIELD_OPTIONS = [
+  { key: "userId", label: "User ID", hint: "Game account / player ID" },
+  { key: "zoneId", label: "Zone / Server ID", hint: "Required for Mobile Legends etc." },
+  { key: "email", label: "Email", hint: "Account email address" },
+];
+
+function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const active = value ? value.split(",").filter(Boolean) : [];
+
+  function toggle(key: string) {
+    const next = active.includes(key) ? active.filter((k) => k !== key) : [...active, key];
+    onChange(next.join(",") || "userId");
+  }
+
+  return (
+    <div>
+      <label style={labelStyle}>Required Input Fields</label>
+      <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
+        Select which fields buyers must fill in on the top-up page.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {FIELD_OPTIONS.map((opt) => {
+          const on = active.includes(opt.key);
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => toggle(opt.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "8px 12px",
+                borderRadius: "7px",
+                border: `1px solid ${on ? "hsl(258,90%,60%)" : "hsl(220,15%,20%)"}`,
+                background: on ? "hsla(258,90%,66%,0.12)" : "hsl(220,20%,11%)",
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+                transition: "all 0.15s",
+              }}
+            >
+              <span style={{
+                width: "18px", height: "18px", borderRadius: "4px", flexShrink: 0,
+                border: `2px solid ${on ? "hsl(258,90%,60%)" : "hsl(220,15%,25%)"}`,
+                background: on ? "hsl(258,90%,60%)" : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {on && <span style={{ color: "white", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
+              </span>
+              <span>
+                <span style={{ display: "block", fontSize: "12px", fontWeight: 600, color: on ? "hsl(210,40%,92%)" : "hsl(220,10%,65%)" }}>
+                  {opt.label}
+                </span>
+                <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>
+                  {opt.hint}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Game Form ────────────────────────────────────────────────────────────────
 function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; onSubmit: (d: any) => void; loading: boolean }) {
   const [form, setForm] = useState(initial);
@@ -276,6 +343,12 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
           <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
       </div>
+
+      <RequiredFieldsPicker
+        value={form.requiredFields ?? "userId"}
+        onChange={(v) => set("requiredFields", v)}
+      />
+
       <button type="submit" style={{ ...btnPrimary, marginTop: "0.25rem", justifyContent: "center" }} disabled={loading}>
         {loading ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
         {loading ? "Saving..." : "Save Game"}
@@ -593,7 +666,7 @@ export default function Games() {
       {editGame && (
         <Modal title="Edit Game" onClose={() => setEditGame(null)}>
           <GameForm
-            initial={{ name: editGame.name, slug: editGame.slug, description: editGame.description ?? "", logoUrl: editGame.logoUrl ?? "", bannerUrl: editGame.bannerUrl ?? "", category: editGame.category, status: editGame.status, sortOrder: editGame.sortOrder }}
+            initial={{ name: editGame.name, slug: editGame.slug, description: editGame.description ?? "", logoUrl: editGame.logoUrl ?? "", bannerUrl: editGame.bannerUrl ?? "", category: editGame.category, status: editGame.status, sortOrder: editGame.sortOrder, requiredFields: editGame.requiredFields ?? "userId" }}
             onSubmit={(d) => editMut.mutate({ id: editGame.id, data: d })}
             loading={editMut.isPending}
           />

@@ -45,6 +45,7 @@ export const games = pgTable("games", {
   isTrending: boolean("is_trending").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   pluginSlug: varchar("plugin_slug", { length: 100 }),
+  requiredFields: varchar("required_fields", { length: 100 }).default("userId"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
