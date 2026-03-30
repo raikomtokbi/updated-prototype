@@ -114,9 +114,9 @@ export default function Dashboard() {
     queryFn: () => adminApi.get("/games"),
   });
 
-  const { data: siteSettings } = useQuery<{ default_currency?: string }>({
-    queryKey: ["/api/admin/site-settings"],
-    queryFn: () => adminApi.get("/site-settings"),
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/admin/settings"],
+    queryFn: () => adminApi.get("/settings"),
   });
 
   const currency = siteSettings?.default_currency ?? "USD";
