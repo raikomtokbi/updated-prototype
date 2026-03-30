@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Mail, MessageSquare, Send } from "lucide-react";
+import { Mail, MessageSquare, Send, Phone, MapPin } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Contact() {
   const [name, setName] = useState("");
@@ -8,6 +9,15 @@ export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 0,
+  });
+
+  const contactEmail = siteSettings?.contact_email || "support@nexcoin.gg";
+  const contactPhone = siteSettings?.contact_phone || "";
+  const contactAddress = siteSettings?.contact_address || "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,18 +68,10 @@ export default function Contact() {
         {/* Contact info */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {[
-            {
-              icon: Mail,
-              label: "Email",
-              value: "support@nexcoin.gg",
-              href: "mailto:support@nexcoin.gg",
-            },
-            {
-              icon: MessageSquare,
-              label: "Live Support",
-              value: "Available via ticket",
-              href: "/support",
-            },
+            { icon: Mail, label: "Email", value: contactEmail, href: `mailto:${contactEmail}` },
+            ...(contactPhone ? [{ icon: Phone, label: "Phone", value: contactPhone, href: `tel:${contactPhone}` }] : []),
+            ...(contactAddress ? [{ icon: MapPin, label: "Address", value: contactAddress, href: "#" }] : []),
+            { icon: MessageSquare, label: "Live Support", value: "Available via ticket", href: "/support" },
           ].map((item) => {
             const Icon = item.icon;
             return (

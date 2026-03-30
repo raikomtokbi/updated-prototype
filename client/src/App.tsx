@@ -95,15 +95,17 @@ function PublicRoutes() {
   );
 }
 
-function SiteHead({ siteName, seoTitle, seoDescription, favicon }: {
+function SiteHead({ siteName, seoTitle, seoDescription, seoKeywords, favicon }: {
   siteName?: string;
   seoTitle?: string;
   seoDescription?: string;
+  seoKeywords?: string;
   favicon?: string;
 }) {
   useEffect(() => {
-    if (siteName) document.title = siteName;
-  }, [siteName]);
+    const title = seoTitle || siteName;
+    if (title) document.title = title;
+  }, [siteName, seoTitle]);
 
   useEffect(() => {
     if (favicon) {
@@ -118,16 +120,19 @@ function SiteHead({ siteName, seoTitle, seoDescription, favicon }: {
   }, [favicon]);
 
   useEffect(() => {
-    if (seoDescription) {
-      let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const setMeta = (name: string, content: string | undefined) => {
+      if (!content) return;
+      let meta = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
       if (!meta) {
         meta = document.createElement("meta");
-        meta.name = "description";
+        meta.name = name;
         document.head.appendChild(meta);
       }
-      meta.content = seoDescription;
-    }
-  }, [seoDescription]);
+      meta.content = content;
+    };
+    setMeta("description", seoDescription);
+    setMeta("keywords", seoKeywords);
+  }, [seoDescription, seoKeywords]);
 
   return null;
 }
@@ -194,6 +199,7 @@ export default function App() {
         siteName={siteSettings?.site_name}
         seoTitle={siteSettings?.seo_title}
         seoDescription={siteSettings?.seo_description}
+        seoKeywords={siteSettings?.seo_keywords}
         favicon={siteSettings?.site_favicon}
       />
       <PublicRoutes />

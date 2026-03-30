@@ -161,6 +161,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/auth/register", async (req, res) => {
+    const regSetting = await storage.getSiteSetting("user_registration");
+    if (regSetting?.value === "false") {
+      return res.status(403).json({ message: "Registration is currently disabled." });
+    }
     const { username, email, password } = req.body ?? {};
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password required" });

@@ -724,8 +724,9 @@ export default function ControlPanel() {
               }}
             >
               <span style={{ fontSize: "13px", color: "hsl(210, 40%, 80%)" }}>{doc.label}</span>
-              <button
+              <a
                 data-testid={`button-edit-${doc.key}`}
+                href="/admin/edit-content"
                 style={{
                   padding: "5px 14px",
                   borderRadius: "5px",
@@ -734,10 +735,12 @@ export default function ControlPanel() {
                   color: "hsl(210, 40%, 70%)",
                   border: "1px solid hsl(220, 15%, 18%)",
                   cursor: "pointer",
+                  textDecoration: "none",
+                  display: "inline-block",
                 }}
               >
                 Edit
-              </button>
+              </a>
             </div>
           ))}
         </div>

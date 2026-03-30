@@ -779,6 +779,35 @@ export default function EditContent() {
         </div>
       </div>
 
+      {/* ── Legal Pages ────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Legal Pages</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "4px" }}>
+            Override the default static content for each legal page. Leave blank to use the built-in defaults.
+          </p>
+          {[
+            { key: "terms_content", label: "Terms of Service" },
+            { key: "privacy_content", label: "Privacy Policy" },
+            { key: "refund_content", label: "Refund Policy" },
+          ].map((item) => (
+            <div key={item.key}>
+              <label style={labelStyle}>{item.label}</label>
+              <textarea
+                data-testid={`input-${item.key}`}
+                style={{ ...textareaStyle, minHeight: "120px" }}
+                value={local[item.key] ?? ""}
+                onChange={(e) => set(item.key, e.target.value)}
+                placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Media Assets ───────────────────────────────────────────────────── */}
       <div style={{ ...card, marginBottom: 0 }}>
         <div style={sectionHeader}>

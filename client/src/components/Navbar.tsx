@@ -36,8 +36,37 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
+  const announcementEnabled = siteSettings?.announcement_enabled === "true";
+  const announcementText = siteSettings?.announcement_text || "";
+  const showAnnouncement = announcementEnabled && !!announcementText;
+  const announcementBarHeight = 36;
+
   return (
     <>
+      {showAnnouncement && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1001,
+            height: `${announcementBarHeight}px`,
+            background: "linear-gradient(90deg, hsl(258,90%,30%) 0%, hsl(258,80%,22%) 100%)",
+            borderBottom: "1px solid rgba(124,58,237,0.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.78rem",
+            fontWeight: 500,
+            color: "hsl(210,40%,92%)",
+            letterSpacing: "0.01em",
+            padding: "0 1rem",
+          }}
+        >
+          {announcementText}
+        </div>
+      )}
       <nav
         style={{
           background: "rgba(7, 11, 20, 0.95)",
@@ -45,7 +74,7 @@ export default function Navbar() {
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           position: "fixed",
-          top: 0,
+          top: showAnnouncement ? `${announcementBarHeight}px` : 0,
           left: 0,
           right: 0,
           zIndex: 1000,

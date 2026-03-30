@@ -753,14 +753,17 @@ function Footer() {
             {/* Social icons */}
             <div style={{ display: "flex", gap: "0.6rem" }}>
               {[
-                { icon: Facebook, label: "Facebook" },
-                { icon: Twitter, label: "Twitter" },
-                { icon: Instagram, label: "Instagram" },
-                { icon: Youtube, label: "YouTube" },
-              ].map(({ icon: Icon, label }) => (
-                <button
+                { icon: Facebook, label: "Facebook", url: siteSettings?.social_facebook },
+                { icon: Twitter, label: "Twitter", url: siteSettings?.social_twitter },
+                { icon: Instagram, label: "Instagram", url: siteSettings?.social_instagram },
+                { icon: Youtube, label: "Discord", url: siteSettings?.social_discord },
+              ].map(({ icon: Icon, label, url }) => (
+                <a
                   key={label}
+                  href={url || "#"}
                   aria-label={label}
+                  target={url ? "_blank" : undefined}
+                  rel={url ? "noopener noreferrer" : undefined}
                   style={{
                     width: "32px",
                     height: "32px",
@@ -771,20 +774,24 @@ function Footer() {
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: "pointer",
-                    color: "rgba(148,163,184,0.6)",
+                    color: url ? "rgba(148,163,184,0.8)" : "rgba(148,163,184,0.3)",
                     transition: "border-color 0.2s, color 0.2s",
+                    textDecoration: "none",
+                    opacity: url ? 1 : 0.5,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
-                    e.currentTarget.style.color = "#a78bfa";
+                    if (url) {
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(124,58,237,0.5)";
+                      (e.currentTarget as HTMLAnchorElement).style.color = "#a78bfa";
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(124,58,237,0.2)";
-                    e.currentTarget.style.color = "rgba(148,163,184,0.6)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(124,58,237,0.2)";
+                    (e.currentTarget as HTMLAnchorElement).style.color = url ? "rgba(148,163,184,0.8)" : "rgba(148,163,184,0.3)";
                   }}
                 >
                   <Icon size={14} />
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -863,7 +870,7 @@ function Footer() {
           }}
         >
           <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)" }}>
-            © {new Date().getFullYear()} {siteSettings?.site_name || "Nexcoin"}. All rights reserved.
+            {siteSettings?.footer_copyright || `© ${new Date().getFullYear()} ${siteSettings?.site_name || "Nexcoin"}. All rights reserved.`}
           </p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             {[
