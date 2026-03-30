@@ -184,13 +184,14 @@ export default function Vouchers() {
   }, [vouchers, search, statusFilter]);
 
   return (
-    <AdminLayout title="Vouchers">
+    <AdminLayout title="Vouchers" actions={
+      <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-voucher">
+        <Plus size={14} /> Add Voucher
+      </button>
+    }>
       <Toolbar>
         <SearchInput value={search} onChange={setSearch} placeholder="Search vouchers..." />
         <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-        <button style={btnPrimary} onClick={() => setShowAdd(true)} data-testid="button-add-voucher">
-          <Plus size={14} /> Add Voucher
-        </button>
       </Toolbar>
 
       <div style={card}>

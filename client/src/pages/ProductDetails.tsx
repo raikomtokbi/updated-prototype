@@ -6,7 +6,7 @@ import { useCartStore } from "@/lib/store/cartStore";
 import type { Game, Product, Service, ProductPackage } from "@shared/schema";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  game_currency: "Game Currency",
+  game_currency: "Games",
   gift_card: "Gift Card",
   voucher: "Voucher",
   subscription: "Subscription",

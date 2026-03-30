@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Unlink } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Unlink, Gamepad2 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -588,31 +588,33 @@ export default function Games() {
               <div key={g.id} style={{ borderBottom: idx < gameList.length - 1 ? "1px solid hsl(220,15%,11%)" : "none" }}>
                 {/* Game row */}
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", cursor: "pointer" }}
+                  style={{ display: "flex", flexDirection: "column", padding: "12px 16px", gap: "8px", cursor: "pointer" }}
                   onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
                 >
-                  {/* Expand icon */}
-                  <span style={{ color: "hsl(220,10%,42%)", flexShrink: 0 }}>
-                    {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  </span>
-
-                  {/* Logo */}
-                  {g.logoUrl ? (
-                    <img src={g.logoUrl} alt={g.name} style={{ width: "34px", height: "34px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: "34px", height: "34px", borderRadius: "6px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: "14px" }}>🎮</span>
+                  {/* Top line: expand icon + logo + name + status */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "hsl(220,10%,42%)", flexShrink: 0 }}>
+                      {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    </span>
+                    {g.logoUrl ? (
+                      <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                      <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
                     </div>
-                  )}
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210,40%,95%)" }}>{g.name}</div>
-                    <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>{g.slug} &bull; {g.category}</div>
+                    <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
                   </div>
 
-                  <span style={statusBadge(g.status === "active")}>{g.status}</span>
-
-                  <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+                  {/* Bottom line: action buttons */}
+                  <div
+                    style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", paddingLeft: "44px" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       style={g.isTrending
                         ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
