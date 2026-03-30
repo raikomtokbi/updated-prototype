@@ -77,7 +77,7 @@ const statusBadge = (active: boolean): React.CSSProperties => ({
 });
 
 const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0 };
-const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", currency: "USD", status: "active", sortOrder: 0 };
+const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0 };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -208,12 +208,6 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.7rem" }}>
         <div>
-          <label style={labelStyle}>Currency</label>
-          <select style={inputStyle} value={form.currency} onChange={(e) => set("currency", e.target.value)}>
-            <option>USD</option><option>EUR</option><option>IDR</option><option>MYR</option><option>SGD</option>
-          </select>
-        </div>
-        <div>
           <label style={labelStyle}>Status</label>
           <select style={inputStyle} value={form.status} onChange={(e) => set("status", e.target.value)}>
             <option value="active">Active</option>
@@ -275,7 +269,7 @@ function ServicesPanel({ game }: { game: Game }) {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
               <tr>
-                {["Name", "Price", "Discount", "Final", "Currency", "Status", ""].map((h) => (
+                {["Name", "Price", "Discount", "Final", "Status", ""].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(220,10%,38%)", borderBottom: "1px solid hsl(220,15%,13%)" }}>{h}</th>
                 ))}
               </tr>
@@ -287,7 +281,6 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px", color: "hsl(210,40%,70%)" }}>{s.price}</td>
                   <td style={{ padding: "8px 10px", color: "hsl(220,10%,55%)" }}>{s.discountPercent}%</td>
                   <td style={{ padding: "8px 10px", color: "#a78bfa", fontWeight: 600 }}>{s.finalPrice}</td>
-                  <td style={{ padding: "8px 10px", color: "hsl(220,10%,55%)" }}>{s.currency}</td>
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
@@ -310,7 +303,7 @@ function ServicesPanel({ game }: { game: Game }) {
       {editSvc && (
         <Modal title="Edit Service" onClose={() => setEditSvc(null)}>
           <ServiceForm
-            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), currency: editSvc.currency, status: editSvc.status, sortOrder: editSvc.sortOrder }}
+            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder }}
             onSubmit={(d) => editMut.mutate({ id: editSvc.id, data: d })}
             loading={editMut.isPending}
           />

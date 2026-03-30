@@ -113,6 +113,13 @@ export default function Dashboard() {
     queryFn: () => adminApi.get("/games"),
   });
 
+  const { data: siteSettings } = useQuery<{ default_currency?: string }>({
+    queryKey: ["/api/admin/site-settings"],
+    queryFn: () => adminApi.get("/site-settings"),
+  });
+
+  const currency = siteSettings?.default_currency ?? "USD";
+
   const seedMut = useMutation({
     mutationFn: () => adminApi.post("/seed", {}),
     onSuccess: () => {
@@ -194,7 +201,7 @@ export default function Dashboard() {
   const statCards = [
     {
       label: "Sales",
-      value: stats ? `$${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
+      value: stats ? `${currency} ${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
       icon: <DollarSign size={18} />,
       color: "hsl(258, 90%, 66%)",
       sub: statsLabel,
