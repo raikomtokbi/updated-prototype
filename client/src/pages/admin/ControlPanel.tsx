@@ -206,7 +206,8 @@ export default function ControlPanel() {
     }
   }, [remoteSettings]);
 
-  const isDirty = !!(remoteSettings && JSON.stringify(local) !== JSON.stringify(remoteSettings));
+  // Only compare keys that the server persists — avoids false positives from DEFAULTS extra keys / key order
+  const isDirty = !!(remoteSettings && Object.keys(remoteSettings).some((k) => local[k] !== remoteSettings[k]));
 
   // Keep ref in sync so navigation guard has latest value without re-registering
   useEffect(() => {
