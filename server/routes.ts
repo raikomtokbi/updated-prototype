@@ -165,7 +165,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (regSetting?.value === "false") {
       return res.status(403).json({ message: "Registration is currently disabled." });
     }
-    const { username, email, password } = req.body ?? {};
+    const { username, email, password, fullName } = req.body ?? {};
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password required" });
     }
@@ -174,7 +174,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(409).json({ message: "Username already taken" });
     }
     try {
-      const user = await storage.createUser({ username, email, password, role: "user" });
+      const user = await storage.createUser({ username, email, password, fullName, role: "user" });
       const { password: _pw, ...safeUser } = user;
       storage.createNotification({ type: "user", title: "New User Registered", message: `${username} just created an account.` }).catch(() => {});
       return res.status(201).json({ user: safeUser });

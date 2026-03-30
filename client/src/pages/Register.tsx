@@ -7,6 +7,8 @@ export default function Register() {
   const [, navigate] = useLocation();
   const { isAuthenticated, setUser } = useAuthStore();
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,10 +33,11 @@ export default function Register() {
     }
     setLoading(true);
     try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ firstName, lastName, username, email, password, fullName }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Registration failed");
@@ -120,6 +123,54 @@ export default function Register() {
           onSubmit={handleRegister}
           style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+            <div>
+              <label
+                htmlFor="reg-firstname"
+                style={{
+                  display: "block",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  color: "hsl(220,10%,65%)",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                First Name
+              </label>
+              <input
+                id="reg-firstname"
+                className="input-field"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="reg-lastname"
+                style={{
+                  display: "block",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  color: "hsl(220,10%,65%)",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                Last Name
+              </label>
+              <input
+                id="reg-lastname"
+                className="input-field"
+                type="text"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div>
             <label
               htmlFor="reg-username"
