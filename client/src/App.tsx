@@ -169,7 +169,7 @@ export default function App() {
 
   const { data: siteSettings, isLoading: settingsLoading } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
-    staleTime: 10_000,
+    staleTime: 0,
   });
 
   const maintenanceMode = siteSettings?.maintenance_mode === "true";

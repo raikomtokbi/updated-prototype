@@ -23,7 +23,7 @@ export default function Navbar() {
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
-    staleTime: 60_000,
+    staleTime: 0,
   });
   const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
   const siteLogo = siteSettings?.site_logo || "";
