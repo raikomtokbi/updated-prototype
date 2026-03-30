@@ -87,15 +87,25 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
 
 export default function Dashboard() {
   const qc = useQueryClient();
+  const [statsRangeKey, setStatsRangeKey] = useState("today");
+  const [statsCustomRange, setStatsCustomRange] = useState<DateRange | undefined>(undefined);
   const [salesRangeKey, setSalesRangeKey] = useState("today");
   const [salesCustomRange, setSalesCustomRange] = useState<DateRange | undefined>(undefined);
   const [orderRangeKey, setOrderRangeKey] = useState("today");
   const [orderCustomRange, setOrderCustomRange] = useState<DateRange | undefined>(undefined);
   const [seedDone, setSeedDone] = useState(false);
 
+  const statsQueryKey = statsRangeKey === "custom" && statsCustomRange?.from
+    ? ["/api/admin/stats", statsRangeKey, statsCustomRange.from?.toISOString(), statsCustomRange.to?.toISOString()]
+    : ["/api/admin/stats", statsRangeKey];
+
+  const statsUrl = statsRangeKey === "custom" && statsCustomRange?.from
+    ? `/stats?range=custom&from=${statsCustomRange.from.toISOString()}&to=${(statsCustomRange.to ?? statsCustomRange.from).toISOString()}`
+    : `/stats?range=${statsRangeKey}`;
+
   const { data: stats } = useQuery<{ totalUsers: number; totalOrders: number; totalRevenue: number; openTickets: number }>({
-    queryKey: ["/api/admin/stats"],
-    queryFn: () => adminApi.get("/stats"),
+    queryKey: statsQueryKey,
+    queryFn: () => adminApi.get(statsUrl),
   });
 
   const { data: gameList = [] } = useQuery<{ id: string }[]>({
@@ -162,13 +172,17 @@ export default function Dashboard() {
   })();
   const displayName = user?.fullName || user?.username || "Admin";
 
+  const statsLabel = statsRangeKey === "custom" && statsCustomRange?.from
+    ? statsCustomRange.to ? `${formatDateShort(statsCustomRange.from)} – ${formatDateShort(statsCustomRange.to)}` : formatDateShort(statsCustomRange.from)
+    : rangeOptions.find((o) => o.key === statsRangeKey)?.label ?? "Today";
+
   const statCards = [
     {
       label: "Sales",
       value: stats ? `$${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
       icon: <DollarSign size={18} />,
       color: "hsl(258, 90%, 66%)",
-      sub: "Total revenue",
+      sub: statsLabel,
       testId: "stat-total-sales",
     },
     {
@@ -176,7 +190,7 @@ export default function Dashboard() {
       value: stats ? stats.totalOrders.toLocaleString() : "—",
       icon: <ShoppingBag size={18} />,
       color: "hsl(196, 100%, 50%)",
-      sub: "All time",
+      sub: statsLabel,
       testId: "stat-total-orders",
     },
     {
@@ -184,7 +198,7 @@ export default function Dashboard() {
       value: stats ? stats.openTickets.toLocaleString() : "—",
       icon: <LifeBuoy size={18} />,
       color: "hsl(38, 92%, 55%)",
-      sub: "Open tickets",
+      sub: statsLabel,
       testId: "stat-open-tickets",
     },
     {
@@ -192,7 +206,7 @@ export default function Dashboard() {
       value: stats ? stats.totalUsers.toLocaleString() : "—",
       icon: <Users size={18} />,
       color: "hsl(142, 71%, 45%)",
-      sub: "Registered accounts",
+      sub: statsLabel,
       testId: "stat-total-users",
     },
   ];
@@ -212,6 +226,16 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+
+        {/* ── Stat cards filter ──────────────────────────────────────── */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <DateRangeFilter
+            selected={statsRangeKey}
+            onSelect={setStatsRangeKey}
+            customRange={statsCustomRange}
+            onCustomRange={setStatsCustomRange}
+          />
+        </div>
 
         {/* ── Stat cards ─────────────────────────────────────────────── */}
         <div
