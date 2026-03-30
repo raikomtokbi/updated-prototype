@@ -694,6 +694,7 @@ function Footer() {
   ];
   const LEGAL_LINKS = [
     { label: "About Us", href: "/about" },
+    { label: "FAQ", href: "/faq" },
     { label: "Support", href: "/support" },
     { label: "Terms & Services", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },

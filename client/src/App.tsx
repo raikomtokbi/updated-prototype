@@ -13,6 +13,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import About from "./pages/About";
+import Faq from "./pages/Faq";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -86,6 +87,7 @@ function PublicRoutes() {
           <Route path="/account" component={Account} />
           <Route path="/support" component={Support} />
           <Route path="/about" component={About} />
+          <Route path="/faq" component={Faq} />
           <Route path="/contact" component={Contact} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/terms" component={Terms} />

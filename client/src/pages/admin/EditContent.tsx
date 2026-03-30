@@ -69,6 +69,10 @@ const DEFAULTS: SettingsMap = {
   hero_bg_image: "",
   og_image: "",
   about_banner: "",
+  about_headline: "",
+  about_tagline: "",
+  about_story: "",
+  faq_items: "[]",
 };
 
 type GameOption = { id: string; name: string };
@@ -814,6 +818,137 @@ export default function EditContent() {
               />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── About Page ─────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>About Page</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "2px" }}>
+            Customize the public About Us page. Leave any field blank to use the built-in default.
+          </p>
+          <div>
+            <label style={labelStyle}>Page Headline</label>
+            <input
+              style={inputStyle}
+              value={local.about_headline ?? ""}
+              onChange={(e) => set("about_headline", e.target.value)}
+              placeholder="About Us (defaults to site name)"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Tagline / Intro</label>
+            <textarea
+              style={{ ...textareaStyle, minHeight: "70px" }}
+              value={local.about_tagline ?? ""}
+              onChange={(e) => set("about_tagline", e.target.value)}
+              placeholder="Short intro paragraph shown under the headline…"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Our Story</label>
+            <textarea
+              style={{ ...textareaStyle, minHeight: "130px" }}
+              value={local.about_story ?? ""}
+              onChange={(e) => set("about_story", e.target.value)}
+              placeholder="Tell visitors your story — how you started, your mission, etc…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>FAQ</span>
+            <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+              ({(() => { try { return JSON.parse(local.faq_items || "[]").length; } catch { return 0; } })()} items)
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              try {
+                const items = JSON.parse(local.faq_items || "[]");
+                items.push({ q: "", a: "" });
+                set("faq_items", JSON.stringify(items));
+              } catch { set("faq_items", JSON.stringify([{ q: "", a: "" }])); }
+            }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "5px",
+              padding: "6px 12px", borderRadius: "6px",
+              background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+              color: "white", fontSize: "12px", fontWeight: 600,
+              border: "none", cursor: "pointer",
+            }}
+          >
+            <Plus size={12} /> Add Question
+          </button>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "2px" }}>
+            Add frequently asked questions that appear on the public FAQ page.
+          </p>
+          {(() => {
+            let items: { q: string; a: string }[] = [];
+            try { items = JSON.parse(local.faq_items || "[]"); } catch { items = []; }
+            if (items.length === 0) {
+              return (
+                <div style={{ textAlign: "center", padding: "24px", color: "hsl(220,10%,40%)", fontSize: "12px" }}>
+                  No FAQ items yet. Click "Add Question" to create your first one.
+                </div>
+              );
+            }
+            return items.map((item, idx) => (
+              <div key={idx} style={{ background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "8px", padding: "14px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(258,90%,66%)" }}>Q{idx + 1}</span>
+                  <button
+                    onClick={() => {
+                      const updated = items.filter((_, i) => i !== idx);
+                      set("faq_items", JSON.stringify(updated));
+                    }}
+                    style={{
+                      background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
+                      color: "hsl(0,72%,60%)", borderRadius: "5px", padding: "3px 8px",
+                      fontSize: "11px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px",
+                    }}
+                  >
+                    <Trash2 size={11} /> Remove
+                  </button>
+                </div>
+                <div style={{ marginBottom: "8px" }}>
+                  <label style={labelStyle}>Question</label>
+                  <input
+                    style={inputStyle}
+                    value={item.q}
+                    onChange={(e) => {
+                      const updated = items.map((it, i) => i === idx ? { ...it, q: e.target.value } : it);
+                      set("faq_items", JSON.stringify(updated));
+                    }}
+                    placeholder="e.g. How fast is delivery?"
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Answer</label>
+                  <textarea
+                    style={{ ...textareaStyle, minHeight: "70px" }}
+                    value={item.a}
+                    onChange={(e) => {
+                      const updated = items.map((it, i) => i === idx ? { ...it, a: e.target.value } : it);
+                      set("faq_items", JSON.stringify(updated));
+                    }}
+                    placeholder="Provide a clear, helpful answer…"
+                  />
+                </div>
+              </div>
+            ));
+          })()}
         </div>
       </div>
 
