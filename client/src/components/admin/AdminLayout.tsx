@@ -693,7 +693,7 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
           </div>
           {[
             { icon: <User size={13} />, label: "Profile", action: () => { navigate("/account"); setOpen(false); } },
-            { icon: <ShoppingBag size={13} />, label: "Frontend", action: () => { navigate("/"); setOpen(false); } },
+            { icon: <ShoppingBag size={13} />, label: "Go back to store", action: () => { navigate("/"); setOpen(false); } },
           ].map((item) => (
             <button
               key={item.label}
