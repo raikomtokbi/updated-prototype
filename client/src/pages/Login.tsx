@@ -31,12 +31,7 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
       setUser(data.user);
-      const role = data.user?.role;
-      if (role === "super_admin" || role === "admin" || role === "staff") {
-        navigate("/admin");
-      } else {
-        navigate("/account");
-      }
+      navigate("/account");
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {

@@ -1,11 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { User, LogOut, ShoppingBag, Shield, ChevronRight } from "lucide-react";
+import { User, LogOut, ShoppingBag, Shield, ChevronRight, Lock } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useCartStore } from "@/lib/store/cartStore";
 
 export default function Account() {
   const [, navigate] = useLocation();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, isStaff } = useAuthStore();
   const itemCount = useCartStore((s) => s.getItemCount());
 
   if (!isAuthenticated) {
@@ -131,15 +131,28 @@ export default function Account() {
           </span>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="btn-secondary"
-          style={{ fontSize: "0.8rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
-          data-testid="button-logout"
-        >
-          <LogOut size={14} />
-          Sign Out
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {isStaff() && (
+            <button
+              onClick={() => navigate("/admin")}
+              className="btn-primary"
+              style={{ fontSize: "0.8rem" }}
+              data-testid="button-go-to-admin"
+            >
+              <Lock size={14} />
+              Go to Admin Panel
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            className="btn-secondary"
+            style={{ fontSize: "0.8rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
+            data-testid="button-logout"
+          >
+            <LogOut size={14} />
+            Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Stats row */}
