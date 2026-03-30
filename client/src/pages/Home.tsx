@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
-  Facebook, Twitter, Instagram, Youtube, Gamepad2, Gift, HeadphonesIcon,
+  Facebook, Twitter, Instagram, Discord, Gamepad2, Gift, HeadphonesIcon,
   Wrench,
 } from "lucide-react";
 
@@ -756,7 +756,7 @@ function Footer() {
                 { icon: Facebook, label: "Facebook", url: siteSettings?.social_facebook },
                 { icon: Twitter, label: "Twitter", url: siteSettings?.social_twitter },
                 { icon: Instagram, label: "Instagram", url: siteSettings?.social_instagram },
-                { icon: Youtube, label: "Discord", url: siteSettings?.social_discord },
+                { icon: Discord, label: "Discord", url: siteSettings?.social_discord },
               ].map(({ icon: Icon, label, url }) => (
                 <a
                   key={label}
