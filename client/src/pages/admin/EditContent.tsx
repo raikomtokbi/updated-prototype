@@ -459,6 +459,11 @@ export default function EditContent() {
   const [showAddSlider, setShowAddSlider] = useState(false);
   const [editSlider, setEditSlider] = useState<HeroSlider | null>(null);
 
+  // dirty-state: compare local to what's in the DB
+  const isDirty = (remoteSettings: SettingsMap | undefined) =>
+    remoteSettings !== undefined &&
+    Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k]));
+
   const { data: remoteSettings, isLoading } = useQuery<SettingsMap>({
     queryKey: ["/api/admin/settings"],
     queryFn: () => adminApi.get("/settings"),
@@ -577,35 +582,39 @@ export default function EditContent() {
     );
   }
 
+  const dirty = isDirty(remoteSettings);
+
   return (
-    <AdminLayout title="Content">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", gap: "12px" }}>
+    <AdminLayout title="Content" actions={dirty ? (
+      <button
+        data-testid="button-save-content"
+        onClick={() => save.mutate(local)}
+        disabled={save.isPending}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "7px",
+          padding: "8px 18px",
+          borderRadius: "6px",
+          background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+          color: "white",
+          fontSize: "13px",
+          fontWeight: 600,
+          cursor: save.isPending ? "not-allowed" : "pointer",
+          border: "none",
+          flexShrink: 0,
+          transition: "background 0.2s",
+          opacity: save.isPending ? 0.8 : 1,
+        }}
+      >
+        {save.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
+        {saved ? "Saved!" : "Save Changes"}
+      </button>
+    ) : undefined}>
+      <div style={{ marginBottom: "20px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
           Manage homepage content, hero sliders, and media assets
         </p>
-        <button
-          data-testid="button-save-content"
-          onClick={() => save.mutate(local)}
-          disabled={save.isPending}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "7px",
-            padding: "8px 18px",
-            borderRadius: "6px",
-            background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 600,
-            cursor: "pointer",
-            border: "none",
-            flexShrink: 0,
-            transition: "background 0.2s",
-          }}
-        >
-          {save.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
-          {saved ? "Saved!" : "Save Changes"}
-        </button>
       </div>
 
       {/* ── Hero Sliders ──────────────────────────────────────────────────── */}
