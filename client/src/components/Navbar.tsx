@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Zap, Menu, X, Search } from "lucide-react";
+import { ShoppingCart, User, Zap, Menu, X, Search, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -14,12 +14,12 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const itemCount = useCartStore((s) => s.getItemCount());
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -542,26 +542,55 @@ export default function Navbar() {
             }}
           >
             {isAuthenticated ? (
-              <Link
-                href="/account"
-                onClick={() => setDrawerOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem 0.9rem",
-                  borderRadius: "8px",
-                  textDecoration: "none",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  color: "#a78bfa",
-                  background: "rgba(124,58,237,0.1)",
-                  border: "1px solid rgba(124,58,237,0.25)",
-                }}
-              >
-                <User size={15} />
-                {user?.username ?? "My Account"}
-              </Link>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <Link
+                  href="/account"
+                  onClick={() => setDrawerOpen(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.75rem 0.9rem",
+                    borderRadius: "8px",
+                    textDecoration: "none",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    color: "#a78bfa",
+                    background: "rgba(124,58,237,0.1)",
+                    border: "1px solid rgba(124,58,237,0.25)",
+                  }}
+                >
+                  <User size={15} />
+                  {user?.username ?? "My Account"}
+                </Link>
+                <button
+                  data-testid="drawer-button-logout"
+                  onClick={() => {
+                    logout();
+                    setDrawerOpen(false);
+                    navigate("/");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    padding: "0.75rem 0.9rem",
+                    borderRadius: "8px",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    color: "#f87171",
+                    background: "rgba(248,113,113,0.1)",
+                    border: "1px solid rgba(248,113,113,0.3)",
+                    cursor: "pointer",
+                    width: "100%",
+                    textAlign: "center",
+                  }}
+                >
+                  <LogOut size={15} />
+                  Logout
+                </button>
+              </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <Link
