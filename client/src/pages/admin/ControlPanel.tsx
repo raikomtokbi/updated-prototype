@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, AlertTriangle } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, AlertTriangle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
@@ -196,6 +196,7 @@ const DEFAULTS: SettingsMap = {
 export default function ControlPanel() {
   const qc = useQueryClient();
   const [, setLocation] = useLocation();
+  const isMobile = useMobile(768);
   const [local, setLocal] = useState<SettingsMap>({ ...DEFAULTS });
   const [saved, setSaved] = useState(false);
   const [leaveDialog, setLeaveDialog] = useState(false);
@@ -366,7 +367,7 @@ export default function ControlPanel() {
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Site Identity</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
             <div>
               <label style={labelStyle}>Site Name</label>
               <input
@@ -395,7 +396,21 @@ export default function ControlPanel() {
               onChange={(e) => set("site_description", e.target.value)}
             />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>
+              <Mail size={11} style={{ display: "inline", marginRight: "5px", verticalAlign: "middle" }} />
+              Footer Support Email
+            </label>
+            <input
+              data-testid="input-support-email"
+              type="email"
+              style={inputStyle}
+              value={local.footer_support_email ?? ""}
+              onChange={(e) => set("footer_support_email", e.target.value)}
+              placeholder="support@yourdomain.com"
+            />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
             <ImageUploadField
               label="Site Logo"
               value={local.site_logo ?? ""}
@@ -423,7 +438,7 @@ export default function ControlPanel() {
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Contact & Social</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
             <div>
               <label style={labelStyle}>Support Email</label>
               <input
@@ -457,7 +472,7 @@ export default function ControlPanel() {
             <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 50%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Social Links
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "10px" }}>
               {[
                 { key: "social_twitter", label: "Twitter / X" },
                 { key: "social_facebook", label: "Facebook" },
@@ -524,7 +539,7 @@ export default function ControlPanel() {
           <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>General Settings</span>
         </div>
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
           <div>
             <label style={labelStyle}>Timezone</label>
             <select
@@ -639,7 +654,7 @@ export default function ControlPanel() {
           <Shield size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Security & Access</span>
         </div>
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
           <div>
             <label style={labelStyle}>Session Timeout (minutes)</label>
             <input
@@ -722,7 +737,7 @@ export default function ControlPanel() {
           <Toggle checked={bool("tax_enabled")} onChange={() => toggle("tax_enabled")} />
         </SettingRow>
         {bool("tax_enabled") && (
-          <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
+          <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
             <div>
               <label style={labelStyle}>Tax Name</label>
               <input
@@ -781,16 +796,6 @@ export default function ControlPanel() {
               style={inputStyle}
               value={local.footer_copyright ?? ""}
               onChange={(e) => set("footer_copyright", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Support Email</label>
-            <input
-              data-testid="input-support-email"
-              type="email"
-              style={inputStyle}
-              value={local.footer_support_email ?? ""}
-              onChange={(e) => set("footer_support_email", e.target.value)}
             />
           </div>
         </div>

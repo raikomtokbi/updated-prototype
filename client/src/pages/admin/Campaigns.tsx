@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Campaign } from "@shared/schema";
 import {
@@ -33,6 +33,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaign>; onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const toInput = (d: Date | string | null | undefined) => {
     if (!d) return "";
     return new Date(d).toISOString().slice(0, 16);
@@ -70,7 +71,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
         ratio="rectangle"
         showRatioSelector={false}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Type</label>
           <select style={inputStyle} value={form.type} onChange={(e) => set("type", e.target.value)}>
@@ -89,7 +90,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
           </select>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Start Date</label>
           <input style={inputStyle} type="datetime-local" value={form.startsAt} onChange={(e) => set("startsAt", e.target.value)} />

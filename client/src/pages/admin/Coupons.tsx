@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Coupon } from "@shared/schema";
 import {
@@ -29,6 +29,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 function CouponForm({ initial, onSubmit, loading }: { initial: Partial<Coupon>; onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const toDate = (d: Date | string | null | undefined) => {
     if (!d) return "";
     return new Date(d).toISOString().slice(0, 10);
@@ -74,7 +75,7 @@ function CouponForm({ initial, onSubmit, loading }: { initial: Partial<Coupon>; 
         <label style={labelStyle}>Description</label>
         <input style={inputStyle} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Optional description" />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Discount Value *</label>
           <input style={inputStyle} required type="number" step="0.01" min="0" value={form.discountValue} onChange={(e) => set("discountValue", e.target.value)} placeholder={form.discountType === "percentage" ? "20" : "10.00"} />

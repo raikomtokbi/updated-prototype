@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Unlink, Gamepad2 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import type { Game, Service, Plugin } from "@shared/schema";
@@ -286,12 +286,13 @@ function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v
 
 // ─── Game Form ────────────────────────────────────────────────────────────────
 function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const [form, setForm] = useState(initial);
   const set = (k: string, v: string | number | boolean) => setForm((p) => ({ ...p, [k]: v }));
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Name *</label>
           <input style={inputStyle} required value={form.name} onChange={(e) => { set("name", e.target.value); set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")); }} placeholder="Mobile Legends" />
@@ -305,7 +306,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
         <label style={labelStyle}>Description</label>
         <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "70px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <ImageUploadField
           label="Logo URL"
           value={form.logoUrl ?? ""}
@@ -321,7 +322,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
           labelStyle={labelStyle}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Status</label>
           <select style={inputStyle} value={form.status} onChange={(e) => set("status", e.target.value)}>
@@ -382,6 +383,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
 
 // ─── Service Form ─────────────────────────────────────────────────────────────
 function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SERVICE; onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const [form, setForm] = useState(initial);
   const set = (k: string, v: string | number) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -404,7 +406,7 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         <label style={labelStyle}>Description</label>
         <input style={inputStyle} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="100 Unknown Cash for PUBG Mobile" />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.7rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
         <div>
           <label style={labelStyle}>Price *</label>
           <input style={inputStyle} required type="number" step="0.01" value={form.price} onChange={(e) => {
@@ -424,7 +426,7 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
           <input style={inputStyle} type="number" step="0.01" value={form.finalPrice} onChange={(e) => set("finalPrice", e.target.value)} placeholder="auto" />
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.7rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
         <div>
           <label style={labelStyle}>Status</label>
           <select style={inputStyle} value={form.status} onChange={(e) => set("status", e.target.value)}>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, PlusCircle, X } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Product, ProductPackage } from "@shared/schema";
 import {
@@ -36,6 +36,7 @@ function fmtDate(d: string | Date | null | undefined) {
 
 function PackageManager({ productId }: { productId: string }) {
   const qc = useQueryClient();
+  const isMobile = useMobile(768);
   const [newLabel, setNewLabel] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newOrigPrice, setNewOrigPrice] = useState("");
@@ -76,7 +77,7 @@ function PackageManager({ productId }: { productId: string }) {
         ))}
         {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No tiers yet.</p>}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px auto", gap: "0.4rem", alignItems: "end" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 80px auto" : "1fr 90px 90px auto", gap: "0.4rem", alignItems: "end" }}>
         <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label><input style={inputStyle} placeholder="Monthly" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} /></div>
         <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label><input style={inputStyle} type="number" placeholder="9.99" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} /></div>
         <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label><input style={inputStyle} type="number" placeholder="Optional" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} /></div>

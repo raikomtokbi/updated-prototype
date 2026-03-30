@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, X, CreditCard, Wallet, Landmark, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { PaymentMethod } from "@shared/schema";
 
@@ -114,6 +114,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 // ─── Payment Method Form ──────────────────────────────────────────────────────
 function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const [form, setForm] = useState(initial);
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -154,7 +155,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Mode</label>
           <select style={inputStyle} value={form.mode} onChange={(e) => set("mode", e.target.value)}>

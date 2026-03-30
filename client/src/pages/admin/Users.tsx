@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Plus, X, Loader2 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { useAuthStore } from "@/lib/store/authstore";
 import type { User } from "@shared/schema";
@@ -85,12 +85,13 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 const EMPTY_USER = { username: "", email: "", password: "", role: "user", fullName: "", phone: "", isActive: true };
 
 function AddUserForm({ onSubmit, loading }: { onSubmit: (d: any) => void; loading: boolean }) {
+  const isMobile = useMobile(768);
   const [form, setForm] = useState(EMPTY_USER);
   const set = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Username *</label>
           <input style={inputStyle} required value={form.username} onChange={(e) => set("username", e.target.value)} placeholder="johndoe" />
@@ -112,7 +113,7 @@ function AddUserForm({ onSubmit, loading }: { onSubmit: (d: any) => void; loadin
         <label style={labelStyle}>Password *</label>
         <input style={inputStyle} type="password" required value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="••••••••" />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Role</label>
           <select style={inputStyle} value={form.role} onChange={(e) => set("role", e.target.value)}>

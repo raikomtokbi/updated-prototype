@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import type { HeroSlider } from "@shared/schema";
@@ -91,6 +91,7 @@ function SliderForm({
   games?: GameOption[];
   products?: ProductOption[];
 }) {
+  const isMobileSlider = useMobile(768);
   const toInput = (d: Date | string | null | undefined) =>
     d ? new Date(d).toISOString().slice(0, 16) : "";
 
@@ -171,7 +172,7 @@ function SliderForm({
           />
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobileSlider ? "1fr" : "1fr 1fr 1fr", gap: "10px" }}>
         <div>
           <label style={labelStyle}>Start Date</label>
           <input
@@ -455,6 +456,7 @@ function SliderItem({
 
 export default function EditContent() {
   const qc = useQueryClient();
+  const isMobile = useMobile(768);
   const [local, setLocal] = useState<SettingsMap>({ ...DEFAULTS });
   const [saved, setSaved] = useState(false);
   const [showAddSlider, setShowAddSlider] = useState(false);
@@ -795,7 +797,7 @@ export default function EditContent() {
           <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Media Assets</span>
         </div>
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "16px" }}>
           {[
             { key: "hero_bg_image", label: "Hero Background (fallback)" },
             { key: "og_image", label: "OG / Share Image" },
