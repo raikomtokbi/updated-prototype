@@ -721,20 +721,29 @@ function Footer() {
         >
           {/* Brand */}
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "7px",
-                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Zap size={14} color="white" />
-              </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem" }}>
+              {siteSettings?.site_logo ? (
+                <img
+                  src={siteSettings.site_logo}
+                  alt={siteName}
+                  style={{ width: "30px", height: "30px", borderRadius: "7px", objectFit: "contain", flexShrink: 0 }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "7px",
+                    background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Zap size={14} color="white" />
+                </div>
+              )}
               <span
                 className="font-orbitron"
                 style={{
@@ -749,8 +758,13 @@ function Footer() {
                 {siteName}
               </span>
             </div>
+            {siteSettings?.site_tagline && (
+              <p style={{ fontSize: "0.72rem", color: "rgba(167,139,250,0.7)", marginBottom: "0.6rem", fontStyle: "italic" }}>
+                {siteSettings.site_tagline}
+              </p>
+            )}
             <p style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
-              The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide.
+              {siteSettings?.site_description || "The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide."}
             </p>
             {/* Social icons */}
             <div style={{ display: "flex", gap: "0.6rem" }}>
