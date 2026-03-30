@@ -498,7 +498,6 @@ export default function ControlPanel() {
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>System Toggles</span>
         </div>
         {[
-          { key: "maintenance_mode", label: "Maintenance Mode", description: "Temporarily disable the storefront for all non-admin users" },
           { key: "user_registration", label: "User Registration", description: "Allow new users to create accounts" },
           { key: "order_processing", label: "Order Processing", description: "Enable automatic order fulfillment" },
           { key: "email_notifications", label: "Email Notifications", description: "Send transactional emails to customers" },
