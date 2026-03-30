@@ -209,7 +209,14 @@ body {
   display: none;
 }
 
-/* Responsive */
+/* Responsive utility classes */
+.mobile-only {
+  display: none !important;
+}
+.desktop-only {
+  display: inline-flex !important;
+}
+
 @media (max-width: 768px) {
   .search-bar-desktop {
     display: none !important;
@@ -219,6 +226,12 @@ body {
   }
   .mobile-menu-btn {
     display: flex !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  .desktop-only {
+    display: none !important;
   }
   .footer-grid {
     grid-template-columns: 1fr 1fr !important;

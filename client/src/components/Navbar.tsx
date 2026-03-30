@@ -425,7 +425,6 @@ export default function Navbar() {
               className="mobile-only"
               aria-label="Search"
               style={{
-                display: "none",
                 alignItems: "center",
                 justifyContent: "center",
                 width: "34px",
