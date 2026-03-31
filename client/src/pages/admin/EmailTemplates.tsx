@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Mail, Save, Eye, Send, ChevronRight, CheckCircle,
@@ -7,6 +7,8 @@ import {
 import { useLocation } from "wouter";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useMobile } from "@/components/admin/AdminLayout";
+import { useNavGuard } from "@/hooks/useNavGuard";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -331,12 +333,18 @@ function TemplateEditor({
   onSaved,
   onBack,
   isMobile,
+  onDirtyChange,
+  registerSave,
+  onSaveSuccess,
 }: {
   def: (typeof TEMPLATE_DEFS)[number];
   template?: EmailTemplate;
   onSaved: () => void;
   onBack?: () => void;
   isMobile: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  registerSave?: (fn: () => void) => void;
+  onSaveSuccess?: () => void;
 }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<EmailTemplate>({
@@ -374,6 +382,14 @@ function TemplateEditor({
     }
   }, [template?.type, template?.updatedAt]);
 
+  // Notify parent when dirty state changes
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty]);
+
+  const formRef = useRef(form);
+  formRef.current = form;
+
   const saveMut = useMutation({
     mutationFn: (data: EmailTemplate) =>
       fetch(`/api/admin/email-templates/${def.type}`, {
@@ -392,8 +408,14 @@ function TemplateEditor({
       setIsDirty(false);
       setTimeout(() => setSaved(false), 2500);
       onSaved();
+      onSaveSuccess?.();
     },
   });
+
+  // Register save function with parent so it can trigger save on "Save & Leave"
+  useEffect(() => {
+    registerSave?.(() => { saveMut.mutate(formRef.current); });
+  }, []);
 
   function set(key: keyof EmailTemplate, value: string | boolean) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -632,7 +654,9 @@ export default function EmailTemplates() {
   const [, setLocation] = useLocation();
   const isMobile = useMobile(768);
   const [selectedType, setSelectedType] = useState<string>(TEMPLATE_DEFS[0].type);
-  const [showEditor, setShowEditor] = useState(false); // mobile: track which pane is visible
+  const [showEditor, setShowEditor] = useState(false);
+  const [pageIsDirty, setPageIsDirty] = useState(false);
+  const editorSaveRef = useRef<(() => void) | null>(null);
 
   const { data: templates = [], refetch } = useQuery<EmailTemplate[]>({
     queryKey: ["/api/admin/email-templates"],
@@ -643,6 +667,8 @@ export default function EmailTemplates() {
       }).then((r) => r.json()),
   });
 
+  const { leaveDialog, cancelLeave, doLeave } = useNavGuard(pageIsDirty);
+
   const templateByType = Object.fromEntries(templates.map((t) => [t.type, t]));
   const selectedDef = TEMPLATE_DEFS.find((d) => d.type === selectedType) ?? TEMPLATE_DEFS[0];
   const selectedTemplate = templateByType[selectedType];
@@ -650,10 +676,27 @@ export default function EmailTemplates() {
   function handleSelect(type: string) {
     setSelectedType(type);
     if (isMobile) setShowEditor(true);
+    // Reset dirty when switching templates (editor will mount fresh)
+    setPageIsDirty(false);
   }
 
   function handleBack() {
     setShowEditor(false);
+  }
+
+  function leaveAndDiscard() {
+    setPageIsDirty(false);
+    doLeave();
+  }
+
+  function leaveAndSave() {
+    // Trigger save inside TemplateEditor; navigate on success via onSaveSuccess
+    if (editorSaveRef.current) {
+      editorSaveRef.current();
+    } else {
+      doLeave();
+    }
+    cancelLeave();
   }
 
   return (
@@ -717,6 +760,9 @@ export default function EmailTemplates() {
                 onSaved={() => refetch()}
                 onBack={handleBack}
                 isMobile={true}
+                onDirtyChange={setPageIsDirty}
+                registerSave={(fn) => { editorSaveRef.current = fn; }}
+                onSaveSuccess={doLeave}
               />
             </div>
           )}
@@ -750,10 +796,20 @@ export default function EmailTemplates() {
               template={selectedTemplate}
               onSaved={() => refetch()}
               isMobile={false}
+              onDirtyChange={setPageIsDirty}
+              registerSave={(fn) => { editorSaveRef.current = fn; }}
+              onSaveSuccess={doLeave}
             />
           </div>
         </div>
       )}
+
+      <UnsavedChangesDialog
+        open={leaveDialog}
+        onStay={cancelLeave}
+        onDiscard={leaveAndDiscard}
+        onSave={leaveAndSave}
+      />
     </AdminLayout>
   );
 }

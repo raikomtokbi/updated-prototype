@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, AlertTriangle, Mail } from "lucide-react";
-import { useLocation } from "wouter";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { useNavGuard } from "@/hooks/useNavGuard";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 const card: React.CSSProperties = {
   background: "hsl(220, 20%, 9%)",
@@ -195,14 +196,9 @@ const DEFAULTS: SettingsMap = {
 
 export default function ControlPanel() {
   const qc = useQueryClient();
-  const [, setLocation] = useLocation();
   const isMobile = useMobile(768);
   const [local, setLocal] = useState<SettingsMap>({ ...DEFAULTS });
   const [saved, setSaved] = useState(false);
-  const [leaveDialog, setLeaveDialog] = useState(false);
-  const [pendingPath, setPendingPath] = useState<string | null>(null);
-  const bypassRef = useRef(false);
-  const isDirtyRef = useRef(false);
 
   const { data: remoteSettings, isLoading } = useQuery<SettingsMap>({
     queryKey: ["/api/admin/settings"],
@@ -215,59 +211,9 @@ export default function ControlPanel() {
     }
   }, [remoteSettings]);
 
-  // Only compare keys that the server persists — avoids false positives from DEFAULTS extra keys / key order
   const isDirty = !!(remoteSettings && Object.keys(remoteSettings).some((k) => local[k] !== remoteSettings[k]));
 
-  // Keep ref in sync so navigation guard has latest value without re-registering
-  useEffect(() => {
-    isDirtyRef.current = isDirty;
-  }, [isDirty]);
-
-  // Intercept browser tab close / refresh when dirty
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirtyRef.current) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
-
-  // Intercept in-app navigation (wouter uses history.pushState)
-  useEffect(() => {
-    const orig = history.pushState;
-    history.pushState = function (...args: Parameters<typeof history.pushState>) {
-      if (!bypassRef.current && isDirtyRef.current) {
-        const url = args[2];
-        const current = window.location.pathname + window.location.search;
-        if (url && typeof url === "string" && url !== current) {
-          setPendingPath(url);
-          setLeaveDialog(true);
-          return;
-        }
-      }
-      orig.apply(history, args);
-    };
-    return () => {
-      history.pushState = orig;
-    };
-  }, []);
-
-  // Intercept browser back / forward button (popstate event)
-  useEffect(() => {
-    const handlePopState = () => {
-      if (!bypassRef.current && isDirtyRef.current) {
-        // Push current URL back so we stay on control-panel
-        history.pushState(null, "", "/admin/control-panel");
-        setPendingPath("__back__");
-        setLeaveDialog(true);
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  const { leaveDialog, cancelLeave, doLeave } = useNavGuard(isDirty);
 
   const save = useMutation({
     mutationFn: (settings: SettingsMap) => adminApi.put("/settings", settings),
@@ -295,43 +241,19 @@ export default function ControlPanel() {
     save.mutate(local);
   }
 
-  // Navigate away and discard changes
   function leaveAndDiscard() {
-    if (!pendingPath) return;
     if (remoteSettings) setLocal({ ...remoteSettings });
-    bypassRef.current = true;
-    setLeaveDialog(false);
-    if (pendingPath === "__back__") {
-      history.back();
-    } else {
-      setLocation(pendingPath);
-    }
-    setTimeout(() => { bypassRef.current = false; }, 100);
+    doLeave();
   }
 
-  // Save then navigate away
   function leaveAndSave() {
-    if (!pendingPath) return;
-    const target = pendingPath;
     save.mutate(local, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
         qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
-        bypassRef.current = true;
-        setLeaveDialog(false);
-        if (target === "__back__") {
-          history.back();
-        } else {
-          setLocation(target);
-        }
-        setTimeout(() => { bypassRef.current = false; }, 100);
+        doLeave();
       },
     });
-  }
-
-  function cancelLeave() {
-    setPendingPath(null);
-    setLeaveDialog(false);
   }
 
   if (isLoading) {
@@ -888,92 +810,13 @@ export default function ControlPanel() {
         </div>
       </div>
 
-      {/* Unsaved Changes — Leave Page Dialog */}
-      {leaveDialog && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-          onClick={cancelLeave}
-        >
-          <div
-            style={{
-              backgroundColor: "hsl(220, 20%, 10%)",
-              border: "1px solid hsl(220, 15%, 18%)",
-              borderRadius: "10px",
-              padding: "28px 24px 22px",
-              maxWidth: "420px",
-              width: "90%",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", marginBottom: "20px" }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: "42px", height: "42px", borderRadius: "8px",
-                backgroundColor: "hsl(38, 92%, 45%)", flexShrink: 0,
-              }}>
-                <AlertTriangle size={20} color="white" />
-              </div>
-              <div>
-                <h3 style={{ margin: "0 0 5px 0", fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,96%)" }}>
-                  Unsaved Changes
-                </h3>
-                <p style={{ margin: 0, fontSize: "13px", color: "hsl(220, 10%, 50%)", lineHeight: "1.5" }}>
-                  You have unsaved changes. What would you like to do before leaving?
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
-              <button
-                data-testid="button-stay-page"
-                onClick={cancelLeave}
-                style={{
-                  padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500,
-                  backgroundColor: "hsl(220, 15%, 16%)", color: "hsl(220, 10%, 55%)",
-                  border: "1px solid hsl(220, 15%, 22%)", cursor: "pointer",
-                }}
-              >
-                Stay
-              </button>
-              <button
-                data-testid="button-discard-leave"
-                onClick={leaveAndDiscard}
-                style={{
-                  padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500,
-                  backgroundColor: "hsl(0, 65%, 40%)", color: "white",
-                  border: "none", cursor: "pointer",
-                }}
-              >
-                Discard & Leave
-              </button>
-              <button
-                data-testid="button-save-leave"
-                onClick={leaveAndSave}
-                disabled={save.isPending}
-                style={{
-                  padding: "8px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: 600,
-                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)", color: "white",
-                  border: "none", cursor: save.isPending ? "not-allowed" : "pointer",
-                  opacity: save.isPending ? 0.75 : 1,
-                  display: "inline-flex", alignItems: "center", gap: "6px",
-                }}
-              >
-                {save.isPending && <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />}
-                Save & Leave
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <UnsavedChangesDialog
+        open={leaveDialog}
+        saving={save.isPending}
+        onStay={cancelLeave}
+        onDiscard={leaveAndDiscard}
+        onSave={leaveAndSave}
+      />
     </AdminLayout>
   );
 }

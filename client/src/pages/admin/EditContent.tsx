@@ -4,6 +4,8 @@ import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, Che
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { useNavGuard } from "@/hooks/useNavGuard";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import type { HeroSlider } from "@shared/schema";
 
 const card: React.CSSProperties = {
@@ -470,11 +472,6 @@ export default function EditContent() {
   const [showAddSlider, setShowAddSlider] = useState(false);
   const [editSlider, setEditSlider] = useState<HeroSlider | null>(null);
 
-  // dirty-state: compare local to what's in the DB
-  const isDirty = (remoteSettings: SettingsMap | undefined) =>
-    remoteSettings !== undefined &&
-    Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k]));
-
   const { data: remoteSettings, isLoading } = useQuery<SettingsMap>({
     queryKey: ["/api/admin/settings"],
     queryFn: () => adminApi.get("/settings"),
@@ -506,6 +503,9 @@ export default function EditContent() {
     }
   }, [remoteSettings]);
 
+  const dirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k])));
+  const { leaveDialog, cancelLeave, doLeave } = useNavGuard(dirty);
+
   const save = useMutation({
     mutationFn: (settings: SettingsMap) => adminApi.put("/settings", settings),
     onSuccess: () => {
@@ -514,6 +514,20 @@ export default function EditContent() {
       setTimeout(() => setSaved(false), 2500);
     },
   });
+
+  function leaveAndDiscard() {
+    if (remoteSettings) setLocal({ ...DEFAULTS, ...remoteSettings });
+    doLeave();
+  }
+
+  function leaveAndSave() {
+    save.mutate(local, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+        doLeave();
+      },
+    });
+  }
 
   const addSlider = useMutation({
     mutationFn: (d: any) => adminApi.post("/hero-sliders", d),
@@ -592,8 +606,6 @@ export default function EditContent() {
       </AdminLayout>
     );
   }
-
-  const dirty = isDirty(remoteSettings);
 
   return (
     <AdminLayout title="Content" actions={dirty ? (
@@ -914,6 +926,14 @@ export default function EditContent() {
           })()}
         </div>
       </div>
+
+      <UnsavedChangesDialog
+        open={leaveDialog}
+        saving={save.isPending}
+        onStay={cancelLeave}
+        onDiscard={leaveAndDiscard}
+        onSave={leaveAndSave}
+      />
     </AdminLayout>
   );
 }

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Palette, RotateCcw } from "lucide-react";
+import { Check, Loader2, Palette, RotateCcw, Save } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { applyThemeVars, PRESET_THEMES } from "@/lib/theme";
+import { useNavGuard } from "@/hooks/useNavGuard";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
@@ -77,17 +79,26 @@ export default function ChooseTheme() {
 
   const [customPrimary, setCustomPrimary] = useState("258 90% 66%");
   const [customAccent, setCustomAccent] = useState("196 100% 50%");
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (settings.theme_custom_primary) setCustomPrimary(settings.theme_custom_primary);
     if (settings.theme_custom_accent) setCustomAccent(settings.theme_custom_accent);
   }, [settings.theme_custom_primary, settings.theme_custom_accent]);
 
+  const savedPrimary = settings.theme_custom_primary ?? "258 90% 66%";
+  const savedAccent = settings.theme_custom_accent ?? "196 100% 50%";
+  const customDirty = customPrimary !== savedPrimary || customAccent !== savedAccent;
+
+  const { leaveDialog, cancelLeave, doLeave } = useNavGuard(customDirty);
+
   const saveMut = useMutation({
     mutationFn: (data: Record<string, string>) => adminApi.put("/settings", data),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
       applyThemeVars(vars.active_theme, vars.theme_custom_primary, vars.theme_custom_accent);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
     },
   });
 
@@ -106,6 +117,18 @@ export default function ChooseTheme() {
     saveMut.mutate({ active_theme: "dark-purple", theme_custom_primary: def.primary, theme_custom_accent: def.accent });
   }
 
+  function leaveAndDiscard() {
+    setCustomPrimary(savedPrimary);
+    setCustomAccent(savedAccent);
+    doLeave();
+  }
+
+  function leaveAndSave() {
+    saveMut.mutate({ active_theme: "custom", theme_custom_primary: customPrimary, theme_custom_accent: customAccent }, {
+      onSuccess: () => doLeave(),
+    });
+  }
+
   const card: React.CSSProperties = {
     background: "hsl(220,20%,9%)",
     border: "1px solid hsl(220,15%,13%)",
@@ -120,8 +143,27 @@ export default function ChooseTheme() {
     borderBottom: "1px solid hsl(220,15%,12%)",
   };
 
+  const saveBtn = customDirty ? (
+    <button
+      onClick={applyCustom}
+      disabled={saveMut.isPending}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: "7px",
+        padding: "8px 18px", borderRadius: "6px",
+        background: saved ? "hsl(142,71%,38%)" : "linear-gradient(135deg,#7c3aed,#6d28d9)",
+        color: "white", fontSize: "13px", fontWeight: 600,
+        cursor: saveMut.isPending ? "not-allowed" : "pointer",
+        border: "none", flexShrink: 0, opacity: saveMut.isPending ? 0.8 : 1,
+      }}
+    >
+      {saveMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
+      {saved ? "Saved!" : "Save Changes"}
+    </button>
+  ) : undefined;
+
   return (
-    <AdminLayout title="Theme">
+    <AdminLayout title="Theme" actions={saveBtn}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
         {/* Preset themes */}
@@ -252,6 +294,14 @@ export default function ChooseTheme() {
         </div>
 
       </div>
+
+      <UnsavedChangesDialog
+        open={leaveDialog}
+        saving={saveMut.isPending}
+        onStay={cancelLeave}
+        onDiscard={leaveAndDiscard}
+        onSave={leaveAndSave}
+      />
     </AdminLayout>
   );
 }
