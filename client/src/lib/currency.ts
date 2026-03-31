@@ -13,6 +13,12 @@ export function getCurrencySymbol(currencyCode: string): string {
     MYR: "RM",
     THB: "฿",
     VND: "₫",
+    PHP: "₱",
+    BDT: "৳",
+    PKR: "₨",
+    LKR: "Rs",
+    AED: "د.إ",
+    SAR: "﷼",
   };
 
   return symbols[currencyCode?.toUpperCase()] || currencyCode || "$";

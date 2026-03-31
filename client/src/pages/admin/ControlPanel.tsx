@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail, Info } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -109,23 +109,31 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   );
 }
 
-function SettingRow({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) {
+function InfoNote({ text }: { text: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginTop: "6px", padding: "6px 8px", background: "hsl(220, 30%, 13%)", borderRadius: "5px", border: "1px solid hsl(220, 15%, 18%)" }}>
+      <Info size={11} style={{ color: "hsl(215, 80%, 60%)", flexShrink: 0, marginTop: "1px" }} />
+      <span style={{ fontSize: "10px", color: "hsl(215, 60%, 60%)", lineHeight: 1.5 }}>{text}</span>
+    </div>
+  );
+}
+
+function SettingRow({ label, description, children, note }: { label: string; description?: string; children: React.ReactNode; note?: string }) {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
         padding: "14px 20px",
         borderBottom: "1px solid hsl(220, 15%, 12%)",
-        gap: "16px",
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 88%)", marginBottom: "2px" }}>{label}</div>
-        {description && <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{description}</div>}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 88%)", marginBottom: "2px" }}>{label}</div>
+          {description && <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{description}</div>}
+        </div>
+        {children}
       </div>
-      {children}
+      {note && <InfoNote text={note} />}
     </div>
   );
 }
@@ -192,6 +200,10 @@ const DEFAULTS: SettingsMap = {
   seo_title: "Nexcoin — Game Top-Ups, Vouchers & Subscriptions",
   seo_description: "Buy game credits, vouchers, and subscriptions instantly. Fast, secure & affordable.",
   seo_keywords: "game top-up, game credits, mobile legends, free fire, voucher",
+  // User management
+  require_email_verify: "false",
+  social_login: "false",
+  account_approval: "auto",
 };
 
 export default function ControlPanel() {
@@ -497,6 +509,7 @@ export default function ControlPanel() {
                 <option key={tz} value={tz}>{tz}</option>
               ))}
             </select>
+            <InfoNote text="Saved to config. Used by server-side date generation for reports and exports." />
           </div>
           <div>
             <label style={labelStyle}>Date Format</label>
@@ -510,6 +523,7 @@ export default function ControlPanel() {
                 <option key={f} value={f}>{f}</option>
               ))}
             </select>
+            <InfoNote text="Saved to config. Applied to date display in reports and exports." />
           </div>
           <div>
             <label style={labelStyle}>Default Currency</label>
@@ -536,6 +550,7 @@ export default function ControlPanel() {
                 <option key={o.v} value={o.v}>{o.l}</option>
               ))}
             </select>
+            <InfoNote text="Saved to config. Full multi-language support requires an i18n library to be integrated." />
           </div>
         </div>
       </div>
@@ -546,32 +561,21 @@ export default function ControlPanel() {
           <ToggleLeft size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>System Toggles</span>
         </div>
-        {[
-          { key: "user_registration", label: "User Registration", description: "Allow new users to create accounts" },
-          { key: "order_processing", label: "Order Processing", description: "Enable automatic order fulfillment" },
-          { key: "email_notifications", label: "Email Notifications", description: "Send transactional emails to customers" },
-          { key: "two_factor_auth", label: "Two-Factor Auth (2FA)", description: "Require 2FA for all admin logins" },
-          { key: "auto_refunds", label: "Automatic Refunds", description: "Automatically process refunds for failed orders" },
-        ].map((item, i, arr) => (
-          <div
-            key={item.key}
-            data-testid={`setting-${item.key}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 20px",
-              borderBottom: i < arr.length - 1 ? "1px solid hsl(220, 15%, 12%)" : "none",
-              gap: "16px",
-            }}
-          >
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 88%)", marginBottom: "2px" }}>{item.label}</div>
-              <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{item.description}</div>
-            </div>
-            <Toggle checked={bool(item.key)} onChange={() => toggle(item.key)} />
-          </div>
-        ))}
+        <SettingRow key="user_registration" label="User Registration" description="Allow new users to create accounts">
+          <Toggle checked={bool("user_registration")} onChange={() => toggle("user_registration")} />
+        </SettingRow>
+        <SettingRow key="order_processing" label="Order Processing" description="Enable automatic order fulfillment" note="Saved to config — enforcement applies when the order API is active.">
+          <Toggle checked={bool("order_processing")} onChange={() => toggle("order_processing")} />
+        </SettingRow>
+        <SettingRow key="email_notifications" label="Email Notifications" description="Send transactional emails to customers (welcome email, ticket replies)">
+          <Toggle checked={bool("email_notifications")} onChange={() => toggle("email_notifications")} />
+        </SettingRow>
+        <SettingRow key="two_factor_auth" label="Two-Factor Auth (2FA)" description="Require 2FA for all admin logins" note="Requires OTP/TOTP infrastructure. Setting is saved but enforcement needs a 2FA provider configured via API Integration.">
+          <Toggle checked={bool("two_factor_auth")} onChange={() => toggle("two_factor_auth")} />
+        </SettingRow>
+        <SettingRow key="auto_refunds" label="Automatic Refunds" description="Automatically process refunds for failed orders" note="Saved to config — applies when the payment gateway and refund flow are active.">
+          <Toggle checked={bool("auto_refunds")} onChange={() => toggle("auto_refunds")} />
+        </SettingRow>
       </div>
 
       {/* ── Notifications ───────────────────────────────────────────────────── */}
@@ -611,6 +615,7 @@ export default function ControlPanel() {
               value={local.session_timeout_minutes ?? "60"}
               onChange={(e) => set("session_timeout_minutes", e.target.value)}
             />
+            <InfoNote text="Saved to config. Full enforcement requires server-side session management to be implemented." />
           </div>
           <div>
             <label style={labelStyle}>Max Login Attempts</label>
@@ -633,13 +638,14 @@ export default function ControlPanel() {
               value={local.ip_whitelist ?? ""}
               onChange={(e) => set("ip_whitelist", e.target.value)}
             />
+            <InfoNote text="Saved to config. IP-level enforcement requires a server middleware layer — contact a developer to activate." />
           </div>
         </div>
         <SettingRow label="Cookie Consent Banner" description="Show GDPR cookie consent notice to new visitors">
           <Toggle checked={bool("cookie_consent_enabled")} onChange={() => toggle("cookie_consent_enabled")} />
         </SettingRow>
         <div style={{ borderBottom: "none" }}>
-          <SettingRow label="Audit Log" description="Record admin actions for security auditing">
+          <SettingRow label="Audit Log" description="Record admin actions for security auditing" note="Saved to config. A full audit log system (logging all admin write actions to a dedicated table) can be enabled when the audit middleware is implemented.">
             <Toggle checked={bool("audit_log_enabled")} onChange={() => toggle("audit_log_enabled")} />
           </SettingRow>
         </div>
@@ -651,10 +657,10 @@ export default function ControlPanel() {
           <Users size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>User Management</span>
         </div>
-        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering">
+        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Saved to config. Enforcement requires an email verification flow with OTP or verification link — configure your SMTP plugin first.">
           <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
         </SettingRow>
-        <SettingRow label="Allow Social Login" description="Enable Google / Facebook sign-in">
+        <SettingRow label="Allow Social Login" description="Enable Google / Facebook sign-in" note="Requires Google and/or Facebook OAuth apps to be configured. Setting is saved but sign-in buttons will not appear until OAuth is set up via API Integration.">
           <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
         </SettingRow>
         <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
@@ -666,7 +672,7 @@ export default function ControlPanel() {
             onChange={(e) => set("account_approval", e.target.value)}
           >
             <option value="auto">Automatic (approved instantly)</option>
-            <option value="manual">Manual review required</option>
+            <option value="manual">Manual review required — new accounts start inactive until an admin approves</option>
             <option value="invite">Invite only</option>
           </select>
         </div>

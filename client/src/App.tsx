@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
 import { applyThemeVars } from "@/lib/theme";
 import Navbar from "./components/Navbar";
+import CookieBanner from "./components/CookieBanner";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
@@ -220,6 +221,7 @@ export default function App() {
         favicon={siteSettings?.site_favicon}
       />
       <PublicRoutes />
+      <CookieBanner enabled={siteSettings?.cookie_consent_enabled !== "false"} />
     </>
   );
 }

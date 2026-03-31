@@ -264,8 +264,8 @@ export const ticketsRelations = relations(tickets, ({ one, many }) => ({
 
 // ─── Insert schemas & Types ───────────────────────────────────────────────────
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true, email: true, password: true, role: true, fullName: true,
-});
+  username: true, email: true, password: true, role: true, fullName: true, isActive: true,
+}).partial({ isActive: true });
 export const insertGameSchema = createInsertSchema(games).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertServiceSchema = createInsertSchema(services).omit({ id: true, createdAt: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true });

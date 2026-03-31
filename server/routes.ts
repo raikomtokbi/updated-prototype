@@ -84,6 +84,45 @@ function injectAdminRole(req: Request, _res: Response, next: NextFunction) {
   next();
 }
 
+// ─── In-memory login attempt tracker ─────────────────────────────────────────
+const loginAttempts = new Map<string, { count: number; lockedUntil: number | null }>();
+
+function recordFailedLogin(username: string) {
+  const rec = loginAttempts.get(username) ?? { count: 0, lockedUntil: null };
+  rec.count += 1;
+  loginAttempts.set(username, rec);
+}
+
+function resetLoginAttempts(username: string) {
+  loginAttempts.delete(username);
+}
+
+async function isLoginLocked(username: string): Promise<{ locked: boolean; remaining: number }> {
+  const rec = loginAttempts.get(username);
+  if (!rec) return { locked: false, remaining: 0 };
+  if (rec.lockedUntil && Date.now() < rec.lockedUntil) {
+    return { locked: true, remaining: Math.ceil((rec.lockedUntil - Date.now()) / 1000) };
+  }
+  if (rec.lockedUntil && Date.now() >= rec.lockedUntil) {
+    loginAttempts.delete(username);
+    return { locked: false, remaining: 0 };
+  }
+  const maxSetting = await storage.getSiteSetting("max_login_attempts");
+  const maxAttempts = parseInt(maxSetting?.value ?? "5") || 5;
+  if (rec.count >= maxAttempts) {
+    rec.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 min lockout
+    loginAttempts.set(username, rec);
+    return { locked: true, remaining: 900 };
+  }
+  return { locked: false, remaining: 0 };
+}
+
+// ─── Helper: get a single site setting value ──────────────────────────────────
+async function getSetting(key: string, fallback = ""): Promise<string> {
+  const s = await storage.getSiteSetting(key);
+  return s?.value ?? fallback;
+}
+
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   app.use("/api/admin", injectAdminRole);
 
@@ -235,10 +274,26 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password required" });
     }
+
+    // Check if account is locked due to too many failed attempts
+    const lockStatus = await isLoginLocked(username);
+    if (lockStatus.locked) {
+      return res.status(429).json({
+        message: `Too many failed login attempts. Account locked for ${Math.ceil(lockStatus.remaining / 60)} more minute(s).`,
+      });
+    }
+
     const user = await storage.getUserByUsername(username);
-    if (!user) {
+    if (!user || user.password !== password) {
+      recordFailedLogin(username);
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Your account is pending approval. Please wait for an administrator to approve it." });
+    }
+
+    resetLoginAttempts(username);
     const { password: _pw, ...safeUser } = user;
     return res.json({ user: safeUser });
   });
@@ -257,11 +312,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(409).json({ message: "Username already taken" });
     }
     try {
-      const user = await storage.createUser({ username, email, password, fullName, role: "user" });
+      // Account approval setting: 'manual' means new users start inactive until admin approves
+      const approvalSetting = await getSetting("account_approval", "auto");
+      const isActive = approvalSetting !== "manual";
+
+      const user = await storage.createUser({ username, email, password, fullName, role: "user", isActive });
       const { password: _pw, ...safeUser } = user;
-      storage.createNotification({ type: "user", title: "New User Registered", message: `${username} just created an account.` }).catch(() => {});
-      // Send welcome email (non-blocking)
-      if (email) {
+
+      // Create admin notification only if notif_new_user is enabled
+      const notifNewUser = await getSetting("notif_new_user", "true");
+      if (notifNewUser !== "false") {
+        storage.createNotification({ type: "user", title: "New User Registered", message: `${username} just created an account.` }).catch(() => {});
+      }
+
+      // Send welcome email only if email_notifications is enabled
+      const emailNotifEnabled = await getSetting("email_notifications", "true");
+      if (email && emailNotifEnabled !== "false") {
         (async () => {
           try {
             const [smtpPlugin, template, settings] = await Promise.all([
@@ -285,6 +351,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             }
           } catch {}
         })();
+      }
+
+      if (!isActive) {
+        return res.status(201).json({ user: safeUser, pending: true, message: "Account created. Awaiting admin approval before you can log in." });
       }
       return res.status(201).json({ user: safeUser });
     } catch (e: any) {
@@ -670,10 +740,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const ticket = await storage.getTicket(req.params.id);
     const reply = await storage.replyToTicket(req.params.id, req.body.userId, req.body.message, true);
     res.status(201).json(reply);
-    // Send email notification (non-blocking)
+    // Send email notification only if email_notifications is enabled
     if (ticket) {
       (async () => {
         try {
+          const emailNotifEnabled = await getSetting("email_notifications", "true");
+          if (emailNotifEnabled === "false") return;
           const ticketUser = ticket.userId ? await storage.getUser(ticket.userId) : null;
           if (!ticketUser?.email) return;
           const [smtpPlugin, template, settings] = await Promise.all([

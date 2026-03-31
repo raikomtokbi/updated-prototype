@@ -41,7 +41,9 @@ export default function Register() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Registration failed");
-      if (data.user) {
+      if (data.pending) {
+        setSuccess(data.message || "Account created! Awaiting admin approval before you can log in.");
+      } else if (data.user) {
         setUser(data.user, data.token);
         navigate("/account");
       } else {
