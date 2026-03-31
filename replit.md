@@ -40,20 +40,34 @@ Uses **MySQL** via `mysql2` + Drizzle ORM (`drizzle-orm/mysql2`).
 
 **The server starts without credentials.** API calls return 500 until credentials are set.
 
-### Required Environment Variables (Replit Secrets)
+### Configuration with DATABASE_URL
 
-| Key | Description |
+Set a single secret in Replit:
+
+| Secret | Format |
 |---|---|
-| `DB_HOST` | MySQL hostname (e.g. `localhost` or cPanel hostname) |
-| `DB_PORT` | MySQL port (default `3306`) |
-| `DB_NAME` | Database name |
-| `DB_USER` | MySQL username |
-| `DB_PASSWORD` | MySQL password |
+| `DATABASE_URL` | `mysql://USER:PASSWORD@HOST:3306/DATABASE` |
+
+**Example:**
+```
+DATABASE_URL=mysql://root:mypassword@localhost:3306/nexcoin
+```
+
+For cPanel Node.js hosting:
+```
+DATABASE_URL=mysql://cpaneluser:cpanelpass@cpanelhost.com:3306/cpaneldb
+```
+
+The `DATABASE_URL` variable is parsed in:
+- `server/db.ts` — MySQL pool connection
+- `drizzle.config.ts` — Schema migration tool
+
+If `DATABASE_URL` is not set or invalid, defaults to `localhost` with empty credentials (useful for build/dev without DB connection).
 
 ### Deploying to cPanel
 
 1. Import `migrations/mysql-schema.sql` via phpMyAdmin
-2. Set the 5 secrets above in Replit
+2. Add `DATABASE_URL` secret in Replit with cPanel credentials
 3. Restart the app
 
 ## Authentication
