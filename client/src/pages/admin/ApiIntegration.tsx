@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plug, CheckCircle, XCircle, Settings } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -68,6 +68,17 @@ const SERVICES: ServiceDef[] = [
     note: "Used for tracking visits and conversions",
     fields: [
       { key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" },
+    ],
+  },
+  {
+    slug: "social-auth",
+    name: "Social Login (Google / Facebook)",
+    note: "Required for Google and Facebook sign-in on the registration and login pages",
+    fields: [
+      { key: "GOOGLE_CLIENT_ID", label: "Google Client ID", placeholder: "xxxx.apps.googleusercontent.com" },
+      { key: "GOOGLE_CLIENT_SECRET", label: "Google Client Secret", placeholder: "GOCSPX-..." },
+      { key: "FACEBOOK_APP_ID", label: "Facebook App ID", placeholder: "1234567890" },
+      { key: "FACEBOOK_APP_SECRET", label: "Facebook App Secret", placeholder: "abc123..." },
     ],
   },
   {
@@ -162,6 +173,23 @@ export default function ApiIntegration() {
     queryFn: () => adminApi.get("/plugins"),
   });
 
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+    const tryScroll = (attempts = 0) => {
+      const el = document.getElementById(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.style.transition = "box-shadow 0.3s";
+        el.style.boxShadow = "0 0 0 2px hsl(258,90%,66%)";
+        setTimeout(() => { el.style.boxShadow = ""; }, 2000);
+      } else if (attempts < 10) {
+        setTimeout(() => tryScroll(attempts + 1), 150);
+      }
+    };
+    tryScroll();
+  }, []);
+
   const pluginMap = Object.fromEntries(plugins.map((p) => [p.slug, p]));
 
   function isConfigured(service: ServiceDef) {
@@ -197,6 +225,7 @@ export default function ApiIntegration() {
               return (
                 <div
                   key={svc.slug}
+                  id={svc.slug}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -205,6 +234,8 @@ export default function ApiIntegration() {
                     borderBottom: i < SERVICES.length - 1 ? "1px solid hsl(220, 15%, 12%)" : "none",
                     gap: "12px",
                     flexWrap: "wrap",
+                    borderRadius: "4px",
+                    transition: "box-shadow 0.3s",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

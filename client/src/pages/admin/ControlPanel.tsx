@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail, Info } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail, Info, CheckCircle, Settings, ExternalLink } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -118,7 +118,54 @@ function InfoNote({ text }: { text: string }) {
   );
 }
 
-function SettingRow({ label, description, children, note }: { label: string; description?: string; children: React.ReactNode; note?: string }) {
+function ApiConfigLink({ slug, label = "Configure API" }: { slug: string; label?: string }) {
+  const { data: plugins = [] } = useQuery<{ slug: string; config?: string | null; isEnabled?: boolean }[]>({
+    queryKey: ["/api/admin/plugins"],
+    queryFn: () => adminApi.get("/plugins"),
+    staleTime: 30_000,
+  });
+
+  const plugin = plugins.find((p) => p.slug === slug);
+  const connected = (() => {
+    if (!plugin) return false;
+    try {
+      const cfg = JSON.parse(plugin.config ?? "{}");
+      return Object.keys(cfg).length > 0 && Object.values(cfg).some(Boolean);
+    } catch { return false; }
+  })();
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "7px", marginTop: "7px", flexWrap: "wrap" }}>
+      {connected && (
+        <span
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "4px",
+            padding: "2px 8px", borderRadius: "4px",
+            background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)",
+            fontSize: "10px", fontWeight: 600, color: "hsl(142,71%,48%)",
+          }}
+        >
+          <CheckCircle size={10} /> API Connected
+        </span>
+      )}
+      <a
+        href={`/admin/api-integration#${slug}`}
+        data-testid={`link-configure-${slug}`}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: "4px",
+          padding: "2px 9px", borderRadius: "4px",
+          background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)",
+          fontSize: "10px", fontWeight: 600, color: "hsl(258,80%,72%)",
+          textDecoration: "none", cursor: "pointer",
+        }}
+      >
+        <Settings size={10} /> {label} <ExternalLink size={9} style={{ opacity: 0.7 }} />
+      </a>
+    </div>
+  );
+}
+
+function SettingRow({ label, description, children, note, apiSlug }: { label: string; description?: string; children: React.ReactNode; note?: string; apiSlug?: string }) {
   return (
     <div
       style={{
@@ -134,6 +181,7 @@ function SettingRow({ label, description, children, note }: { label: string; des
         {children}
       </div>
       {note && <InfoNote text={note} />}
+      {apiSlug && <ApiConfigLink slug={apiSlug} />}
     </div>
   );
 }
@@ -567,10 +615,10 @@ export default function ControlPanel() {
         <SettingRow key="order_processing" label="Order Processing" description="Enable automatic order fulfillment" note="Saved to config — enforcement applies when the order API is active.">
           <Toggle checked={bool("order_processing")} onChange={() => toggle("order_processing")} />
         </SettingRow>
-        <SettingRow key="email_notifications" label="Email Notifications" description="Send transactional emails to customers (welcome email, ticket replies)">
+        <SettingRow key="email_notifications" label="Email Notifications" description="Send transactional emails to customers (welcome email, ticket replies)" apiSlug="smtp-email">
           <Toggle checked={bool("email_notifications")} onChange={() => toggle("email_notifications")} />
         </SettingRow>
-        <SettingRow key="two_factor_auth" label="Two-Factor Auth (2FA)" description="Require 2FA for all admin logins" note="Requires OTP/TOTP infrastructure. Setting is saved but enforcement needs a 2FA provider configured via API Integration.">
+        <SettingRow key="two_factor_auth" label="Two-Factor Auth (2FA)" description="Require 2FA for all admin logins" note="Setting is saved. Enforcement needs a 2FA/OTP provider configured below." apiSlug="sms-otp">
           <Toggle checked={bool("two_factor_auth")} onChange={() => toggle("two_factor_auth")} />
         </SettingRow>
         <SettingRow key="auto_refunds" label="Automatic Refunds" description="Automatically process refunds for failed orders" note="Saved to config — applies when the payment gateway and refund flow are active.">
@@ -657,10 +705,10 @@ export default function ControlPanel() {
           <Users size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>User Management</span>
         </div>
-        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Saved to config. Enforcement requires an email verification flow with OTP or verification link — configure your SMTP plugin first.">
+        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
           <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
         </SettingRow>
-        <SettingRow label="Allow Social Login" description="Enable Google / Facebook sign-in" note="Requires Google and/or Facebook OAuth apps to be configured. Setting is saved but sign-in buttons will not appear until OAuth is set up via API Integration.">
+        <SettingRow label="Allow Social Login" description="Enable Google / Facebook sign-in" note="Sign-in buttons appear once Google / Facebook OAuth credentials are configured." apiSlug="social-auth">
           <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
         </SettingRow>
         <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
