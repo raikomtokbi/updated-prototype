@@ -103,7 +103,7 @@ function AddUserForm({ onSubmit, loading }: { onSubmit: (d: any) => void; loadin
       </div>
       <div>
         <label style={labelStyle}>Email</label>
-        <input style={inputStyle} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="john@example.com" />
+        <input style={inputStyle} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="john@example.com" autoComplete="off" />
       </div>
       <div>
         <label style={labelStyle}>Phone</label>

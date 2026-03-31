@@ -408,6 +408,7 @@ export default function ControlPanel() {
               value={local.footer_support_email ?? ""}
               onChange={(e) => set("footer_support_email", e.target.value)}
               placeholder="support@yourdomain.com"
+              autoComplete="off"
             />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
@@ -447,6 +448,7 @@ export default function ControlPanel() {
                 style={inputStyle}
                 value={local.contact_email ?? ""}
                 onChange={(e) => set("contact_email", e.target.value)}
+                autoComplete="off"
               />
             </div>
             <div>

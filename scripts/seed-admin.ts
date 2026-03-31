@@ -10,9 +10,9 @@ async function seedAdmin() {
 
   const existing = await db.select().from(users).where(eq(users.email, email));
   if (existing.length > 0) {
-    console.log("Admin user already exists, updating role to admin...");
-    await db.update(users).set({ role: "admin" }).where(eq(users.email, email));
-    console.log("Done. Admin role confirmed.");
+    console.log("Admin user already exists, updating role to super_admin...");
+    await db.update(users).set({ role: "super_admin" }).where(eq(users.email, email));
+    console.log("Done. Super admin role confirmed.");
     process.exit(0);
   }
 
@@ -22,7 +22,7 @@ async function seedAdmin() {
     username,
     email,
     password,
-    role: "admin",
+    role: "super_admin",
     fullName: "Admin",
     isActive: true,
     isEmailVerified: true,
@@ -32,7 +32,7 @@ async function seedAdmin() {
   console.log("  Username : admin");
   console.log("  Email    : admin@raikom.com");
   console.log("  Password : admin123");
-  console.log("  Role     : admin");
+  console.log("  Role     : super_admin");
   process.exit(0);
 }
 
