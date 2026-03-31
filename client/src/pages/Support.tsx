@@ -1,33 +1,28 @@
 import { useState } from "react";
 import { Headphones, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
+import { useQuery } from "@tanstack/react-query";
 
-const FAQS = [
-  {
-    q: "How long does delivery take?",
-    a: "Most digital top-ups are delivered instantly after your payment is confirmed. In rare cases it may take up to 15 minutes.",
-  },
-  {
-    q: "What payment methods do you accept?",
-    a: "We accept major credit/debit cards, e-wallets, and bank transfers depending on your region. Available options are shown at checkout.",
-  },
-  {
-    q: "What if I entered the wrong Player ID?",
-    a: "Please contact us immediately via this form. We will investigate within 24 hours. Unfortunately we cannot guarantee a reversal if the top-up has already been credited.",
-  },
-  {
-    q: "How do I request a refund?",
-    a: "Refunds are reviewed case-by-case. Submit a support ticket with your order ID and a brief explanation. We typically respond within 1–2 business days.",
-  },
-  {
-    q: "Is my payment information secure?",
-    a: "Yes. We never store raw card data. All payments are processed through encrypted, PCI-compliant gateways.",
-  },
-];
+type FaqItem = { q: string; a: string };
 
 export default function Support() {
   const { user, isAuthenticated } = useAuthStore();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const { data: settings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  let faqs: FaqItem[] = [];
+  try {
+    const parsed = JSON.parse(settings?.faq_items || "[]");
+    if (Array.isArray(parsed)) {
+      faqs = parsed.filter((item: FaqItem) => item.q || item.a);
+    }
+  } catch {
+    faqs = [];
+  }
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,53 +80,59 @@ export default function Support() {
         >
           Frequently Asked Questions
         </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {FAQS.map((faq, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: "hsl(220,20%,9%)",
-                border: "1px solid hsl(220,15%,18%)",
-                borderRadius: "0.75rem",
-                overflow: "hidden",
-              }}
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+        {faqs.length === 0 ? (
+          <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "13px", background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "0.75rem" }}>
+            No FAQ items available yet.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {faqs.map((faq, idx) => (
+              <div
+                key={idx}
                 style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "1rem 1.25rem",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "hsl(210,40%,88%)",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  textAlign: "left",
-                  gap: "0.5rem",
+                  background: "hsl(220,20%,9%)",
+                  border: "1px solid hsl(220,15%,18%)",
+                  borderRadius: "0.75rem",
+                  overflow: "hidden",
                 }}
               >
-                <span>{faq.q}</span>
-                {openFaq === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-              {openFaq === idx && (
-                <div
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                   style={{
-                    padding: "0 1.25rem 1rem",
-                    fontSize: "0.85rem",
-                    color: "hsl(220,10%,55%)",
-                    lineHeight: 1.65,
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "1rem 1.25rem",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "hsl(210,40%,88%)",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    textAlign: "left",
+                    gap: "0.5rem",
                   }}
                 >
-                  {faq.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                  <span>{faq.q}</span>
+                  {openFaq === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {openFaq === idx && (
+                  <div
+                    style={{
+                      padding: "0 1.25rem 1rem",
+                      fontSize: "0.85rem",
+                      color: "hsl(220,10%,55%)",
+                      lineHeight: 1.65,
+                    }}
+                  >
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Contact form */}

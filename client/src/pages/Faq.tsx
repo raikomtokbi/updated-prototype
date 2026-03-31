@@ -5,33 +5,6 @@ import { Link } from "wouter";
 
 type FaqItem = { q: string; a: string };
 
-const DEFAULT_FAQS: FaqItem[] = [
-  {
-    q: "How fast is delivery?",
-    a: "Most orders are delivered instantly — within seconds of payment confirmation. In rare cases where manual processing is needed, delivery may take up to 15 minutes.",
-  },
-  {
-    q: "Which payment methods do you accept?",
-    a: "We accept major credit and debit cards, PayPal, and various local payment methods depending on your region.",
-  },
-  {
-    q: "Is my account information safe?",
-    a: "Yes. We never store your game account credentials. All transactions are encrypted and processed through PCI-compliant payment gateways.",
-  },
-  {
-    q: "What if I entered the wrong game ID?",
-    a: "If your order has not yet been processed, contact support immediately through the Support page. Once a top-up has been delivered to an account, it cannot be reversed.",
-  },
-  {
-    q: "How do I track my order?",
-    a: "You can view your order history and status by logging into your account and navigating to Order History.",
-  },
-  {
-    q: "Do you offer refunds?",
-    a: "Refunds are available for orders that have not yet been processed. Please review our Refund Policy for full details.",
-  },
-];
-
 function FaqRow({ item, index }: { item: FaqItem; index: number }) {
   const [open, setOpen] = useState(false);
   return (
@@ -111,14 +84,14 @@ export default function Faq() {
     staleTime: 5 * 60 * 1000,
   });
 
-  let faqs: FaqItem[] = DEFAULT_FAQS;
+  let faqs: FaqItem[] = [];
   try {
     const parsed = JSON.parse(settings?.faq_items || "[]");
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       faqs = parsed.filter((item: any) => item.q || item.a);
     }
   } catch {
-    faqs = DEFAULT_FAQS;
+    faqs = [];
   }
 
   const siteName = settings?.site_name || "Nexcoin";
