@@ -39,6 +39,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+textarea {
+  resize: none;
+}
+
 .font-orbitron {
   font-family: 'Orbitron', sans-serif;
 }
