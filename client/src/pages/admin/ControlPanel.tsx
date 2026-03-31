@@ -211,7 +211,7 @@ export default function ControlPanel() {
     }
   }, [remoteSettings]);
 
-  const isDirty = !!(remoteSettings && Object.keys(remoteSettings).some((k) => local[k] !== remoteSettings[k]));
+  const isDirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k])));
 
   const { leaveDialog, cancelLeave, doLeave } = useNavGuard(isDirty);
 
