@@ -825,28 +825,30 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               gap: "8px",
             }}
           >
-            <button
-              data-testid="button-mobile-menu"
-              onClick={() => setSidebarOpen(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "34px",
-                height: "34px",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "hsl(258, 90%, 66%)",
-                flexShrink: 0,
-              }}
-            >
-              <Menu size={20} />
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+              <button
+                data-testid="button-mobile-menu"
+                onClick={() => setSidebarOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "34px",
+                  height: "34px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "hsl(258, 90%, 66%)",
+                  flexShrink: 0,
+                }}
+              >
+                <Menu size={20} />
+              </button>
 
-            <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flex: 1, textAlign: "center", margin: 0 }}>
-              {title}
-            </h1>
+              <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {title}
+              </h1>
+            </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
               <NotificationBell />
