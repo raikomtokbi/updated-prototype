@@ -228,6 +228,8 @@ const DEFAULTS: SettingsMap = {
   // Footer
   footer_copyright: "© 2024 Nexcoin. All rights reserved.",
   footer_support_email: "support@nexcoin.gg",
+  footer_button_name: "",
+  footer_button_link: "",
   // Legal page content
   terms_content: "",
   privacy_content: "",
@@ -926,6 +928,26 @@ export default function ControlPanel() {
               style={inputStyle}
               value={local.footer_copyright ?? ""}
               onChange={(e) => set("footer_copyright", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Footer Button Label</label>
+            <input
+              data-testid="input-footer-button-name"
+              style={inputStyle}
+              placeholder="e.g. Contact Us (leave blank to hide)"
+              value={local.footer_button_name ?? ""}
+              onChange={(e) => set("footer_button_name", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Footer Button Link</label>
+            <input
+              data-testid="input-footer-button-link"
+              style={inputStyle}
+              placeholder="e.g. /contact or https://..."
+              value={local.footer_button_link ?? ""}
+              onChange={(e) => set("footer_button_link", e.target.value)}
             />
           </div>
         </div>

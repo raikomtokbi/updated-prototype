@@ -707,22 +707,6 @@ export default function EmailTemplates() {
 
       {/* Page header */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-          <button
-            onClick={() => setLocation("/admin/control-panel")}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: "none", border: "none", cursor: "pointer",
-              fontSize: "12px", color: "hsl(220,10%,45%)", padding: 0,
-            }}
-          >
-            <ArrowLeft size={13} /> Control Panel
-          </button>
-          <ChevronRight size={11} color="hsl(220,10%,28%)" />
-          <span style={{ fontSize: "12px", color: "hsl(210,40%,72%)", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-            <Mail size={12} /> Email Templates
-          </span>
-        </div>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", margin: 0, lineHeight: 1.6 }}>
           Customise automated emails.{" "}
           <a href="/admin/api-integration" style={{ color: "#a78bfa", textDecoration: "none" }}>Configure SMTP →</a>

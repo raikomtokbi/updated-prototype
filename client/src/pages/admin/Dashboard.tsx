@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
-import { Loader2, Database, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -87,15 +87,12 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
 }
 
 export default function Dashboard() {
-  const qc = useQueryClient();
   const [statsRangeKey, setStatsRangeKey] = useState("today");
   const [statsCustomRange, setStatsCustomRange] = useState<DateRange | undefined>(undefined);
   const [salesRangeKey, setSalesRangeKey] = useState("today");
   const [salesCustomRange, setSalesCustomRange] = useState<DateRange | undefined>(undefined);
   const [orderRangeKey, setOrderRangeKey] = useState("today");
   const [orderCustomRange, setOrderCustomRange] = useState<DateRange | undefined>(undefined);
-  const [seedDone, setSeedDone] = useState(false);
-
   const statsQueryKey = statsRangeKey === "custom" && statsCustomRange?.from
     ? ["/api/admin/stats", statsRangeKey, statsCustomRange.from?.toISOString(), statsCustomRange.to?.toISOString()]
     : ["/api/admin/stats", statsRangeKey];
@@ -109,29 +106,12 @@ export default function Dashboard() {
     queryFn: () => adminApi.get(statsUrl),
   });
 
-  const { data: gameList = [] } = useQuery<{ id: string }[]>({
-    queryKey: ["/api/admin/games"],
-    queryFn: () => adminApi.get("/games"),
-  });
-
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/admin/settings"],
     queryFn: () => adminApi.get("/settings"),
   });
 
   const currency = siteSettings?.default_currency ?? "USD";
-
-  const seedMut = useMutation({
-    mutationFn: () => adminApi.post("/seed", {}),
-    onSuccess: () => {
-      setSeedDone(true);
-      qc.invalidateQueries({ queryKey: ["/api/admin/games"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/stats"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/hero-sliders"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
-      qc.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
-    },
-  });
 
   const salesQueryKey = salesRangeKey === "custom" && salesCustomRange?.from
     ? ["/api/admin/analytics", "sales", salesRangeKey, salesCustomRange.from?.toISOString(), salesCustomRange.to?.toISOString()]
@@ -281,35 +261,6 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-
-        {/* ── Setup / Seed demo data ──────────────────────────────────── */}
-        {gameList.length === 0 && !seedDone && (
-          <div style={{ background: "hsl(258,70%,10%)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "8px", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "rgba(124,58,237,0.15)", color: "hsl(258,90%,66%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Database size={17} />
-              </div>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)" }}>No data yet — Load sample data to get started</div>
-                <div style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginTop: "2px" }}>Adds 4 games, pricing options, 3 hero sliders, and 2 campaigns for testing</div>
-              </div>
-            </div>
-            <button
-              onClick={() => seedMut.mutate()}
-              disabled={seedMut.isPending}
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "6px", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "white", fontSize: "12px", fontWeight: 600, cursor: seedMut.isPending ? "not-allowed" : "pointer", border: "none", whiteSpace: "nowrap", flexShrink: 0 }}
-              data-testid="button-seed-data"
-            >
-              {seedMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Database size={13} />}
-              {seedMut.isPending ? "Loading..." : "Load Sample Data"}
-            </button>
-          </div>
-        )}
-        {seedDone && (
-          <div style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "8px", padding: "12px 18px", fontSize: "13px", color: "hsl(142,71%,48%)" }}>
-            Sample data loaded. Refresh the page to see it on the storefront.
-          </div>
-        )}
 
         {/* ── Charts ─────────────────────────────────────────────────── */}
         <div

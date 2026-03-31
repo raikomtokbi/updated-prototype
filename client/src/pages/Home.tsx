@@ -903,11 +903,44 @@ function Footer() {
           style={{
             borderTop: "1px solid rgba(124,58,237,0.12)",
             paddingTop: "1.5rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "0.75rem",
           }}
         >
-          <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)" }}>
+          <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)", margin: 0 }}>
             {siteSettings?.footer_copyright || `© ${new Date().getFullYear()} ${siteSettings?.site_name || "Nexcoin"}. All rights reserved.`}
           </p>
+          {siteSettings?.footer_button_name && (
+            <a
+              href={siteSettings.footer_button_link || "#"}
+              data-testid="link-footer-button"
+              style={{
+                display: "inline-block",
+                padding: "0.35rem 0.9rem",
+                borderRadius: "6px",
+                background: "rgba(124,58,237,0.15)",
+                border: "1px solid rgba(124,58,237,0.35)",
+                color: "#a78bfa",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "background 0.15s, border-color 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(124,58,237,0.28)";
+                e.currentTarget.style.borderColor = "rgba(124,58,237,0.6)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(124,58,237,0.15)";
+                e.currentTarget.style.borderColor = "rgba(124,58,237,0.35)";
+              }}
+            >
+              {siteSettings.footer_button_name}
+            </a>
+          )}
         </div>
       </div>
     </footer>
