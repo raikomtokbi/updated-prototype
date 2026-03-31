@@ -267,40 +267,40 @@ export default function ControlPanel() {
     );
   }
 
+  const saveBtn = (isDirty || saved) ? (
+    <button
+      data-testid="button-save-settings"
+      onClick={handleSave}
+      disabled={save.isPending}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "7px",
+        padding: "8px 18px",
+        borderRadius: "6px",
+        background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+        color: "white",
+        fontSize: "13px",
+        fontWeight: 600,
+        cursor: save.isPending ? "default" : "pointer",
+        border: "none",
+        flexShrink: 0,
+        transition: "background 0.2s",
+        opacity: save.isPending ? 0.75 : 1,
+      }}
+    >
+      {save.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
+      {saved ? "Saved!" : "Save Changes"}
+    </button>
+  ) : undefined;
+
   return (
-    <AdminLayout title="Control Panel">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", gap: "12px" }}>
-        <div>
-          <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)", marginTop: "2px" }}>
-            Manage system-wide configuration and feature toggles
-          </p>
-        </div>
-        {(isDirty || saved) && (
-          <button
-            data-testid="button-save-settings"
-            onClick={handleSave}
-            disabled={save.isPending}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "7px",
-              padding: "8px 18px",
-              borderRadius: "6px",
-              background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
-              color: "white",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: save.isPending ? "default" : "pointer",
-              border: "none",
-              flexShrink: 0,
-              transition: "background 0.2s",
-              opacity: save.isPending ? 0.75 : 1,
-            }}
-          >
-            {save.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
-            {saved ? "Saved!" : "Save Changes"}
-          </button>
-        )}
+    <AdminLayout title="Control Panel" actions={saveBtn}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ marginBottom: "20px" }}>
+        <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)", margin: 0 }}>
+          Manage system-wide configuration and feature toggles
+        </p>
       </div>
 
       {/* ── Site Identity ───────────────────────────────────────────────────── */}
