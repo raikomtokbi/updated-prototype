@@ -239,6 +239,11 @@ const DEFAULTS: SettingsMap = {
   about_tagline: "",
   about_story: "",
   why_nexcoin_cards: JSON.stringify(DEFAULT_VALUE_CARDS),
+  // About page stats overrides
+  about_stat_games: "0",
+  about_stat_products: "0",
+  about_stat_orders: "0",
+  about_stat_users: "0",
   // Contact
   contact_email: "support@nexcoin.gg",
   contact_phone: "+1 (800) 123-4567",
@@ -413,6 +418,7 @@ export default function ControlPanel() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
+      qc.invalidateQueries({ queryKey: ["/api/about-stats"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
@@ -444,6 +450,7 @@ export default function ControlPanel() {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
         qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
+        qc.invalidateQueries({ queryKey: ["/api/about-stats"] });
         doLeave();
       },
     });
@@ -1025,6 +1032,39 @@ export default function ControlPanel() {
               value={local.why_nexcoin_cards ?? JSON.stringify(DEFAULT_VALUE_CARDS)}
               onChange={(v) => set("why_nexcoin_cards", v)}
             />
+          </div>
+        </div>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)" }}>About Page Stats</span>
+            <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: "4px 0 0" }}>
+              Override the live counts shown on the About page. Enter 0 to display the real database count.
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            {([
+              { key: "about_stat_games",    label: "Games Available" },
+              { key: "about_stat_products", label: "Products Available" },
+              { key: "about_stat_orders",   label: "Orders Fulfilled" },
+              { key: "about_stat_users",    label: "Registered Users" },
+            ] as { key: string; label: string }[]).map((item) => (
+              <div key={item.key}>
+                <label style={labelStyle}>{item.label}</label>
+                <input
+                  data-testid={`input-${item.key}`}
+                  type="number"
+                  min="0"
+                  step="1"
+                  style={inputStyle}
+                  placeholder="0"
+                  value={local[item.key] ?? "0"}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, "");
+                    set(item.key, raw === "" ? "0" : String(Math.max(0, parseInt(raw, 10))));
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

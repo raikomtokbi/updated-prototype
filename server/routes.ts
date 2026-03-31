@@ -165,17 +165,26 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── About page public stats ───────────────────────────────────────────────
   app.get("/api/about-stats", async (_req, res) => {
-    const [prods, allGames, userCount, orderCount] = await Promise.all([
+    const [prods, allGames, userCount, orderCount, allSettings] = await Promise.all([
       storage.getAllProducts(),
       storage.getAllGames(),
       storage.countUsers(),
       storage.countOrders(),
+      storage.getAllSiteSettings(),
     ]);
+
+    const settingsMap: Record<string, string> = Object.fromEntries(allSettings.map((s) => [s.key, s.value]));
+
+    const override = (key: string, realVal: number) => {
+      const v = parseInt(settingsMap[key] ?? "0", 10);
+      return Number.isFinite(v) && v > 0 ? v : realVal;
+    };
+
     res.json({
-      productsCount: prods.length,
-      gamesCount: allGames.filter((g) => g.status === "active").length,
-      ordersCount: orderCount,
-      usersCount: userCount,
+      productsCount: override("about_stat_products", prods.length),
+      gamesCount: override("about_stat_games", allGames.filter((g) => g.status === "active").length),
+      ordersCount: override("about_stat_orders", orderCount),
+      usersCount: override("about_stat_users", userCount),
     });
   });
 
