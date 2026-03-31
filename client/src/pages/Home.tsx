@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
   Facebook, Twitter, Instagram, Radio, Gamepad2, Gift, HeadphonesIcon,
-  Wrench, Mail,
+  Wrench,
 } from "lucide-react";
 
 import { useSiteStore } from "@/lib/store/siteStore";
@@ -813,27 +813,6 @@ function Footer() {
                 </a>
               ))}
             </div>
-            {/* Support Email */}
-            {siteSettings?.footer_support_email && (
-              <a
-                href={`mailto:${siteSettings.footer_support_email}`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  marginTop: "0.9rem",
-                  fontSize: "0.78rem",
-                  color: "rgba(148,163,184,0.6)",
-                  textDecoration: "none",
-                  transition: "color 0.15s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
-              >
-                <Mail size={12} />
-                {siteSettings.footer_support_email}
-              </a>
-            )}
           </div>
 
           {/* Marketplace */}
