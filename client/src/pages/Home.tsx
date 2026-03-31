@@ -537,11 +537,10 @@ function TrendingGames() {
                     <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
                   </div>
                 )}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(11,16,32,0.85) 0%, transparent 55%)" }} />
                 <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
               </div>
-              <div style={{ padding: "0.6rem 0.75rem 0.75rem" }}>
-                <p style={{ fontSize: "0.78rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div style={{ padding: "0.5rem 0.75rem" }}>
+                <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0 }}>
                   {game.name}
                 </p>
               </div>
