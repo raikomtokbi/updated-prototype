@@ -22,6 +22,9 @@ import Terms from "./pages/Terms";
 import RefundPolicy from "./pages/RefundPolicy";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyResetOtp from "./pages/VerifyResetOtp";
+import ResetPassword from "./pages/ResetPassword";
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import TopupOrders from "./pages/admin/TopupOrders";
@@ -88,6 +91,9 @@ function PublicRoutes() {
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/auth/forgot-password" component={ForgotPassword} />
+          <Route path="/auth/verify-reset-otp" component={VerifyResetOtp} />
+          <Route path="/auth/reset-password" component={ResetPassword} />
           <Route path="/account" component={Account} />
           <Route path="/support" component={Support} />
           <Route path="/about" component={About} />

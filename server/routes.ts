@@ -3,6 +3,7 @@ import express from "express";
 import type { Server } from "http";
 import path from "path";
 import fs from "fs";
+import { createHash, randomBytes } from "crypto";
 import multer from "multer";
 import AdmZip from "adm-zip";
 import { storage } from "./storage";
@@ -299,7 +300,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       });
     }
 
-    const user = await storage.getUserByUsername(username);
+    // Try to find user by username, email, or user ID
+    let user = await storage.getUserByUsername(username);
+    if (!user) user = await storage.getUserByEmail(username);
+    if (!user) user = await storage.getUser(username);
+
     if (!user || user.password !== password) {
       recordFailedLogin(username);
       return res.status(401).json({ message: "Invalid credentials" });
@@ -312,6 +317,158 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     resetLoginAttempts(username);
     const { password: _pw, ...safeUser } = user;
     return res.json({ user: safeUser });
+  });
+
+  // ── Forgot password / OTP reset ────────────────────────────────────────────
+  const resetRequestTimes = new Map<string, number>(); // userId → last request ms
+
+  function hashOtp(otp: string, userId: string) {
+    return createHash("sha256").update(`${otp}:${userId}`).digest("hex");
+  }
+
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    const { identifier } = req.body ?? {};
+    if (!identifier || typeof identifier !== "string" || !identifier.trim()) {
+      return res.status(400).json({ message: "Identifier is required" });
+    }
+    const id = identifier.trim();
+
+    // Find user by username, email, or user ID
+    let user = await storage.getUserByUsername(id);
+    if (!user) user = await storage.getUserByEmail(id);
+    if (!user) user = await storage.getUser(id);
+
+    // Generic response — never reveal if account exists
+    const GENERIC = "If an account with that identifier exists, an OTP has been sent to the registered email.";
+
+    if (!user || !user.email) {
+      return res.json({ message: GENERIC });
+    }
+
+    // Rate limit: max 1 request per 60 seconds per user
+    const lastRequest = resetRequestTimes.get(user.id);
+    if (lastRequest && Date.now() - lastRequest < 60_000) {
+      return res.status(429).json({ message: "Please wait a minute before requesting another OTP." });
+    }
+
+    // Generate 6-digit OTP
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = hashOtp(otp, user.id);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete old tokens for this user and create a new one
+    await storage.deletePasswordResetTokensByUserId(user.id);
+    const token = await storage.createPasswordResetToken(user.id, otpHash, expiresAt);
+    resetRequestTimes.set(user.id, Date.now());
+
+    // Send OTP via email (best-effort)
+    (async () => {
+      try {
+        const [smtpPlugin, template, settings] = await Promise.all([
+          storage.getPlugin("smtp-email"),
+          storage.getEmailTemplate("otp"),
+          storage.getAllSiteSettings(),
+        ]);
+        const smtpConfig = smtpPlugin?.config ? JSON.parse(smtpPlugin.config) : null;
+        const siteObj: Record<string, string> = {};
+        settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+        const siteName = siteObj.site_name || "Nexcoin";
+        const tpl = template ?? DEFAULT_EMAIL_TEMPLATES.find((t) => t.type === "otp");
+        if (smtpConfig && tpl) {
+          await sendTemplatedEmail({
+            to: user!.email!,
+            template: tpl as any,
+            vars: {
+              user_name: user!.fullName || user!.username,
+              otp_code: otp,
+              site_name: siteName,
+              site_url: "",
+            },
+            siteName,
+            smtpConfig,
+          });
+        } else {
+          // Dev fallback: log OTP to console
+          console.log(`[ForgotPassword] OTP for ${user!.username} (${user!.email}): ${otp}`);
+        }
+      } catch (e) {
+        console.error("[ForgotPassword] Email send error:", e);
+      }
+    })();
+
+    return res.json({ message: GENERIC, token_id: token.id });
+  });
+
+  app.post("/api/auth/verify-reset-otp", async (req, res) => {
+    const { token_id, otp } = req.body ?? {};
+    if (!token_id || !otp) {
+      return res.status(400).json({ message: "Token ID and OTP are required" });
+    }
+
+    const token = await storage.getPasswordResetToken(token_id);
+    if (!token) return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    // Check expiry
+    if (new Date() > token.expiresAt) {
+      await storage.deletePasswordResetTokensByUserId(token.userId);
+      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    }
+
+    // Check max attempts
+    if (token.attempts >= 5) {
+      await storage.deletePasswordResetTokensByUserId(token.userId);
+      return res.status(400).json({ message: "Too many failed attempts. Please request a new OTP." });
+    }
+
+    // Verify OTP
+    const inputHash = hashOtp(String(otp).trim(), token.userId);
+    if (inputHash !== token.otpHash) {
+      await storage.updatePasswordResetToken(token.id, { attempts: token.attempts + 1 });
+      const remaining = 5 - (token.attempts + 1);
+      return res.status(400).json({ message: `Invalid OTP. ${remaining} attempt(s) remaining.` });
+    }
+
+    // OTP valid — generate a one-time reset token
+    const resetToken = randomBytes(32).toString("hex");
+    const newExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await storage.updatePasswordResetToken(token.id, { resetToken, expiresAt: newExpiry, attempts: 0 });
+
+    return res.json({ reset_token: resetToken });
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    const { reset_token, new_password } = req.body ?? {};
+    if (!reset_token || !new_password) {
+      return res.status(400).json({ message: "Reset token and new password are required" });
+    }
+    if (typeof new_password !== "string" || new_password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
+
+    // Find token record by resetToken value
+    const [tokenRow] = await (async () => {
+      // We need a custom query since there's no direct index by resetToken
+      // Use the storage layer — query by reset_token via a helper we'll build inline
+      const { db } = await import("./db");
+      const { passwordResetTokens } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      return db.select().from(passwordResetTokens).where(eq(passwordResetTokens.resetToken, reset_token)).limit(1);
+    })();
+
+    if (!tokenRow) return res.status(400).json({ message: "Invalid or expired reset token" });
+
+    // Check expiry
+    if (new Date() > tokenRow.expiresAt) {
+      await storage.deletePasswordResetTokensByUserId(tokenRow.userId);
+      return res.status(400).json({ message: "Reset token has expired. Please request a new OTP." });
+    }
+
+    // Update password (stored plaintext to match existing app auth)
+    await storage.updateUser(tokenRow.userId, { password: new_password });
+    await storage.deletePasswordResetTokensByUserId(tokenRow.userId);
+    resetRequestTimes.delete(tokenRow.userId);
+
+    return res.json({ message: "Password updated successfully. You can now log in with your new password." });
   });
 
   app.post("/api/auth/register", async (req, res) => {

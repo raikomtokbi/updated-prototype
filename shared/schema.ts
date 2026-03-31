@@ -331,6 +331,19 @@ export const emailTemplates = pgTable("email_templates", {
 
 export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({ id: true, createdAt: true, updatedAt: true });
 
+// ─── Password Reset Tokens ────────────────────────────────────────────────────
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  otpHash: text("otp_hash").notNull(),
+  resetToken: text("reset_token"),
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
 // ─── Site Settings ────────────────────────────────────────────────────────────
 export const siteSettings = pgTable("site_settings", {
   id: varchar("id", { length: 36 }).primaryKey(),

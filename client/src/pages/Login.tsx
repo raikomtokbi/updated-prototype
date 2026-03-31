@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Zap, Eye, EyeOff, LogIn } from "lucide-react";
+import { Zap, Eye, EyeOff, LogIn, KeyRound } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 
 export default function Login() {
@@ -104,13 +104,13 @@ export default function Login() {
               htmlFor="username"
               style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}
             >
-              Username
+              Username / Email / User ID
             </label>
             <input
               id="username"
               className="input-field"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter username, email, or user ID"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -119,12 +119,29 @@ export default function Login() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}
-            >
-              Password
-            </label>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+              <label
+                htmlFor="password"
+                style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)" }}
+              >
+                Password
+              </label>
+              <Link
+                href="/auth/forgot-password"
+                style={{
+                  fontSize: "0.75rem",
+                  color: "hsl(258,90%,70%)",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                }}
+                data-testid="link-forgot-password"
+              >
+                <KeyRound size={12} />
+                Forgot Password?
+              </Link>
+            </div>
             <div style={{ position: "relative" }}>
               <input
                 id="password"

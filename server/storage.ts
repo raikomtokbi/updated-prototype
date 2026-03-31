@@ -19,10 +19,11 @@ import {
   type Notification,
   type SiteSetting,
   type EmailTemplate,
+  type PasswordResetToken,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
-  notifications, siteSettings, emailTemplates,
+  notifications, siteSettings, emailTemplates, passwordResetTokens,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -142,6 +143,13 @@ export interface IStorage {
   getSiteSetting(key: string): Promise<SiteSetting | undefined>;
   upsertSiteSetting(key: string, value: string): Promise<SiteSetting>;
   upsertSiteSettings(settings: Record<string, string>): Promise<void>;
+
+  // Password Reset Tokens
+  createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
+  getPasswordResetToken(id: string): Promise<PasswordResetToken | undefined>;
+  getLatestPasswordResetTokenByUserId(userId: string): Promise<PasswordResetToken | undefined>;
+  updatePasswordResetToken(id: string, data: Partial<PasswordResetToken>): Promise<void>;
+  deletePasswordResetTokensByUserId(userId: string): Promise<void>;
 
   // Dashboard
   getDashboardStats(): Promise<{
@@ -546,6 +554,30 @@ export class DatabaseStorage implements IStorage {
   }
   async upsertSiteSettings(settings: Record<string, string>) {
     await Promise.all(Object.entries(settings).map(([k, v]) => this.upsertSiteSetting(k, v)));
+  }
+
+  // ── Password Reset Tokens ──────────────────────────────────────────────────
+  async createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date) {
+    const id = randomUUID();
+    await db.insert(passwordResetTokens).values({ id, userId, otpHash, expiresAt });
+    return fetchAfter<PasswordResetToken>(passwordResetTokens, id, passwordResetTokens.id);
+  }
+  async getPasswordResetToken(id: string) {
+    const [row] = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.id, id));
+    return row;
+  }
+  async getLatestPasswordResetTokenByUserId(userId: string) {
+    const [row] = await db.select().from(passwordResetTokens)
+      .where(eq(passwordResetTokens.userId, userId))
+      .orderBy(desc(passwordResetTokens.createdAt))
+      .limit(1);
+    return row;
+  }
+  async updatePasswordResetToken(id: string, data: Partial<PasswordResetToken>) {
+    await db.update(passwordResetTokens).set(data).where(eq(passwordResetTokens.id, id));
+  }
+  async deletePasswordResetTokensByUserId(userId: string) {
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
   }
 
   // ── Dashboard Stats ────────────────────────────────────────────────────────
