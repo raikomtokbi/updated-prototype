@@ -49,54 +49,39 @@ function GameCard({ game }: { game: Game }) {
         (e.currentTarget as HTMLElement).style.boxShadow = "none";
       }}
     >
-      <div
-        style={{
-          height: "160px",
-          background: "linear-gradient(135deg, hsl(258,35%,16%), hsl(220,28%,10%))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
+      {/* Image — fills container fully, crops overflow */}
+      <div style={{ aspectRatio: "4/3", position: "relative", overflow: "hidden", background: "hsl(258,35%,14%)" }}>
         {game.logoUrl ? (
-          <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "8px" }} />
+          <img
+            src={game.logoUrl}
+            alt={game.name}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
         ) : (
-          <Gamepad2 size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Gamepad2 size={40} style={{ color: "hsla(258,90%,66%,0.3)" }} />
+          </div>
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(7,11,20,0.7) 0%, transparent 55%)" }} />
+        {/* Bottom gradient so the name overlay is readable */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(5,8,18,0.75) 0%, transparent 50%)" }} />
         {game.isTrending && (
-          <span style={{ position: "absolute", top: "0.5rem", left: "0.5rem", padding: "0.15rem 0.45rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
+          <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
             HOT
           </span>
         )}
-      </div>
-      <div style={{ padding: "1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
-          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)", flex: 1 }}>
+        {/* Name overlaid on the image */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0.55rem 0.65rem 0.6rem" }}>
+          <h3 style={{ fontSize: "0.82rem", fontWeight: 700, color: "#f1f5f9", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {game.name}
           </h3>
-          <span className="badge badge-purple" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>Game</span>
         </div>
-        {game.description && (
-          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,50%)", lineHeight: 1.5 }}>
-            {game.description.length > 70 ? game.description.slice(0, 70) + "…" : game.description}
-          </p>
-        )}
-        <div
-          style={{
-            marginTop: "0.75rem",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.35rem",
-            fontSize: "0.78rem",
-            fontWeight: 600,
-            color: "hsl(258,90%,72%)",
-          }}
-        >
-          Top Up <Zap size={12} />
-        </div>
+      </div>
+      {/* Bottom bar */}
+      <div style={{ padding: "0.55rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 600, color: "hsl(258,90%,72%)" }}>
+          Top Up <Zap size={11} />
+        </span>
+        <span className="badge badge-purple" style={{ fontSize: "0.6rem" }}>Game</span>
       </div>
     </Link>
   );
@@ -284,12 +269,12 @@ export default function Products() {
 
       {/* Grid */}
       {isLoading ? (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.25rem" }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
               style={{
-                height: "280px",
+                aspectRatio: "4/3",
                 background: "hsl(220,20%,9%)",
                 border: "1px solid hsl(220,15%,14%)",
                 borderRadius: "0.75rem",
@@ -314,7 +299,7 @@ export default function Products() {
           )}
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1.25rem" }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((item) =>
             item.kind === "game" ? (
               <GameCard key={`game-${item.data.id}`} game={item.data} />

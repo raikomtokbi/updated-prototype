@@ -529,11 +529,13 @@ function TrendingGames() {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
               }}
             >
-              <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(11,16,32,0.9))", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative", background: "hsl(258,35%,14%)" }}>
                 {game.logoUrl ? (
-                  <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "8px" }} />
+                  <img src={game.logoUrl} alt={game.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
+                  </div>
                 )}
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(11,16,32,0.85) 0%, transparent 55%)" }} />
                 <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
