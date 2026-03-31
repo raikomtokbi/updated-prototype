@@ -241,7 +241,7 @@ export default function ControlPanel() {
     history.pushState = function (...args: Parameters<typeof history.pushState>) {
       if (!bypassRef.current && isDirtyRef.current) {
         const url = args[2];
-        const current = location.pathname + location.search;
+        const current = window.location.pathname + window.location.search;
         if (url && typeof url === "string" && url !== current) {
           setPendingPath(url);
           setLeaveDialog(true);
@@ -253,6 +253,20 @@ export default function ControlPanel() {
     return () => {
       history.pushState = orig;
     };
+  }, []);
+
+  // Intercept browser back / forward button (popstate event)
+  useEffect(() => {
+    const handlePopState = () => {
+      if (!bypassRef.current && isDirtyRef.current) {
+        // Push current URL back so we stay on control-panel
+        history.pushState(null, "", "/admin/control-panel");
+        setPendingPath("__back__");
+        setLeaveDialog(true);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   const save = useMutation({
@@ -283,13 +297,16 @@ export default function ControlPanel() {
 
   // Navigate away and discard changes
   function leaveAndDiscard() {
-    if (pendingPath) {
-      if (remoteSettings) setLocal({ ...remoteSettings });
-      bypassRef.current = true;
-      setLeaveDialog(false);
+    if (!pendingPath) return;
+    if (remoteSettings) setLocal({ ...remoteSettings });
+    bypassRef.current = true;
+    setLeaveDialog(false);
+    if (pendingPath === "__back__") {
+      history.back();
+    } else {
       setLocation(pendingPath);
-      setTimeout(() => { bypassRef.current = false; }, 0);
     }
+    setTimeout(() => { bypassRef.current = false; }, 100);
   }
 
   // Save then navigate away
@@ -302,8 +319,12 @@ export default function ControlPanel() {
         qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
         bypassRef.current = true;
         setLeaveDialog(false);
-        setLocation(target);
-        setTimeout(() => { bypassRef.current = false; }, 0);
+        if (target === "__back__") {
+          history.back();
+        } else {
+          setLocation(target);
+        }
+        setTimeout(() => { bypassRef.current = false; }, 100);
       },
     });
   }
