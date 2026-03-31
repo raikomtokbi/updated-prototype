@@ -162,6 +162,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(p);
   });
 
+  // ── About page public stats ───────────────────────────────────────────────
+  app.get("/api/about-stats", async (_req, res) => {
+    const [prods, allGames, userCount, orderCount] = await Promise.all([
+      storage.getAllProducts(),
+      storage.getAllGames(),
+      storage.countUsers(),
+      storage.countOrders(),
+    ]);
+    res.json({
+      productsCount: prods.length,
+      gamesCount: allGames.filter((g) => g.status === "active").length,
+      ordersCount: orderCount,
+      usersCount: userCount,
+    });
+  });
+
   // ── Public games routes ────────────────────────────────────────────────────
   app.get("/api/games", async (_req, res) => {
     const all = await storage.getAllGames();

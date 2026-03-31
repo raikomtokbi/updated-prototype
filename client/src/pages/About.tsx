@@ -1,41 +1,26 @@
-import { Zap, Shield, Clock, Users } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { ICON_MAP, DEFAULT_VALUE_CARDS } from "@/lib/iconMap";
 
-const VALUES = [
-  {
-    icon: Zap,
-    title: "Instant Delivery",
-    desc: "Top-ups are credited to your account within seconds of payment confirmation.",
-  },
-  {
-    icon: Shield,
-    title: "Secure & Trusted",
-    desc: "All transactions are encrypted end-to-end and processed by PCI-compliant gateways.",
-  },
-  {
-    icon: Clock,
-    title: "24/7 Support",
-    desc: "Our support team is available around the clock to resolve any issue you may face.",
-  },
-  {
-    icon: Users,
-    title: "Community First",
-    desc: "Built by gamers for gamers — we understand what matters to you.",
-  },
-];
+interface ValueCard { icon: string; title: string; desc: string }
+interface AboutStats { productsCount: number; gamesCount: number; ordersCount: number; usersCount: number }
 
-const STATS = [
-  { label: "Products Available", value: "100+" },
-  { label: "Orders Fulfilled", value: "10K+" },
-  { label: "Happy Customers", value: "5K+" },
-  { label: "Avg. Delivery Time", value: "<1 min" },
-];
+function fmtStat(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M+`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K+`;
+  return n.toString();
+}
 
 export default function About() {
   const { data: settings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
     staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: stats } = useQuery<AboutStats>({
+    queryKey: ["/api/about-stats"],
+    staleTime: 60 * 1000,
   });
 
   const siteName = settings?.site_name || "Nexcoin";
@@ -44,6 +29,22 @@ export default function About() {
     settings?.about_tagline ||
     `${siteName} is your trusted destination for instant digital top-ups — game currency, gift cards, vouchers, and subscriptions, all in one place.`;
   const storyText = settings?.about_story || "";
+
+  const valueCards: ValueCard[] = (() => {
+    try {
+      const parsed = JSON.parse(settings?.why_nexcoin_cards ?? "[]");
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_VALUE_CARDS;
+    } catch {
+      return DEFAULT_VALUE_CARDS;
+    }
+  })();
+
+  const statRows = [
+    { label: "Games Available",   value: stats ? fmtStat(stats.gamesCount)    : "—" },
+    { label: "Products Available", value: stats ? fmtStat(stats.productsCount) : "—" },
+    { label: "Orders Fulfilled",   value: stats ? fmtStat(stats.ordersCount)   : "—" },
+    { label: "Registered Users",   value: stats ? fmtStat(stats.usersCount)    : "—" },
+  ];
 
   return (
     <div style={{ maxWidth: "960px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
@@ -73,25 +74,17 @@ export default function About() {
         <div
           aria-hidden
           style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse 60% 60% at 50% 0%, hsla(258,90%,66%,0.07) 0%, transparent 70%)",
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse 60% 60% at 50% 0%, hsla(258,90%,66%,0.07) 0%, transparent 70%)",
             pointerEvents: "none",
           }}
         />
         <div
           style={{
-            width: "56px",
-            height: "56px",
-            borderRadius: "0.9rem",
-            background: "hsla(258,90%,66%,0.12)",
-            border: "1px solid hsla(258,90%,66%,0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 1.25rem",
-            position: "relative",
+            width: "56px", height: "56px", borderRadius: "0.9rem",
+            background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 1.25rem", position: "relative",
           }}
         >
           <Zap size={26} style={{ color: "hsl(258,90%,70%)" }} />
@@ -107,7 +100,7 @@ export default function About() {
         </p>
       </div>
 
-      {/* Stats */}
+      {/* Live Stats */}
       <div
         style={{
           display: "grid",
@@ -116,9 +109,10 @@ export default function About() {
           marginBottom: "3rem",
         }}
       >
-        {STATS.map((stat) => (
+        {statRows.map((stat) => (
           <div
             key={stat.label}
+            data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
             style={{
               background: "hsl(220,20%,9%)",
               border: "1px solid hsl(220,15%,18%)",
@@ -138,15 +132,11 @@ export default function About() {
         ))}
       </div>
 
-      {/* Values */}
+      {/* Why section */}
       <h2
         style={{
-          fontSize: "1rem",
-          fontWeight: 700,
-          color: "hsl(210,40%,85%)",
-          marginBottom: "1.25rem",
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
+          fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,85%)",
+          marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em",
         }}
       >
         Why {siteName}
@@ -159,11 +149,11 @@ export default function About() {
           marginBottom: "3rem",
         }}
       >
-        {VALUES.map((v) => {
-          const Icon = v.icon;
+        {valueCards.map((v, i) => {
+          const Icon = ICON_MAP[v.icon] ?? Zap;
           return (
             <div
-              key={v.title}
+              key={i}
               style={{
                 background: "hsl(220,20%,9%)",
                 border: "1px solid hsl(220,15%,18%)",
@@ -173,14 +163,9 @@ export default function About() {
             >
               <div
                 style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "0.65rem",
-                  background: "hsla(258,90%,66%,0.12)",
-                  border: "1px solid hsla(258,90%,66%,0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: "40px", height: "40px", borderRadius: "0.65rem",
+                  background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   marginBottom: "0.85rem",
                 }}
               >
@@ -200,21 +185,11 @@ export default function About() {
       {/* Story */}
       <div
         style={{
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
-          borderRadius: "1rem",
-          padding: "2rem",
-          marginBottom: "2rem",
+          background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,18%)",
+          borderRadius: "1rem", padding: "2rem", marginBottom: "2rem",
         }}
       >
-        <h2
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 700,
-            color: "hsl(210,40%,90%)",
-            marginBottom: "0.75rem",
-          }}
-        >
+        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "0.75rem" }}>
           Our Story
         </h2>
         {storyText ? (

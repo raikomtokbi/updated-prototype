@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail, Info, CheckCircle, Settings, ExternalLink } from "lucide-react";
+import { Save, Loader2, Shield, Globe, Bell, Users, DollarSign, FileText, ToggleLeft, Image, Phone, Search, Mail, Info, CheckCircle, Settings, ExternalLink, Plus, Trash2 } from "lucide-react";
+import { ICON_MAP, ICON_LIST, DEFAULT_VALUE_CARDS } from "@/lib/iconMap";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -58,7 +59,6 @@ const textareaStyle: React.CSSProperties = {
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
-  resize: "vertical",
   minHeight: "72px",
   lineHeight: "1.5",
   fontFamily: "inherit",
@@ -236,6 +236,7 @@ const DEFAULTS: SettingsMap = {
   about_headline: "",
   about_tagline: "",
   about_story: "",
+  why_nexcoin_cards: JSON.stringify(DEFAULT_VALUE_CARDS),
   // Contact
   contact_email: "support@nexcoin.gg",
   contact_phone: "+1 (800) 123-4567",
@@ -253,6 +254,136 @@ const DEFAULTS: SettingsMap = {
   social_login: "false",
   account_approval: "auto",
 };
+
+interface ValueCard { icon: string; title: string; desc: string }
+
+function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [openPickerIdx, setOpenPickerIdx] = useState<number | null>(null);
+
+  const cards: ValueCard[] = (() => {
+    try {
+      const p = JSON.parse(value || "[]");
+      return Array.isArray(p) && p.length > 0 ? p : DEFAULT_VALUE_CARDS;
+    } catch { return DEFAULT_VALUE_CARDS; }
+  })();
+
+  function update(idx: number, field: keyof ValueCard, val: string) {
+    const next = cards.map((c, i) => i === idx ? { ...c, [field]: val } : c);
+    onChange(JSON.stringify(next));
+  }
+
+  function remove(idx: number) {
+    const next = cards.filter((_, i) => i !== idx);
+    onChange(JSON.stringify(next));
+    if (openPickerIdx === idx) setOpenPickerIdx(null);
+  }
+
+  function addCard() {
+    const next = [...cards, { icon: "Star", title: "New Feature", desc: "Describe this feature." }];
+    onChange(JSON.stringify(next));
+  }
+
+  const pickerBtnBase: React.CSSProperties = {
+    width: "32px", height: "32px", borderRadius: "6px", border: "1px solid hsl(220,15%,18%)",
+    background: "hsl(220,20%,11%)", cursor: "pointer", display: "flex", alignItems: "center",
+    justifyContent: "center", flexShrink: 0, color: "hsl(258,90%,70%)",
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      {cards.map((card, idx) => {
+        const CardIcon = ICON_MAP[card.icon] ?? ICON_MAP["Star"];
+        const pickerOpen = openPickerIdx === idx;
+        return (
+          <div
+            key={idx}
+            style={{
+              background: "hsl(220,20%,11%)", border: "1px solid hsl(220,15%,18%)",
+              borderRadius: "8px", padding: "12px", display: "flex",
+              flexDirection: "column", gap: "8px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+              <button
+                type="button"
+                title="Choose icon"
+                onClick={() => setOpenPickerIdx(pickerOpen ? null : idx)}
+                style={{ ...pickerBtnBase, background: pickerOpen ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,11%)", border: pickerOpen ? "1px solid hsla(258,90%,66%,0.4)" : "1px solid hsl(220,15%,18%)" }}
+                data-testid={`button-icon-picker-${idx}`}
+              >
+                <CardIcon size={16} />
+              </button>
+              <input
+                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
+                value={card.title}
+                onChange={(e) => update(idx, "title", e.target.value)}
+                placeholder="Card title"
+                data-testid={`input-card-title-${idx}`}
+              />
+              <button
+                type="button"
+                onClick={() => remove(idx)}
+                data-testid={`button-remove-card-${idx}`}
+                style={{ ...pickerBtnBase, color: "hsl(0,60%,55%)", border: "1px solid hsla(0,60%,40%,0.3)" }}
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+            <textarea
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "60px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box" }}
+              value={card.desc}
+              onChange={(e) => update(idx, "desc", e.target.value)}
+              placeholder="Short description for this feature card"
+              data-testid={`input-card-desc-${idx}`}
+            />
+            {pickerOpen && (
+              <div style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "10px" }}>
+                <p style={{ fontSize: "10px", color: "hsl(220,10%,45%)", marginBottom: "8px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
+                  {ICON_LIST.map((name) => {
+                    const Ic = ICON_MAP[name];
+                    const selected = card.icon === name;
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        title={name}
+                        data-testid={`button-icon-${name}-${idx}`}
+                        onClick={() => { update(idx, "icon", name); setOpenPickerIdx(null); }}
+                        style={{
+                          padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(220,15%,18%)",
+                          background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
+                          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                          color: selected ? "hsl(258,90%,72%)" : "hsl(220,10%,55%)",
+                          transition: "all 0.1s",
+                        }}
+                      >
+                        <Ic size={14} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <button
+        type="button"
+        onClick={addCard}
+        data-testid="button-add-card"
+        style={{
+          display: "inline-flex", alignItems: "center", gap: "6px",
+          padding: "7px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
+          background: "hsla(258,90%,66%,0.08)", border: "1px solid hsla(258,90%,66%,0.2)",
+          color: "hsl(258,80%,72%)", cursor: "pointer", alignSelf: "flex-start",
+        }}
+      >
+        <Plus size={13} /> Add Card
+      </button>
+    </div>
+  );
+}
 
 export default function ControlPanel() {
   const qc = useQueryClient();
@@ -772,7 +903,7 @@ export default function ControlPanel() {
               <label style={labelStyle}>Invoice Footer Note</label>
               <textarea
                 data-testid="input-invoice-footer"
-                style={{ ...inputStyle, resize: "vertical", minHeight: "72px" } as React.CSSProperties}
+                style={{ ...inputStyle, minHeight: "72px" } as React.CSSProperties}
                 value={local.invoice_footer ?? ""}
                 onChange={(e) => set("invoice_footer", e.target.value)}
               />
@@ -859,6 +990,18 @@ export default function ControlPanel() {
               value={local.about_story ?? ""}
               onChange={(e) => set("about_story", e.target.value)}
               placeholder="Tell visitors your story — how you started, your mission, etc…"
+            />
+          </div>
+        </div>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Why {local.site_name || "Nexcoin"} — Feature Cards</label>
+            <p style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginBottom: "10px" }}>
+              Click the icon button on each card to open the icon picker. Changes are saved with the rest of the settings.
+            </p>
+            <ValueCardsEditor
+              value={local.why_nexcoin_cards ?? JSON.stringify(DEFAULT_VALUE_CARDS)}
+              onChange={(v) => set("why_nexcoin_cards", v)}
             />
           </div>
         </div>
