@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Unlink, Gamepad2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Gamepad2 } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -48,35 +48,31 @@ const btnPrimary: React.CSSProperties = {
 const btnDanger: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  padding: "5px 10px",
-  borderRadius: "5px",
+  justifyContent: "center",
+  gap: "5px",
+  padding: "0 12px",
+  height: "32px",
+  borderRadius: "6px",
   background: "rgba(239,68,68,0.1)",
   border: "1px solid rgba(239,68,68,0.25)",
   color: "hsl(0,72%,62%)",
-  fontSize: "11px",
+  fontSize: "12px",
+  fontWeight: 500,
   cursor: "pointer",
 };
 const btnEdit: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  padding: "5px 10px",
-  borderRadius: "5px",
+  justifyContent: "center",
+  gap: "5px",
+  padding: "0 12px",
+  height: "32px",
+  borderRadius: "6px",
   background: "rgba(124,58,237,0.1)",
   border: "1px solid rgba(124,58,237,0.25)",
   color: "#a78bfa",
-  fontSize: "11px",
-  cursor: "pointer",
-};
-const btnMap: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "4px",
-  padding: "5px 10px",
-  borderRadius: "5px",
-  background: "rgba(34,211,238,0.08)",
-  border: "1px solid rgba(34,211,238,0.2)",
-  color: "hsl(187,100%,42%)",
-  fontSize: "11px",
+  fontSize: "12px",
+  fontWeight: 500,
   cursor: "pointer",
 };
 
@@ -87,9 +83,22 @@ const statusBadge = (active: boolean): React.CSSProperties => ({
   fontWeight: 500,
   background: active ? "rgba(74,222,128,0.12)" : "rgba(239,68,68,0.12)",
   color: active ? "hsl(142,71%,45%)" : "hsl(0,72%,51%)",
+  whiteSpace: "nowrap" as const,
 });
 
-const EMPTY_GAME = { name: "", slug: "", description: "", logoUrl: "", bannerUrl: "", category: "game_currency", status: "active", sortOrder: 0, requiredFields: "userId", instantDelivery: true };
+const EMPTY_GAME = {
+  name: "",
+  slug: "",
+  description: "",
+  logoUrl: "",
+  bannerUrl: "",
+  category: "game_currency",
+  status: "active",
+  sortOrder: 0,
+  requiredFields: "userId",
+  instantDelivery: true,
+  pluginSlug: "",
+};
 const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0 };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
@@ -108,7 +117,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-// ─── Map Plugin Modal ─────────────────────────────────────────────────────────
+// ─── Map Plugin Modal (used only for Services now) ────────────────────────────
 type MapTarget = { type: "game" | "service"; id: string; name: string; currentSlug?: string | null };
 
 function MapPluginModal({
@@ -157,7 +166,6 @@ function MapPluginModal({
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "260px", overflowY: "auto" }}>
-            {/* None option */}
             <label
               style={{
                 display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
@@ -206,7 +214,7 @@ function MapPluginModal({
           <button
             onClick={() => onMap(selected)}
             disabled={loading}
-            style={{ ...btnMap, padding: "7px 16px", fontSize: "12px", fontWeight: 600, opacity: loading ? 0.7 : 1 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "6px", background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(187,100%,42%)", fontSize: "12px", fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
           >
             {loading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Plug size={12} />}
             {loading ? "Saving..." : "Apply Mapping"}
@@ -217,14 +225,17 @@ function MapPluginModal({
   );
 }
 
-// ─── Required Fields Picker ───────────────────────────────────────────────────
+// ─── Field Map Picker ─────────────────────────────────────────────────────────
 const FIELD_OPTIONS = [
   { key: "userId", label: "User ID", hint: "Game account / player ID" },
   { key: "zoneId", label: "Zone / Server ID", hint: "Required for Mobile Legends etc." },
+  { key: "playerId", label: "Player ID", hint: "Optional player identifier" },
   { key: "email", label: "Email", hint: "Account email address" },
+  { key: "loginId", label: "Login ID", hint: "Login username or ID" },
+  { key: "characterName", label: "Character Name", hint: "In-game character name" },
 ];
 
-function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const active = value ? value.split(",").filter(Boolean) : [];
 
   function toggle(key: string) {
@@ -234,9 +245,9 @@ function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v
 
   return (
     <div>
-      <label style={labelStyle}>Required Input Fields</label>
+      <label style={labelStyle}>Field Map</label>
       <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
-        Select which fields buyers must fill in on the top-up page.
+        Toggle which fields buyers must fill in on the top-up page.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         {FIELD_OPTIONS.map((opt) => {
@@ -276,10 +287,50 @@ function RequiredFieldsPicker({ value, onChange }: { value: string; onChange: (v
                   {opt.hint}
                 </span>
               </span>
+              {on && (
+                <span style={{ marginLeft: "auto", fontSize: "10px", fontWeight: 700, color: "hsl(258,90%,70%)", flexShrink: 0 }}>ON</span>
+              )}
             </button>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// ─── Plugin Picker (inline, for Edit Game form) ───────────────────────────────
+function PluginPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data: plugins = [], isLoading } = useQuery<Plugin[]>({
+    queryKey: ["/api/admin/plugins"],
+    queryFn: () => adminApi.get("/plugins"),
+  });
+  const enabledPlugins = plugins.filter((p) => p.isEnabled);
+
+  return (
+    <div>
+      <label style={labelStyle}>Delivery Plugin</label>
+      <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
+        Optional: map this game to a plugin for automated top-up delivery.
+      </p>
+      {isLoading ? (
+        <div style={{ ...inputStyle, color: "hsl(220,10%,40%)" }}>Loading plugins...</div>
+      ) : (
+        <select
+          style={inputStyle}
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          <option value="">No Plugin</option>
+          {enabledPlugins.map((p) => (
+            <option key={p.slug} value={p.slug}>{p.name} ({p.slug})</option>
+          ))}
+        </select>
+      )}
+      {value && (
+        <p style={{ fontSize: "11px", color: "hsl(187,100%,42%)", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+          <Plug size={10} /> Mapped to: {value}
+        </p>
+      )}
     </div>
   );
 }
@@ -336,12 +387,19 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
         </div>
       </div>
 
-      <RequiredFieldsPicker
+      {/* ─── Field Map ─────────────────────────────────────────────── */}
+      <FieldMapPicker
         value={form.requiredFields ?? "userId"}
         onChange={(v) => set("requiredFields", v)}
       />
 
-      {/* Instant Delivery toggle */}
+      {/* ─── Delivery Plugin ───────────────────────────────────────── */}
+      <PluginPicker
+        value={form.pluginSlug ?? ""}
+        onChange={(v) => set("pluginSlug", v)}
+      />
+
+      {/* ─── Instant Delivery toggle ───────────────────────────────── */}
       <div>
         <label style={labelStyle}>Instant Delivery</label>
         <button
@@ -522,11 +580,18 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
                       <button
-                        style={{ ...btnMap, ...(s.pluginSlug ? {} : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }) }}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: "4px",
+                          padding: "5px 10px", borderRadius: "5px", fontSize: "11px", cursor: "pointer",
+                          ...(s.pluginSlug
+                            ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(187,100%,42%)" }
+                            : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }
+                          )
+                        }}
                         onClick={() => setMapTarget({ type: "service", id: s.id, name: s.name, currentSlug: s.pluginSlug })}
                         title={s.pluginSlug ? `Mapped to: ${s.pluginSlug}` : "Map to a plugin"}
                       >
-                        {s.pluginSlug ? <Plug size={10} /> : <Plug size={10} />} Map
+                        <Plug size={10} /> Map
                       </button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>
                       <button style={btnDanger} onClick={() => { if (confirm("Delete this service?")) delMut.mutate(s.id); }}><Trash2 size={11} /></button>
@@ -569,10 +634,10 @@ function ServicesPanel({ game }: { game: Game }) {
 // ─── Main Games page ──────────────────────────────────────────────────────────
 export default function Games() {
   const qc = useQueryClient();
+  const isMobile = useMobile(768);
   const [showAdd, setShowAdd] = useState(false);
   const [editGame, setEditGame] = useState<Game | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
 
   const { data: gameList = [], isLoading } = useQuery<Game[]>({
     queryKey: ["/api/admin/games"],
@@ -595,11 +660,6 @@ export default function Games() {
     mutationFn: (id: string) => adminApi.patch(`/games/${id}/trending`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
   });
-  const mapMut = useMutation({
-    mutationFn: ({ id, pluginSlug }: { id: string; pluginSlug: string | null }) =>
-      adminApi.patch(`/games/${id}`, { pluginSlug }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); setMapTarget(null); },
-  });
 
   return (
     <AdminLayout title="Games" actions={
@@ -620,58 +680,112 @@ export default function Games() {
           <div>
             {gameList.map((g, idx) => (
               <div key={g.id} style={{ borderBottom: idx < gameList.length - 1 ? "1px solid hsl(220,15%,11%)" : "none" }}>
-                {/* Game row */}
-                <div
-                  style={{ display: "flex", flexDirection: "column", padding: "12px 16px", gap: "8px", cursor: "pointer" }}
-                  onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
-                >
-                  {/* Top line: expand icon + logo + name + status */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ color: "hsl(220,10%,42%)", flexShrink: 0 }}>
-                      {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    </span>
-                    {g.logoUrl ? (
-                      <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
-                    ) : (
-                      <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
-                      </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
-                      <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
-                    </div>
-                    <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
-                  </div>
 
-                  {/* Bottom line: action buttons */}
-                  <div
-                    style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", paddingLeft: "44px" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      style={g.isTrending
-                        ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
-                        : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }}
-                      onClick={() => trendingMut.mutate(g.id)}
-                      disabled={trendingMut.isPending}
-                      title={g.isTrending ? "Remove from Trending" : "Add to Trending"}
+                {isMobile ? (
+                  /* ── Mobile card layout ── */
+                  <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {/* Top row: icon + status + chevron */}
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}
+                      onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
                     >
-                      <TrendingUp size={11} /> {g.isTrending ? "Trending" : "Trend"}
-                    </button>
-                    <button
-                      style={{ ...btnMap, ...(g.pluginSlug ? {} : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }) }}
-                      onClick={() => setMapTarget({ type: "game", id: g.id, name: g.name, currentSlug: g.pluginSlug })}
-                      title={g.pluginSlug ? `Plugin: ${g.pluginSlug}` : "Map lookup plugin"}
+                      {g.logoUrl ? (
+                        <img src={g.logoUrl} alt={g.name} style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Gamepad2 size={18} style={{ color: "hsla(258,90%,66%,0.6)" }} />
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "15px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                        <div style={{ fontSize: "12px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "2px" }}>{g.slug}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                        <span style={statusBadge(g.status === "active")}>{g.status}</span>
+                        <span style={{ color: "hsl(220,10%,42%)" }}>
+                          {expandedId === g.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: action buttons */}
+                    <div
+                      style={{ display: "flex", gap: "8px", alignItems: "center" }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <Plug size={10} /> {g.pluginSlug ? g.pluginSlug : "Map"}
-                    </button>
-                    <button style={btnEdit} onClick={() => setEditGame(g)}><Pencil size={11} /> Edit</button>
-                    <button style={btnDanger} onClick={() => { if (confirm(`Delete "${g.name}"? This will also delete all its services.`)) delMut.mutate(g.id); }}>
-                      <Trash2 size={11} />
-                    </button>
+                      <button
+                        style={{
+                          ...( g.isTrending
+                            ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
+                            : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }
+                          ),
+                          flex: 1,
+                        }}
+                        onClick={() => trendingMut.mutate(g.id)}
+                        disabled={trendingMut.isPending}
+                      >
+                        <TrendingUp size={13} />
+                        {g.isTrending ? "Trending" : "Trend"}
+                      </button>
+                      <button
+                        style={{ ...btnEdit, flex: 1 }}
+                        onClick={() => setEditGame(g)}
+                      >
+                        <Pencil size={13} /> Edit
+                      </button>
+                      <button
+                        style={{ ...btnDanger, flex: 1 }}
+                        onClick={() => { if (confirm(`Delete "${g.name}"? This will also delete all its services.`)) delMut.mutate(g.id); }}
+                      >
+                        <Trash2 size={13} /> Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* ── Desktop card layout (unchanged) ── */
+                  <div
+                    style={{ display: "flex", flexDirection: "column", padding: "12px 16px", gap: "8px", cursor: "pointer" }}
+                    onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ color: "hsl(220,10%,42%)", flexShrink: 0 }}>
+                        {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                      </span>
+                      {g.logoUrl ? (
+                        <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                        <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
+                      </div>
+                      <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
+                    </div>
+
+                    <div
+                      style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", paddingLeft: "44px" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        style={g.isTrending
+                          ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
+                          : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }}
+                        onClick={() => trendingMut.mutate(g.id)}
+                        disabled={trendingMut.isPending}
+                        title={g.isTrending ? "Remove from Trending" : "Add to Trending"}
+                      >
+                        <TrendingUp size={11} /> {g.isTrending ? "Trending" : "Trend"}
+                      </button>
+                      <button style={btnEdit} onClick={() => setEditGame(g)}><Pencil size={11} /> Edit</button>
+                      <button style={btnDanger} onClick={() => { if (confirm(`Delete "${g.name}"? This will also delete all its services.`)) delMut.mutate(g.id); }}>
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Services panel */}
                 {expandedId === g.id && (
@@ -693,20 +807,23 @@ export default function Games() {
       {editGame && (
         <Modal title="Edit Game" onClose={() => setEditGame(null)}>
           <GameForm
-            initial={{ name: editGame.name, slug: editGame.slug, description: editGame.description ?? "", logoUrl: editGame.logoUrl ?? "", bannerUrl: editGame.bannerUrl ?? "", category: editGame.category, status: editGame.status, sortOrder: editGame.sortOrder, requiredFields: editGame.requiredFields ?? "userId", instantDelivery: editGame.instantDelivery !== false }}
-            onSubmit={(d) => editMut.mutate({ id: editGame.id, data: d })}
+            initial={{
+              name: editGame.name,
+              slug: editGame.slug,
+              description: editGame.description ?? "",
+              logoUrl: editGame.logoUrl ?? "",
+              bannerUrl: editGame.bannerUrl ?? "",
+              category: editGame.category,
+              status: editGame.status,
+              sortOrder: editGame.sortOrder,
+              requiredFields: editGame.requiredFields ?? "userId",
+              instantDelivery: editGame.instantDelivery !== false,
+              pluginSlug: editGame.pluginSlug ?? "",
+            }}
+            onSubmit={(d) => editMut.mutate({ id: editGame.id, data: { ...d, pluginSlug: d.pluginSlug || null } })}
             loading={editMut.isPending}
           />
         </Modal>
-      )}
-      {mapTarget && (
-        <MapPluginModal
-          target={mapTarget}
-          description="Select a plugin to fetch user info when a player enters their game ID."
-          loading={mapMut.isPending}
-          onClose={() => setMapTarget(null)}
-          onMap={(slug) => mapMut.mutate({ id: mapTarget.id, pluginSlug: slug })}
-        />
       )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

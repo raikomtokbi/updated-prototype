@@ -182,6 +182,9 @@ function GameDetailView({ game }: { game: Game }) {
   const [userId, setUserId] = useState("");
   const [zoneId, setZoneId] = useState("");
   const [email, setEmail] = useState("");
+  const [playerId, setPlayerId] = useState("");
+  const [loginId, setLoginId] = useState("");
+  const [characterName, setCharacterName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -191,6 +194,9 @@ function GameDetailView({ game }: { game: Game }) {
   const needsUserId = requiredFields.includes("userId");
   const needsZoneId = requiredFields.includes("zoneId");
   const needsEmail = requiredFields.includes("email");
+  const needsPlayerId = requiredFields.includes("playerId");
+  const needsLoginId = requiredFields.includes("loginId");
+  const needsCharacterName = requiredFields.includes("characterName");
 
   const { data: services = [], isLoading: svcsLoading } = useQuery<Service[]>({
     queryKey: [`/api/services?gameId=${game.id}`],
@@ -209,6 +215,9 @@ function GameDetailView({ game }: { game: Game }) {
     if (needsUserId && !userId.trim()) errs.userId = "User ID is required";
     if (needsZoneId && !zoneId.trim()) errs.zoneId = "Zone / Server ID is required";
     if (needsEmail && !email.trim()) errs.email = "Email is required";
+    if (needsPlayerId && !playerId.trim()) errs.playerId = "Player ID is required";
+    if (needsLoginId && !loginId.trim()) errs.loginId = "Login ID is required";
+    if (needsCharacterName && !characterName.trim()) errs.characterName = "Character name is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -224,6 +233,9 @@ function GameDetailView({ game }: { game: Game }) {
       userId: needsUserId ? userId.trim() : (needsEmail ? email.trim() : "-"),
       zoneId: needsZoneId ? zoneId.trim() : undefined,
       email: needsEmail ? email.trim() : undefined,
+      playerId: needsPlayerId ? playerId.trim() : undefined,
+      loginId: needsLoginId ? loginId.trim() : undefined,
+      characterName: needsCharacterName ? characterName.trim() : undefined,
       quantity,
     };
   }
@@ -442,6 +454,57 @@ function GameDetailView({ game }: { game: Game }) {
                 autoComplete="off"
               />
               {errors.email && <FieldError message={errors.email} />}
+            </div>
+          )}
+
+          {/* Player ID — only shown if required */}
+          {needsPlayerId && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Player ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                placeholder="Enter Player ID"
+                value={playerId}
+                onChange={(e) => { setPlayerId(e.target.value); setErrors((p) => ({ ...p, playerId: "" })); }}
+                autoComplete="off"
+              />
+              {errors.playerId && <FieldError message={errors.playerId} />}
+            </div>
+          )}
+
+          {/* Login ID — only shown if required */}
+          {needsLoginId && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Login ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                placeholder="Enter Login ID or username"
+                value={loginId}
+                onChange={(e) => { setLoginId(e.target.value); setErrors((p) => ({ ...p, loginId: "" })); }}
+                autoComplete="off"
+              />
+              {errors.loginId && <FieldError message={errors.loginId} />}
+            </div>
+          )}
+
+          {/* Character Name — only shown if required */}
+          {needsCharacterName && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Character Name <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
+              </label>
+              <input
+                className="input-field"
+                placeholder="Enter in-game character name"
+                value={characterName}
+                onChange={(e) => { setCharacterName(e.target.value); setErrors((p) => ({ ...p, characterName: "" })); }}
+                autoComplete="off"
+              />
+              {errors.characterName && <FieldError message={errors.characterName} />}
             </div>
           )}
 
