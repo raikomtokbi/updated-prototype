@@ -876,11 +876,6 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               {title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "auto" }}>
-              {actions && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingRight: "4px", borderRight: "1px solid hsl(220, 15%, 18%)", marginRight: "2px" }}>
-                  {actions}
-                </div>
-              )}
               <NotificationBell />
               <StatusButton />
               <AdminAccountButton />
@@ -889,8 +884,8 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
         )}
 
         <main style={{ flex: 1, padding: isMobile ? "13px" : "18px", fontSize: "12px", zoom: 0.92 }}>
-          {/* Mobile action buttons strip */}
-          {isMobile && actions && (
+          {/* Action buttons strip — mobile and desktop */}
+          {actions && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
               {actions}
             </div>
