@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { generateTicketNumber, generateTransactionNumber, generateOrderNumber } from "./lib/idGenerator";
 import {
   type User, type InsertUser,
   type Game, type InsertGame,
@@ -353,7 +354,8 @@ export class DatabaseStorage implements IStorage {
   }
   async createTicket(data: InsertTicket) {
     const id = randomUUID();
-    await db.insert(tickets).values({ ...data, id });
+    const ticketNumber = generateTicketNumber();
+    await db.insert(tickets).values({ ...data, id, ticketNumber });
     return fetchAfter<Ticket>(tickets, id, tickets.id);
   }
   async updateTicketStatus(id: string, status: string) {

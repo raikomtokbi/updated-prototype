@@ -120,6 +120,7 @@ export const orderItems = pgTable("order_items", {
 // ─── Transactions ─────────────────────────────────────────────────────────────
 export const transactions = pgTable("transactions", {
   id: varchar("id", { length: 36 }).primaryKey(),
+  transactionNumber: varchar("transaction_number", { length: 50 }).notNull().unique(),
   orderId: varchar("order_id", { length: 36 }).references(() => orders.id),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   paymentMethod: varchar("payment_method", { length: 100 }).notNull(),
@@ -151,6 +152,7 @@ export const coupons = pgTable("coupons", {
 // ─── Support Tickets ──────────────────────────────────────────────────────────
 export const tickets = pgTable("tickets", {
   id: varchar("id", { length: 36 }).primaryKey(),
+  ticketNumber: varchar("ticket_number", { length: 50 }).notNull().unique(),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   subject: varchar("subject", { length: 255 }).notNull(),
   message: text("message").notNull(),
