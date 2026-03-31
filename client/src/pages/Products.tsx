@@ -49,8 +49,8 @@ function GameCard({ game }: { game: Game }) {
         (e.currentTarget as HTMLElement).style.boxShadow = "none";
       }}
     >
-      {/* Image — fills container fully, crops overflow */}
-      <div style={{ aspectRatio: "4/3", position: "relative", overflow: "hidden", background: "hsl(258,35%,14%)" }}>
+      {/* Image — square container, fills fully */}
+      <div style={{ aspectRatio: "1/1", position: "relative", overflow: "hidden", background: "hsl(258,35%,14%)" }}>
         {game.logoUrl ? (
           <img
             src={game.logoUrl}
@@ -68,9 +68,9 @@ function GameCard({ game }: { game: Game }) {
           </span>
         )}
       </div>
-      {/* Game name below image — transparent background */}
-      <div style={{ padding: "0.5rem 0.65rem", background: "transparent" }}>
-        <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {/* Game name below — separated, not connected */}
+      <div style={{ marginTop: "0.75rem", padding: "0 0.65rem 0.5rem" }}>
+        <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {game.name}
         </h3>
       </div>
