@@ -597,10 +597,10 @@ export class DatabaseStorage implements IStorage {
   // ── Analytics ──────────────────────────────────────────────────────────────
   async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month") {
     const trunc =
-      groupBy === "hour" ? sql`date_trunc('hour', ${orders.createdAt})`
-      : groupBy === "day" ? sql`date_trunc('day', ${orders.createdAt})`
-      : groupBy === "week" ? sql`date_trunc('week', ${orders.createdAt})`
-      : sql`date_trunc('month', ${orders.createdAt})`;
+      groupBy === "hour" ? sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-%d %H:00:00')`
+      : groupBy === "day" ? sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-%d')`
+      : groupBy === "week" ? sql`DATE_FORMAT(DATE_SUB(${orders.createdAt}, INTERVAL WEEKDAY(${orders.createdAt}) DAY), '%Y-%m-%d')`
+      : sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-01')`;
 
     const trendRows = await db
       .select({
