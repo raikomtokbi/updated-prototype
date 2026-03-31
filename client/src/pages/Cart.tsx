@@ -11,7 +11,13 @@ export default function Cart() {
   });
   const currencySymbol = getCurrencySymbol(siteSettings?.default_currency ?? "USD");
 
-  const total = getCartTotal();
+  const taxEnabled = siteSettings?.tax_enabled === "true";
+  const taxRate = parseFloat(siteSettings?.tax_rate ?? "0") / 100;
+  const taxName = siteSettings?.tax_name || "VAT";
+
+  const subtotal = getCartTotal();
+  const taxAmount = taxEnabled ? subtotal * taxRate : 0;
+  const total = subtotal + taxAmount;
 
   if (items.length === 0) {
     return (
@@ -213,13 +219,23 @@ export default function Cart() {
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-            <span style={{ color: "hsl(220,10%,55%)" }}>Items ({items.length})</span>
-            <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{total.toFixed(2)}</span>
+            <span style={{ color: "hsl(220,10%,55%)" }}>Subtotal ({items.length} {items.length === 1 ? "item" : "items"})</span>
+            <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
             <span style={{ color: "hsl(220,10%,55%)" }}>Processing Fee</span>
             <span style={{ color: "hsl(145,70%,55%)" }}>Free</span>
           </div>
+          {taxEnabled && (
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+              <span style={{ color: "hsl(220,10%,55%)" }}>
+                {taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)
+              </span>
+              <span data-testid="text-tax-amount" style={{ color: "hsl(210,40%,88%)" }}>
+                {currencySymbol}{taxAmount.toFixed(2)}
+              </span>
+            </div>
+          )}
         </div>
         <hr style={{ border: "none", borderTop: "1px solid hsl(220,15%,16%)", marginBottom: "1.25rem" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
