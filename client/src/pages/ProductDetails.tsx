@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle } from "lucide-react";
+import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { getCurrencySymbol } from "@/lib/currency";
 import type { Game, Product, Service, ProductPackage } from "@shared/schema";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -33,7 +34,7 @@ function PackageCard({
   onSelect: (id: string) => void;
 }) {
   const hasDiscount = discount && parseFloat(String(discount)) > 0 && originalPrice && originalPrice > price;
-  const curr = currency ?? "";
+  const curr = getCurrencySymbol(currency ?? "USD");
 
   return (
     <button
@@ -188,6 +189,36 @@ function GameDetailView({ game }: { game: Game }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [validateStatus, setValidateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [validatedName, setValidatedName] = useState<string | null>(null);
+  const [validateError, setValidateError] = useState<string | null>(null);
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+  });
+  const currencySymbol = getCurrencySymbol(siteSettings?.default_currency ?? "USD");
+
+  async function handleValidate() {
+    if (!userId.trim()) {
+      setErrors((p) => ({ ...p, userId: "Enter a User ID first" }));
+      return;
+    }
+    setValidateStatus("loading");
+    setValidatedName(null);
+    setValidateError(null);
+    try {
+      const params = new URLSearchParams({ userId: userId.trim() });
+      if (zoneId.trim()) params.append("zoneId", zoneId.trim());
+      const res = await fetch(`/api/games/${game.slug}/validate?${params}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message ?? "Validation failed");
+      setValidatedName(data.playerName);
+      setValidateStatus("success");
+    } catch (err: any) {
+      setValidateError(err.message ?? "Could not validate");
+      setValidateStatus("error");
+    }
+  }
 
   // Parse which fields are required for this game
   const requiredFields = (game.requiredFields ?? "userId").split(",").filter(Boolean);
@@ -508,6 +539,38 @@ function GameDetailView({ game }: { game: Game }) {
             </div>
           )}
 
+          {/* Plugin validate button */}
+          {game.pluginSlug && needsUserId && (
+            <div>
+              <button
+                type="button"
+                onClick={handleValidate}
+                disabled={validateStatus === "loading"}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: "7px 14px", borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: "pointer",
+                  border: "1px solid rgba(124,58,237,0.4)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
+                  opacity: validateStatus === "loading" ? 0.7 : 1,
+                }}
+              >
+                {validateStatus === "loading" ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <CheckCircle2 size={12} />}
+                {validateStatus === "loading" ? "Validating…" : "Validate Player"}
+              </button>
+              {validateStatus === "success" && validatedName && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px" }}>
+                  <CheckCircle2 size={12} style={{ color: "hsl(142,71%,52%)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", fontWeight: 600 }}>{validatedName}</span>
+                </div>
+              )}
+              {validateStatus === "error" && validateError && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px" }}>
+                  <AlertCircle size={12} style={{ color: "hsl(0,72%,60%)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)" }}>{validateError}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Quantity + price summary */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
             <div>
@@ -520,7 +583,7 @@ function GameDetailView({ game }: { game: Game }) {
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginBottom: "2px" }}>Total</p>
                 <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
-                  {selectedService?.currency} {totalPrice}
+                  {currencySymbol}{totalPrice}
                 </p>
               </div>
             )}

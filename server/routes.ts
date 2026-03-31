@@ -90,6 +90,39 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(g);
   });
 
+  // ── Plugin player validation ───────────────────────────────────────────────
+  app.get("/api/games/:slug/validate", async (req, res) => {
+    const g = await storage.getGameBySlug(req.params.slug);
+    if (!g) return res.status(404).json({ message: "Game not found" });
+    if (!g.pluginSlug) return res.status(400).json({ message: "This game does not have a validation plugin configured." });
+
+    const userId = req.query.userId as string | undefined;
+    const zoneId = req.query.zoneId as string | undefined;
+    if (!userId) return res.status(400).json({ message: "userId is required" });
+
+    const plugin = await storage.getPlugin(g.pluginSlug);
+    if (!plugin || !plugin.isEnabled) return res.status(400).json({ message: "Plugin not available for this game." });
+
+    let config: Record<string, any> = {};
+    try { config = plugin.config ? JSON.parse(plugin.config) : {}; } catch {}
+
+    const validationUrl: string | undefined = config.validationUrl;
+    if (!validationUrl) return res.status(400).json({ message: "Plugin validation URL not configured." });
+
+    try {
+      const params = new URLSearchParams({ userId });
+      if (zoneId) params.append("zoneId", zoneId);
+      const response = await fetch(`${validationUrl}?${params}`, { signal: AbortSignal.timeout(8000) });
+      const data = await response.json();
+      if (!response.ok) return res.status(400).json({ message: data.message ?? "Validation failed" });
+      const playerName: string = data.playerName ?? data.username ?? data.name ?? data.nickname ?? "";
+      if (!playerName) return res.status(400).json({ message: "Player not found" });
+      return res.json({ playerName });
+    } catch {
+      return res.status(502).json({ message: "Could not reach validation service. Please try again." });
+    }
+  });
+
   app.get("/api/games/:id", async (req, res) => {
     const g = await storage.getGame(req.params.id);
     if (!g) return res.status(404).json({ message: "Not found" });

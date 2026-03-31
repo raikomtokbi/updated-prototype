@@ -245,7 +245,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
 
   return (
     <div>
-      <label style={labelStyle}>Field Map</label>
+      <label style={labelStyle}>Input Fields</label>
       <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
         Toggle which fields buyers must fill in on the top-up page.
       </p>
@@ -460,10 +460,6 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         <label style={labelStyle}>Name *</label>
         <input style={inputStyle} required value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="100 UC" />
       </div>
-      <div>
-        <label style={labelStyle}>Description</label>
-        <input style={inputStyle} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="100 Unknown Cash for PUBG Mobile" />
-      </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
         <div>
           <label style={labelStyle}>Price *</label>
@@ -658,7 +654,10 @@ export default function Games() {
   });
   const trendingMut = useMutation({
     mutationFn: (id: string) => adminApi.patch(`/games/${id}/trending`, {}),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      qc.invalidateQueries({ queryKey: ["/api/games/trending"] });
+    },
   });
 
   return (

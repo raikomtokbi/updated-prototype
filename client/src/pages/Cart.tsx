@@ -1,9 +1,15 @@
 import { Link } from "wouter";
 import { Trash2, ShoppingBag, Plus, Minus, ArrowLeft, ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
+import { getCurrencySymbol } from "@/lib/currency";
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, getCartTotal, clearCart } = useCartStore();
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+  });
+  const currencySymbol = getCurrencySymbol(siteSettings?.default_currency ?? "USD");
 
   const total = getCartTotal();
 
@@ -121,7 +127,7 @@ export default function Cart() {
                 className="font-orbitron"
                 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(258,90%,72%)" }}
               >
-                ${(item.price * item.quantity).toFixed(2)}
+                {currencySymbol}{(item.price * item.quantity).toFixed(2)}
               </span>
 
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -208,7 +214,7 @@ export default function Cart() {
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
             <span style={{ color: "hsl(220,10%,55%)" }}>Items ({items.length})</span>
-            <span style={{ color: "hsl(210,40%,88%)" }}>${total.toFixed(2)}</span>
+            <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{total.toFixed(2)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
             <span style={{ color: "hsl(220,10%,55%)" }}>Processing Fee</span>
@@ -223,7 +229,7 @@ export default function Cart() {
             data-testid="text-cart-total"
             style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(258,90%,72%)" }}
           >
-            ${total.toFixed(2)}
+            {currencySymbol}{total.toFixed(2)}
           </span>
         </div>
 

@@ -531,7 +531,7 @@ function TrendingGames() {
             >
               <div style={{ width: "100%", height: "120px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(11,16,32,0.9))", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {game.logoUrl ? (
-                  <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "8px" }} />
                 ) : (
                   <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
                 )}

@@ -61,7 +61,7 @@ function GameCard({ game }: { game: Game }) {
         }}
       >
         {game.logoUrl ? (
-          <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={game.logoUrl} alt={game.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "8px" }} />
         ) : (
           <Gamepad2 size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
         )}
