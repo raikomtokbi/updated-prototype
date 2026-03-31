@@ -529,7 +529,7 @@ function TrendingGames() {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
               }}
             >
-              <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", position: "relative", background: "hsl(258,35%,14%)" }}>
+              <div style={{ width: "100%", aspectRatio: "1/1", overflow: "visible", position: "relative", background: "hsl(258,35%,14%)" }}>
                 {game.logoUrl ? (
                   <img src={game.logoUrl} alt={game.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
@@ -538,11 +538,12 @@ function TrendingGames() {
                   </div>
                 )}
                 <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
-              </div>
-              <div style={{ marginTop: "0.5rem", padding: "0 0.75rem 0.5rem" }}>
-                <p style={{ fontSize: "0.7rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0 }}>
-                  {game.name}
-                </p>
+                {/* Game name hanging below */}
+                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.35rem" }}>
+                  <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0, paddingLeft: "0.05rem", paddingRight: "0.05rem" }}>
+                    {game.name}
+                  </p>
+                </div>
               </div>
             </Link>
           ))

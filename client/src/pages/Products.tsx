@@ -50,7 +50,7 @@ function GameCard({ game }: { game: Game }) {
       }}
     >
       {/* Image — square container, fills fully */}
-      <div style={{ aspectRatio: "1/1", position: "relative", overflow: "hidden", background: "hsl(258,35%,14%)" }}>
+      <div style={{ aspectRatio: "1/1", position: "relative", overflow: "visible", background: "hsl(258,35%,14%)" }}>
         {game.logoUrl ? (
           <img
             src={game.logoUrl}
@@ -67,12 +67,12 @@ function GameCard({ game }: { game: Game }) {
             HOT
           </span>
         )}
-      </div>
-      {/* Game name below — separated, not connected */}
-      <div style={{ marginTop: "0.75rem", padding: "0 0.65rem 0.5rem" }}>
-        <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {game.name}
-        </h3>
+        {/* Game name hanging below */}
+        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.4rem", paddingX: "0" }}>
+          <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
+            {game.name}
+          </h3>
+        </div>
       </div>
     </Link>
   );
