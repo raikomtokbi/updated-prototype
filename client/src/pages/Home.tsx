@@ -11,44 +11,7 @@ import { FaDiscord } from "react-icons/fa";
 import { useSiteStore } from "@/lib/store/siteStore";
 
 import heroBannerImg from "@assets/hero-banner_1774458324894.png";
-import mlbbBannerImg from "@assets/mlbb-banner_1774458324929.png";
-import game1Img from "@assets/game-1_1774458324765.png";
 import game2Img from "@assets/game-2_1774458324828.png";
-
-
-// ─── Fallback slider data (used when no API sliders exist) ────────────────────
-const FALLBACK_SLIDES = [
-  {
-    id: "fallback-1",
-    bg: heroBannerImg,
-    badge: "WEEKEND SPECIAL",
-    title: ["LEVEL UP", "YOUR", "GAMEPLAY"],
-    highlight: 2,
-    sub: "The fastest, safest way to top up your favorite games. Get game credits, diamonds, and gift cards instantly.",
-    cta1: { label: "Browse Games", href: "/products" },
-    cta2: { label: "View Offers", href: "/offers" },
-  },
-  {
-    id: "fallback-2",
-    bg: mlbbBannerImg,
-    badge: "LIMITED TIME",
-    title: ["DOUBLE", "DIAMOND", "WEEKEND"],
-    highlight: 1,
-    sub: "Get 2x diamonds on all Mobile Legends top-ups this weekend only. Don't miss out!",
-    cta1: { label: "Top Up Now", href: "/products" },
-    cta2: { label: "Learn More", href: "/" },
-  },
-  {
-    id: "fallback-3",
-    bg: game2Img,
-    badge: "NEW GAME",
-    title: ["FANTASY", "REALMS", "AWAIT"],
-    highlight: 0,
-    sub: "Explore new worlds with instant in-game currency. No delays, no hassle — just gaming.",
-    cta1: { label: "Shop Now", href: "/products" },
-    cta2: { label: "View Deals", href: "/offers" },
-  },
-];
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 const FEATURES = [
@@ -62,23 +25,21 @@ function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { data: apiSliders = [] } = useQuery<any[]>({
+  const { data: apiSliders = [], isSuccess } = useQuery<any[]>({
     queryKey: ["/api/hero-sliders/active"],
     staleTime: 60_000,
   });
 
-  const SLIDES = apiSliders.length > 0
-    ? apiSliders.map((s: any) => ({
-        id: s.id,
-        bg: s.bannerUrl || heroBannerImg,
-        badge: "FEATURED",
-        title: [s.title],
-        highlight: 0,
-        sub: s.subtitle || "",
-        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
-        cta2: { label: "View Offers", href: "/offers" },
-      }))
-    : FALLBACK_SLIDES;
+  const SLIDES = apiSliders.map((s: any) => ({
+    id: s.id,
+    bg: s.bannerUrl || heroBannerImg,
+    badge: "FEATURED",
+    title: [s.title],
+    highlight: 0,
+    sub: s.subtitle || "",
+    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+    cta2: { label: "View Offers", href: "/offers" },
+  }));
 
   function startTimer() {
     timerRef.current = setInterval(() => {
@@ -87,6 +48,7 @@ function HeroSlider() {
   }
 
   useEffect(() => {
+    if (SLIDES.length === 0) return;
     setCurrent(0);
     startTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
@@ -97,6 +59,8 @@ function HeroSlider() {
     if (timerRef.current) clearInterval(timerRef.current);
     startTimer();
   }
+
+  if (!isSuccess || SLIDES.length === 0) return null;
 
   const slide = SLIDES[current] ?? SLIDES[0];
 
