@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
   Facebook, Twitter, Instagram, Radio, Gamepad2, Gift, HeadphonesIcon,
-  Wrench,
+  Wrench, Mail,
 } from "lucide-react";
 
 import { useSiteStore } from "@/lib/store/siteStore";
@@ -769,6 +769,27 @@ function Footer() {
             <p style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
               {siteSettings?.site_description || "The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide."}
             </p>
+            {/* Support Email */}
+            {siteSettings?.footer_support_email && (
+              <a
+                href={`mailto:${siteSettings.footer_support_email}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  marginBottom: "0.8rem",
+                  fontSize: "0.78rem",
+                  color: "rgba(148,163,184,0.6)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+              >
+                <Mail size={12} />
+                {siteSettings.footer_support_email}
+              </a>
+            )}
             {/* Social icons */}
             <div style={{ display: "flex", gap: "0.6rem" }}>
               {[
