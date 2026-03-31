@@ -323,6 +323,47 @@ export const emailTemplates = mysqlTable("email_templates", {
 
 export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({ id: true, createdAt: true, updatedAt: true });
 
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+export const sessions = mysqlTable("sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  expiresAt: datetime("expires_at").notNull(),
+  createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type Session = typeof sessions.$inferSelect;
+
+// ─── Audit Logs ───────────────────────────────────────────────────────────────
+export const auditLogs = mysqlTable("audit_logs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id, { onDelete: "set null" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  entity: varchar("entity", { length: 100 }),
+  entityId: varchar("entity_id", { length: 36 }),
+  oldValues: text("old_values"),
+  newValues: text("new_values"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+
+// ─── Email Verification Tokens ────────────────────────────────────────────────
+export const emailVerificationTokens = mysqlTable("email_verification_tokens", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: datetime("expires_at").notNull(),
+  verifiedAt: datetime("verified_at"),
+  createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
+
 // ─── Password Reset Tokens ────────────────────────────────────────────────────
 export const passwordResetTokens = mysqlTable("password_reset_tokens", {
   id: varchar("id", { length: 36 }).primaryKey(),
