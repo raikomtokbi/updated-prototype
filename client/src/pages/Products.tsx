@@ -62,22 +62,20 @@ function GameCard({ game }: { game: Game }) {
             <Gamepad2 size={40} style={{ color: "hsla(258,90%,66%,0.3)" }} />
           </div>
         )}
-        {/* Bottom gradient so the name overlay is readable */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(5,8,18,0.75) 0%, transparent 50%)" }} />
         {game.isTrending && (
           <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
             HOT
           </span>
         )}
-        {/* Name overlaid on the image */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0.55rem 0.65rem 0.6rem" }}>
-          <h3 style={{ fontSize: "0.82rem", fontWeight: 700, color: "#f1f5f9", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {game.name}
-          </h3>
-        </div>
+      </div>
+      {/* Game name below image */}
+      <div style={{ padding: "0.6rem 0.65rem 0.5rem" }}>
+        <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {game.name}
+        </h3>
       </div>
       {/* Bottom bar */}
-      <div style={{ padding: "0.55rem 0.65rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ padding: "0.4rem 0.65rem 0.55rem", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(124,58,237,0.1)" }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 600, color: "hsl(258,90%,72%)" }}>
           Top Up <Zap size={11} />
         </span>
