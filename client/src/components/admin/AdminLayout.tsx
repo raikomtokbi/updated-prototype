@@ -145,8 +145,10 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
         display: "flex",
         flexDirection: "column",
         zIndex: 200,
+        animation: "slideInLeft 0.5s ease forwards",
       }}
     >
+      <style>{`@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>
       <div
         style={{
           display: "flex",
