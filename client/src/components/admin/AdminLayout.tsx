@@ -138,7 +138,7 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
         position: "fixed",
         left: 0,
         top: 0,
-        width: "256px",
+        width: "236px",
         height: "100vh",
         background: "hsl(220, 20%, 7%)",
         borderRight: "1px solid hsl(220, 15%, 12%)",
@@ -152,8 +152,8 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          padding: "0 16px",
-          height: "52px",
+          padding: "0 14px",
+          height: "46px",
           borderBottom: "1px solid hsl(220, 15%, 13%)",
           flexShrink: 0,
         }}
@@ -172,7 +172,7 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
         >
           <LayoutDashboard size={14} color="white" />
         </div>
-        <span style={{ fontWeight: 600, fontSize: "14px", color: "hsl(210, 40%, 95%)", letterSpacing: "0.02em", flex: 1 }}>
+        <span style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210, 40%, 95%)", letterSpacing: "0.02em", flex: 1 }}>
           Admin Panel
         </span>
         {onClose && (
@@ -203,8 +203,8 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
             {section.title && (
               <div
                 style={{
-                  padding: "14px 16px 4px",
-                  fontSize: "10px",
+                  padding: "10px 14px 3px",
+                  fontSize: "9px",
                   fontWeight: 700,
                   letterSpacing: "0.1em",
                   color: "hsl(220, 10%, 38%)",
@@ -228,11 +228,11 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
-                    margin: "1px 8px",
-                    padding: "8px 12px",
+                    gap: "8px",
+                    margin: "1px 6px",
+                    padding: "6px 10px",
                     borderRadius: "6px",
-                    fontSize: "13px",
+                    fontSize: "12px",
                     cursor: "pointer",
                     textDecoration: "none",
                     color: isActive ? "hsl(210, 40%, 95%)" : "hsl(220, 10%, 52%)",
@@ -252,8 +252,8 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      <div style={{ padding: "12px 20px", borderTop: "1px solid hsl(220, 15%, 13%)", flexShrink: 0 }}>
-        <p style={{ fontSize: "11px", color: "hsl(220, 10%, 35%)" }}>Admin v1.0</p>
+      <div style={{ padding: "8px 14px", borderTop: "1px solid hsl(220, 15%, 13%)", flexShrink: 0 }}>
+        <p style={{ fontSize: "10px", color: "hsl(220, 10%, 35%)" }}>Admin v1.0</p>
       </div>
     </aside>
   );
@@ -797,7 +797,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
 
       <div
         style={{
-          marginLeft: isMobile ? 0 : "256px",
+          marginLeft: isMobile ? 0 : "236px",
           flex: 1,
           display: "flex",
           flexDirection: "column",
@@ -817,12 +817,12 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "0 14px",
+              padding: "0 12px",
               background: "hsl(220, 20%, 7%)",
               borderBottom: "1px solid hsl(220, 15%, 13%)",
-              height: "52px",
+              height: "46px",
               flexShrink: 0,
-              gap: "10px",
+              gap: "8px",
             }}
           >
             <button
@@ -844,11 +844,11 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               <Menu size={20} />
             </button>
 
-            <h1 style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flex: 1, textAlign: "center", margin: 0 }}>
+            <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flex: 1, textAlign: "center", margin: 0 }}>
               {title}
             </h1>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
               <NotificationBell />
               <StatusButton compact />
               <AdminAccountButton compact />
@@ -864,15 +864,15 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "0 24px",
+              padding: "0 20px",
               background: "hsl(220, 20%, 7%)",
               borderBottom: "1px solid hsl(220, 15%, 13%)",
-              minHeight: "52px",
+              minHeight: "46px",
               flexShrink: 0,
-              gap: "12px",
+              gap: "10px",
             }}
           >
-            <h1 style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flexShrink: 0 }}>
+            <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flexShrink: 0 }}>
               {title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "auto" }}>
@@ -888,10 +888,10 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
           </header>
         )}
 
-        <main style={{ flex: 1, padding: isMobile ? "16px" : "24px" }}>
+        <main style={{ flex: 1, padding: isMobile ? "13px" : "18px", fontSize: "12px", zoom: 0.92 }}>
           {/* Mobile action buttons strip */}
           {isMobile && actions && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
               {actions}
             </div>
           )}
