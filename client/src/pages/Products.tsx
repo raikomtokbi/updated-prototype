@@ -68,18 +68,11 @@ function GameCard({ game }: { game: Game }) {
           </span>
         )}
       </div>
-      {/* Game name below image */}
-      <div style={{ padding: "0.6rem 0.65rem 0.5rem" }}>
-        <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {/* Game name below image — transparent background */}
+      <div style={{ padding: "0.5rem 0.65rem", background: "transparent" }}>
+        <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {game.name}
         </h3>
-      </div>
-      {/* Bottom bar */}
-      <div style={{ padding: "0.4rem 0.65rem 0.55rem", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(124,58,237,0.1)" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 600, color: "hsl(258,90%,72%)" }}>
-          Top Up <Zap size={11} />
-        </span>
-        <span className="badge badge-purple" style={{ fontSize: "0.6rem" }}>Game</span>
       </div>
     </Link>
   );
