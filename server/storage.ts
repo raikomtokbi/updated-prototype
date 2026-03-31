@@ -18,10 +18,11 @@ import {
   type Plugin,
   type Notification,
   type SiteSetting,
+  type EmailTemplate,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
-  notifications, siteSettings,
+  notifications, siteSettings, emailTemplates,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -123,6 +124,11 @@ export interface IStorage {
   getPlugin(slug: string): Promise<Plugin | undefined>;
   upsertPlugin(slug: string, data: Partial<Plugin>): Promise<Plugin>;
   deletePlugin(slug: string): Promise<void>;
+
+  // Email Templates
+  getAllEmailTemplates(): Promise<EmailTemplate[]>;
+  getEmailTemplate(type: string): Promise<EmailTemplate | undefined>;
+  upsertEmailTemplate(type: string, data: Partial<EmailTemplate>): Promise<EmailTemplate>;
 
   // Notifications
   getAllNotifications(limit?: number): Promise<Notification[]>;
@@ -477,6 +483,26 @@ export class DatabaseStorage implements IStorage {
   }
   async deletePlugin(slug: string) {
     await db.delete(plugins).where(eq(plugins.slug, slug));
+  }
+
+  // ── Email Templates ─────────────────────────────────────────────────────────
+  async getAllEmailTemplates() {
+    return db.select().from(emailTemplates).orderBy(emailTemplates.type);
+  }
+  async getEmailTemplate(type: string) {
+    const [t] = await db.select().from(emailTemplates).where(eq(emailTemplates.type, type));
+    return t;
+  }
+  async upsertEmailTemplate(type: string, data: Partial<EmailTemplate>) {
+    const existing = await this.getEmailTemplate(type);
+    if (existing) {
+      await db.update(emailTemplates).set({ ...data, updatedAt: new Date() }).where(eq(emailTemplates.type, type));
+      return fetchAfter<EmailTemplate>(emailTemplates, existing.id, emailTemplates.id);
+    } else {
+      const id = randomUUID();
+      await db.insert(emailTemplates).values({ id, type, name: data.name ?? type, subject: "", title: "", body: "", ...data } as any);
+      return fetchAfter<EmailTemplate>(emailTemplates, id, emailTemplates.id);
+    }
   }
 
   // ── Notifications ──────────────────────────────────────────────────────────

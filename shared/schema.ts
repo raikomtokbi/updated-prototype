@@ -313,6 +313,24 @@ export const notifications = pgTable("notifications", {
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 
+// ─── Email Templates ──────────────────────────────────────────────────────────
+export const emailTemplates = pgTable("email_templates", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  type: varchar("type", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 191 }).notNull(),
+  subject: varchar("subject", { length: 500 }).notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
+  body: text("body").notNull(),
+  footerText: varchar("footer_text", { length: 500 }),
+  buttonText: varchar("button_text", { length: 191 }),
+  buttonLink: varchar("button_link", { length: 500 }),
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+
 // ─── Site Settings ────────────────────────────────────────────────────────────
 export const siteSettings = pgTable("site_settings", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -347,5 +365,7 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export type Plugin = typeof plugins.$inferSelect;
 export type InsertPlugin = z.infer<typeof insertPluginSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type SiteSetting = typeof siteSettings.$inferSelect;

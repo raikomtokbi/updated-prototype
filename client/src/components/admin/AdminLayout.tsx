@@ -30,6 +30,7 @@ import {
   AlertTriangle,
   Info,
   Menu,
+  Mail,
   X,
 } from "lucide-react";
 
@@ -116,6 +117,7 @@ const navSections: NavSection[] = [
       { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method" },
       { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration" },
       { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins" },
+      { label: "Email Templates", icon: <Mail size={15} />, path: "/admin/email-templates" },
     ],
   },
   {

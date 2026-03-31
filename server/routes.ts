@@ -16,6 +16,12 @@ import {
   loadAllActivePlugins,
   PLUGINS_BASE,
 } from "./lib/pluginManager";
+import {
+  sendTemplatedEmail,
+  buildEmailHtml,
+  processTemplate,
+  DEFAULT_EMAIL_TEMPLATES,
+} from "./lib/emailService";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
 const uploadsDir = path.resolve(process.cwd(), "public/uploads");
@@ -254,6 +260,32 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const user = await storage.createUser({ username, email, password, fullName, role: "user" });
       const { password: _pw, ...safeUser } = user;
       storage.createNotification({ type: "user", title: "New User Registered", message: `${username} just created an account.` }).catch(() => {});
+      // Send welcome email (non-blocking)
+      if (email) {
+        (async () => {
+          try {
+            const [smtpPlugin, template, settings] = await Promise.all([
+              storage.getPlugin("smtp-email"),
+              storage.getEmailTemplate("welcome"),
+              storage.getAllSiteSettings(),
+            ]);
+            const smtpConfig = smtpPlugin?.config ? JSON.parse(smtpPlugin.config) : null;
+            const siteObj: Record<string, string> = {};
+            settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+            const siteName = siteObj.site_name || "WebCMS";
+            const tpl = template ?? DEFAULT_EMAIL_TEMPLATES.find((t) => t.type === "welcome");
+            if (smtpConfig && tpl) {
+              await sendTemplatedEmail({
+                to: email,
+                template: tpl as any,
+                vars: { user_name: fullName || username, user_email: email, site_name: siteName, site_url: "" },
+                siteName,
+                smtpConfig,
+              });
+            }
+          } catch {}
+        })();
+      }
       return res.status(201).json({ user: safeUser });
     } catch (e: any) {
       return res.status(400).json({ message: e.message });
@@ -635,8 +667,46 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/admin/tickets/:id/reply", requireAdmin, async (req, res) => {
+    const ticket = await storage.getTicket(req.params.id);
     const reply = await storage.replyToTicket(req.params.id, req.body.userId, req.body.message, true);
     res.status(201).json(reply);
+    // Send email notification (non-blocking)
+    if (ticket) {
+      (async () => {
+        try {
+          const ticketUser = ticket.userId ? await storage.getUser(ticket.userId) : null;
+          if (!ticketUser?.email) return;
+          const [smtpPlugin, template, settings] = await Promise.all([
+            storage.getPlugin("smtp-email"),
+            storage.getEmailTemplate("support_ticket_reply"),
+            storage.getAllSiteSettings(),
+          ]);
+          const smtpConfig = smtpPlugin?.config ? JSON.parse(smtpPlugin.config) : null;
+          const siteObj: Record<string, string> = {};
+          settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+          const siteName = siteObj.site_name || "WebCMS";
+          const tpl = template ?? DEFAULT_EMAIL_TEMPLATES.find((t) => t.type === "support_ticket_reply");
+          if (smtpConfig && tpl) {
+            await sendTemplatedEmail({
+              to: ticketUser.email,
+              template: tpl as any,
+              vars: {
+                user_name: ticketUser.fullName || ticketUser.username,
+                user_email: ticketUser.email,
+                ticket_id: ticket.ticketNumber || ticket.id.slice(0, 8),
+                ticket_subject: ticket.subject,
+                reply_message: req.body.message,
+                site_name: siteName,
+                site_url: "",
+                support_email: siteObj.contact_email || "",
+              },
+              siteName,
+              smtpConfig,
+            });
+          }
+        } catch {}
+      })();
+    }
   });
 
   // ── Admin Hero Sliders ─────────────────────────────────────────────────────
@@ -1019,6 +1089,117 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.patch("/api/admin/notifications/read-all", requireAdmin, async (_req, res) => {
     await storage.markAllNotificationsRead();
     res.json({ ok: true });
+  });
+
+  // ── Email Templates ────────────────────────────────────────────────────────
+
+  // Helper: get SMTP config from plugins
+  async function getSmtpConfig() {
+    const plugin = await storage.getPlugin("smtp-email");
+    if (!plugin || !plugin.config) return null;
+    try { return JSON.parse(plugin.config) as Record<string, string>; } catch { return null; }
+  }
+
+  // Helper: get email template with defaults
+  async function getEmailTemplateWithDefault(type: string) {
+    const stored = await storage.getEmailTemplate(type);
+    if (stored) return stored;
+    const def = DEFAULT_EMAIL_TEMPLATES.find((t) => t.type === type);
+    return def ?? null;
+  }
+
+  // List all templates (return stored + defaults for missing ones)
+  app.get("/api/admin/email-templates", requireAdmin, async (_req, res) => {
+    const stored = await storage.getAllEmailTemplates();
+    const storedByType = Object.fromEntries(stored.map((t) => [t.type, t]));
+    const all = DEFAULT_EMAIL_TEMPLATES.map((def) => storedByType[def.type] ?? { ...def, id: "", createdAt: new Date(), updatedAt: new Date() });
+    res.json(all);
+  });
+
+  // Get single template
+  app.get("/api/admin/email-templates/:type", requireAdmin, async (req, res) => {
+    const template = await getEmailTemplateWithDefault(req.params.type);
+    if (!template) return res.status(404).json({ message: "Template not found" });
+    res.json(template);
+  });
+
+  // Save (upsert) template
+  app.put("/api/admin/email-templates/:type", requireAdmin, async (req: Request, res: Response) => {
+    const { type } = req.params;
+    const allowed = DEFAULT_EMAIL_TEMPLATES.map((t) => t.type);
+    if (!allowed.includes(type)) return res.status(400).json({ message: "Unknown template type" });
+    const template = await storage.upsertEmailTemplate(type, { ...req.body, type });
+    res.json(template);
+  });
+
+  // Preview template HTML
+  app.post("/api/admin/email-templates/:type/preview", requireAdmin, async (req: Request, res: Response) => {
+    const { type } = req.params;
+    const templateData = req.body;
+    const siteSettings = await storage.getAllSiteSettings();
+    const siteObj: Record<string, string> = {};
+    siteSettings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+    const siteName = siteObj.site_name || "WebCMS";
+    const vars: Record<string, string> = {
+      user_name: "John Doe",
+      user_email: "john@example.com",
+      otp_code: "123456",
+      order_id: "Ord00001",
+      order_amount: "25.00",
+      order_currency: "$",
+      order_date: new Date().toLocaleDateString(),
+      site_name: siteName,
+      site_url: "https://yoursite.com",
+      support_email: siteObj.contact_email || "support@example.com",
+      ticket_id: "Tkt00001",
+      ticket_subject: "Issue with my order",
+      reply_message: "Thank you for contacting us. We have resolved your issue.",
+    };
+    const html = buildEmailHtml(templateData, vars, siteName);
+    res.send(html);
+  });
+
+  // Send test email
+  app.post("/api/admin/email-templates/:type/test", requireAdmin, async (req: Request, res: Response) => {
+    const { type } = req.params;
+    const { to } = req.body;
+    if (!to) return res.status(400).json({ message: "Recipient email required" });
+
+    const smtpConfig = await getSmtpConfig();
+    if (!smtpConfig) return res.status(400).json({ message: "SMTP not configured. Go to API Integration and configure SMTP Email Service first." });
+
+    const template = await getEmailTemplateWithDefault(type);
+    if (!template) return res.status(404).json({ message: "Template not found" });
+
+    const siteSettings = await storage.getAllSiteSettings();
+    const siteObj: Record<string, string> = {};
+    siteSettings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+    const siteName = siteObj.site_name || "WebCMS";
+
+    const result = await sendTemplatedEmail({
+      to,
+      template: template as any,
+      vars: {
+        user_name: "Test User",
+        user_email: to,
+        otp_code: "123456",
+        order_id: "Ord00001",
+        order_amount: "25.00",
+        order_currency: "$",
+        order_date: new Date().toLocaleDateString(),
+        site_name: siteName,
+        site_url: "",
+        support_email: siteObj.contact_email || "support@example.com",
+        ticket_id: "Tkt00001",
+        ticket_subject: "Test Ticket",
+        reply_message: "This is a test reply from the admin.",
+      },
+      siteName,
+      smtpConfig: smtpConfig as any,
+    });
+
+    if (!result.ok) return res.status(500).json({ message: result.error });
+    res.json({ ok: true, message: `Test email sent to ${to}` });
   });
 
   // ── Site Settings ──────────────────────────────────────────────────────────
