@@ -116,6 +116,8 @@ export interface IStorage {
 
   // Payment Methods
   getAllPaymentMethods(): Promise<PaymentMethod[]>;
+  getActivePaymentMethods(): Promise<PaymentMethod[]>;
+  getPaymentMethodByType(type: string): Promise<PaymentMethod | undefined>;
   createPaymentMethod(data: Partial<PaymentMethod>): Promise<PaymentMethod>;
   updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod | undefined>;
   deletePaymentMethod(id: string): Promise<void>;
@@ -473,6 +475,9 @@ export class DatabaseStorage implements IStorage {
   }
   async getPaymentMethodByName(name: string) {
     return db.select().from(paymentMethods).where(eq(paymentMethods.name, name)).then(rows => rows[0]);
+  }
+  async getPaymentMethodByType(type: string) {
+    return db.select().from(paymentMethods).where(eq(paymentMethods.type, type)).then(rows => rows[0]);
   }
   async createPaymentMethod(data: Partial<PaymentMethod>) {
     const id = randomUUID();

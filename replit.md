@@ -22,6 +22,19 @@ server/         Express backend
   routes.ts     All API endpoints
   storage.ts    Data access layer (DatabaseStorage)
   db.ts         PostgreSQL connection via pg Pool
+  lib/
+    paymentGateways/   Multi-gateway payment system
+      index.ts         Gateway factory + registry
+      types.ts         Shared types (InitiateParams, GatewayInitiateResult, etc.)
+      razorpay.ts      Razorpay (modal/SDK flow)
+      payu.ts          PayU (form redirect, SHA512 hash)
+      cashfree.ts      Cashfree (REST API → redirect URL)
+      instamojo.ts     Instamojo (REST API → redirect URL)
+      ccavenue.ts      CCAvenue (AES-128-CBC form redirect)
+      phonepe.ts       PhonePe (SHA256 base64 API → redirect URL)
+      paytm.ts         Paytm PG (form redirect, HMAC-SHA256 checksum)
+      easybuzz.ts      EasyBuzz (SHA512 hash → API access key → redirect)
+      bharatpe.ts      BharatPe (API → redirect URL)
 shared/
   schema.ts     Drizzle ORM schema (PostgreSQL / pg-core)
 migrations/
@@ -46,6 +59,38 @@ The `DATABASE_URL` environment variable is automatically set by Replit's built-i
 - Routes protected via `requireAdmin` middleware (roles: `super_admin`, `admin`, `staff`)
 - Default admin account: username `admin`, password `admin123` (change after first login)
 
+## Multi-Gateway Payment System
+
+All gateways are configured via **Admin → Payment Gateways** and stored in the `payment_methods` table.
+
+### Supported Gateways
+
+| Gateway | Type | Flow | Key Fields |
+|---|---|---|---|
+| Razorpay | `razorpay` | SDK Modal | publicKey (Key ID), secretKey (Key Secret) |
+| PayU | `payu` | Form Redirect | publicKey (Merchant Key), secretKey (Salt) |
+| Cashfree | `cashfree` | Redirect URL | publicKey (App ID), secretKey (Secret Key) |
+| Instamojo | `instamojo` | Redirect URL | publicKey (API Key), secretKey (Auth Token) |
+| CCAvenue | `ccavenue` | Form Redirect | publicKey (Access Code), secretKey (Working Key), config.merchantId |
+| PhonePe | `phonepe` | Redirect URL | publicKey (Merchant ID), secretKey (Salt Key), config.saltIndex |
+| Paytm | `paytm` | Form Redirect | publicKey (MID), secretKey (Merchant Key), config.website |
+| EasyBuzz | `easybuzz` | Redirect URL | publicKey (Key), secretKey (Salt) |
+| BharatPe | `bharatpe` | Redirect URL | publicKey (Merchant ID), secretKey (Token) |
+| Stripe | `stripe` | (planned) | publicKey, secretKey, webhookSecret |
+| PayPal | `paypal` | (planned) | publicKey (Client ID), secretKey |
+| Manual | `manual` | - | config.instructions |
+
+### Payment API Endpoints
+
+- `POST /api/payment/initiate` — Initiates payment for any gateway; returns `{type: "modal"|"redirect"|"redirect_url", ...}`
+- `POST /api/payment/verify` — Verifies payment (used by Razorpay modal + post-redirect verification)
+- `POST /api/payment/callback/:gatewayType` — Gateway server-side callback (for all redirect gateways)
+- `POST /api/payment/create-order` — Legacy Razorpay-only endpoint (backward compat)
+
+### Return URL
+
+All redirect gateways return to `/payment-return` with query params that indicate status. The `PaymentReturn` page handles verification and shows success/failure UI.
+
 ## Features
 
 - Role-based access control (super_admin, admin, staff, user)
@@ -59,3 +104,4 @@ The `DATABASE_URL` environment variable is automatically set by Replit's built-i
 - Multi-identifier login (username, email, or phone)
 - Customisable themes (stored in settings)
 - Admin notifications
+- Multi-gateway payment support (9 Indian + global gateways)

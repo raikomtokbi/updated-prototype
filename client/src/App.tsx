@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyResetOtp from "./pages/VerifyResetOtp";
 import ResetPassword from "./pages/ResetPassword";
+import PaymentReturn from "./pages/PaymentReturn";
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import TopupOrders from "./pages/admin/TopupOrders";
@@ -90,6 +91,7 @@ function PublicRoutes() {
           <Route path="/offers" component={Offers} />
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/payment-return" component={PaymentReturn} />
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />

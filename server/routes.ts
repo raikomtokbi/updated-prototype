@@ -9,6 +9,7 @@ import multer from "multer";
 import AdmZip from "adm-zip";
 import Razorpay from "razorpay";
 import { storage } from "./storage";
+import { getGatewayHandler } from "./lib/paymentGateways/index";
 import {
   activatePlugin,
   deactivatePlugin,
@@ -1423,91 +1424,143 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // ── Razorpay Payment ──────────────────────────────────────────────────────
-  app.post("/api/payment/create-order", async (req, res) => {
+  // ── Multi-Gateway Payment System ──────────────────────────────────────────
+
+  function getBaseUrl(req: Request): string {
+    const proto = req.headers["x-forwarded-proto"] || req.protocol;
+    const host = req.headers["x-forwarded-host"] || req.get("host");
+    return `${proto}://${host}`;
+  }
+
+  // Initiate payment for any gateway
+  app.post("/api/payment/initiate", async (req, res) => {
     try {
-      const { amount, currency = "INR", receipt } = req.body;
+      const { gatewayId, amount, currency = "INR", email, name, phone, productInfo } = req.body;
 
-      if (!amount || amount <= 0) {
-        return res.status(400).json({ error: "Invalid amount" });
-      }
+      if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+      if (!email) return res.status(400).json({ error: "Email is required" });
 
-      // Check if Razorpay is active in the database
       const activePaymentMethods = await storage.getActivePaymentMethods();
-      const razorpayMethod = activePaymentMethods.find(m => m.provider === "razorpay" || m.name?.toLowerCase().includes("razorpay"));
 
-      if (!razorpayMethod) {
-        return res.status(500).json({ error: "Razorpay payment gateway is not configured or disabled" });
-      }
+      let method = gatewayId
+        ? activePaymentMethods.find(m => m.id === gatewayId)
+        : activePaymentMethods[0];
 
-      // Get credentials from database or env fallback
-      let keyId = razorpayMethod.publicKey;
-      let keySecret = razorpayMethod.secretKey;
+      if (!method) return res.status(400).json({ error: "No active payment gateway found" });
 
-      // Fallback to environment variables if not set in database
-      if (!keyId) keyId = process.env.RAZORPAY_KEY_ID;
-      if (!keySecret) keySecret = process.env.RAZORPAY_KEY_SECRET;
+      const handler = getGatewayHandler(method.type);
+      if (!handler) return res.status(400).json({ error: `Unsupported gateway type: ${method.type}` });
 
-      if (!keyId || !keySecret) {
-        return res.status(500).json({ error: "Razorpay credentials not configured" });
-      }
+      const baseUrl = getBaseUrl(req);
+      const orderId = `ORD_${Date.now()}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-      const razorpay = new Razorpay({
-        key_id: keyId,
-        key_secret: keySecret,
-      });
+      const result = await handler.initiatePayment(
+        {
+          orderId,
+          amount,
+          currency,
+          name: name || email,
+          email,
+          phone,
+          productInfo: productInfo || "Nexcoin Order",
+          callbackUrl: `${baseUrl}/api/payment/callback/${method.type}`,
+          returnUrl: `${baseUrl}/payment-return`,
+        },
+        method
+      );
 
-      const options = {
-        amount: Math.round(amount * 100), // Convert to paise
-        currency,
-        receipt: receipt || `receipt_${Date.now()}`,
-      };
-
-      const order = await razorpay.orders.create(options);
-      res.json(order);
+      res.json({ ...result, orderId, gatewayType: method.type });
     } catch (error: any) {
-      console.error("Razorpay order creation error:", error);
-      res.status(500).json({ error: error.message || "Failed to create order" });
+      console.error("Payment initiate error:", error);
+      res.status(500).json({ error: error.message || "Failed to initiate payment" });
     }
   });
 
+  // Verify payment (used by modal gateways like Razorpay and for polling)
   app.post("/api/payment/verify", async (req, res) => {
     try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      const { gatewayId, ...params } = req.body;
 
-      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-        return res.status(400).json({ success: false, error: "Missing payment details" });
-      }
-
-      // Check if Razorpay is active in the database
       const activePaymentMethods = await storage.getActivePaymentMethods();
-      const razorpayMethod = activePaymentMethods.find(m => m.provider === "razorpay" || m.name?.toLowerCase().includes("razorpay"));
+      let method = gatewayId
+        ? activePaymentMethods.find(m => m.id === gatewayId)
+        : activePaymentMethods.find(m => m.type === "razorpay");
 
-      if (!razorpayMethod) {
-        return res.status(500).json({ success: false, error: "Razorpay payment gateway is not configured or disabled" });
+      // Backward compat: if Razorpay fields present and no gatewayId
+      if (!method && params.razorpay_payment_id) {
+        method = activePaymentMethods.find(m => m.type === "razorpay");
       }
 
-      // Get secret from database or env fallback
-      let keySecret = razorpayMethod.secretKey;
-      if (!keySecret) keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-      if (!keySecret) {
-        return res.status(500).json({ success: false, error: "Payment verification not configured" });
+      if (!method) {
+        // Try env-based Razorpay fallback
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = params;
+        if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
+          const keySecret = process.env.RAZORPAY_KEY_SECRET;
+          if (!keySecret) return res.status(400).json({ success: false, error: "No gateway configured" });
+          const body = razorpay_order_id + "|" + razorpay_payment_id;
+          const expected = createHmac("sha256", keySecret).update(body).digest("hex");
+          if (expected === razorpay_signature) return res.json({ success: true });
+          return res.status(400).json({ success: false, error: "Signature mismatch" });
+        }
+        return res.status(400).json({ success: false, error: "No matching gateway found" });
       }
 
-      const body = razorpay_order_id + "|" + razorpay_payment_id;
-      const expectedSignature = createHmac("sha256", keySecret)
-        .update(body)
-        .digest("hex");
+      const handler = getGatewayHandler(method.type);
+      if (!handler) return res.status(400).json({ success: false, error: "Unsupported gateway" });
 
-      if (expectedSignature === razorpay_signature) {
-        res.json({ success: true });
-      } else {
-        res.status(400).json({ success: false, error: "Payment verification failed" });
-      }
+      const result = await handler.verifyPayment(params, method);
+      res.json(result);
     } catch (error: any) {
-      console.error("Payment verification error:", error);
+      console.error("Payment verify error:", error);
       res.status(500).json({ success: false, error: error.message || "Verification failed" });
+    }
+  });
+
+  // Callback endpoint for redirect gateways (POST from gateway server)
+  app.post("/api/payment/callback/:gatewayType", async (req, res) => {
+    try {
+      const { gatewayType } = req.params;
+      const activePaymentMethods = await storage.getActivePaymentMethods();
+      const method = activePaymentMethods.find(m => m.type === gatewayType);
+
+      if (!method) return res.status(400).send("Gateway not found");
+
+      const handler = getGatewayHandler(gatewayType);
+      if (!handler) return res.status(400).send("Unsupported gateway");
+
+      const result = await handler.verifyPayment(req.body, method);
+      console.log(`Payment callback [${gatewayType}]:`, result);
+      res.status(200).send("OK");
+    } catch (error: any) {
+      console.error("Payment callback error:", error);
+      res.status(500).send("Error");
+    }
+  });
+
+  // Legacy Razorpay create-order endpoint (backward compat)
+  app.post("/api/payment/create-order", async (req, res) => {
+    try {
+      const { amount, currency = "INR", receipt } = req.body;
+      if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+
+      const activePaymentMethods = await storage.getActivePaymentMethods();
+      const razorpayMethod = activePaymentMethods.find(m => m.type === "razorpay");
+
+      let keyId = razorpayMethod?.publicKey || process.env.RAZORPAY_KEY_ID;
+      let keySecret = razorpayMethod?.secretKey || process.env.RAZORPAY_KEY_SECRET;
+
+      if (!keyId || !keySecret) return res.status(500).json({ error: "Razorpay not configured" });
+
+      const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const order = await razorpay.orders.create({
+        amount: Math.round(amount * 100),
+        currency,
+        receipt: receipt || `receipt_${Date.now()}`,
+      });
+      res.json(order);
+    } catch (error: any) {
+      console.error("Razorpay order error:", error);
+      res.status(500).json({ error: error.message || "Failed to create order" });
     }
   });
 
