@@ -325,6 +325,7 @@ export const emailTemplates = pgTable("email_templates", {
   buttonText: varchar("button_text", { length: 191 }),
   buttonLink: varchar("button_link", { length: 500 }),
   isEnabled: boolean("is_enabled").notNull().default(true),
+  styles: text("styles"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

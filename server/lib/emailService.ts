@@ -7,13 +7,72 @@ export function processTemplate(template: string, vars: Record<string, string>):
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
 }
 
+// ─── Email Styles ──────────────────────────────────────────────────────────────
+
+export interface EmailStyles {
+  fontFamily: string;
+  fontSize: string;
+  textColor: string;
+  backgroundColor: string;
+  containerWidth: string;
+  padding: string;
+  spacing: string;
+  headingSize: string;
+  headingColor: string;
+  buttonBg: string;
+  buttonColor: string;
+  buttonBorderRadius: string;
+  buttonAlignment: string;
+  cardBg: string;
+  cardBorderRadius: string;
+  cardShadow: string;
+  headerBg: string;
+  headerColor: string;
+  footerColor: string;
+  logoUrl: string;
+}
+
+export const DEFAULT_EMAIL_STYLES: EmailStyles = {
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif",
+  fontSize: "14px",
+  textColor: "#c8cfe0",
+  backgroundColor: "#0d0f14",
+  containerWidth: "600px",
+  padding: "32px",
+  spacing: "20px",
+  headingSize: "18px",
+  headingColor: "#e8eeff",
+  buttonBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
+  buttonColor: "#ffffff",
+  buttonBorderRadius: "7px",
+  buttonAlignment: "center",
+  cardBg: "#141720",
+  cardBorderRadius: "12px",
+  cardShadow: "none",
+  headerBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
+  headerColor: "#ffffff",
+  footerColor: "#4a5568",
+  logoUrl: "",
+};
+
+export function parseStyles(stylesJson: string | null | undefined): EmailStyles {
+  if (!stylesJson) return DEFAULT_EMAIL_STYLES;
+  try {
+    return { ...DEFAULT_EMAIL_STYLES, ...JSON.parse(stylesJson) };
+  } catch {
+    return DEFAULT_EMAIL_STYLES;
+  }
+}
+
 // ─── HTML Builder ──────────────────────────────────────────────────────────────
 
 export function buildEmailHtml(
-  template: EmailTemplate,
+  template: EmailTemplate & { styles?: string | null },
   vars: Record<string, string>,
   siteName = "WebCMS"
 ): string {
+  const styles = parseStyles(template.styles);
+
   const title = processTemplate(template.title, vars);
   const body = processTemplate(template.body, vars);
   const footer = processTemplate(template.footerText ?? `© ${new Date().getFullYear()} ${siteName}. All rights reserved.`, vars);
@@ -21,16 +80,23 @@ export function buildEmailHtml(
   const buttonLink = template.buttonLink ? processTemplate(template.buttonLink, vars) : null;
 
   const button = buttonText && buttonLink
-    ? `<div style="text-align:center;margin:28px 0 12px">
-         <a href="${buttonLink}" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;text-decoration:none;border-radius:7px;font-weight:600;font-size:14px;letter-spacing:0.02em">${buttonText}</a>
+    ? `<div style="text-align:${styles.buttonAlignment};margin:${styles.spacing} 0 12px">
+         <a href="${buttonLink}" style="display:inline-block;padding:12px 28px;background:${styles.buttonBg};color:${styles.buttonColor};text-decoration:none;border-radius:${styles.buttonBorderRadius};font-weight:600;font-size:${styles.fontSize};letter-spacing:0.02em">${buttonText}</a>
        </div>`
     : "";
 
-  // Convert line breaks in body to <br> and wrap paragraphs
   const htmlBody = body
     .split(/\n\n+/)
-    .map((p) => `<p style="margin:0 0 14px;color:#c8cfe0;font-size:14px;line-height:1.7">${p.replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 14px;color:${styles.textColor};font-size:${styles.fontSize};line-height:1.7;font-family:${styles.fontFamily}">${p.replace(/\n/g, "<br>")}</p>`)
     .join("");
+
+  const cardShadowStyle = styles.cardShadow !== "none" && styles.cardShadow
+    ? `;box-shadow:${styles.cardShadow}`
+    : "";
+
+  const logoHtml = styles.logoUrl
+    ? `<img src="${styles.logoUrl}" alt="${siteName}" style="max-height:48px;max-width:160px;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto" />`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -39,25 +105,23 @@ export function buildEmailHtml(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${processTemplate(template.subject, vars)}</title>
 </head>
-<body style="margin:0;padding:0;background:#0d0f14;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0f14;padding:40px 20px">
+<body style="margin:0;padding:0;background:${styles.backgroundColor};font-family:${styles.fontFamily}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${styles.backgroundColor};padding:40px 20px">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
-          <!-- Header -->
+        <table width="${styles.containerWidth}" cellpadding="0" cellspacing="0" style="max-width:${styles.containerWidth};width:100%">
           <tr>
-            <td style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:28px 32px;border-radius:12px 12px 0 0;text-align:center">
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.02em">${siteName}</h1>
+            <td style="background:${styles.headerBg};padding:24px ${styles.padding};border-radius:${styles.cardBorderRadius} ${styles.cardBorderRadius} 0 0;text-align:center">
+              ${logoHtml}
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:${styles.headerColor};letter-spacing:-0.02em;font-family:${styles.fontFamily}">${siteName}</h1>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
-            <td style="background:#141720;padding:32px;border-radius:0 0 12px 12px;border:1px solid #1e2535;border-top:none">
-              <h2 style="margin:0 0 20px;font-size:18px;font-weight:700;color:#e8eeff;letter-spacing:-0.01em">${title}</h2>
+            <td style="background:${styles.cardBg};padding:${styles.padding};border-radius:0 0 ${styles.cardBorderRadius} ${styles.cardBorderRadius};border:1px solid #1e2535;border-top:none${cardShadowStyle}">
+              <h2 style="margin:0 0 ${styles.spacing};font-size:${styles.headingSize};font-weight:700;color:${styles.headingColor};letter-spacing:-0.01em;font-family:${styles.fontFamily}">${title}</h2>
               <div>${htmlBody}</div>
               ${button}
-              <!-- Footer -->
-              <div style="margin-top:28px;padding-top:20px;border-top:1px solid #1e2535;text-align:center;font-size:11px;color:#4a5568">
+              <div style="margin-top:${styles.spacing};padding-top:${styles.spacing};border-top:1px solid #1e2535;text-align:center;font-size:11px;color:${styles.footerColor};font-family:${styles.fontFamily}">
                 ${footer}
               </div>
             </td>
@@ -138,7 +202,7 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     type: "welcome",
     name: "Welcome Email",
     subject: "Welcome to {{site_name}}, {{user_name}}!",
-    title: "Welcome aboard, {{user_name}}! 🎮",
+    title: "Welcome aboard, {{user_name}}!",
     body: `Hi {{user_name}},
 
 Thank you for joining {{site_name}}! We're excited to have you as part of our gaming community.
@@ -152,6 +216,7 @@ Happy gaming!`,
     buttonText: "Start Shopping",
     buttonLink: "{{site_url}}",
     isEnabled: true,
+    styles: null,
   },
   {
     type: "otp",
@@ -171,11 +236,12 @@ If you did not request this, please ignore this email or contact support.`,
     buttonText: null,
     buttonLink: null,
     isEnabled: true,
+    styles: null,
   },
   {
     type: "promotional",
     name: "Promotional Email",
-    subject: "🎉 Special Offer from {{site_name}}",
+    subject: "Special Offer from {{site_name}}",
     title: "Exclusive Deal Just for You",
     body: `Hi {{user_name}},
 
@@ -188,19 +254,22 @@ Check out what's new today and save big on your next purchase.`,
     buttonText: "View Offers",
     buttonLink: "{{site_url}}/offers",
     isEnabled: true,
+    styles: null,
   },
   {
     type: "order_confirmation",
     name: "Order Confirmation Email",
     subject: "Order Confirmed — #{{order_id}}",
-    title: "Your Order is Confirmed! ✅",
+    title: "Your Order is Confirmed!",
     body: `Hi {{user_name}},
 
 Great news! Your order has been confirmed and is being processed.
 
 Order ID: {{order_id}}
-Amount: {{order_currency}}{{order_amount}}
+Amount: {{order_amount}}
 Date: {{order_date}}
+Payment: {{payment_method}}
+Status: {{order_status}}
 
 Your items will be delivered to your account shortly. You can track your order status from your account page.
 
@@ -209,6 +278,7 @@ Thank you for shopping with {{site_name}}!`,
     buttonText: "View Order",
     buttonLink: "{{site_url}}/orders",
     isEnabled: true,
+    styles: null,
   },
   {
     type: "support_ticket_reply",
@@ -233,5 +303,6 @@ Best regards,
     buttonText: "View Ticket",
     buttonLink: "{{site_url}}/support",
     isEnabled: true,
+    styles: null,
   },
 ];
