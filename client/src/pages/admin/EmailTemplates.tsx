@@ -708,10 +708,11 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
 
 // ─── Live Preview Panel ────────────────────────────────────────────────────────
 
-function LivePreview({ html, previewMode, setPreviewMode }: {
+function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
   html: string;
   previewMode: "desktop" | "mobile";
   setPreviewMode: (m: "desktop" | "mobile") => void;
+  hideTitle?: boolean;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -724,11 +725,14 @@ function LivePreview({ html, previewMode, setPreviewMode }: {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "hsl(220,20%,8%)", flexShrink: 0,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Eye size={13} color="#a78bfa" />
-          <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,86%)" }}>Live Preview</span>
-          <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)" }}>updates in real time</span>
-        </div>
+        {!hideTitle && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Eye size={13} color="#a78bfa" />
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,86%)" }}>Live Preview</span>
+            <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)" }}>updates in real time</span>
+          </div>
+        )}
+        {hideTitle && <div />}
         <div style={{ display: "flex", gap: 4 }}>
           <button
             type="button"
@@ -1183,7 +1187,7 @@ function TemplateEditor({
             </button>
           </div>
           <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <LivePreview html={previewHtml} previewMode={previewMode} setPreviewMode={setPreviewMode} />
+            <LivePreview html={previewHtml} previewMode={previewMode} setPreviewMode={setPreviewMode} hideTitle />
           </div>
         </div>
       )}
