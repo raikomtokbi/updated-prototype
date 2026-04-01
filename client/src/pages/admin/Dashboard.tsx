@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
-import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown, Puzzle, Power } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -112,6 +112,14 @@ export default function Dashboard() {
   });
 
   const currency = siteSettings?.default_currency ?? "USD";
+
+  const { data: plugins = [] } = useQuery<{ id: string; name: string; description: string; slug: string; pluginType: string; isEnabled: boolean; category: string }[]>({
+    queryKey: ["/api/admin/plugins"],
+    queryFn: () => adminApi.get("/plugins"),
+    staleTime: 60000,
+  });
+
+  const activeModules = plugins.filter((p) => p.isEnabled);
 
   const salesQueryKey = salesRangeKey === "custom" && salesCustomRange?.from
     ? ["/api/admin/analytics", "sales", salesRangeKey, salesCustomRange.from?.toISOString(), salesCustomRange.to?.toISOString()]
@@ -261,6 +269,55 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* ── Modules ─────────────────────────────────────────────────── */}
+        {plugins.length > 0 && (
+          <div style={{ ...card, padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+              <Puzzle size={14} color="#a78bfa" />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Modules</span>
+              <span style={{ marginLeft: "auto", fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>
+                {activeModules.length}/{plugins.length} active
+              </span>
+            </div>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "10px",
+            }}>
+              {plugins.map((p) => (
+                <div
+                  key={p.id ?? p.slug}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    borderRadius: "7px",
+                    background: p.isEnabled ? "rgba(124,58,237,0.07)" : "hsl(220,15%,10%)",
+                    border: `1px solid ${p.isEnabled ? "rgba(124,58,237,0.28)" : "hsl(220,15%,15%)"}`,
+                  }}
+                >
+                  <div style={{
+                    width: "28px", height: "28px", borderRadius: "6px", flexShrink: 0,
+                    background: p.isEnabled ? "rgba(124,58,237,0.2)" : "hsl(220,15%,15%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Power size={13} color={p.isEnabled ? "#a78bfa" : "hsl(220,10%,38%)"} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: p.isEnabled ? "hsl(210,40%,90%)" : "hsl(220,10%,48%)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.name}
+                    </div>
+                    <div style={{ fontSize: "10px", color: p.isEnabled ? "#10b981" : "hsl(220,10%,35%)", marginTop: "2px" }}>
+                      {p.isEnabled ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Charts ─────────────────────────────────────────────────── */}
         <div

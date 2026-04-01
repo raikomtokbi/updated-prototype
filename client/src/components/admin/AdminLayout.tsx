@@ -130,7 +130,7 @@ const navSections: NavSection[] = [
   },
 ];
 
-function AdminSidebar({ onClose }: { onClose?: () => void }) {
+function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: boolean }) {
   const [location] = useLocation();
 
   return (
@@ -146,10 +146,10 @@ function AdminSidebar({ onClose }: { onClose?: () => void }) {
         display: "flex",
         flexDirection: "column",
         zIndex: 200,
-        animation: "slideInLeft 0.5s ease forwards",
+        ...(animate ? { animation: "slideInLeft 0.3s ease forwards" } : {}),
       }}
     >
-      <style>{`@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>
+      {animate && <style>{`@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>}
       <div
         style={{
           display: "flex",
@@ -827,7 +827,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               backdropFilter: "blur(2px)",
             }}
           />
-          <AdminSidebar onClose={() => setSidebarOpen(false)} />
+          <AdminSidebar onClose={() => setSidebarOpen(false)} animate />
         </>
       )}
 

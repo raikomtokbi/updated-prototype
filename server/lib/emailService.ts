@@ -28,6 +28,8 @@ export interface EmailStyles {
   cardShadow: string;
   headerBg: string;
   headerColor: string;
+  headerText: string;
+  headerImageUrl: string;
   footerColor: string;
   logoUrl: string;
 }
@@ -51,6 +53,8 @@ export const DEFAULT_EMAIL_STYLES: EmailStyles = {
   cardShadow: "none",
   headerBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
   headerColor: "#ffffff",
+  headerText: "",
+  headerImageUrl: "",
   footerColor: "#4a5568",
   logoUrl: "",
 };
@@ -111,9 +115,9 @@ export function buildEmailHtml(
       <td align="center">
         <table width="${styles.containerWidth}" cellpadding="0" cellspacing="0" style="max-width:${styles.containerWidth};width:100%">
           <tr>
-            <td style="background:${styles.headerBg};padding:24px ${styles.padding};border-radius:${styles.cardBorderRadius} ${styles.cardBorderRadius} 0 0;text-align:center">
+            <td style="background:${styles.headerBg};${styles.headerImageUrl ? `background-image:url('${styles.headerImageUrl}');background-size:cover;background-position:center;` : ""}padding:24px ${styles.padding};border-radius:${styles.cardBorderRadius} ${styles.cardBorderRadius} 0 0;text-align:center">
               ${logoHtml}
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:${styles.headerColor};letter-spacing:-0.02em;font-family:${styles.fontFamily}">${siteName}</h1>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:${styles.headerColor};letter-spacing:-0.02em;font-family:${styles.fontFamily}">${styles.headerText || siteName}</h1>
             </td>
           </tr>
           <tr>

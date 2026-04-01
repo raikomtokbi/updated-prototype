@@ -31,6 +31,8 @@ interface EmailStyles {
   cardShadow: string;
   headerBg: string;
   headerColor: string;
+  headerText: string;
+  headerImageUrl: string;
   footerColor: string;
   logoUrl: string;
 }
@@ -84,6 +86,8 @@ const DEFAULT_STYLES: EmailStyles = {
   cardShadow: "none",
   headerBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
   headerColor: "#ffffff",
+  headerText: "",
+  headerImageUrl: "",
   footerColor: "#4a5568",
   logoUrl: "",
 };
@@ -230,9 +234,9 @@ function buildEmailHtmlClient(form: FormState, siteName = "Nexcoin"): string {
       <td align="center">
         <table width="${s.containerWidth}" cellpadding="0" cellspacing="0" style="max-width:${s.containerWidth};width:100%">
           <tr>
-            <td style="background:${s.headerBg};padding:24px ${s.padding};border-radius:${s.cardBorderRadius} ${s.cardBorderRadius} 0 0;text-align:center">
+            <td style="background:${s.headerBg};${s.headerImageUrl ? `background-image:url('${s.headerImageUrl}');background-size:cover;background-position:center;` : ""}padding:24px ${s.padding};border-radius:${s.cardBorderRadius} ${s.cardBorderRadius} 0 0;text-align:center">
               ${logoHtml}
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:${s.headerColor};letter-spacing:-0.02em;font-family:${s.fontFamily}">${siteName}</h1>
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:${s.headerColor};letter-spacing:-0.02em;font-family:${s.fontFamily}">${s.headerText || siteName}</h1>
             </td>
           </tr>
           <tr>
@@ -558,8 +562,14 @@ function StylesEditor({ styles, onChange }: { styles: EmailStyles; onChange: (s:
 
       <div style={section}>
         <div style={sectionTitle}>Header</div>
+        <StyleRow label="Header Text">
+          <TextInput value={styles.headerText} onChange={(v) => set("headerText", v)} placeholder="Leave blank to use site name" />
+        </StyleRow>
         <StyleRow label="Header Background">
           <ColorInput value={styles.headerBg} onChange={(v) => set("headerBg", v)} />
+        </StyleRow>
+        <StyleRow label="Header Image URL">
+          <TextInput value={styles.headerImageUrl} onChange={(v) => set("headerImageUrl", v)} placeholder="https://... (overrides background color)" />
         </StyleRow>
         <StyleRow label="Header Text Color">
           <ColorInput value={styles.headerColor} onChange={(v) => set("headerColor", v)} />

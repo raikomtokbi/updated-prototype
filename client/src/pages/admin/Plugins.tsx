@@ -982,15 +982,6 @@ export default function Plugins() {
       `}</style>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        {/* Stats bar */}
-        {plugins.length > 0 && (
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-            <StatPill icon={<Package size={13} />} label="Total" value={plugins.length} color="#a78bfa" />
-            <StatPill icon={<Power size={13} />} label="Active" value={activeCount} color="#10b981" />
-            <StatPill icon={<PowerOff size={13} />} label="Inactive" value={plugins.length - activeCount} color="hsl(220,10%,45%)" />
-          </div>
-        )}
-
         {/* Upload section */}
         <UploadSection onInstalled={() => qc.invalidateQueries({ queryKey: ["/api/admin/plugins"] })} />
 
