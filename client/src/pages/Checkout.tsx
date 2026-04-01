@@ -1,9 +1,21 @@
 import { Link, useLocation } from "wouter";
 import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol } from "@/lib/currency";
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function Checkout() {
   const [, navigate] = useLocation();
@@ -11,6 +23,7 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -24,6 +37,79 @@ export default function Checkout() {
   const subtotal = getCartTotal();
   const taxAmount = taxEnabled ? subtotal * taxRate : 0;
   const total = subtotal + taxAmount;
+  const currency = siteSettings?.default_currency ?? "INR";
+  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePayment = async () => {
+    setErrorMsg("");
+    if (!email || !email.includes("@")) {
+      setErrorMsg("Please enter a valid email address");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Step 1: Create order on backend
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: total,
+          currency,
+          receipt: `receipt_${Date.now()}`,
+        }),
+      });
+
+      if (!orderRes.ok) {
+        const error = await orderRes.json();
+        throw new Error(error.error || "Failed to create order");
+      }
+
+      const order = await orderRes.json();
+
+      // Step 2: Open Razorpay checkout
+      const options = {
+        key: razorpayKeyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Nexcoin",
+        description: "Game Top-up Purchase",
+        order_id: order.id,
+        prefill: {
+          email,
+        },
+        handler: (response: RazorpayResponse) => {
+          // Payment successful
+          setOrderPlaced(true);
+          clearCart();
+          setIsProcessing(false);
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setErrorMsg("Payment cancelled");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setErrorMsg(err.message || "Payment failed. Please try again.");
+      setIsProcessing(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -76,20 +162,6 @@ export default function Checkout() {
     );
   }
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes("@")) {
-      alert("Please enter a valid email address");
-      return;
-    }
-    setIsProcessing(true);
-    // Simulate order processing
-    setTimeout(() => {
-      setOrderPlaced(true);
-      clearCart();
-    }, 1500);
-  };
-
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
       <Link href="/cart" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,60%)", marginBottom: "1.5rem", textDecoration: "none", cursor: "pointer", fontSize: "0.9rem" }} data-testid="link-back-to-cart">
@@ -104,7 +176,7 @@ export default function Checkout() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", alignItems: "start" }}>
         {/* Left: Checkout Form */}
         <div>
-          <form onSubmit={handleSubmitOrder}>
+          <div>
             <div style={{ marginBottom: "1.5rem" }}>
               <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "0.5rem" }}>
                 Email Address
@@ -133,6 +205,15 @@ export default function Checkout() {
               </p>
             </div>
 
+            {errorMsg && (
+              <div style={{ background: "hsla(0,72%,55%,0.1)", border: "1px solid hsla(0,72%,55%,0.3)", borderRadius: "0.75rem", padding: "1rem", marginBottom: "1.5rem", display: "flex", gap: "0.75rem" }}>
+                <AlertCircle size={18} style={{ color: "hsl(0,72%,55%)", flexShrink: 0 }} />
+                <div style={{ fontSize: "0.8rem", color: "hsl(0,72%,60%)" }}>
+                  {errorMsg}
+                </div>
+              </div>
+            )}
+
             <div style={{ background: "hsla(142,70%,55%,0.1)", border: "1px solid hsla(142,70%,55%,0.3)", borderRadius: "0.75rem", padding: "1rem", marginBottom: "1.5rem", display: "flex", gap: "0.75rem" }}>
               <AlertCircle size={18} style={{ color: "hsl(142,70%,55%)", flexShrink: 0 }} />
               <div style={{ fontSize: "0.8rem", color: "hsl(142,70%,60%)" }}>
@@ -141,23 +222,24 @@ export default function Checkout() {
             </div>
 
             <button
-              type="submit"
-              disabled={isProcessing}
+              type="button"
+              disabled={isProcessing || !razorpayKeyId}
+              onClick={handlePayment}
               className="btn-primary"
               style={{
                 width: "100%",
-                opacity: isProcessing ? 0.7 : 1,
-                cursor: isProcessing ? "not-allowed" : "pointer",
+                opacity: isProcessing || !razorpayKeyId ? 0.7 : 1,
+                cursor: isProcessing || !razorpayKeyId ? "not-allowed" : "pointer",
               }}
               data-testid="button-place-order"
             >
-              {isProcessing ? "Processing..." : (
+              {!razorpayKeyId ? "Payment Not Configured" : isProcessing ? "Processing..." : (
                 <>
                   Complete Order <ArrowRight size={16} />
                 </>
               )}
             </button>
-          </form>
+          </div>
         </div>
 
         {/* Right: Order Summary */}

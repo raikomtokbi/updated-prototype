@@ -7,6 +7,7 @@ import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import AdmZip from "adm-zip";
+import Razorpay from "razorpay";
 import { storage } from "./storage";
 import {
   activatePlugin,
@@ -1408,6 +1409,41 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.put("/api/admin/settings", requireAdmin, async (req, res) => {
     await storage.upsertSiteSettings(req.body);
     res.json({ ok: true });
+  });
+
+  // ── Razorpay Payment ──────────────────────────────────────────────────────
+  app.post("/api/payment/create-order", async (req, res) => {
+    try {
+      const { amount, currency = "INR", receipt } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      const keyId = process.env.RAZORPAY_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+      if (!keyId || !keySecret) {
+        return res.status(500).json({ error: "Razorpay credentials not configured" });
+      }
+
+      const razorpay = new Razorpay({
+        key_id: keyId,
+        key_secret: keySecret,
+      });
+
+      const options = {
+        amount: Math.round(amount * 100), // Convert to paise
+        currency,
+        receipt: receipt || `receipt_${Date.now()}`,
+      };
+
+      const order = await razorpay.orders.create(options);
+      res.json(order);
+    } catch (error: any) {
+      console.error("Razorpay order creation error:", error);
+      res.status(500).json({ error: error.message || "Failed to create order" });
+    }
   });
 
   return httpServer;
