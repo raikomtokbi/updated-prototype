@@ -8,6 +8,7 @@ import CookieBanner from "./components/CookieBanner";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
@@ -88,6 +89,7 @@ function PublicRoutes() {
           <Route path="/products/:slug" component={ProductDetails} />
           <Route path="/offers" component={Offers} />
           <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />

@@ -1,10 +1,11 @@
-import { Link } from "wouter";
+import { Link, useNavigate } from "wouter";
 import { Trash2, ShoppingBag, Plus, Minus, ArrowLeft, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { getCurrencySymbol } from "@/lib/currency";
 
 export default function Cart() {
+  const navigate = useNavigate();
   const { items, removeItem, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -253,7 +254,7 @@ export default function Cart() {
           className="btn-primary"
           style={{ width: "100%" }}
           data-testid="button-checkout"
-          onClick={() => alert("Checkout coming soon! Please contact support to process your order.")}
+          onClick={() => navigate("/checkout")}
         >
           Proceed to Checkout <ArrowRight size={16} />
         </button>
