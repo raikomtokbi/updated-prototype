@@ -10,8 +10,6 @@ import { FaDiscord } from "react-icons/fa";
 
 import { useSiteStore } from "@/lib/store/siteStore";
 
-import heroBannerImg from "@assets/hero-banner_1774458324894.png";
-import game2Img from "@assets/game-2_1774458324828.png";
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 const FEATURES = [
@@ -30,29 +28,16 @@ function HeroSlider() {
     staleTime: 60_000,
   });
 
-  const defaultSlide = {
-    id: "default-phone",
-    bg: game2Img,
+  const SLIDES = apiSliders.map((s: any) => ({
+    id: s.id,
+    bg: s.bannerUrl || "",
     badge: "FEATURED",
-    title: ["Welcome to", "Game Marketplace"],
-    highlight: 1,
-    sub: "Get the best deals on game top-ups, gift cards, and more.",
-    cta1: { label: "Browse Games", href: "/products" },
+    title: [s.title],
+    highlight: 0,
+    sub: s.subtitle || "",
+    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
     cta2: { label: "View Offers", href: "/offers" },
-  };
-
-  const SLIDES = apiSliders.length > 0 
-    ? apiSliders.map((s: any) => ({
-        id: s.id,
-        bg: s.bannerUrl || heroBannerImg,
-        badge: "FEATURED",
-        title: [s.title],
-        highlight: 0,
-        sub: s.subtitle || "",
-        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
-        cta2: { label: "View Offers", href: "/offers" },
-      }))
-    : [defaultSlide];
+  }));
 
   function startTimer() {
     timerRef.current = setInterval(() => {
