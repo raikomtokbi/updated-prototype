@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol } from "@/lib/currency";
 
 export default function Checkout() {
+  const [, navigate] = useLocation();
   const { items, getCartTotal, clearCart } = useCartStore();
   const [email, setEmail] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);

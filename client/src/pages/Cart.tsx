@@ -1,11 +1,11 @@
-import { Link, useNavigate } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Trash2, ShoppingBag, Plus, Minus, ArrowLeft, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { getCurrencySymbol } from "@/lib/currency";
 
 export default function Cart() {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const { items, removeItem, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
