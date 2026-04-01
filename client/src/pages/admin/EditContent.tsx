@@ -66,8 +66,6 @@ type SettingsMap = Record<string, string>;
 const DEFAULTS: SettingsMap = {
   hero_title: "Level Up Your Gaming Experience",
   hero_subtitle: "Buy game credits, vouchers & subscriptions instantly — safe, fast, and affordable.",
-  announcement_text: "Year-end sale! Get up to 20% off on all game credits!",
-  announcement_enabled: "true",
   hero_bg_image: "",
   og_image: "",
   about_banner: "",
@@ -640,11 +638,11 @@ export default function EditContent() {
         </p>
       </div>
 
-      {/* ── Homepage Content ───────────────────────────────────────────────── */}
+      {/* ── Homepage Content & Media Assets ──────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
           <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content & Media Assets</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -665,32 +663,25 @@ export default function EditContent() {
               onChange={(e) => set("hero_subtitle", e.target.value)}
             />
           </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Announcement Banner</label>
-              <button
-                data-testid="toggle-announcement"
-                onClick={() => toggleBool("announcement_enabled")}
-                style={{
-                  fontSize: "11px",
-                  padding: "3px 10px",
-                  borderRadius: "4px",
-                  background: bool("announcement_enabled") ? "rgba(139, 92, 246, 0.15)" : "hsl(220, 15%, 13%)",
-                  color: bool("announcement_enabled") ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 50%)",
-                  border: "1px solid hsl(220, 15%, 20%)",
-                  cursor: "pointer",
-                }}
-              >
-                {bool("announcement_enabled") ? "Enabled" : "Disabled"}
-              </button>
+          <div style={{ paddingTop: "8px", borderTop: "1px solid hsl(220,15%,18%)" }}>
+            <label style={labelStyle}>Media Assets</label>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "16px", marginTop: "12px" }}>
+              {[
+                { key: "hero_bg_image", label: "Hero Background (fallback)" },
+                { key: "og_image", label: "OG / Share Image" },
+                { key: "about_banner", label: "About Page Banner" },
+              ].map((item) => (
+                <ImageUploadField
+                  key={item.key}
+                  label={item.label}
+                  value={local[item.key] ?? ""}
+                  onChange={(url) => set(item.key, url)}
+                  inputStyle={inputStyle}
+                  labelStyle={labelStyle}
+                  ratio="rectangle"
+                />
+              ))}
             </div>
-            <input
-              data-testid="input-announcement-text"
-              style={inputStyle}
-              value={local.announcement_text ?? ""}
-              onChange={(e) => set("announcement_text", e.target.value)}
-              placeholder="Announcement banner text…"
-            />
           </div>
         </div>
       </div>
@@ -808,31 +799,6 @@ export default function EditContent() {
               )
             )
           )}
-        </div>
-      </div>
-
-      {/* ── Media Assets ───────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Media Assets</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "16px" }}>
-          {[
-            { key: "hero_bg_image", label: "Hero Background (fallback)" },
-            { key: "og_image", label: "OG / Share Image" },
-            { key: "about_banner", label: "About Page Banner" },
-          ].map((item) => (
-            <ImageUploadField
-              key={item.key}
-              label={item.label}
-              value={local[item.key] ?? ""}
-              onChange={(url) => set(item.key, url)}
-              inputStyle={inputStyle}
-              labelStyle={labelStyle}
-              ratio="rectangle"
-            />
-          ))}
         </div>
       </div>
 

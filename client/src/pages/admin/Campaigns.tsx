@@ -152,10 +152,70 @@ export default function Campaigns() {
     });
   }, [campaigns, search, typeFilter, statusFilter]);
 
+  const { data: settings = {}, isLoading: settingsLoading } = useQuery<Record<string, string>>({
+    queryKey: ["/api/admin/settings"],
+    queryFn: () => adminApi.get("/settings"),
+  });
+
+  const [announcementText, setAnnouncementText] = useState("");
+  const [announcementEnabled, setAnnouncementEnabled] = useState(false);
+
+  const saveAnnouncement = useMutation({
+    mutationFn: (data: any) => adminApi.put("/settings", data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/settings"] }); },
+  });
+
   return (
     <AdminLayout title="Campaigns" actions={
       <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={14} /> New Campaign</button>
     }>
+
+      {/* ── Announcement Banner ────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220,15%,18%)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,50%)", marginBottom: "8px", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>Homepage Announcement Banner</label>
+            <input
+              data-testid="input-announcement-text"
+              style={{ ...sharedInput, padding: "8px 12px", fontSize: "13px", width: "100%" }}
+              value={announcementText || (settings.announcement_text ?? "")}
+              onChange={(e) => setAnnouncementText(e.target.value)}
+              placeholder="Announcement banner text…"
+            />
+          </div>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <button
+              data-testid="toggle-announcement"
+              onClick={() => setAnnouncementEnabled(!announcementEnabled)}
+              style={{
+                fontSize: "11px",
+                padding: "6px 14px",
+                borderRadius: "4px",
+                background: announcementEnabled || settings.announcement_enabled === "true" ? "rgba(139, 92, 246, 0.15)" : "hsl(220, 15%, 13%)",
+                color: announcementEnabled || settings.announcement_enabled === "true" ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 50%)",
+                border: "1px solid hsl(220, 15%, 20%)",
+                cursor: "pointer",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {announcementEnabled || settings.announcement_enabled === "true" ? "Enabled" : "Disabled"}
+            </button>
+            <button
+              onClick={() => {
+                saveAnnouncement.mutate({
+                  announcement_text: announcementText || settings.announcement_text,
+                  announcement_enabled: (announcementEnabled || settings.announcement_enabled === "true").toString(),
+                });
+              }}
+              disabled={saveAnnouncement.isPending}
+              style={{ ...btnPrimary, padding: "6px 14px", fontSize: "11px" }}
+            >
+              {saveAnnouncement.isPending ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div style={card}>
         <Toolbar>
