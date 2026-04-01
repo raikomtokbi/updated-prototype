@@ -4,6 +4,7 @@ import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, Che
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { ICON_MAP, ICON_LIST } from "@/lib/iconMap";
 import { useNavGuard } from "@/hooks/useNavGuard";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import type { HeroSlider } from "@shared/schema";
@@ -700,44 +701,89 @@ export default function EditContent() {
             { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds", defaultIcon: "Zap" },
             { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions", defaultIcon: "Shield" },
             { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups", defaultIcon: "Tag" },
-          ].map((feat) => (
-            <div key={feat.key} style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                <div>
-                  <label style={labelStyle}>Title</label>
-                  <textarea
-                    data-testid={`input-${feat.key}-title`}
-                    style={{ ...textareaStyle, minHeight: "40px" }}
-                    value={local[`${feat.key}_title`] ?? feat.title}
-                    onChange={(e) => set(`${feat.key}_title`, e.target.value)}
-                  />
+          ].map((feat, featIdx) => {
+            const currentIcon = local[`${feat.key}_icon`] ?? feat.defaultIcon;
+            const IconComponent = ICON_MAP[currentIcon] || ICON_MAP["Zap"];
+            return (
+              <div key={feat.key} style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                  <div>
+                    <label style={labelStyle}>Title</label>
+                    <textarea
+                      data-testid={`input-${feat.key}-title`}
+                      style={{ ...textareaStyle, minHeight: "40px" }}
+                      value={local[`${feat.key}_title`] ?? feat.title}
+                      onChange={(e) => set(`${feat.key}_title`, e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Icon</label>
+                    <button
+                      data-testid={`button-icon-picker-${feat.key}`}
+                      onClick={() => set(`${feat.key}_picker_open`, local[`${feat.key}_picker_open`] ? "" : "1")}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid hsl(220,15%,18%)",
+                        background: "hsl(220,20%,11%)",
+                        color: "hsl(210,40%,92%)",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}
+                    >
+                      <IconComponent size={16} />
+                      {currentIcon}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label style={labelStyle}>Icon</label>
-                  <select
-                    data-testid={`select-${feat.key}-icon`}
-                    style={inputStyle}
-                    value={local[`${feat.key}_icon`] ?? feat.defaultIcon}
-                    onChange={(e) => set(`${feat.key}_icon`, e.target.value)}
-                  >
-                    <option value="Zap">⚡ Lightning</option>
-                    <option value="Shield">🛡️ Shield</option>
-                    <option value="Tag">🏷️ Tag</option>
-                    <option value="Heart">❤️ Heart</option>
-                    <option value="Star">⭐ Star</option>
-                    <option value="Zap">⚡ Zap</option>
-                  </select>
-                </div>
+                <label style={labelStyle}>Description</label>
+                <textarea
+                  data-testid={`input-${feat.key}-desc`}
+                  style={{ ...textareaStyle, minHeight: "50px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
+                  value={local[`${feat.key}_desc`] ?? feat.desc}
+                  onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
+                />
+                {local[`${feat.key}_picker_open`] && (
+                  <div style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px", marginTop: "12px" }}>
+                    <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,45%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
+                      {ICON_LIST.map((iconName) => {
+                        const Icon = ICON_MAP[iconName];
+                        const selected = currentIcon === iconName;
+                        return (
+                          <button
+                            key={iconName}
+                            type="button"
+                            data-testid={`button-icon-${iconName}-${feat.key}`}
+                            onClick={() => { set(`${feat.key}_icon`, iconName); set(`${feat.key}_picker_open`, ""); }}
+                            title={iconName}
+                            style={{
+                              padding: "8px",
+                              borderRadius: "6px",
+                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(220,15%,18%)",
+                              background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: selected ? "hsl(258,90%,72%)" : "hsl(220,10%,55%)",
+                              transition: "all 0.1s",
+                            }}
+                          >
+                            <Icon size={14} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
-              <label style={labelStyle}>Description</label>
-              <textarea
-                data-testid={`input-${feat.key}-desc`}
-                style={{ ...textareaStyle, minHeight: "50px" }}
-                value={local[`${feat.key}_desc`] ?? feat.desc}
-                onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
