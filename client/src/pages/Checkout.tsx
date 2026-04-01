@@ -348,30 +348,20 @@ export default function Checkout() {
               <span style={{ color: "hsl(220,10%,52%)" }}>Subtotal</span>
               <span style={{ color: "hsl(210,40%,85%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
             </div>
-            {fees.length > 0 && (
-              <>
-                {fees.map((fee) => {
-                  const feeAmount = fee.type === "percentage"
-                    ? subtotal * (parseFloat(fee.amount) / 100)
-                    : parseFloat(fee.amount);
-                  return (
-                    <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                      <span style={{ color: "hsl(220,10%,52%)" }}>
-                        {fee.name}
-                        {fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}
-                      </span>
-                      <span style={{ color: "hsl(210,40%,85%)" }}>{currencySymbol}{feeAmount.toFixed(2)}</span>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-            {fees.length === 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                <span style={{ color: "hsl(220,10%,52%)" }}>Processing Fee</span>
-                <span style={{ color: "hsl(145,70%,55%)" }}>Free</span>
-              </div>
-            )}
+            {fees.length > 0 && fees.map((fee) => {
+              const feeAmount = fee.type === "percentage"
+                ? subtotal * (parseFloat(fee.amount) / 100)
+                : parseFloat(fee.amount);
+              return (
+                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                  <span style={{ color: "hsl(220,10%,52%)" }}>
+                    {fee.name}
+                    {fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}
+                  </span>
+                  <span style={{ color: "hsl(210,40%,85%)" }}>{currencySymbol}{feeAmount.toFixed(2)}</span>
+                </div>
+              );
+            })}
             {taxEnabled && (
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
                 <span style={{ color: "hsl(220,10%,52%)" }}>{taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 1)}%)</span>
