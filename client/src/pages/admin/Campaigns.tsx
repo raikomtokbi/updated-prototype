@@ -217,6 +217,70 @@ export default function Campaigns() {
         </div>
       </div>
 
+      {/* ── Weekend Special ───────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ borderBottom: "1px solid hsl(220,15%,18%)", paddingBottom: "12px" }}>
+            <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)" }}>Weekend Special</label>
+            <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: "4px 0 0" }}>
+              Display a special offer below Trending Now on the homepage
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={labelStyle}>Title</label>
+              <input
+                data-testid="input-weekend-title"
+                style={inputStyle}
+                value={settings.weekend_special_title ?? ""}
+                onChange={(e) => saveAnnouncement.mutate({ weekend_special_title: e.target.value })}
+                placeholder="Weekend Special"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Button Text</label>
+              <input
+                data-testid="input-weekend-button"
+                style={inputStyle}
+                value={settings.weekend_special_button_text ?? ""}
+                onChange={(e) => saveAnnouncement.mutate({ weekend_special_button_text: e.target.value })}
+                placeholder="Claim Now"
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea
+              data-testid="input-weekend-desc"
+              style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "60px" }}
+              value={settings.weekend_special_description ?? ""}
+              onChange={(e) => saveAnnouncement.mutate({ weekend_special_description: e.target.value })}
+              placeholder="Extra 20% off on selected items this weekend only!"
+            />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "8px" }}>Badge Color</label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {["purple", "blue", "green", "orange", "red"].map((color) => (
+                <button
+                  key={color}
+                  data-testid={`btn-weekend-color-${color}`}
+                  onClick={() => saveAnnouncement.mutate({ weekend_special_color: color })}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "4px",
+                    border: settings.weekend_special_color === color ? "2px solid hsl(258, 90%, 66%)" : "1px solid hsl(220, 15%, 25%)",
+                    background: color === "purple" ? "hsl(258, 90%, 50%)" : color === "blue" ? "hsl(210, 90%, 50%)" : color === "green" ? "hsl(142, 71%, 45%)" : color === "orange" ? "hsl(39, 100%, 50%)" : "hsl(0, 84%, 60%)",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div style={card}>
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search campaign name..." />

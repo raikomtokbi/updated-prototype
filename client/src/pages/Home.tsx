@@ -986,8 +986,101 @@ export default function Home() {
       <HeroSlider />
       <FeaturesStrip />
       <TrendingGames />
+      <WeekendSpecial />
       <BonusBanner />
       <Footer />
     </div>
+  );
+}
+
+// ─── Weekend Special ──────────────────────────────────────────────────────────
+function WeekendSpecial() {
+  const { data: siteSettings = {} } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 0,
+  });
+
+  const title = siteSettings.weekend_special_title || "Weekend Special";
+  const description = siteSettings.weekend_special_description || "Get exclusive deals this weekend!";
+  const buttonText = siteSettings.weekend_special_button_text || "Claim Now";
+  const color = siteSettings.weekend_special_color || "purple";
+
+  const colorMap: Record<string, { bg: string; text: string; badge: string }> = {
+    purple: { bg: "linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(124,58,237,0.05) 100%)", text: "hsl(258, 90%, 66%)", badge: "hsl(258, 90%, 50%)" },
+    blue: { bg: "linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%)", text: "hsl(217, 91%, 60%)", badge: "hsl(210, 90%, 50%)" },
+    green: { bg: "linear-gradient(135deg, rgba(74,222,128,0.15) 0%, rgba(74,222,128,0.05) 100%)", text: "hsl(142, 71%, 48%)", badge: "hsl(142, 71%, 45%)" },
+    orange: { bg: "linear-gradient(135deg, rgba(251,146,60,0.15) 0%, rgba(251,146,60,0.05) 100%)", text: "hsl(39, 100%, 50%)", badge: "hsl(39, 100%, 50%)" },
+    red: { bg: "linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)", text: "hsl(0, 84%, 60%)", badge: "hsl(0, 84%, 60%)" },
+  };
+
+  const theme = colorMap[color] || colorMap.purple;
+
+  return (
+    <section style={{ padding: "3.5rem 0", maxWidth: "1320px", margin: "0 auto" }}>
+      <div
+        style={{
+          margin: "0 1.5rem",
+          padding: "2rem",
+          borderRadius: "12px",
+          border: `1px solid ${theme.text}33`,
+          background: theme.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: "250px" }}>
+          <div
+            style={{
+              display: "inline-block",
+              padding: "4px 10px",
+              borderRadius: "4px",
+              background: theme.badge,
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "#fff",
+              marginBottom: "12px",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Special Offer
+          </div>
+          <h3 style={{ fontSize: "1.5rem", fontWeight: 800, color: theme.text, margin: "0 0 8px 0" }}>
+            {title}
+          </h3>
+          <p style={{ fontSize: "0.9rem", color: "rgba(148,163,184,0.8)", margin: 0 }}>
+            {description}
+          </p>
+        </div>
+        <button
+          data-testid="button-weekend-claim"
+          style={{
+            padding: "10px 24px",
+            borderRadius: "6px",
+            background: theme.badge,
+            color: "#fff",
+            fontSize: "13px",
+            fontWeight: 600,
+            border: "none",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            transition: "opacity 0.2s, transform 0.2s",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = "0.85";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = "1";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+          }}
+        >
+          {buttonText}
+        </button>
+      </div>
+    </section>
   );
 }
