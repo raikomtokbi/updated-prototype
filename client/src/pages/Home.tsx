@@ -28,16 +28,34 @@ function HeroSlider() {
     staleTime: 60_000,
   });
 
-  const SLIDES = apiSliders.map((s: any) => ({
-    id: s.id,
-    bg: s.bannerUrl || "",
+  const { data: siteSettings = {} } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 0,
+  });
+
+  const defaultSlide = {
+    id: "default",
+    bg: "",
     badge: "FEATURED",
-    title: [s.title],
+    title: [(siteSettings.hero_title || "Welcome to Game Marketplace").split(" ")].flat(),
     highlight: 0,
-    sub: s.subtitle || "",
-    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+    sub: siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
+    cta1: { label: "Browse Games", href: "/products" },
     cta2: { label: "View Offers", href: "/offers" },
-  }));
+  };
+
+  const SLIDES = apiSliders.length > 0 
+    ? apiSliders.map((s: any) => ({
+        id: s.id,
+        bg: s.bannerUrl || "",
+        badge: "FEATURED",
+        title: [s.title],
+        highlight: 0,
+        sub: s.subtitle || "",
+        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+        cta2: { label: "View Offers", href: "/offers" },
+      }))
+    : [defaultSlide];
 
   function startTimer() {
     timerRef.current = setInterval(() => {
@@ -58,7 +76,7 @@ function HeroSlider() {
     startTimer();
   }
 
-  if (!isSuccess || SLIDES.length === 0) return null;
+  if (!isSuccess) return null;
 
   const slide = SLIDES[current] ?? SLIDES[0];
 
@@ -83,12 +101,14 @@ function HeroSlider() {
             transition: "opacity 0.9s ease",
           }}
         >
-          <img
-            src={s.bg}
-            alt=""
-            aria-hidden
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-          />
+          {s.bg && (
+            <img
+              src={s.bg}
+              alt=""
+              aria-hidden
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+            />
+          )}
           {/* Dark wash gradient over bg */}
           <div
             style={{
