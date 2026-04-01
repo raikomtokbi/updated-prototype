@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
+import { Save, Loader2, Image, FileText, Plus, Pencil, Trash2, GripVertical, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -683,6 +683,41 @@ export default function EditContent() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Features Strip ───────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Zap size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Features Strip (Above Trending Now)</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+            Edit the three features displayed below the hero section
+          </p>
+          {[
+            { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds" },
+            { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions" },
+            { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups" },
+          ].map((feat) => (
+            <div key={feat.key} style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px" }}>
+              <label style={labelStyle}>{feat.title}</label>
+              <textarea
+                data-testid={`input-${feat.key}-title`}
+                style={{ ...textareaStyle, minHeight: "40px", marginBottom: "8px" }}
+                value={local[`${feat.key}_title`] ?? feat.title}
+                onChange={(e) => set(`${feat.key}_title`, e.target.value)}
+              />
+              <label style={labelStyle}>Description</label>
+              <textarea
+                data-testid={`input-${feat.key}-desc`}
+                style={{ ...textareaStyle, minHeight: "50px" }}
+                value={local[`${feat.key}_desc`] ?? feat.desc}
+                onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
+              />
+            </div>
+          ))}
         </div>
       </div>
 

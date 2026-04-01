@@ -12,7 +12,7 @@ import { useSiteStore } from "@/lib/store/siteStore";
 
 
 // ─── Features ─────────────────────────────────────────────────────────────────
-const FEATURES = [
+const DEFAULT_FEATURES = [
   { icon: Zap, title: "Lightning Fast", desc: "Instant delivery to your account within seconds" },
   { icon: Shield, title: "Secure Payments", desc: "256-bit encryption on all transactions" },
   { icon: Tag, title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups" },
@@ -358,6 +358,29 @@ function HeroSlider() {
 
 // ─── Features strip ───────────────────────────────────────────────────────────
 function FeaturesStrip() {
+  const { data: siteSettings = {} } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 0,
+  });
+
+  const features = [
+    {
+      icon: Zap,
+      title: siteSettings.feature_1_title || DEFAULT_FEATURES[0].title,
+      desc: siteSettings.feature_1_desc || DEFAULT_FEATURES[0].desc,
+    },
+    {
+      icon: Shield,
+      title: siteSettings.feature_2_title || DEFAULT_FEATURES[1].title,
+      desc: siteSettings.feature_2_desc || DEFAULT_FEATURES[1].desc,
+    },
+    {
+      icon: Tag,
+      title: siteSettings.feature_3_title || DEFAULT_FEATURES[2].title,
+      desc: siteSettings.feature_3_desc || DEFAULT_FEATURES[2].desc,
+    },
+  ];
+
   return (
     <section
       style={{
@@ -376,9 +399,9 @@ function FeaturesStrip() {
           gap: "2rem",
         }}
       >
-        {FEATURES.map(({ icon: Icon, title, desc }) => (
+        {features.map(({ icon: Icon, title, desc }, idx: number) => (
           <div
-            key={title}
+            key={idx}
             style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}
           >
             <div
