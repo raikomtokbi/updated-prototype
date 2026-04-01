@@ -1043,6 +1043,7 @@ interface Fee {
 function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   const { data: fees = [], isLoading } = useQuery<Fee[]>({
     queryKey: ["/api/admin/fees"],
+    queryFn: () => adminApi.get("/fees"),
   });
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1050,11 +1051,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   const [formData, setFormData] = useState({ name: "", amount: "", type: "fixed", isActive: true });
 
   const createFee = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch("/api/admin/fees", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      if (!res.ok) throw new Error("Failed to create fee");
-      return res.json();
-    },
+    mutationFn: (data: any) => adminApi.post("/fees", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
       setShowForm(false);
@@ -1063,11 +1060,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   });
 
   const updateFee = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch(`/api/admin/fees/${editingId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      if (!res.ok) throw new Error("Failed to update fee");
-      return res.json();
-    },
+    mutationFn: (data: any) => adminApi.patch(`/fees/${editingId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
       setEditingId(null);
@@ -1076,10 +1069,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   });
 
   const deleteFee = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/fees/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete fee");
-    },
+    mutationFn: (id: string) => adminApi.delete(`/fees/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
     },
