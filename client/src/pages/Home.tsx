@@ -84,7 +84,7 @@ function HeroSlider() {
     <section
       style={{
         position: "relative",
-        height: "min(100vh, 700px)",
+        height: "min(100vh, 520px)",
         minHeight: "540px",
         overflow: "hidden",
         background: "#070b14",
