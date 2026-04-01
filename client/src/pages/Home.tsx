@@ -538,6 +538,17 @@ function TrendingGames() {
 
 // ─── Weekend Bonus Banner ─────────────────────────────────────────────────────
 function BonusBanner() {
+  const { data: siteSettings = {} } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 0,
+  });
+
+  const badgeText = siteSettings.bonus_badge_text || "WEEKEND SPECIAL";
+  const bonusText = siteSettings.bonus_percent || "20%";
+  const mainTitle = siteSettings.bonus_main_title || "GET";
+  const mainTitleSuffix = siteSettings.bonus_main_suffix || "CREDITS";
+  const description = siteSettings.bonus_description || "Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.";
+
   return (
     <section style={{ padding: "0 1.5rem 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
       <div
@@ -580,7 +591,7 @@ function BonusBanner() {
               marginBottom: "0.75rem",
             }}
           >
-            WEEKEND SPECIAL
+            {badgeText}
           </span>
           <h2
             className="font-orbitron"
@@ -592,7 +603,7 @@ function BonusBanner() {
               marginBottom: "0.75rem",
             }}
           >
-            GET{" "}
+            {mainTitle}{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, #7c3aed, #a855f7)",
@@ -601,12 +612,12 @@ function BonusBanner() {
                 backgroundClip: "text",
               }}
             >
-              20% BONUS
+              {bonusText} BONUS
             </span>{" "}
-            CREDITS
+            {mainTitleSuffix}
           </h2>
           <p style={{ fontSize: "0.825rem", color: "rgba(229,231,235,0.6)", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
-            Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.
+            {description}
           </p>
           <Link
             href="/offers"
