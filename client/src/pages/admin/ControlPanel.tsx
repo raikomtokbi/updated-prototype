@@ -1022,18 +1022,6 @@ export default function ControlPanel() {
             />
           </div>
         </div>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div>
-            <label style={{ ...labelStyle, marginBottom: "2px" }}>Why {local.site_name || "Nexcoin"} — Feature Cards</label>
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginBottom: "10px" }}>
-              Click the icon button on each card to open the icon picker. Changes are saved with the rest of the settings.
-            </p>
-            <ValueCardsEditor
-              value={local.why_nexcoin_cards ?? JSON.stringify(DEFAULT_VALUE_CARDS)}
-              onChange={(v) => set("why_nexcoin_cards", v)}
-            />
-          </div>
-        </div>
         <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
             <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)" }}>About Page Stats</span>
@@ -1065,6 +1053,18 @@ export default function ControlPanel() {
                 />
               </div>
             ))}
+          </div>
+        </div>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Why {local.site_name || "Nexcoin"} — Feature Cards</label>
+            <p style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginBottom: "10px" }}>
+              Click the icon button on each card to open the icon picker. Changes are saved with the rest of the settings.
+            </p>
+            <ValueCardsEditor
+              value={local.why_nexcoin_cards ?? JSON.stringify(DEFAULT_VALUE_CARDS)}
+              onChange={(v) => set("why_nexcoin_cards", v)}
+            />
           </div>
         </div>
       </div>
