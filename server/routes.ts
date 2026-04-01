@@ -610,6 +610,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  app.delete("/api/user/delete", requireUser, async (req: any, res) => {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ message: "Password is required to delete account" });
+    }
+    if (!(await bcrypt.compare(password, req.currentUser.password))) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+    await storage.deleteUser(req.currentUser.id);
+    res.json({ ok: true, message: "Account deleted successfully" });
+  });
+
   // ── Dashboard stats ────────────────────────────────────────────────────────
   app.get("/api/admin/stats", requireAdmin, async (_req, res) => {
     const stats = await storage.getDashboardStats();

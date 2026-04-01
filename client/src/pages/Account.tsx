@@ -595,6 +595,119 @@ function SecurityTab({ user }: { user: any }) {
           </button>
         </form>
       </div>
+
+      {/* Delete Account Section */}
+      <DeleteAccountSection />
+    </div>
+  );
+}
+
+function DeleteAccountSection() {
+  const [showDelete, setShowDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [, navigate] = useLocation();
+  const { logout } = useAuthStore();
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (password: string) => {
+      const res = await fetch("/api/user/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to delete account");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Account deleted", description: "Your account has been permanently deleted." });
+      logout();
+      navigate("/");
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleDelete = () => {
+    if (!deletePassword) {
+      toast({ title: "Error", description: "Please enter your password", variant: "destructive" });
+      return;
+    }
+    deleteMutation.mutate(deletePassword);
+  };
+
+  return (
+    <div style={{
+      background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.2)",
+      borderRadius: "0.75rem", padding: "1.25rem", overflow: "hidden",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
+        <div>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(0,72%,60%)", marginBottom: "0.25rem" }}>
+            Delete Account
+          </h3>
+          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,50%)", margin: 0 }}>
+            Permanently delete your account and all associated data. This action cannot be undone.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowDelete(!showDelete)}
+          className="btn-secondary"
+          style={{ fontSize: "0.8rem", flexShrink: 0 }}
+          data-testid="button-delete-account-toggle"
+        >
+          {showDelete ? "Cancel" : "Delete"}
+        </button>
+      </div>
+
+      {showDelete && (
+        <div style={{
+          borderTop: "1px solid hsla(0,72%,55%,0.2)", paddingTop: "1rem",
+          display: "flex", flexDirection: "column", gap: "0.75rem",
+        }}>
+          <div style={{
+            background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.15)",
+            borderRadius: "0.5rem", padding: "0.75rem",
+            fontSize: "0.78rem", color: "hsl(0,72%,65%)",
+          }}>
+            This will permanently delete your account, orders, and personal information. This cannot be reversed.
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.3rem" }}>
+              Enter your password to confirm
+            </label>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Your password"
+              data-testid="input-delete-password"
+              style={{
+                width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                borderRadius: "0.5rem", padding: "0.6rem 0.9rem",
+                fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+              }}
+            />
+          </div>
+          <button
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending || !deletePassword}
+            style={{
+              background: "hsl(0,72%,55%)", color: "white", border: "none",
+              borderRadius: "0.5rem", padding: "0.6rem 1rem",
+              fontSize: "0.85rem", fontWeight: 600, cursor: "pointer",
+              opacity: deleteMutation.isPending || !deletePassword ? 0.6 : 1,
+            }}
+            data-testid="button-confirm-delete"
+          >
+            {deleteMutation.isPending ? <Loader2 size={14} className="inline animate-spin" /> : "Permanently Delete Account"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
