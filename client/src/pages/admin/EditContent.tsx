@@ -694,21 +694,41 @@ export default function EditContent() {
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
-            Edit the three features displayed below the hero section
+            Edit the three features displayed below the hero section including titles, descriptions, and icons
           </p>
           {[
-            { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds" },
-            { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions" },
-            { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups" },
+            { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds", defaultIcon: "Zap" },
+            { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions", defaultIcon: "Shield" },
+            { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups", defaultIcon: "Tag" },
           ].map((feat) => (
             <div key={feat.key} style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px" }}>
-              <label style={labelStyle}>{feat.title}</label>
-              <textarea
-                data-testid={`input-${feat.key}-title`}
-                style={{ ...textareaStyle, minHeight: "40px", marginBottom: "8px" }}
-                value={local[`${feat.key}_title`] ?? feat.title}
-                onChange={(e) => set(`${feat.key}_title`, e.target.value)}
-              />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                <div>
+                  <label style={labelStyle}>Title</label>
+                  <textarea
+                    data-testid={`input-${feat.key}-title`}
+                    style={{ ...textareaStyle, minHeight: "40px" }}
+                    value={local[`${feat.key}_title`] ?? feat.title}
+                    onChange={(e) => set(`${feat.key}_title`, e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Icon</label>
+                  <select
+                    data-testid={`select-${feat.key}-icon`}
+                    style={inputStyle}
+                    value={local[`${feat.key}_icon`] ?? feat.defaultIcon}
+                    onChange={(e) => set(`${feat.key}_icon`, e.target.value)}
+                  >
+                    <option value="Zap">⚡ Lightning</option>
+                    <option value="Shield">🛡️ Shield</option>
+                    <option value="Tag">🏷️ Tag</option>
+                    <option value="Heart">❤️ Heart</option>
+                    <option value="Star">⭐ Star</option>
+                    <option value="Zap">⚡ Zap</option>
+                  </select>
+                </div>
+              </div>
               <label style={labelStyle}>Description</label>
               <textarea
                 data-testid={`input-${feat.key}-desc`}

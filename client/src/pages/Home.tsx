@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Zap, Shield, Tag, ArrowRight, ChevronLeft, ChevronRight,
+  Zap, Shield, Tag, Heart, Star, ArrowRight, ChevronLeft, ChevronRight,
   Facebook, Twitter, Instagram, Gamepad2, Gift, HeadphonesIcon,
   Wrench, Mail,
 } from "lucide-react";
@@ -363,19 +363,23 @@ function FeaturesStrip() {
     staleTime: 0,
   });
 
+  const iconMap: Record<string, typeof Zap> = {
+    Zap, Shield, Tag, Heart, Star,
+  };
+
   const features = [
     {
-      icon: Zap,
+      iconName: siteSettings.feature_1_icon || "Zap",
       title: siteSettings.feature_1_title || DEFAULT_FEATURES[0].title,
       desc: siteSettings.feature_1_desc || DEFAULT_FEATURES[0].desc,
     },
     {
-      icon: Shield,
+      iconName: siteSettings.feature_2_icon || "Shield",
       title: siteSettings.feature_2_title || DEFAULT_FEATURES[1].title,
       desc: siteSettings.feature_2_desc || DEFAULT_FEATURES[1].desc,
     },
     {
-      icon: Tag,
+      iconName: siteSettings.feature_3_icon || "Tag",
       title: siteSettings.feature_3_title || DEFAULT_FEATURES[2].title,
       desc: siteSettings.feature_3_desc || DEFAULT_FEATURES[2].desc,
     },
@@ -399,35 +403,38 @@ function FeaturesStrip() {
           gap: "2rem",
         }}
       >
-        {features.map(({ icon: Icon, title, desc }, idx: number) => (
-          <div
-            key={idx}
-            style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}
-          >
+        {features.map(({ iconName, title, desc }, idx: number) => {
+          const Icon = iconMap[iconName] || Zap;
+          return (
             <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "10px",
-                background: "rgba(124,58,237,0.12)",
-                border: "1px solid rgba(124,58,237,0.25)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                boxShadow: "0 0 12px rgba(124,58,237,0.15)",
-              }}
+              key={idx}
+              style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}
             >
-              <Icon size={20} color="#a78bfa" />
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "10px",
+                  background: "rgba(124,58,237,0.12)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: "0 0 12px rgba(124,58,237,0.15)",
+                }}
+              >
+                <Icon size={20} color="#a78bfa" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "#e5e7eb", marginBottom: "0.3rem" }}>
+                  {title}
+                </h3>
+                <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.65)", lineHeight: 1.5 }}>{desc}</p>
+              </div>
             </div>
-            <div>
-              <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "#e5e7eb", marginBottom: "0.3rem" }}>
-                {title}
-              </h3>
-              <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.65)", lineHeight: 1.5 }}>{desc}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
