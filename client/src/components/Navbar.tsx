@@ -241,8 +241,7 @@ export default function Navbar() {
 
   const announcementEnabled = siteSettings?.announcement_enabled === "true";
   const announcementText = siteSettings?.announcement_text || "";
-  const isOffersPage = location === "/offers";
-  const showAnnouncement = announcementEnabled && !!announcementText && !isOffersPage;
+  const showAnnouncement = announcementEnabled && !!announcementText;
   const announcementBarHeight = 36;
 
   return (
