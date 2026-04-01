@@ -1432,8 +1432,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ error: "Invalid amount" });
       }
 
-      const keyId = process.env.RAZORPAY_KEY_ID;
-      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      // Check if Razorpay is active in the database
+      const activePaymentMethods = await storage.getActivePaymentMethods();
+      const razorpayMethod = activePaymentMethods.find(m => m.provider === "razorpay" || m.name?.toLowerCase().includes("razorpay"));
+
+      if (!razorpayMethod) {
+        return res.status(500).json({ error: "Razorpay payment gateway is not configured or disabled" });
+      }
+
+      // Get credentials from database or env fallback
+      let keyId = razorpayMethod.publicKey;
+      let keySecret = razorpayMethod.secretKey;
+
+      // Fallback to environment variables if not set in database
+      if (!keyId) keyId = process.env.RAZORPAY_KEY_ID;
+      if (!keySecret) keySecret = process.env.RAZORPAY_KEY_SECRET;
 
       if (!keyId || !keySecret) {
         return res.status(500).json({ error: "Razorpay credentials not configured" });
@@ -1466,7 +1479,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ success: false, error: "Missing payment details" });
       }
 
-      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      // Check if Razorpay is active in the database
+      const activePaymentMethods = await storage.getActivePaymentMethods();
+      const razorpayMethod = activePaymentMethods.find(m => m.provider === "razorpay" || m.name?.toLowerCase().includes("razorpay"));
+
+      if (!razorpayMethod) {
+        return res.status(500).json({ success: false, error: "Razorpay payment gateway is not configured or disabled" });
+      }
+
+      // Get secret from database or env fallback
+      let keySecret = razorpayMethod.secretKey;
+      if (!keySecret) keySecret = process.env.RAZORPAY_KEY_SECRET;
+
       if (!keySecret) {
         return res.status(500).json({ success: false, error: "Payment verification not configured" });
       }

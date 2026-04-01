@@ -468,6 +468,12 @@ export class DatabaseStorage implements IStorage {
   async getAllPaymentMethods() {
     return db.select().from(paymentMethods).orderBy(paymentMethods.sortOrder);
   }
+  async getActivePaymentMethods() {
+    return db.select().from(paymentMethods).where(eq(paymentMethods.isActive, true)).orderBy(paymentMethods.sortOrder);
+  }
+  async getPaymentMethodByName(name: string) {
+    return db.select().from(paymentMethods).where(eq(paymentMethods.name, name)).then(rows => rows[0]);
+  }
   async createPaymentMethod(data: Partial<PaymentMethod>) {
     const id = randomUUID();
     await db.insert(paymentMethods).values({ ...(data as any), id });
