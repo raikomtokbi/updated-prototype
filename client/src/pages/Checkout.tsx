@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, CreditCard } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, CreditCard, Tag, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -47,17 +47,26 @@ const GATEWAY_LABELS: Record<string, string> = {
   stripe: "Stripe", paypal: "PayPal", manual: "Manual",
 };
 
+const card: React.CSSProperties = {
+  background: "hsl(220,20%,9%)",
+  border: "1px solid hsl(220,15%,16%)",
+  borderRadius: "0.75rem",
+  padding: "1.25rem",
+};
+
 export default function Checkout() {
   const [, navigate] = useLocation();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
   const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const redirectFormRef = useRef<HTMLFormElement | null>(null);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -75,17 +84,15 @@ export default function Checkout() {
 
   const subtotal = getCartTotal();
   const taxAmount = taxEnabled ? subtotal * taxRate : 0;
-  const total = subtotal + taxAmount;
+  const total = subtotal + taxAmount - couponDiscount;
   const currency = siteSettings?.default_currency ?? "INR";
 
-  // Auto-select first gateway
   useEffect(() => {
     if (gateways.length > 0 && !selectedGatewayId) {
       setSelectedGatewayId(gateways[0].id);
     }
   }, [gateways, selectedGatewayId]);
 
-  // Load Razorpay SDK
   useEffect(() => {
     const hasRazorpay = gateways.some(g => g.type === "razorpay");
     if (!hasRazorpay) return;
@@ -97,6 +104,37 @@ export default function Checkout() {
   }, [gateways]);
 
   const selectedGateway = gateways.find(g => g.id === selectedGatewayId) || gateways[0];
+
+  async function applyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await fetch(`/api/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), amount: subtotal }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.valid) {
+        setCouponError(data.message || "Invalid or expired coupon");
+      } else {
+        setCouponApplied(true);
+        setCouponDiscount(data.discountAmount ?? 0);
+      }
+    } catch {
+      setCouponError("Could not apply coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setCouponApplied(false);
+    setCouponDiscount(0);
+    setCouponCode("");
+    setCouponError("");
+  }
 
   function submitRedirectForm(formUrl: string, method: string, fields: Record<string, string>) {
     const form = document.createElement("form");
@@ -116,10 +154,6 @@ export default function Checkout() {
 
   async function handlePayment() {
     setErrorMsg("");
-    if (!email || !email.includes("@")) {
-      setErrorMsg("Please enter a valid email address");
-      return;
-    }
     if (!selectedGateway) {
       setErrorMsg("No payment gateway available. Please contact support.");
       return;
@@ -136,10 +170,10 @@ export default function Checkout() {
           gatewayId: selectedGateway.id,
           amount: total,
           currency,
-          email,
-          name: name || email,
-          phone: phone || undefined,
+          email: "guest@checkout.com",
+          name: "Guest",
           productInfo,
+          couponCode: couponApplied ? couponCode : undefined,
         }),
       });
 
@@ -151,7 +185,6 @@ export default function Checkout() {
       const result = await initiateRes.json();
 
       if (result.type === "modal" && result.gatewayType === "razorpay") {
-        // Razorpay modal flow
         const rzp = new window.Razorpay({
           key: result.keyId,
           amount: result.amount,
@@ -159,7 +192,7 @@ export default function Checkout() {
           name: result.name || "Nexcoin",
           description: result.description || "Order Payment",
           order_id: result.orderId,
-          prefill: { email, contact: phone || "", name: name || "" },
+          prefill: {},
           handler: async (response: RazorpayResponse) => {
             try {
               const verifyRes = await fetch("/api/payment/verify", {
@@ -195,12 +228,10 @@ export default function Checkout() {
         rzp.open();
 
       } else if (result.type === "redirect_url") {
-        // Direct URL redirect (Cashfree, Instamojo, PhonePe, etc.)
         clearCart();
         window.location.href = result.url;
 
       } else if (result.type === "redirect") {
-        // Form POST redirect (PayU, CCAvenue, Paytm, EasyBuzz, BharatPe, etc.)
         clearCart();
         submitRedirectForm(result.formUrl, result.method || "POST", result.fields || {});
 
@@ -216,7 +247,7 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div style={{ maxWidth: "600px", margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center" }}>
+      <div style={{ maxWidth: "480px", margin: "0 auto", padding: "4rem 1.5rem", textAlign: "center" }}>
         <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "1rem" }}>
           Your Cart is Empty
         </h2>
@@ -224,7 +255,7 @@ export default function Checkout() {
           Add items to your cart before proceeding to checkout.
         </p>
         <Link href="/products" className="btn-primary" data-testid="link-browse-products">
-          <ArrowLeft size={16} /> Continue Shopping
+          <ArrowLeft size={16} /> Browse Products
         </Link>
       </div>
     );
@@ -232,24 +263,20 @@ export default function Checkout() {
 
   if (orderPlaced) {
     return (
-      <div style={{ maxWidth: "520px", margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center" }}>
+      <div style={{ maxWidth: "480px", margin: "0 auto", padding: "4rem 1.5rem", textAlign: "center" }}>
         <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "hsla(142,70%,55%,0.15)", border: "2px solid hsl(142,70%,55%)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
           <CheckCircle size={40} style={{ color: "hsl(142,70%,55%)" }} />
         </div>
         <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "1rem" }}>
           Order Placed Successfully!
         </h2>
-        <p style={{ color: "hsl(220,10%,55%)", marginBottom: "0.5rem", fontSize: "0.9rem" }}>
-          Confirmation sent to:
-        </p>
-        <p style={{ color: "hsl(210,40%,88%)", marginBottom: "2rem", fontWeight: 600 }}>{email}</p>
         <div style={{ background: "hsla(258,90%,66%,0.1)", border: "1px solid hsla(258,90%,66%,0.2)", borderRadius: "0.75rem", padding: "1.25rem", marginBottom: "2rem" }}>
           <p className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(258,90%,72%)" }}>
             {currencySymbol}{total.toFixed(2)}
           </p>
         </div>
         <p style={{ color: "hsl(220,10%,55%)", marginBottom: "2rem", fontSize: "0.85rem", lineHeight: 1.6 }}>
-          Your digital products will be delivered to your email within minutes. Check your spam folder if needed.
+          Your digital products will be delivered instantly. Check your account orders for details.
         </p>
         <Link href="/products" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="link-shop-again">
           Continue Shopping <ArrowRight size={16} />
@@ -261,214 +288,222 @@ export default function Checkout() {
   const noGateways = gateways.length === 0;
 
   return (
-    <div style={{ maxWidth: "940px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
-      <Link href="/cart" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,60%)", marginBottom: "1.5rem", textDecoration: "none", fontSize: "0.9rem" }} data-testid="link-back-to-cart">
-        <ArrowLeft size={16} /> Back to Cart
+    <div style={{ maxWidth: "520px", margin: "0 auto", padding: "1.5rem 1rem 3rem" }}>
+      {/* Back */}
+      <Link href="/cart" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,55%)", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
+        <ArrowLeft size={15} /> Back to Cart
       </Link>
 
-      <h1 className="font-orbitron" style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "2rem" }}>
+      <h1 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "1.5rem" }}>
         Checkout
       </h1>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", alignItems: "start" }}>
-        {/* Left: Form */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 
-          {/* Contact info */}
-          <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", padding: "1.25rem" }}>
-            <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "1rem" }}>Contact Information</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your Name"
-                  data-testid="input-name"
-                  style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "0.5rem", border: "1px solid hsl(220,15%,18%)", background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "0.875rem", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  data-testid="input-email"
-                  style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "0.5rem", border: "1px solid hsl(220,15%,18%)", background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "0.875rem", outline: "none", boxSizing: "border-box" }}
-                />
-                <p style={{ fontSize: "0.7rem", color: "hsl(220,10%,45%)", marginTop: "0.25rem" }}>Order confirmation will be sent here</p>
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
-                  Phone (optional)
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 9999999999"
-                  data-testid="input-phone"
-                  style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "0.5rem", border: "1px solid hsl(220,15%,18%)", background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "0.875rem", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Payment method selector */}
-          {!noGateways && (
-            <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", padding: "1.25rem" }}>
-              <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "1rem" }}>
-                Payment Method
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {gateways.map((gw) => {
-                  const color = GATEWAY_COLORS[gw.type] || "#6B7280";
-                  const isSelected = selectedGatewayId === gw.id;
-                  return (
-                    <button
-                      key={gw.id}
-                      type="button"
-                      onClick={() => setSelectedGatewayId(gw.id)}
-                      data-testid={`select-gateway-${gw.type}`}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                        padding: "0.75rem 1rem",
-                        borderRadius: "0.5rem",
-                        border: `1px solid ${isSelected ? color : "hsl(220,15%,18%)"}`,
-                        background: isSelected ? `${color}18` : "hsl(220,20%,11%)",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: `${color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <CreditCard size={16} style={{ color }} />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: isSelected ? "hsl(210,40%,95%)" : "hsl(210,40%,80%)" }}>
-                          {gw.name}
-                        </div>
-                        <div style={{ fontSize: "11px", color: "hsl(220,10%,45%)" }}>
-                          {GATEWAY_LABELS[gw.type] || gw.type}
-                          {gw.mode === "test" && <span style={{ marginLeft: "6px", color: "hsl(40,96%,55%)" }}>TEST MODE</span>}
-                        </div>
-                      </div>
-                      <div style={{ width: "16px", height: "16px", borderRadius: "50%", border: `2px solid ${isSelected ? color : "hsl(220,15%,30%)"}`, background: isSelected ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        {isSelected && <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "white" }} />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {errorMsg && (
-            <div style={{ background: "hsla(0,72%,55%,0.1)", border: "1px solid hsla(0,72%,55%,0.3)", borderRadius: "0.75rem", padding: "1rem", display: "flex", gap: "0.75rem" }}>
-              <AlertCircle size={18} style={{ color: "hsl(0,72%,55%)", flexShrink: 0 }} />
-              <div style={{ fontSize: "0.8rem", color: "hsl(0,72%,60%)" }}>{errorMsg}</div>
-            </div>
-          )}
-
-          {/* Info */}
-          <div style={{ background: "hsla(142,70%,55%,0.1)", border: "1px solid hsla(142,70%,55%,0.3)", borderRadius: "0.75rem", padding: "1rem", display: "flex", gap: "0.75rem" }}>
-            <AlertCircle size={18} style={{ color: "hsl(142,70%,55%)", flexShrink: 0 }} />
-            <div style={{ fontSize: "0.8rem", color: "hsl(142,70%,60%)" }}>
-              <strong>Instant Delivery:</strong> Your digital products will be sent to your email immediately after payment.
-            </div>
-          </div>
-
-          {/* Pay button */}
-          <button
-            type="button"
-            disabled={isProcessing || noGateways}
-            onClick={handlePayment}
-            className="btn-primary"
-            style={{
-              width: "100%",
-              opacity: isProcessing || noGateways ? 0.7 : 1,
-              cursor: isProcessing || noGateways ? "not-allowed" : "pointer",
-              justifyContent: "center",
-            }}
-            data-testid="button-place-order"
-          >
-            {noGateways
-              ? "Payment Not Configured"
-              : isProcessing
-              ? "Processing..."
-              : <>Complete Order — {currencySymbol}{total.toFixed(2)} <ArrowRight size={16} /></>}
-          </button>
-
-          {selectedGateway && (
-            <p style={{ textAlign: "center", fontSize: "11px", color: "hsl(220,10%,40%)" }}>
-              Secured by {GATEWAY_LABELS[selectedGateway.type] || selectedGateway.type}
-            </p>
-          )}
-        </div>
-
-        {/* Right: Order Summary */}
-        <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", padding: "1.5rem", position: "sticky", top: "1rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "1.25rem" }}>
+        {/* ── Order Summary ── */}
+        <div style={card}>
+          <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(210,40%,85%)", marginBottom: "1rem" }}>
             Order Summary
-          </h2>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.25rem", maxHeight: "300px", overflowY: "auto", paddingRight: "0.25rem" }}>
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1rem" }}>
             {items.map((item) => (
-              <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", paddingBottom: "0.75rem", borderBottom: "1px solid hsl(220,15%,16%)" }}>
-                <div>
-                  <div style={{ color: "hsl(210,40%,92%)", fontWeight: 600 }}>{item.productTitle}</div>
-                  <div style={{ color: "hsl(220,10%,50%)", fontSize: "0.75rem", marginTop: "0.2rem" }}>
+              <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,92%)" }}>{item.productTitle}</div>
+                  <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)", marginTop: "1px" }}>
                     {item.packageName} × {item.quantity}
                   </div>
                 </div>
-                <div style={{ color: "hsl(210,40%,88%)", fontWeight: 600 }}>
+                <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(210,40%,88%)", whiteSpace: "nowrap" }}>
                   {currencySymbol}{(item.price * item.quantity).toFixed(2)}
                 </div>
               </div>
             ))}
           </div>
 
-          <hr style={{ border: "none", borderTop: "1px solid hsl(220,15%,16%)", margin: "1rem 0" }} />
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span style={{ color: "hsl(220,10%,55%)" }}>Subtotal</span>
-              <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
+          <div style={{ borderTop: "1px solid hsl(220,15%,16%)", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+              <span style={{ color: "hsl(220,10%,52%)" }}>Subtotal</span>
+              <span style={{ color: "hsl(210,40%,85%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span style={{ color: "hsl(220,10%,55%)" }}>Processing Fee</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+              <span style={{ color: "hsl(220,10%,52%)" }}>Processing Fee</span>
               <span style={{ color: "hsl(145,70%,55%)" }}>Free</span>
             </div>
             {taxEnabled && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-                <span style={{ color: "hsl(220,10%,55%)" }}>
-                  {taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)
-                </span>
-                <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{taxAmount.toFixed(2)}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                <span style={{ color: "hsl(220,10%,52%)" }}>{taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 1)}%)</span>
+                <span style={{ color: "hsl(210,40%,85%)" }}>{currencySymbol}{taxAmount.toFixed(2)}</span>
               </div>
             )}
-          </div>
-
-          <hr style={{ border: "none", borderTop: "1px solid hsl(220,15%,16%)", margin: "1rem 0" }} />
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "hsl(210,40%,92%)" }}>Total</span>
-            <span className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(258,90%,72%)" }} data-testid="text-checkout-total">
-              {currencySymbol}{total.toFixed(2)}
-            </span>
+            {couponApplied && couponDiscount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                <span style={{ color: "hsl(142,70%,55%)" }}>Coupon Discount</span>
+                <span style={{ color: "hsl(142,70%,55%)" }}>-{currencySymbol}{couponDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            <div style={{ borderTop: "1px solid hsl(220,15%,16%)", paddingTop: "0.65rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)" }}>Total</span>
+              <span className="font-orbitron" style={{ fontSize: "1.2rem", fontWeight: 800, color: "hsl(258,90%,72%)" }} data-testid="text-checkout-total">
+                {currencySymbol}{Math.max(0, total).toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* ── Coupon ── */}
+        <div style={card}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+            <Tag size={14} style={{ color: "hsl(258,90%,68%)" }} />
+            <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(210,40%,85%)" }}>Coupon Code</span>
+          </div>
+          {couponApplied ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsla(142,70%,55%,0.1)", border: "1px solid hsla(142,70%,55%,0.25)", borderRadius: "0.5rem", padding: "0.65rem 0.75rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Tag size={13} style={{ color: "hsl(142,70%,55%)" }} />
+                <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(142,70%,60%)" }}>{couponCode.toUpperCase()}</span>
+                <span style={{ fontSize: "0.75rem", color: "hsl(142,70%,50%)" }}>(-{currencySymbol}{couponDiscount.toFixed(2)})</span>
+              </div>
+              <button onClick={removeCoupon} data-testid="button-remove-coupon" style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(142,70%,50%)", display: "flex", alignItems: "center" }}>
+                <X size={15} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => { setCouponCode(e.target.value); setCouponError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                placeholder="Enter coupon code"
+                data-testid="input-coupon"
+                style={{ flex: 1, padding: "0.6rem 0.75rem", borderRadius: "0.5rem", border: `1px solid ${couponError ? "hsla(0,72%,55%,0.5)" : "hsl(220,15%,18%)"}`, background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "0.875rem", outline: "none" }}
+              />
+              <button
+                onClick={applyCoupon}
+                disabled={couponLoading || !couponCode.trim()}
+                data-testid="button-apply-coupon"
+                style={{ padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(258,90%,58%)", color: "#fff", border: "none", fontWeight: 600, fontSize: "0.8rem", cursor: couponLoading || !couponCode.trim() ? "not-allowed" : "pointer", opacity: couponLoading || !couponCode.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+              >
+                {couponLoading ? "..." : "Apply"}
+              </button>
+            </div>
+          )}
+          {couponError && (
+            <p style={{ fontSize: "0.75rem", color: "hsl(0,72%,60%)", marginTop: "0.4rem" }}>{couponError}</p>
+          )}
+        </div>
+
+        {/* ── Payment Method ── */}
+        {!noGateways && (
+          <div style={card}>
+            <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(210,40%,85%)", marginBottom: "0.75rem" }}>
+              Payment Method
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {gateways.map((gw) => {
+                const color = GATEWAY_COLORS[gw.type] || "#6B7280";
+                const isSelected = selectedGatewayId === gw.id;
+                return (
+                  <button
+                    key={gw.id}
+                    type="button"
+                    onClick={() => setSelectedGatewayId(gw.id)}
+                    data-testid={`select-gateway-${gw.type}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "0.5rem",
+                      border: `1px solid ${isSelected ? color : "hsl(220,15%,18%)"}`,
+                      background: isSelected ? `${color}15` : "hsl(220,20%,11%)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      width: "100%",
+                    }}
+                  >
+                    <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: `${color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <CreditCard size={14} style={{ color }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 600, color: isSelected ? "hsl(210,40%,95%)" : "hsl(210,40%,78%)" }}>
+                        {gw.name}
+                      </div>
+                      <div style={{ fontSize: "0.7rem", color: "hsl(220,10%,45%)" }}>
+                        {GATEWAY_LABELS[gw.type] || gw.type}
+                        {gw.mode === "test" && <span style={{ marginLeft: "6px", color: "hsl(40,96%,55%)" }}>TEST MODE</span>}
+                      </div>
+                    </div>
+                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", border: `2px solid ${isSelected ? color : "hsl(220,15%,30%)"}`, background: isSelected ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {isSelected && <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "white" }} />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Error ── */}
+        {errorMsg && (
+          <div style={{ background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.25)", borderRadius: "0.75rem", padding: "0.85rem 1rem", display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
+            <AlertCircle size={16} style={{ color: "hsl(0,72%,58%)", flexShrink: 0, marginTop: "1px" }} />
+            <div style={{ fontSize: "0.8rem", color: "hsl(0,72%,62%)" }}>{errorMsg}</div>
+          </div>
+        )}
+
+        {/* ── Buy Now ── */}
+        <button
+          type="button"
+          disabled={isProcessing || noGateways}
+          onClick={handlePayment}
+          className="btn-primary"
+          style={{
+            width: "100%",
+            justifyContent: "center",
+            padding: "0.9rem 1.5rem",
+            fontSize: "1rem",
+            fontWeight: 700,
+            opacity: isProcessing || noGateways ? 0.7 : 1,
+            cursor: isProcessing || noGateways ? "not-allowed" : "pointer",
+          }}
+          data-testid="button-place-order"
+        >
+          {noGateways
+            ? "Payment Not Configured"
+            : isProcessing
+            ? "Processing..."
+            : <>Buy Now — {currencySymbol}{Math.max(0, total).toFixed(2)} <ArrowRight size={16} /></>}
+        </button>
+
+        {selectedGateway && (
+          <p style={{ textAlign: "center", fontSize: "0.7rem", color: "hsl(220,10%,38%)" }}>
+            Secured by {GATEWAY_LABELS[selectedGateway.type] || selectedGateway.type}
+          </p>
+        )}
+
+        {/* ── Browse More ── */}
+        <Link
+          href="/products"
+          data-testid="link-browse-more"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            padding: "0.75rem",
+            borderRadius: "0.5rem",
+            border: "1px solid hsl(220,15%,18%)",
+            color: "hsl(220,10%,55%)",
+            textDecoration: "none",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            transition: "color 0.15s, border-color 0.15s",
+          }}
+        >
+          <ArrowLeft size={14} /> Browse More Products
+        </Link>
       </div>
     </div>
   );

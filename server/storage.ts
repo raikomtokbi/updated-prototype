@@ -138,6 +138,7 @@ export interface IStorage {
   createNotification(data: Partial<Notification>): Promise<Notification>;
   markNotificationRead(id: string): Promise<void>;
   markAllNotificationsRead(): Promise<void>;
+  clearAllNotifications(): Promise<void>;
   getUnreadNotificationCount(): Promise<number>;
 
   // Site Settings
@@ -549,6 +550,9 @@ export class DatabaseStorage implements IStorage {
   }
   async markAllNotificationsRead() {
     await db.update(notifications).set({ isRead: true }).where(eq(notifications.isRead, false));
+  }
+  async clearAllNotifications() {
+    await db.delete(notifications);
   }
   async getUnreadNotificationCount() {
     const [r] = await db.select({ count: count() }).from(notifications).where(eq(notifications.isRead, false));

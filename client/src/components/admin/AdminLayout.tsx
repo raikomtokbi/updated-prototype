@@ -32,6 +32,7 @@ import {
   Menu,
   Mail,
   X,
+  Trash2,
 } from "lucide-react";
 
 import { useAuthStore } from "@/lib/store/authstore";
@@ -334,6 +335,14 @@ function NotificationBell() {
     },
   });
 
+  const clearAll = useMutation({
+    mutationFn: () => adminApi.delete("/notifications/clear-all"),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/notifications/unread-count"] });
+    },
+  });
+
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
@@ -523,8 +532,33 @@ function NotificationBell() {
             )}
           </div>
 
-          <div style={{ padding: "10px 16px", borderTop: "1px solid hsl(220, 15%, 14%)", textAlign: "center" }}>
-            <span style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>Showing last {notifications.length} notifications</span>
+          <div style={{ padding: "10px 16px", borderTop: "1px solid hsl(220, 15%, 14%)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <span style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>
+              {notifications.length === 0 ? "No notifications" : `Showing ${notifications.length} notifications`}
+            </span>
+            {notifications.length > 0 && (
+              <button
+                data-testid="button-clear-notifications"
+                onClick={() => { if (confirm("Clear all notifications?")) clearAll.mutate(); }}
+                disabled={clearAll.isPending}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "11px",
+                  color: "hsl(0, 72%, 55%)",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  padding: "3px 8px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Trash2 size={10} />
+                {clearAll.isPending ? "Clearing..." : "Clear all"}
+              </button>
+            )}
           </div>
         </div>
       )}

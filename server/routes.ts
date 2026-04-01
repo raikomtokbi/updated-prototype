@@ -1300,6 +1300,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  app.delete("/api/admin/notifications/clear-all", requireAdmin, async (_req, res) => {
+    await storage.clearAllNotifications();
+    res.json({ ok: true });
+  });
+
   // ── Email Templates ────────────────────────────────────────────────────────
 
   // Helper: get SMTP config from plugins

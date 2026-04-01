@@ -255,6 +255,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
     e.preventDefault();
     const output = {
       ...form,
+      name: gatewayCfg.label,
       provider: gatewayCfg.label,
       config: form.config && Object.keys(form.config).length > 0
         ? JSON.stringify(form.config)
@@ -312,18 +313,6 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Display Name */}
-      <div>
-        <label style={labelStyle}>Display Name *</label>
-        <input
-          style={inputStyle}
-          required
-          value={form.name}
-          onChange={(e) => set("name", e.target.value)}
-          placeholder={`e.g. ${gatewayCfg.label} Payment`}
-        />
       </div>
 
       {/* Gateway-specific credentials */}
