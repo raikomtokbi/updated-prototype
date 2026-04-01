@@ -267,6 +267,16 @@ export default function Campaigns() {
                 placeholder="CREDITS"
               />
             </div>
+            <div>
+              <label style={labelStyle}>Button Text</label>
+              <input
+                data-testid="input-bonus-button"
+                style={inputStyle}
+                value={settings.bonus_button_text ?? ""}
+                onChange={(e) => saveAnnouncement.mutate({ bonus_button_text: e.target.value })}
+                placeholder="Claim Now"
+              />
+            </div>
           </div>
           <div>
             <label style={labelStyle}>Description</label>

@@ -548,6 +548,7 @@ function BonusBanner() {
   const mainTitle = siteSettings.bonus_main_title || "GET";
   const mainTitleSuffix = siteSettings.bonus_main_suffix || "CREDITS";
   const description = siteSettings.bonus_description || "Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.";
+  const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
   return (
     <section style={{ padding: "0 1.5rem 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
@@ -639,7 +640,7 @@ function BonusBanner() {
             onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 28px rgba(124,58,237,0.65)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 16px rgba(124,58,237,0.4)"; }}
           >
-            Claim Now <ArrowRight size={14} />
+            {buttonText} <ArrowRight size={14} />
           </Link>
         </div>
 
