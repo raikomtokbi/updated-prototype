@@ -33,6 +33,8 @@ const SERVICES: ServiceDef[] = [
       { key: "SMTP_PORT", label: "SMTP Port", placeholder: "587" },
       { key: "SMTP_USER", label: "SMTP Username", placeholder: "user@example.com" },
       { key: "SMTP_PASS", label: "SMTP Password", placeholder: "••••••••" },
+      { key: "SMTP_FROM_EMAIL", label: "From Email Address", placeholder: "noreply@example.com" },
+      { key: "SMTP_FROM_NAME", label: "From Name", placeholder: "Nexcoin Support" },
     ],
   },
   {

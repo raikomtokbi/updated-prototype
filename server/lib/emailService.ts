@@ -77,7 +77,8 @@ interface SmtpConfig {
   SMTP_PORT: string;
   SMTP_USER: string;
   SMTP_PASS: string;
-  SMTP_FROM?: string;
+  SMTP_FROM_EMAIL?: string;
+  SMTP_FROM_NAME?: string;
 }
 
 function createTransporter(config: SmtpConfig) {
@@ -118,9 +119,10 @@ export async function sendTemplatedEmail(opts: SendEmailOptions): Promise<{ ok: 
     const transporter = createTransporter(smtpConfig);
     const subject = processTemplate(template.subject, vars);
     const html = buildEmailHtml(template, vars, siteName);
-    const from = smtpConfig.SMTP_FROM || smtpConfig.SMTP_USER;
+    const fromEmail = smtpConfig.SMTP_FROM_EMAIL || smtpConfig.SMTP_USER;
+    const fromName = smtpConfig.SMTP_FROM_NAME || siteName;
 
-    await transporter.sendMail({ from: `${siteName} <${from}>`, to, subject, html });
+    await transporter.sendMail({ from: `${fromName} <${fromEmail}>`, to, subject, html });
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
