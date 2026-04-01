@@ -88,11 +88,30 @@ export default function Checkout() {
         prefill: {
           email,
         },
-        handler: (response: RazorpayResponse) => {
-          // Payment successful
-          setOrderPlaced(true);
-          clearCart();
-          setIsProcessing(false);
+        handler: async (response: RazorpayResponse) => {
+          try {
+            // Verify payment on backend
+            const verifyRes = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              // Payment verified successfully
+              setOrderPlaced(true);
+              clearCart();
+            } else {
+              setErrorMsg("Payment verification failed. Please contact support.");
+            }
+          } catch (err: any) {
+            console.error("Payment verification error:", err);
+            setErrorMsg("Payment verification error. Please contact support.");
+          } finally {
+            setIsProcessing(false);
+          }
         },
         modal: {
           ondismiss: () => {

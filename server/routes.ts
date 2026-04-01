@@ -3,7 +3,7 @@ import express from "express";
 import type { Server } from "http";
 import path from "path";
 import fs from "fs";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes, createHmac } from "crypto";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import AdmZip from "adm-zip";
@@ -1443,6 +1443,35 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (error: any) {
       console.error("Razorpay order creation error:", error);
       res.status(500).json({ error: error.message || "Failed to create order" });
+    }
+  });
+
+  app.post("/api/payment/verify", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({ success: false, error: "Missing payment details" });
+      }
+
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (!keySecret) {
+        return res.status(500).json({ success: false, error: "Payment verification not configured" });
+      }
+
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = createHmac("sha256", keySecret)
+        .update(body)
+        .digest("hex");
+
+      if (expectedSignature === razorpay_signature) {
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ success: false, error: "Payment verification failed" });
+      }
+    } catch (error: any) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ success: false, error: error.message || "Verification failed" });
     }
   });
 
