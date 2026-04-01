@@ -266,63 +266,7 @@ function HeroSlider() {
         </div>
       </div>
 
-      {/* Slider controls */}
-      <button
-        onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
-        data-testid="button-slide-prev"
-        style={{
-          position: "absolute",
-          left: "1rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid rgba(124,58,237,0.3)",
-          color: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(4px)",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronLeft size={18} />
-      </button>
-      <button
-        onClick={() => goTo((current + 1) % SLIDES.length)}
-        data-testid="button-slide-next"
-        style={{
-          position: "absolute",
-          right: "1rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid rgba(124,58,237,0.3)",
-          color: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(4px)",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronRight size={18} />
-      </button>
-
-      {/* Dot indicators */}
+      {/* Dot indicators + nav controls in one row at the bottom */}
       <div
         style={{
           position: "absolute",
@@ -331,9 +275,36 @@ function HeroSlider() {
           transform: "translateX(-50%)",
           zIndex: 10,
           display: "flex",
+          alignItems: "center",
           gap: "0.5rem",
         }}
       >
+        {/* Prev button */}
+        <button
+          onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
+          data-testid="button-slide-prev"
+          style={{
+            width: "30px",
+            height: "30px",
+            borderRadius: "50%",
+            background: "rgba(124,58,237,0.15)",
+            border: "1px solid rgba(124,58,237,0.3)",
+            color: "white",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(4px)",
+            transition: "background 0.2s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+        >
+          <ChevronLeft size={15} />
+        </button>
+
+        {/* Dots */}
         {SLIDES.map((_, i) => (
           <button
             key={i}
@@ -351,6 +322,31 @@ function HeroSlider() {
             }}
           />
         ))}
+
+        {/* Next button */}
+        <button
+          onClick={() => goTo((current + 1) % SLIDES.length)}
+          data-testid="button-slide-next"
+          style={{
+            width: "30px",
+            height: "30px",
+            borderRadius: "50%",
+            background: "rgba(124,58,237,0.15)",
+            border: "1px solid rgba(124,58,237,0.3)",
+            color: "white",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(4px)",
+            transition: "background 0.2s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+        >
+          <ChevronRight size={15} />
+        </button>
       </div>
     </section>
   );
