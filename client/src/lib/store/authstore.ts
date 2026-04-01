@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useCartStore } from "./cartStore";
 
 export type UserRole = "super_admin" | "admin" | "staff" | "user";
 
@@ -38,8 +39,12 @@ export const useAuthStore = create<AuthState>()(
       },
       setUser: (user, token) =>
         set({ user, token: token ?? null, isAuthenticated: true }),
-      logout: () =>
-        set({ user: null, token: null, isAuthenticated: false }),
+      logout: () => {
+        // Clear cart when logging out
+        const cartStore = useCartStore.getState();
+        cartStore.clearCart();
+        set({ user: null, token: null, isAuthenticated: false });
+      },
     }),
     {
       name: "nexcoin-auth",

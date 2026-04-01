@@ -281,7 +281,7 @@ function GameDetailView({ game }: { game: Game }) {
   function handleBuyNow() {
     if (!validate() || !selectedService) return;
     addItem(buildCartPayload());
-    navigate("/cart");
+    navigate("/checkout");
   }
 
   const infoItems = [
@@ -693,7 +693,7 @@ function ProductDetailView({ product }: { product: Product }) {
       userId: userId.trim(),
       quantity,
     });
-    navigate("/cart");
+    navigate("/checkout");
   }
 
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category;
