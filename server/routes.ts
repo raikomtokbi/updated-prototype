@@ -4,6 +4,7 @@ import type { Server } from "http";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes } from "crypto";
+import bcrypt from "bcrypt";
 import multer from "multer";
 import AdmZip from "adm-zip";
 import { storage } from "./storage";
@@ -314,7 +315,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!user) user = await storage.getUserByEmail(username);
     if (!user) user = await storage.getUser(username);
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      recordFailedLogin(username);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Verify password with bcrypt
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
       recordFailedLogin(username);
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -472,8 +480,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(400).json({ message: "Reset token has expired. Please request a new OTP." });
     }
 
-    // Update password (stored plaintext to match existing app auth)
-    await storage.updateUser(tokenRow.userId, { password: new_password });
+    // Hash password and update
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await storage.updateUser(tokenRow.userId, { password: hashedPassword });
     await storage.deletePasswordResetTokensByUserId(tokenRow.userId);
     resetRequestTimes.delete(tokenRow.userId);
 
@@ -489,6 +498,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password required" });
     }
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
     const existing = await storage.getUserByUsername(username);
     if (existing) {
       return res.status(409).json({ message: "Username already taken" });
@@ -498,7 +510,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const approvalSetting = await getSetting("account_approval", "auto");
       const isActive = approvalSetting !== "manual";
 
-      const user = await storage.createUser({ username, email, password, fullName, role: "user", isActive });
+      // Hash password with bcrypt
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await storage.createUser({ username, email, password: hashedPassword, fullName, role: "user", isActive });
       const { password: _pw, ...safeUser } = user;
 
       // Create admin notification only if notif_new_user is enabled
@@ -579,13 +593,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: "Current and new password required" });
     }
-    if (req.currentUser.password !== currentPassword) {
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "New password must be at least 8 characters" });
+    }
+
+    // Verify current password with bcrypt
+    const passwordMatch = await bcrypt.compare(currentPassword, req.currentUser.password);
+    if (!passwordMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: "New password must be at least 6 characters" });
-    }
-    await storage.updateUser(req.currentUser.id, { password: newPassword });
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await storage.updateUser(req.currentUser.id, { password: hashedPassword });
     res.json({ ok: true });
   });
 
