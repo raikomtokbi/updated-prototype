@@ -300,7 +300,7 @@ function GameDetailView({ game }: { game: Game }) {
       <button
         className="btn-secondary"
         onClick={() => navigate("/products")}
-        style={{ marginBottom: "1.25rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
+        style={{ marginBottom: "1.25rem", marginTop: "0.5rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
         data-testid="button-back"
       >
         <ArrowLeft size={15} /> Back
@@ -713,7 +713,7 @@ function ProductDetailView({ product }: { product: Product }) {
       <button
         className="btn-secondary"
         onClick={() => navigate("/products")}
-        style={{ marginBottom: "1.25rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
+        style={{ marginBottom: "1.25rem", marginTop: "0.5rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
         data-testid="button-back"
       >
         <ArrowLeft size={15} /> Back
