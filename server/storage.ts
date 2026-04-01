@@ -430,11 +430,22 @@ export class DatabaseStorage implements IStorage {
   }
   async createHeroSlider(data: Partial<HeroSlider>) {
     const id = randomUUID();
-    await db.insert(heroSliders).values({ ...(data as any), id });
+    const cleanData = {
+      ...(data as any),
+      linkedGameId: data.linkedGameId || null,
+      linkedProductId: data.linkedProductId || null,
+      id,
+    };
+    await db.insert(heroSliders).values(cleanData);
     return fetchAfter<HeroSlider>(heroSliders, id, heroSliders.id);
   }
   async updateHeroSlider(id: string, data: Partial<HeroSlider>) {
-    await db.update(heroSliders).set(data as any).where(eq(heroSliders.id, id));
+    const cleanData = {
+      ...data,
+      linkedGameId: data.linkedGameId || null,
+      linkedProductId: data.linkedProductId || null,
+    };
+    await db.update(heroSliders).set(cleanData as any).where(eq(heroSliders.id, id));
     return fetchAfter<HeroSlider>(heroSliders, id, heroSliders.id);
   }
   async deleteHeroSlider(id: string) {
