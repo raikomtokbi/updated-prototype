@@ -785,9 +785,6 @@ export default function ControlPanel() {
         ))}
       </div>
 
-      {/* ── Additional Fees ─────────────────────────────────────────────────────── */}
-      <FeesManager />
-
       {/* ── Security ────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
@@ -869,60 +866,9 @@ export default function ControlPanel() {
         </div>
       </div>
 
-      {/* ── Tax & Invoicing ─────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <DollarSign size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Tax & Invoicing</span>
-        </div>
-        <SettingRow label="Enable Tax Calculation" description="Automatically apply tax to all orders">
-          <Toggle checked={bool("tax_enabled")} onChange={() => toggle("tax_enabled")} />
-        </SettingRow>
-        {bool("tax_enabled") && (
-          <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
-            <div>
-              <label style={labelStyle}>Tax Name</label>
-              <input
-                data-testid="input-tax-name"
-                style={inputStyle}
-                value={local.tax_name ?? "VAT"}
-                onChange={(e) => set("tax_name", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Tax Rate (%)</label>
-              <input
-                data-testid="input-tax-rate"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                style={inputStyle}
-                value={local.tax_rate ?? "0"}
-                onChange={(e) => set("tax_rate", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Invoice Prefix</label>
-              <input
-                data-testid="input-invoice-prefix"
-                style={inputStyle}
-                value={local.invoice_prefix ?? "INV"}
-                onChange={(e) => set("invoice_prefix", e.target.value)}
-              />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Invoice Footer Note</label>
-              <textarea
-                data-testid="input-invoice-footer"
-                style={{ ...inputStyle, minHeight: "72px" } as React.CSSProperties}
-                value={local.invoice_footer ?? ""}
-                onChange={(e) => set("invoice_footer", e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      {/* ── Fees & Taxes ────────────────────────────────────────────────────── */}
+      <FeesAndTaxesManager local={local} set={set} bool={bool} toggle={toggle} isMobile={isMobile} />
+
 
       {/* ── Legal & Footer ──────────────────────────────────────────────────── */}
       <div style={card}>
@@ -1083,7 +1029,7 @@ export default function ControlPanel() {
   );
 }
 
-// ─── Fees Manager Component ────────────────────────────────────────────────────
+// ─── Fees & Taxes Manager Component ────────────────────────────────────────────
 interface Fee {
   id: string;
   name: string;
@@ -1094,7 +1040,7 @@ interface Fee {
   sortOrder: number;
 }
 
-function FeesManager() {
+function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   const { data: fees = [], isLoading } = useQuery<Fee[]>({
     queryKey: ["/api/admin/fees"],
   });
@@ -1172,35 +1118,75 @@ function FeesManager() {
     fontSize: "14px",
   };
 
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "hsl(210, 40%, 85%)",
+    marginBottom: "4px",
+  };
+
   return (
     <div style={card}>
       <div style={sectionHeader}>
         <DollarSign size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-        <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Additional Fees</span>
-        <button
-          onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }}
-          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "4px", padding: "6px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
-        >
-          <Plus size={12} /> Add Fee
-        </button>
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Fees & Taxes</span>
       </div>
-      <div style={{ padding: "16px 20px" }}>
+
+      {/* Tax Settings */}
+      <SettingRow label="Enable Tax Calculation" description="Automatically apply tax to all orders">
+        <Toggle checked={bool("tax_enabled")} onChange={() => toggle("tax_enabled")} />
+      </SettingRow>
+      {bool("tax_enabled") && (
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
+          <div>
+            <label style={labelStyle}>Tax Name</label>
+            <input data-testid="input-tax-name" style={inputStyle} value={local.tax_name ?? "VAT"} onChange={(e) => set("tax_name", e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Tax Rate (%)</label>
+            <input data-testid="input-tax-rate" type="number" min="0" max="100" step="0.01" style={inputStyle} value={local.tax_rate ?? "0"} onChange={(e) => set("tax_rate", e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Invoice Prefix</label>
+            <input data-testid="input-invoice-prefix" style={inputStyle} value={local.invoice_prefix ?? "INV"} onChange={(e) => set("invoice_prefix", e.target.value)} />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={labelStyle}>Invoice Footer Note</label>
+            <textarea data-testid="input-invoice-footer" style={{ ...inputStyle, minHeight: "72px" } as React.CSSProperties} value={local.invoice_footer ?? ""} onChange={(e) => set("invoice_footer", e.target.value)} />
+          </div>
+        </div>
+      )}
+
+      {/* Additional Fees Section */}
+      <div style={{ borderTop: "1px solid hsl(220, 15%, 12%)", padding: "16px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+          <label style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Additional Charges</label>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); setShowForm(!showForm); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }}
+            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "6px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+          >
+            <Plus size={12} /> Add Fee
+          </button>
+        </div>
+
         {showForm && (
           <form onSubmit={handleSubmit} style={{ marginBottom: "16px", padding: "12px", background: "hsl(220, 15%, 12%)", borderRadius: "4px" }}>
             <div style={{ marginBottom: "10px" }}>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Fee Name</label>
+              <label style={labelStyle}>Fee Name</label>
               <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Processing Fee" style={inputStyle} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Amount</label>
+                <label style={labelStyle}>Amount</label>
                 <input type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="0.00" style={inputStyle} />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Type</label>
+                <label style={labelStyle}>Type</label>
                 <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as "fixed" | "percentage" })} style={inputStyle}>
                   <option value="fixed">Fixed Amount</option>
-                  <option value="percentage">Percentage</option>
+                  <option value="percentage">Percentage (%)</option>
                 </select>
               </div>
             </div>
@@ -1214,10 +1200,11 @@ function FeesManager() {
             </div>
           </form>
         )}
+
         {isLoading ? <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "13px" }}>Loading fees...</p> : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {fees.length === 0 ? (
-              <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "13px" }}>No fees added yet. Click "Add Fee" to create one.</p>
+              <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "12px" }}>No additional fees configured. All charges will be free.</p>
             ) : (
               fees.map((fee) => (
                 <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(220, 15%, 18%)" }}>
@@ -1229,12 +1216,14 @@ function FeesManager() {
                   </div>
                   <div style={{ display: "flex", gap: "6px" }}>
                     <button
+                      type="button"
                       onClick={() => { setEditingId(fee.id); setFormData({ name: fee.name, amount: fee.amount, type: fee.type, isActive: fee.isActive }); setShowForm(true); }}
                       style={{ padding: "4px 8px", background: "hsl(220, 15%, 18%)", color: "hsl(210, 40%, 85%)", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
                     >
                       Edit
                     </button>
                     <button
+                      type="button"
                       onClick={() => deleteFee.mutate(fee.id)}
                       style={{ padding: "4px 8px", background: "hsl(0, 100%, 50%, 0.2)", color: "hsl(0, 100%, 70%)", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
                       disabled={deleteFee.isPending}
