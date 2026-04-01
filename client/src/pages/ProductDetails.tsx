@@ -19,7 +19,7 @@ function PackageCard({
   name,
   price,
   originalPrice,
-  currency,
+  currencySymbol,
   discount,
   selected,
   onSelect,
@@ -28,13 +28,12 @@ function PackageCard({
   name: string;
   price: number;
   originalPrice?: number | null;
-  currency?: string;
+  currencySymbol: string;
   discount?: string | number | null;
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
   const hasDiscount = discount && parseFloat(String(discount)) > 0 && originalPrice && originalPrice > price;
-  const curr = getCurrencySymbol(currency ?? "USD");
 
   return (
     <button
@@ -86,14 +85,14 @@ function PackageCard({
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1px" }}>
         {hasDiscount && originalPrice && (
           <span style={{ fontSize: "10px", color: "hsl(220,10%,42%)", textDecoration: "line-through" }}>
-            {curr} {originalPrice.toFixed(2)}
+            {currencySymbol} {originalPrice.toFixed(2)}
           </span>
         )}
         <span style={{
           fontSize: "13px", fontWeight: 700,
           color: selected ? "hsl(258,80%,78%)" : "hsl(258,90%,70%)",
         }}>
-          {curr} {price.toFixed(2)}
+          {currencySymbol} {price.toFixed(2)}
         </span>
       </div>
     </button>
@@ -422,7 +421,7 @@ function GameDetailView({ game }: { game: Game }) {
                     name={svc.name}
                     price={parseFloat(String(svc.finalPrice))}
                     originalPrice={parseFloat(String(svc.price))}
-                    currency={svc.currency}
+                    currencySymbol={currencySymbol}
                     discount={svc.discountPercent}
                     selected={selectedSvc === svc.id}
                     onSelect={setSelectedSvc}
@@ -645,6 +644,11 @@ function ProductDetailView({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+  });
+  const currencySymbol = getCurrencySymbol(siteSettings?.default_currency ?? "USD");
+
   const { data: packages = [], isLoading: pkgsLoading } = useQuery<ProductPackage[]>({
     queryKey: [`/api/products/${product.id}/packages`],
     queryFn: async () => {
@@ -835,6 +839,7 @@ function ProductDetailView({ product }: { product: Product }) {
                       name={pkg.label}
                       price={price}
                       originalPrice={orig}
+                      currencySymbol={currencySymbol}
                       selected={selectedPkg === pkg.id}
                       onSelect={setSelectedPkg}
                     />
@@ -873,7 +878,7 @@ function ProductDetailView({ product }: { product: Product }) {
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginBottom: "2px" }}>Total</p>
                 <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
-                  ${totalPrice}
+                  {currencySymbol}{totalPrice}
                 </p>
               </div>
             )}
