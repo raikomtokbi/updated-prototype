@@ -1382,6 +1382,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const smtpConfig = await getSmtpConfig();
     if (!smtpConfig) return res.status(400).json({ message: "SMTP not configured. Go to API Integration and configure SMTP Email Service first." });
 
+    // Validate SMTP config has required fields
+    if (!smtpConfig.SMTP_HOST || !smtpConfig.SMTP_PORT || !smtpConfig.SMTP_USER || !smtpConfig.SMTP_PASS) {
+      return res.status(400).json({ message: "SMTP configuration incomplete. All fields are required: Host, Port, Username, Password." });
+    }
+
     const template = await getEmailTemplateWithDefault(type);
     if (!template) return res.status(404).json({ message: "Template not found" });
 
@@ -1390,6 +1395,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     siteSettings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
     const siteName = siteObj.site_name || "WebCMS";
 
+    console.log(`[EmailTest] Sending test email to ${to} using SMTP at ${smtpConfig.SMTP_HOST}:${smtpConfig.SMTP_PORT}`);
+    
     const result = await sendTemplatedEmail({
       to,
       template: template as any,
@@ -1412,7 +1419,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       smtpConfig: smtpConfig as any,
     });
 
-    if (!result.ok) return res.status(500).json({ message: result.error });
+    if (!result.ok) {
+      console.error(`[EmailTest] Failed:`, result.error);
+      return res.status(500).json({ message: result.error || "Failed to send test email. Check server logs for details." });
+    }
+    console.log(`[EmailTest] Success: Email sent to ${to}`);
     res.json({ ok: true, message: `Test email sent to ${to}` });
   });
 
