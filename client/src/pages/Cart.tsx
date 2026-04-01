@@ -4,11 +4,22 @@ import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { getCurrencySymbol } from "@/lib/currency";
 
+interface Fee {
+  id: string;
+  name: string;
+  amount: string;
+  type: "fixed" | "percentage";
+  isActive: boolean;
+}
+
 export default function Cart() {
   const [, navigate] = useLocation();
   const { items, removeItem, updateQuantity, getCartTotal, clearCart } = useCartStore();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
+  });
+  const { data: fees = [] } = useQuery<Fee[]>({
+    queryKey: ["/api/fees"],
   });
   const currencySymbol = getCurrencySymbol(siteSettings?.default_currency ?? "USD");
 
@@ -18,7 +29,17 @@ export default function Cart() {
 
   const subtotal = getCartTotal();
   const taxAmount = taxEnabled ? subtotal * taxRate : 0;
-  const total = subtotal + taxAmount;
+  
+  // Calculate fees
+  let totalFees = 0;
+  fees.forEach(fee => {
+    const feeAmount = fee.type === "percentage" 
+      ? subtotal * (parseFloat(fee.amount) / 100)
+      : parseFloat(fee.amount);
+    totalFees += feeAmount;
+  });
+  
+  const total = subtotal + taxAmount + totalFees;
 
   if (items.length === 0) {
     return (
@@ -223,10 +244,30 @@ export default function Cart() {
             <span style={{ color: "hsl(220,10%,55%)" }}>Subtotal ({items.length} {items.length === 1 ? "item" : "items"})</span>
             <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-            <span style={{ color: "hsl(220,10%,55%)" }}>Processing Fee</span>
-            <span style={{ color: "hsl(145,70%,55%)" }}>Free</span>
-          </div>
+          {fees.length > 0 && (
+            <>
+              {fees.map((fee) => {
+                const feeAmount = fee.type === "percentage"
+                  ? subtotal * (parseFloat(fee.amount) / 100)
+                  : parseFloat(fee.amount);
+                return (
+                  <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+                    <span style={{ color: "hsl(220,10%,55%)" }}>
+                      {fee.name}
+                      {fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}
+                    </span>
+                    <span style={{ color: "hsl(210,40%,88%)" }}>{currencySymbol}{feeAmount.toFixed(2)}</span>
+                  </div>
+                );
+              })}
+            </>
+          )}
+          {fees.length === 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+              <span style={{ color: "hsl(220,10%,55%)" }}>Processing Fee</span>
+              <span style={{ color: "hsl(145,70%,55%)" }}>Free</span>
+            </div>
+          )}
           {taxEnabled && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
               <span style={{ color: "hsl(220,10%,55%)" }}>

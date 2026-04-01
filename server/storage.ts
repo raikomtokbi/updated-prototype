@@ -20,10 +20,11 @@ import {
   type SiteSetting,
   type EmailTemplate,
   type PasswordResetToken,
+  type Fee, type InsertFee,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
-  notifications, siteSettings, emailTemplates, passwordResetTokens,
+  notifications, siteSettings, emailTemplates, passwordResetTokens, fees,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -146,6 +147,14 @@ export interface IStorage {
   getSiteSetting(key: string): Promise<SiteSetting | undefined>;
   upsertSiteSetting(key: string, value: string): Promise<SiteSetting>;
   upsertSiteSettings(settings: Record<string, string>): Promise<void>;
+
+  // Fees
+  getAllFees(): Promise<Fee[]>;
+  getActiveFees(): Promise<Fee[]>;
+  getFee(id: string): Promise<Fee | undefined>;
+  createFee(data: InsertFee): Promise<Fee>;
+  updateFee(id: string, data: Partial<Fee>): Promise<Fee | undefined>;
+  deleteFee(id: string): Promise<void>;
 
   // Password Reset Tokens
   createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -580,6 +589,32 @@ export class DatabaseStorage implements IStorage {
   }
   async upsertSiteSettings(settings: Record<string, string>) {
     await Promise.all(Object.entries(settings).map(([k, v]) => this.upsertSiteSetting(k, v)));
+  }
+
+  // ── Fees ────────────────────────────────────────────────────────────────────
+  async getAllFees() {
+    return db.select().from(fees).orderBy(asc(fees.sortOrder));
+  }
+  async getActiveFees() {
+    return db.select().from(fees).where(eq(fees.isActive, true)).orderBy(asc(fees.sortOrder));
+  }
+  async getFee(id: string) {
+    const [f] = await db.select().from(fees).where(eq(fees.id, id));
+    return f;
+  }
+  async createFee(data: InsertFee) {
+    const id = randomUUID();
+    await db.insert(fees).values({ ...data, id });
+    return fetchAfter<Fee>(fees, id, fees.id);
+  }
+  async updateFee(id: string, data: Partial<Fee>) {
+    const existing = await this.getFee(id);
+    if (!existing) return undefined;
+    await db.update(fees).set({ ...data, updatedAt: new Date() }).where(eq(fees.id, id));
+    return fetchAfter<Fee>(fees, id, fees.id);
+  }
+  async deleteFee(id: string) {
+    await db.delete(fees).where(eq(fees.id, id));
   }
 
   // ── Password Reset Tokens ──────────────────────────────────────────────────

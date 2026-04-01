@@ -393,6 +393,23 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// ─── Additional Fees (Processing, Shipping, etc.) ───────────────────────
+export const fees = pgTable("fees", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull().default("fixed"), // "fixed" or "percentage"
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertFeeSchema = createInsertSchema(fees).omit({ id: true, createdAt: true, updatedAt: true });
+export type Fee = typeof fees.$inferSelect;
+export type InsertFee = z.infer<typeof insertFeeSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Game = typeof games.$inferSelect;

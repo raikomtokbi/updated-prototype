@@ -26,6 +26,7 @@ import {
   processTemplate,
   DEFAULT_EMAIL_TEMPLATES,
 } from "./lib/emailService";
+import { insertFeeSchema } from "@shared/schema";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
 const uploadsDir = path.resolve(process.cwd(), "public/uploads");
@@ -147,6 +148,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const obj: Record<string, string> = {};
     settings.forEach((s) => { obj[s.key] = s.value; });
     res.json(obj);
+  });
+
+  // Get active fees (public endpoint for checkout/cart)
+  app.get("/api/fees", async (_req, res) => {
+    const fees = await storage.getActiveFees();
+    res.json(fees);
   });
 
   // ── Public product routes ──────────────────────────────────────────────────
@@ -1425,6 +1432,30 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     console.log(`[EmailTest] Success: Email sent to ${to}`);
     res.json({ ok: true, message: `Test email sent to ${to}` });
+  });
+
+  // ── Fees Management ────────────────────────────────────────────────────────
+  app.get("/api/admin/fees", requireAdmin, async (_req, res) => {
+    const allFees = await storage.getAllFees();
+    res.json(allFees);
+  });
+
+  app.post("/api/admin/fees", requireAdmin, async (req, res) => {
+    const result = insertFeeSchema.safeParse(req.body);
+    if (!result.success) return res.status(400).json({ message: "Invalid fee data" });
+    const fee = await storage.createFee(result.data);
+    res.status(201).json(fee);
+  });
+
+  app.patch("/api/admin/fees/:id", requireAdmin, async (req, res) => {
+    const fee = await storage.updateFee(req.params.id, req.body);
+    if (!fee) return res.status(404).json({ message: "Fee not found" });
+    res.json(fee);
+  });
+
+  app.delete("/api/admin/fees/:id", requireAdmin, async (req, res) => {
+    await storage.deleteFee(req.params.id);
+    res.json({ ok: true });
   });
 
   // ── Site Settings ──────────────────────────────────────────────────────────

@@ -785,6 +785,9 @@ export default function ControlPanel() {
         ))}
       </div>
 
+      {/* ── Additional Fees ─────────────────────────────────────────────────────── */}
+      <FeesManager />
+
       {/* ── Security ────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
@@ -1077,5 +1080,174 @@ export default function ControlPanel() {
         onSave={leaveAndSave}
       />
     </AdminLayout>
+  );
+}
+
+// ─── Fees Manager Component ────────────────────────────────────────────────────
+interface Fee {
+  id: string;
+  name: string;
+  description?: string;
+  amount: string;
+  type: "fixed" | "percentage";
+  isActive: boolean;
+  sortOrder: number;
+}
+
+function FeesManager() {
+  const { data: fees = [], isLoading } = useQuery<Fee[]>({
+    queryKey: ["/api/admin/fees"],
+  });
+  const queryClient = useQueryClient();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ name: "", amount: "", type: "fixed", isActive: true });
+
+  const createFee = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/admin/fees", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (!res.ok) throw new Error("Failed to create fee");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
+      setShowForm(false);
+      setFormData({ name: "", amount: "", type: "fixed", isActive: true });
+    },
+  });
+
+  const updateFee = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch(`/api/admin/fees/${editingId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (!res.ok) throw new Error("Failed to update fee");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
+      setEditingId(null);
+      setFormData({ name: "", amount: "", type: "fixed", isActive: true });
+    },
+  });
+
+  const deleteFee = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/fees/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete fee");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/fees"] });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.amount) return;
+    const data = { ...formData, amount: parseFloat(formData.amount).toString() };
+    if (editingId) updateFee.mutate(data);
+    else createFee.mutate(data);
+  };
+
+  const card: React.CSSProperties = {
+    background: "hsl(220, 20%, 9%)",
+    border: "1px solid hsl(220, 15%, 13%)",
+    borderRadius: "8px",
+    marginBottom: "16px",
+  };
+
+  const sectionHeader: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "14px 20px",
+    borderBottom: "1px solid hsl(220, 15%, 13%)",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "8px 12px",
+    background: "hsl(220, 20%, 11%)",
+    border: "1px solid hsl(220, 15%, 18%)",
+    borderRadius: "4px",
+    color: "hsl(210, 40%, 92%)",
+    fontSize: "14px",
+  };
+
+  return (
+    <div style={card}>
+      <div style={sectionHeader}>
+        <DollarSign size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Additional Fees</span>
+        <button
+          onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }}
+          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "4px", padding: "6px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+        >
+          <Plus size={12} /> Add Fee
+        </button>
+      </div>
+      <div style={{ padding: "16px 20px" }}>
+        {showForm && (
+          <form onSubmit={handleSubmit} style={{ marginBottom: "16px", padding: "12px", background: "hsl(220, 15%, 12%)", borderRadius: "4px" }}>
+            <div style={{ marginBottom: "10px" }}>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Fee Name</label>
+              <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Processing Fee" style={inputStyle} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Amount</label>
+                <input type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="0.00" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)", marginBottom: "4px" }}>Type</label>
+                <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as "fixed" | "percentage" })} style={inputStyle}>
+                  <option value="fixed">Fixed Amount</option>
+                  <option value="percentage">Percentage</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button type="submit" style={{ flex: 1, padding: "8px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }} disabled={createFee.isPending || updateFee.isPending}>
+                {editingId ? "Update" : "Add"}
+              </button>
+              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }} style={{ flex: 1, padding: "8px 12px", background: "hsl(220, 15%, 18%)", color: "hsl(210, 40%, 85%)", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+        {isLoading ? <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "13px" }}>Loading fees...</p> : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {fees.length === 0 ? (
+              <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "13px" }}>No fees added yet. Click "Add Fee" to create one.</p>
+            ) : (
+              fees.map((fee) => (
+                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(220, 15%, 18%)" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>{fee.name}</div>
+                    <div style={{ fontSize: "12px", color: "hsl(220, 10%, 50%)", marginTop: "2px" }}>
+                      {fee.type === "percentage" ? `${parseFloat(fee.amount).toFixed(2)}%` : `${parseFloat(fee.amount).toFixed(2)}`} • {fee.isActive ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      onClick={() => { setEditingId(fee.id); setFormData({ name: fee.name, amount: fee.amount, type: fee.type, isActive: fee.isActive }); setShowForm(true); }}
+                      style={{ padding: "4px 8px", background: "hsl(220, 15%, 18%)", color: "hsl(210, 40%, 85%)", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteFee.mutate(fee.id)}
+                      style={{ padding: "4px 8px", background: "hsl(0, 100%, 50%, 0.2)", color: "hsl(0, 100%, 70%)", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
+                      disabled={deleteFee.isPending}
+                    >
+                      <Trash2 size={11} style={{ display: "inline" }} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
