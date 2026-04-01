@@ -30,16 +30,29 @@ function HeroSlider() {
     staleTime: 60_000,
   });
 
-  const SLIDES = apiSliders.map((s: any) => ({
-    id: s.id,
-    bg: s.bannerUrl || heroBannerImg,
+  const defaultSlide = {
+    id: "default-phone",
+    bg: game2Img,
     badge: "FEATURED",
-    title: [s.title],
-    highlight: 0,
-    sub: s.subtitle || "",
-    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+    title: ["Welcome to", "Game Marketplace"],
+    highlight: 1,
+    sub: "Get the best deals on game top-ups, gift cards, and more.",
+    cta1: { label: "Browse Games", href: "/products" },
     cta2: { label: "View Offers", href: "/offers" },
-  }));
+  };
+
+  const SLIDES = apiSliders.length > 0 
+    ? apiSliders.map((s: any) => ({
+        id: s.id,
+        bg: s.bannerUrl || heroBannerImg,
+        badge: "FEATURED",
+        title: [s.title],
+        highlight: 0,
+        sub: s.subtitle || "",
+        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+        cta2: { label: "View Offers", href: "/offers" },
+      }))
+    : [defaultSlide];
 
   function startTimer() {
     timerRef.current = setInterval(() => {
@@ -614,31 +627,6 @@ function BonusBanner() {
           </Link>
         </div>
 
-        {/* Right image */}
-        <div
-          style={{
-            width: "300px",
-            height: "180px",
-            flexShrink: 0,
-            overflow: "hidden",
-            position: "relative",
-          }}
-          className="bonus-img"
-        >
-          <img
-            src={game2Img}
-            alt=""
-            aria-hidden
-            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(90deg, #0f0c29 0%, transparent 40%)",
-            }}
-          />
-        </div>
       </div>
     </section>
   );
