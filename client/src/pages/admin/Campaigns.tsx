@@ -159,6 +159,12 @@ export default function Campaigns() {
 
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
+  const [bonusBadgeText, setBonusBadgeText] = useState("");
+  const [bonusPercent, setBonusPercent] = useState("");
+  const [bonusMainTitle, setBonusMainTitle] = useState("");
+  const [bonusMainSuffix, setBonusMainSuffix] = useState("");
+  const [bonusButtonText, setBonusButtonText] = useState("");
+  const [bonusDescription, setBonusDescription] = useState("");
 
   const saveAnnouncement = useMutation({
     mutationFn: (data: any) => adminApi.put("/settings", data),
@@ -232,8 +238,8 @@ export default function Campaigns() {
               <input
                 data-testid="input-bonus-badge"
                 style={inputStyle}
-                value={settings.bonus_badge_text ?? ""}
-                onChange={(e) => saveAnnouncement.mutate({ bonus_badge_text: e.target.value })}
+                value={bonusBadgeText || (settings.bonus_badge_text ?? "")}
+                onChange={(e) => { setBonusBadgeText(e.target.value); saveAnnouncement.mutate({ bonus_badge_text: e.target.value }); }}
                 placeholder="WEEKEND SPECIAL"
               />
             </div>
@@ -242,8 +248,8 @@ export default function Campaigns() {
               <input
                 data-testid="input-bonus-percent"
                 style={inputStyle}
-                value={settings.bonus_percent ?? ""}
-                onChange={(e) => saveAnnouncement.mutate({ bonus_percent: e.target.value })}
+                value={bonusPercent || (settings.bonus_percent ?? "")}
+                onChange={(e) => { setBonusPercent(e.target.value); saveAnnouncement.mutate({ bonus_percent: e.target.value }); }}
                 placeholder="20%"
               />
             </div>
@@ -252,8 +258,8 @@ export default function Campaigns() {
               <input
                 data-testid="input-bonus-title"
                 style={inputStyle}
-                value={settings.bonus_main_title ?? ""}
-                onChange={(e) => saveAnnouncement.mutate({ bonus_main_title: e.target.value })}
+                value={bonusMainTitle || (settings.bonus_main_title ?? "")}
+                onChange={(e) => { setBonusMainTitle(e.target.value); saveAnnouncement.mutate({ bonus_main_title: e.target.value }); }}
                 placeholder="GET"
               />
             </div>
@@ -262,8 +268,8 @@ export default function Campaigns() {
               <input
                 data-testid="input-bonus-suffix"
                 style={inputStyle}
-                value={settings.bonus_main_suffix ?? ""}
-                onChange={(e) => saveAnnouncement.mutate({ bonus_main_suffix: e.target.value })}
+                value={bonusMainSuffix || (settings.bonus_main_suffix ?? "")}
+                onChange={(e) => { setBonusMainSuffix(e.target.value); saveAnnouncement.mutate({ bonus_main_suffix: e.target.value }); }}
                 placeholder="CREDITS"
               />
             </div>
@@ -272,8 +278,8 @@ export default function Campaigns() {
               <input
                 data-testid="input-bonus-button"
                 style={inputStyle}
-                value={settings.bonus_button_text ?? ""}
-                onChange={(e) => saveAnnouncement.mutate({ bonus_button_text: e.target.value })}
+                value={bonusButtonText || (settings.bonus_button_text ?? "")}
+                onChange={(e) => { setBonusButtonText(e.target.value); saveAnnouncement.mutate({ bonus_button_text: e.target.value }); }}
                 placeholder="Claim Now"
               />
             </div>
@@ -283,8 +289,8 @@ export default function Campaigns() {
             <textarea
               data-testid="input-bonus-desc"
               style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "60px" }}
-              value={settings.bonus_description ?? ""}
-              onChange={(e) => saveAnnouncement.mutate({ bonus_description: e.target.value })}
+              value={bonusDescription || (settings.bonus_description ?? "")}
+              onChange={(e) => { setBonusDescription(e.target.value); saveAnnouncement.mutate({ bonus_description: e.target.value }); }}
               placeholder="Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday."
             />
           </div>
