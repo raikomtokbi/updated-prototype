@@ -16,7 +16,7 @@ const bundleList = [
   "nodemailer",
   "passport",
   "passport-local",
-  "mysql2",
+  "pg",
   "zod",
   "zod-validation-error",
 ];
