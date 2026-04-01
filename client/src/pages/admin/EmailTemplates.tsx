@@ -348,7 +348,7 @@ function TemplateListItem({
 
 function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => void; activeField: string | null }) {
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState<string[]>(["User", "Site"]);
+  const [expanded, setExpanded] = useState<string[]>(ALL_VARIABLES.map((g) => g.category));
 
   function toggle(cat: string) {
     setExpanded((prev) =>
@@ -441,17 +441,17 @@ function StyleRow({ label, children }: { label: string; children: React.ReactNod
 }
 
 function ColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const isGradient = value.includes("gradient");
+  // Extract a usable hex from gradient or hex for the color swatch
+  const hexFromValue = value.match(/#([0-9a-fA-F]{3,8})/)?.[0] ?? "#7c3aed";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      {!isGradient && (
-        <input
-          type="color"
-          value={value.startsWith("#") ? value : "#7c3aed"}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 26, borderRadius: 4, border: "1px solid hsl(220,15%,18%)", background: "none", cursor: "pointer", padding: 1 }}
-        />
-      )}
+      <input
+        type="color"
+        value={hexFromValue}
+        onChange={(e) => onChange(e.target.value)}
+        title="Pick a solid color (replaces gradient)"
+        style={{ width: 28, height: 26, borderRadius: 4, border: "1px solid hsl(220,15%,18%)", background: "none", cursor: "pointer", padding: 1, flexShrink: 0 }}
+      />
       <input
         type="text"
         value={value}
@@ -1173,7 +1173,7 @@ function TemplateEditor({
       {/* Mobile preview modal */}
       {showPreviewModal && isMobile && (
         <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "hsl(220,20%,7%)", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "12px 14px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Eye size={14} color="#a78bfa" />
               <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,92%)" }}>Live Preview</span>
@@ -1182,15 +1182,7 @@ function TemplateEditor({
               <X size={18} />
             </button>
           </div>
-          <div style={{ padding: "6px 14px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", gap: 6 }}>
-            <button onClick={() => setPreviewMode("desktop")} style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600, border: "1px solid", cursor: "pointer", background: previewMode === "desktop" ? "rgba(124,58,237,0.15)" : "transparent", borderColor: previewMode === "desktop" ? "rgba(124,58,237,0.4)" : "hsl(220,15%,18%)", color: previewMode === "desktop" ? "#a78bfa" : "hsl(220,10%,45%)" }}>
-              <Monitor size={12} /> Desktop
-            </button>
-            <button onClick={() => setPreviewMode("mobile")} style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600, border: "1px solid", cursor: "pointer", background: previewMode === "mobile" ? "rgba(124,58,237,0.15)" : "transparent", borderColor: previewMode === "mobile" ? "rgba(124,58,237,0.4)" : "hsl(220,15%,18%)", color: previewMode === "mobile" ? "#a78bfa" : "hsl(220,10%,45%)" }}>
-              <Smartphone size={12} /> Mobile
-            </button>
-          </div>
-          <div style={{ flex: 1, overflow: "auto" }}>
+          <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <LivePreview html={previewHtml} previewMode={previewMode} setPreviewMode={setPreviewMode} />
           </div>
         </div>
