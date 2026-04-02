@@ -21,6 +21,7 @@ export interface SmileOnePlayerInfo {
 }
 
 export interface SmileOnePurchaseResult {
+  success: true;
   transaction_id?: string;
   status: "success" | "failed" | "pending";
   message: string;
@@ -150,17 +151,30 @@ async function smilePost<T = Record<string, unknown>>(
   return data;
 }
 
-function parseErrorMessage(data: Record<string, unknown>): string {
-  if (typeof data.msg === "string" && data.msg) return data.msg;
-  if (typeof data.message === "string" && data.message) return data.message;
-  if (typeof data.error === "string" && data.error) return data.error;
+function parseError(data: Record<string, unknown>): { message: string; code?: string | number } {
   const code = data.code ?? data.status;
-  if (code === 6001 || code === "6001") return "Invalid user ID or zone ID";
-  if (code === 6002 || code === "6002") return "Product unavailable";
-  if (code === 6003 || code === "6003") return "Insufficient balance";
-  if (code === 6004 || code === "6004") return "Duplicate order";
-  if (code === 6006 || code === "6006") return "Invalid API credentials";
-  return `API error (code: ${code ?? "unknown"})`;
+  let message: string;
+  if (typeof data.msg === "string" && data.msg) {
+    message = data.msg;
+  } else if (typeof data.message === "string" && data.message) {
+    message = data.message;
+  } else if (typeof data.error === "string" && data.error) {
+    message = data.error;
+  } else if (code === 6001 || code === "6001") {
+    message = "Invalid user ID or zone ID";
+  } else if (code === 6002 || code === "6002") {
+    message = "Product unavailable";
+  } else if (code === 6003 || code === "6003") {
+    message = "Insufficient balance";
+  } else if (code === 6004 || code === "6004") {
+    message = "Duplicate order";
+  } else if (code === 6006 || code === "6006") {
+    message = "Invalid API credentials";
+  } else {
+    message = `API error (code: ${code ?? "unknown"})`;
+  }
+  const numCode = typeof code === "string" ? Number(code) : code;
+  return { message, code: typeof numCode === "number" ? numCode : undefined };
 }
 
 function isSuccess(data: Record<string, unknown>): boolean {
@@ -192,9 +206,9 @@ export async function getProductList(
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
-      const message = parseErrorMessage(data);
+      const { message, code } = parseError(data);
       console.warn(`[SmileOne] getProductList failed for ${gameSlug}:`, message);
-      return { success: false, message };
+      return { success: false, message, code };
     }
 
     // Normalize the product list — the API returns different shapes per product
@@ -261,9 +275,9 @@ export async function validatePlayer(
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
-      const message = parseErrorMessage(data);
+      const { message, code } = parseError(data);
       console.warn(`[SmileOne] validatePlayer failed for ${gameSlug} uid=${userId}:`, message);
-      return { success: false, valid: false, message };
+      return { success: false, message, code };
     }
 
     const username =
@@ -332,9 +346,9 @@ export async function createPurchase(
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
-      const message = parseErrorMessage(data);
+      const { message, code } = parseError(data);
       console.error(`[SmileOne] createPurchase failed for ${gameSlug} product=${productId}:`, message, data);
-      return { success: false, message };
+      return { success: false, message, code };
     }
 
     const transactionId = String(
@@ -354,6 +368,7 @@ export async function createPurchase(
     );
 
     return {
+      success: true,
       transaction_id: transactionId,
       status,
       message,

@@ -1698,13 +1698,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     try {
       const result = await smileGetProductList(game, region);
-      if ("success" in result && result.success === false) {
-        return res.status(smileErrorStatus(result)).json(result);
+      // getProductList returns SmileOneProduct[] on success or SmileOneError on failure
+      if (Array.isArray(result)) {
+        return res.json({ success: true, products: result });
       }
-      return res.json({ success: true, products: result });
-    } catch (err: any) {
+      return res.status(smileErrorStatus(result)).json(result);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
       console.error("[smileone/products] unexpected error:", err);
-      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+      return res.status(500).json({ success: false, message });
     }
   });
 
@@ -1719,13 +1721,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     try {
       const result = await smileValidatePlayer(game, userInput, region);
-      if ("success" in result && result.success === false) {
-        return res.status(smileErrorStatus(result as any)).json(result);
+      // validatePlayer returns SmileOnePlayerInfo (success:true) or SmileOneError (success:false)
+      if (result.success === false) {
+        return res.status(smileErrorStatus(result)).json(result);
       }
       return res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
       console.error("[smileone/validate-player] unexpected error:", err);
-      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+      return res.status(500).json({ success: false, message });
     }
   });
 
@@ -1743,13 +1747,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     try {
       const result = await smileCreatePurchase(game, product_id, userInput, region);
-      if ("success" in result && result.success === false) {
-        return res.status(smileErrorStatus(result as any)).json(result);
+      // createPurchase returns SmileOnePurchaseResult (success:true) or SmileOneError (success:false)
+      if (result.success === false) {
+        return res.status(smileErrorStatus(result)).json(result);
       }
       return res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
       console.error("[smileone/purchase] unexpected error:", err);
-      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+      return res.status(500).json({ success: false, message });
     }
   });
 
