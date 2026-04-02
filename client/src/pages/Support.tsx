@@ -26,7 +26,6 @@ export default function Support() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("");
-  const [priority, setPriority] = useState("medium");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -41,7 +40,7 @@ export default function Support() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ subject, message, category: category || undefined, priority, userId: user?.id }),
+        body: JSON.stringify({ subject, message, category: category || undefined, userId: user?.id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to submit ticket");
@@ -49,7 +48,6 @@ export default function Support() {
       setSubject("");
       setMessage("");
       setCategory("");
-      setPriority("medium");
     } catch (err: any) {
       setError(err.message ?? "Something went wrong. Please try again.");
     } finally {
@@ -213,44 +211,25 @@ export default function Support() {
               </p>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-              <div>
-                <label htmlFor="ticket-category" style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}>
-                  Category
-                </label>
-                <select
-                  id="ticket-category"
-                  className="input-field"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <option value="">Select category…</option>
-                  <option value="Payment">Payment</option>
-                  <option value="Order">Order</option>
-                  <option value="Account">Account</option>
-                  <option value="Technical">Technical</option>
-                  <option value="Delivery">Delivery</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="ticket-priority" style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}>
-                  Priority
-                </label>
-                <select
-                  id="ticket-priority"
-                  className="input-field"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
+            <div>
+              <label htmlFor="ticket-category" style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}>
+                Category
+              </label>
+              <select
+                id="ticket-category"
+                className="input-field"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{ cursor: "pointer" }}
+              >
+                <option value="">Select category…</option>
+                <option value="Payment">Payment</option>
+                <option value="Order">Order</option>
+                <option value="Account">Account</option>
+                <option value="Technical">Technical</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             <div>

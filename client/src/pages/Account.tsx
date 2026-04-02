@@ -1088,8 +1088,8 @@ export default function Account() {
         borderRadius: "1rem", padding: "1.25rem 1.5rem",
         marginBottom: "1.5rem",
       }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-          {/* Avatar */}
+        {/* Top row: avatar + info */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
           <div style={{
             width: "58px", height: "58px", borderRadius: "50%", flexShrink: 0,
             background: "linear-gradient(135deg, hsl(258,90%,45%), hsl(196,100%,40%))",
@@ -1104,15 +1104,11 @@ export default function Account() {
               </span>
             )}
           </div>
-          {/* Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 className="font-orbitron" style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.2rem" }}
+          <div style={{ minWidth: 0 }}>
+            <h1 className="font-orbitron" style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.25rem" }}
               data-testid="text-username">
               {user.fullName || user.username}
             </h1>
-            {user.email && (
-              <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", marginBottom: "0.4rem" }}>{user.email}</p>
-            )}
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
               <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
                 {roleInfo.label}
@@ -1122,21 +1118,24 @@ export default function Account() {
               </span>
             </div>
           </div>
-          {/* Actions — always top-right, never overlapping */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", flexShrink: 0, alignItems: "flex-end" }}>
-            {isStaff() && (
-              <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.78rem", whiteSpace: "nowrap" }} data-testid="button-go-to-admin">
-                <Lock size={12} />
-                Admin Panel
-              </button>
-            )}
-            <button onClick={handleLogout} className="btn-secondary"
-              style={{ fontSize: "0.78rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)", whiteSpace: "nowrap" }}
-              data-testid="button-logout">
-              <LogOut size={12} />
-              Sign Out
+        </div>
+        {/* Bottom row: actions */}
+        <div style={{
+          borderTop: "1px solid hsl(220,15%,14%)", paddingTop: "0.85rem",
+          display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "flex-end",
+        }}>
+          {isStaff() && (
+            <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.78rem" }} data-testid="button-go-to-admin">
+              <Lock size={12} />
+              Admin Panel
             </button>
-          </div>
+          )}
+          <button onClick={handleLogout} className="btn-secondary"
+            style={{ fontSize: "0.78rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
+            data-testid="button-logout">
+            <LogOut size={12} />
+            Sign Out
+          </button>
         </div>
       </div>
 
