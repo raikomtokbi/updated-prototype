@@ -1018,14 +1018,15 @@ function TicketsTab({ user }: { user: any }) {
           {tickets.map((t: any, i: number) => (
             <div
               key={t.id}
-              onClick={() => setSelectedTicketId(t.id)}
+              onClick={() => t.status !== "closed" && setSelectedTicketId(t.id)}
               style={{
                 display: "flex", alignItems: "center", gap: "1rem",
-                padding: "1rem 1.25rem", cursor: "pointer",
+                padding: "1rem 1.25rem", cursor: t.status === "closed" ? "not-allowed" : "pointer",
                 borderBottom: i < tickets.length - 1 ? "1px solid hsl(220,15%,14%)" : "none",
                 transition: "background 0.15s",
+                opacity: t.status === "closed" ? 0.6 : 1,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220,20%,11%)")}
+              onMouseEnter={(e) => { if (t.status !== "closed") e.currentTarget.style.background = "hsl(220,20%,11%)"; }}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <div style={{ flex: 1, minWidth: 0 }}>

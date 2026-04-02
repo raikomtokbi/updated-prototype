@@ -678,6 +678,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const isOwner = ticket.userId === req.currentUser.id;
     const isAdminOrStaff = ["super_admin", "admin", "staff"].includes(req.currentUser.role);
     if (!isOwner && !isAdminOrStaff) return res.status(403).json({ message: "Forbidden" });
+    if (ticket.status === "closed" && !isAdminOrStaff) return res.status(403).json({ message: "This ticket is closed" });
     const replies = await storage.getTicketReplies(req.params.id);
     res.json({ ...ticket, replies });
   });
