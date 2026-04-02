@@ -53,15 +53,28 @@ export function useNavGuard(isDirty: boolean): NavGuard {
 
   // Intercept browser back/forward button
   useEffect(() => {
-    const handler = () => {
+    const popstateHandler = () => {
       if (!bypassRef.current && isDirtyRef.current) {
         history.forward();
         setPendingPath("__back__");
         setLeaveDialog(true);
       }
     };
-    window.addEventListener("popstate", handler);
-    return () => window.removeEventListener("popstate", handler);
+    window.addEventListener("popstate", popstateHandler);
+    return () => window.removeEventListener("popstate", popstateHandler);
+  }, []);
+
+  // Fallback for iOS swipe-back gesture which may not trigger popstate
+  useEffect(() => {
+    const pagehideHandler = (e: PageTransitionEvent) => {
+      if (!bypassRef.current && isDirtyRef.current && e.persisted === false) {
+        e.preventDefault();
+        setPendingPath("__back__");
+        setLeaveDialog(true);
+      }
+    };
+    window.addEventListener("pagehide", pagehideHandler);
+    return () => window.removeEventListener("pagehide", pagehideHandler);
   }, []);
 
   function cancelLeave() {
