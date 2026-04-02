@@ -581,7 +581,7 @@ function VouchersSection() {
   if (!isLoading && vouchers.length === 0) return null;
 
   return (
-    <section style={{ padding: "3.5rem 0", background: "#070b14" }}>
+    <section style={{ padding: "1.5rem 0", background: "#070b14" }}>
       <div style={{ maxWidth: "1320px", margin: "0 auto" }}>
         <div
           style={{
@@ -727,7 +727,7 @@ function GamesGrid() {
   if (!isLoading && games.length === 0) return null;
 
   return (
-    <section style={{ padding: "3.5rem 0 1rem", background: "#070b14" }}>
+    <section style={{ padding: "1.5rem 0 1rem", background: "#070b14" }}>
       <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 1.5rem" }}>
         {/* Header */}
         <div style={{ marginBottom: "1.5rem" }}>
@@ -737,7 +737,7 @@ function GamesGrid() {
               className="font-orbitron"
               style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
             >
-              All Games
+              Games
             </span>
           </div>
           <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
@@ -862,7 +862,7 @@ function BonusBanner() {
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
   return (
-    <section style={{ padding: "3.5rem 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
+    <section style={{ padding: "2rem 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
       <div
         style={{
           borderRadius: "16px",
