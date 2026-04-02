@@ -229,10 +229,7 @@ function MapPluginModal({
 const FIELD_OPTIONS = [
   { key: "userId", label: "User ID", hint: "Game account / player ID" },
   { key: "zoneId", label: "Zone / Server ID", hint: "Required for Mobile Legends etc." },
-  { key: "playerId", label: "Player ID", hint: "Optional player identifier" },
   { key: "email", label: "Email", hint: "Account email address" },
-  { key: "loginId", label: "Login ID", hint: "Login username or ID" },
-  { key: "characterName", label: "Character Name", hint: "In-game character name" },
 ];
 
 function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {

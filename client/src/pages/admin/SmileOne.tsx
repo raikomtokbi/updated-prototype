@@ -32,13 +32,6 @@ const REGIONS = [
   { value: "sa", label: "Saudi Arabia" },
 ];
 
-const REQUIRED_FIELD_OPTIONS = [
-  { key: "userId", label: "User ID" },
-  { key: "zoneId", label: "Zone ID" },
-  { key: "serverId", label: "Server ID" },
-  { key: "email", label: "Email" },
-];
-
 // ─── Shared Styles ───────────────────────────────────────────────────────────
 const sectionTitle: React.CSSProperties = {
   fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)",
@@ -169,112 +162,6 @@ function ConfigTab() {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ─── Game Config Tab ──────────────────────────────────────────────────────────
-function GameConfigTab() {
-  const qc = useQueryClient();
-  const { data: games = [] } = useQuery<Game[]>({
-    queryKey: ["/api/admin/games"],
-    queryFn: () => adminApi.get("/games"),
-  });
-
-  const [editing, setEditing] = useState<string | null>(null);
-  const [fields, setFields] = useState<string[]>([]);
-
-  function startEdit(game: Game) {
-    setEditing(game.id);
-    const current = (game.requiredFields ?? "userId")
-      .split(",")
-      .map((f: string) => f.trim())
-      .filter(Boolean);
-    setFields(current);
-  }
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, requiredFields }: { id: string; requiredFields: string }) =>
-      adminApi.put(`/games/${id}`, { requiredFields }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/games"] });
-      setEditing(null);
-    },
-  });
-
-  function toggleField(key: string) {
-    setFields((prev) =>
-      prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
-    );
-  }
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", marginBottom: "8px" }}>
-        Configure which input fields are required per game when a customer places a top-up order.
-      </p>
-      {games.length === 0 && (
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>No games found. Add games first via the Games section.</p>
-      )}
-      {games.map((game) => (
-        <div key={game.id} style={{ ...card, padding: "14px 16px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-            <div>
-              <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "2px" }}>{game.name}</p>
-              <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)" }}>slug: {game.slug}</p>
-            </div>
-            {editing !== game.id ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ fontSize: "11px", color: "hsl(220,10%,55%)" }}>
-                  {(game.requiredFields ?? "userId").split(",").join(" + ")}
-                </span>
-                <button
-                  data-testid={`button-edit-game-${game.id}`}
-                  style={{ ...btnPrimary, background: "hsl(220,20%,14%)", border: "1px solid hsl(220,15%,20%)", padding: "4px 12px" }}
-                  onClick={() => startEdit(game)}
-                >
-                  Edit Fields
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  {REQUIRED_FIELD_OPTIONS.map((opt) => (
-                    <label key={opt.key} style={{ display: "flex", alignItems: "center", gap: "5px", cursor: "pointer", fontSize: "12px", color: "hsl(210,40%,85%)" }}>
-                      <input
-                        data-testid={`checkbox-field-${opt.key}`}
-                        type="checkbox"
-                        checked={fields.includes(opt.key)}
-                        onChange={() => toggleField(opt.key)}
-                        style={{ accentColor: "hsl(258,90%,62%)" }}
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    data-testid={`button-cancel-edit-${game.id}`}
-                    style={{ ...btnPrimary, background: "transparent", border: "1px solid hsl(220,15%,20%)", color: "hsl(220,10%,60%)", padding: "4px 12px" }}
-                    onClick={() => setEditing(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    data-testid={`button-save-fields-${game.id}`}
-                    style={{ ...btnPrimary, padding: "4px 12px" }}
-                    onClick={() => updateMutation.mutate({ id: game.id, requiredFields: fields.join(",") })}
-                    disabled={updateMutation.isPending}
-                  >
-                    {updateMutation.isPending ? <Loader2 size={12} /> : <Save size={12} />}
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
@@ -555,7 +442,7 @@ function MappingTab() {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SmileOnePage() {
-  const [tab, setTab] = useState<"config" | "games" | "mapping">("config");
+  const [tab, setTab] = useState<"config" | "mapping">("config");
 
   return (
     <AdminLayout title="Smile.one Integration">
@@ -577,13 +464,11 @@ export default function SmileOnePage() {
         {/* Tab bar */}
         <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
           <button data-testid="tab-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
-          <button data-testid="tab-games" style={tabBtn(tab === "games")} onClick={() => setTab("games")}>Game Fields</button>
           <button data-testid="tab-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
         </div>
 
         {/* Tab content */}
         {tab === "config" && <ConfigTab />}
-        {tab === "games" && <GameConfigTab />}
         {tab === "mapping" && <MappingTab />}
       </div>
     </AdminLayout>
