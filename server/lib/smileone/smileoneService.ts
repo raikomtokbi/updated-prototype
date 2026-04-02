@@ -12,6 +12,7 @@ export interface SmileOneProduct {
 }
 
 export interface SmileOnePlayerInfo {
+  success: true;
   valid: boolean;
   username?: string;
   user_id?: string;
@@ -269,6 +270,7 @@ export async function validatePlayer(
       String(data.username ?? data.role_name ?? data.nickname ?? data.name ?? "").trim() || undefined;
 
     return {
+      success: true,
       valid: true,
       username,
       user_id: userId,

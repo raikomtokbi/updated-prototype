@@ -1684,6 +1684,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ── Smile.one API ─────────────────────────────────────────────────────────────
+  // Helper: pick HTTP status for Smile.one service errors.
+  // When the error object has a `code` field, it came from the Smile.one API
+  // (business/input error → 422). Otherwise it is a transport/upstream failure → 502.
+  function smileErrorStatus(err: { code?: string | number }): number {
+    return err.code != null ? 422 : 502;
+  }
 
   app.get("/api/smileone/products", requireUser, async (req, res) => {
     const { game, region } = req.query as Record<string, string>;
@@ -1693,7 +1699,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const result = await smileGetProductList(game, region);
       if ("success" in result && result.success === false) {
-        return res.status(502).json(result);
+        return res.status(smileErrorStatus(result)).json(result);
       }
       return res.json({ success: true, products: result });
     } catch (err: any) {
@@ -1714,7 +1720,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const result = await smileValidatePlayer(game, userInput, region);
       if ("success" in result && result.success === false) {
-        return res.status(502).json(result);
+        return res.status(smileErrorStatus(result as any)).json(result);
       }
       return res.json(result);
     } catch (err: any) {
@@ -1738,7 +1744,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const result = await smileCreatePurchase(game, product_id, userInput, region);
       if ("success" in result && result.success === false) {
-        return res.status(502).json(result);
+        return res.status(smileErrorStatus(result as any)).json(result);
       }
       return res.json(result);
     } catch (err: any) {
