@@ -642,15 +642,26 @@ export default function Games() {
 
   const addMut = useMutation({
     mutationFn: (d: any) => adminApi.post("/games", d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); setShowAdd(false); },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); 
+      qc.invalidateQueries({ queryKey: ["/api/games"] });
+      setShowAdd(false); 
+    },
   });
   const editMut = useMutation({
     mutationFn: ({ id, data }: any) => adminApi.patch(`/games/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); setEditGame(null); },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ["/api/admin/games"] }); 
+      qc.invalidateQueries({ queryKey: ["/api/games"] });
+      setEditGame(null); 
+    },
   });
   const delMut = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/games/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/games"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      qc.invalidateQueries({ queryKey: ["/api/games"] });
+    },
   });
   const trendingMut = useMutation({
     mutationFn: (id: string) => adminApi.patch(`/games/${id}/trending`, {}),
