@@ -31,6 +31,7 @@ import {
   getProductList as smileGetProductList,
   validatePlayer as smileValidatePlayer,
   createPurchase as smileCreatePurchase,
+  type SmileOneCredentials,
 } from "./lib/smileone/smileoneService";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
@@ -1792,14 +1793,42 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     return err.code != null ? 422 : 502;
   }
 
+  // Load credentials from DB, fallback to env vars if DB has nothing.
+  async function resolveSmileCredentials(): Promise<SmileOneCredentials | undefined> {
+    try {
+      const cfg = await storage.getSmileOneConfig();
+      if (cfg?.uid && cfg?.apiKey && cfg?.email) {
+        return { uid: cfg.uid, key: cfg.apiKey, email: cfg.email, defaultRegion: cfg.region ?? "global" };
+      }
+    } catch { /* fall through to env vars */ }
+    return undefined;
+  }
+
+  // Build the userInput map for a game, only including fields the game requires.
+  // Accepts a flat request-body and a comma-separated requiredFields string.
+  function buildUserInput(body: Record<string, string>, requiredFields: string): Record<string, string> {
+    const fields = requiredFields.split(",").map((f) => f.trim()).filter(Boolean);
+    const input: Record<string, string> = {};
+    for (const field of fields) {
+      // Support both camelCase and snake_case variants from request
+      const value =
+        body[field] ??
+        body[field.replace(/([A-Z])/g, "_$1").toLowerCase()] ?? // camelCase → snake_case
+        body[field.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())] ?? // snake_case → camelCase
+        "";
+      if (value) input[field] = value;
+    }
+    return input;
+  }
+
   app.get("/api/smileone/products", requireUser, async (req, res) => {
     const { game, region } = req.query as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game query parameter is required" });
     }
     try {
-      const result = await smileGetProductList(game, region);
-      // getProductList returns SmileOneProduct[] on success or SmileOneError on failure
+      const credentials = await resolveSmileCredentials();
+      const result = await smileGetProductList(game, region, credentials);
       if (Array.isArray(result)) {
         return res.json({ success: true, products: result });
       }
@@ -1812,21 +1841,31 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/smileone/validate-player", requireUser, async (req, res) => {
-    const { game, region, ...userInput } = req.body as Record<string, string>;
+    const { game, region, ...rawInput } = req.body as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game is required" });
     }
-    const userId = userInput.user_id ?? userInput.userId ?? userInput.userid ?? "";
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "user_id is required" });
-    }
     try {
-      const result = await smileValidatePlayer(game, userInput, region);
-      // validatePlayer returns SmileOnePlayerInfo (success:true) or SmileOneError (success:false)
+      // Look up the game to get its configured required fields
+      const games = await storage.getAllGames();
+      const gameRecord = games.find((g) => g.slug === game || g.id === game);
+      const requiredFields = gameRecord?.requiredFields ?? "userId";
+
+      // Build player input from only the configured fields
+      const userInput = buildUserInput(rawInput, requiredFields);
+
+      // userId is always needed for validation; check under any alias
+      const hasUserId = userInput.userId ?? userInput.user_id ?? userInput.userid;
+      if (!hasUserId) {
+        return res.status(400).json({ success: false, message: `userId is required (game requires: ${requiredFields})` });
+      }
+
+      const credentials = await resolveSmileCredentials();
+      const result = await smileValidatePlayer(game, userInput, region, credentials);
       if (result.success === false) {
         return res.status(smileErrorStatus(result)).json(result);
       }
-      return res.json(result);
+      return res.json({ ...result, requiredFields });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";
       console.error("[smileone/validate-player] unexpected error:", err);
@@ -1835,20 +1874,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/smileone/purchase", requireUser, async (req, res) => {
-    const { game, product_id, region, ...userInput } = req.body as Record<string, string>;
+    const { game, product_id, region, ...rawInput } = req.body as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game is required" });
     }
     if (!product_id) {
       return res.status(400).json({ success: false, message: "product_id is required" });
     }
-    const userId = userInput.user_id ?? userInput.userId ?? userInput.userid ?? "";
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "user_id is required" });
-    }
     try {
-      const result = await smileCreatePurchase(game, product_id, userInput, region);
-      // createPurchase returns SmileOnePurchaseResult (success:true) or SmileOneError (success:false)
+      // Look up game to get required fields for this top-up
+      const games = await storage.getAllGames();
+      const gameRecord = games.find((g) => g.slug === game || g.id === game);
+      const requiredFields = gameRecord?.requiredFields ?? "userId";
+
+      // Build player input from only the configured fields
+      const userInput = buildUserInput(rawInput, requiredFields);
+
+      const hasUserId = userInput.userId ?? userInput.user_id ?? userInput.userid;
+      if (!hasUserId) {
+        return res.status(400).json({ success: false, message: `userId is required (game requires: ${requiredFields})` });
+      }
+
+      const credentials = await resolveSmileCredentials();
+      const result = await smileCreatePurchase(game, product_id, userInput, region, credentials);
       if (result.success === false) {
         return res.status(smileErrorStatus(result)).json(result);
       }

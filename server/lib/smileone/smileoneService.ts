@@ -77,17 +77,26 @@ const REGION_BASE_URL_MAP: Record<string, string> = {
   "sa":     "https://www.smile.one/sa/merchant/",
 };
 
+// ─── Config ───────────────────────────────────────────────────────────────────
+
+export interface SmileOneCredentials {
+  uid: string;
+  key: string;
+  email: string;
+  defaultRegion?: string;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getConfig() {
-  const uid = process.env.SMILEONE_UID;
-  const key = process.env.SMILEONE_KEY;
-  const email = process.env.SMILEONE_EMAIL;
-  const defaultRegion = process.env.SMILEONE_REGION || "global";
+function getConfig(override?: SmileOneCredentials) {
+  const uid   = override?.uid   ?? process.env.SMILEONE_UID   ?? "";
+  const key   = override?.key   ?? process.env.SMILEONE_KEY   ?? "";
+  const email = override?.email ?? process.env.SMILEONE_EMAIL ?? "";
+  const defaultRegion = override?.defaultRegion ?? process.env.SMILEONE_REGION ?? "global";
 
   if (!uid || !key || !email) {
     throw new Error(
-      "Smile.one credentials not configured. Set SMILEONE_UID, SMILEONE_KEY, and SMILEONE_EMAIL environment variables."
+      "Smile.one credentials not configured. Set them in Admin → Smile.one, or via SMILEONE_UID / SMILEONE_KEY / SMILEONE_EMAIL environment variables."
     );
   }
 
@@ -189,10 +198,11 @@ function isSuccess(data: Record<string, unknown>): boolean {
  */
 export async function getProductList(
   gameSlug: string,
-  region?: string
+  region?: string,
+  credentials?: SmileOneCredentials
 ): Promise<SmileOneProduct[] | SmileOneError> {
   try {
-    const { uid, key, email, defaultRegion } = getConfig();
+    const { uid, key, email, defaultRegion } = getConfig(credentials);
     const productName = resolveProductName(gameSlug);
     const resolvedRegion = region || defaultRegion;
     const baseUrl = resolveBaseUrl(resolvedRegion);
@@ -237,10 +247,11 @@ export async function getProductList(
 export async function validatePlayer(
   gameSlug: string,
   userInput: Record<string, string>,
-  region?: string
+  region?: string,
+  credentials?: SmileOneCredentials
 ): Promise<SmileOnePlayerInfo | SmileOneError> {
   try {
-    const { uid, key, email, defaultRegion } = getConfig();
+    const { uid, key, email, defaultRegion } = getConfig(credentials);
     const productName = resolveProductName(gameSlug);
     const resolvedRegion = region || defaultRegion;
     const baseUrl = resolveBaseUrl(resolvedRegion);
@@ -304,10 +315,11 @@ export async function createPurchase(
   gameSlug: string,
   productId: string,
   userInput: Record<string, string>,
-  region?: string
+  region?: string,
+  credentials?: SmileOneCredentials
 ): Promise<SmileOnePurchaseResult | SmileOneError> {
   try {
-    const { uid, key, email, defaultRegion } = getConfig();
+    const { uid, key, email, defaultRegion } = getConfig(credentials);
     const productName = resolveProductName(gameSlug);
     const resolvedRegion = region || defaultRegion;
     const baseUrl = resolveBaseUrl(resolvedRegion);
