@@ -2,7 +2,9 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "fs/promises";
 
-// Packages bundled into the server output for self-contained deployment
+// Packages bundled into the server output for self-contained deployment.
+// mysql2 and bcrypt are intentionally excluded so their native bindings
+// load from node_modules at runtime (run `npm install` on the server).
 const bundleList = [
   "drizzle-orm",
   "drizzle-zod",
@@ -16,7 +18,6 @@ const bundleList = [
   "nodemailer",
   "passport",
   "passport-local",
-  "pg",
   "zod",
   "zod-validation-error",
 ];
@@ -27,7 +28,7 @@ async function buildAll() {
   console.log("Building client  →  client/dist ...");
   await viteBuild();
 
-  console.log("Building server  →  dist/server/index.js ...");
+  console.log("Building server  →  dist/index.cjs ...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [
     ...Object.keys(pkg.dependencies || {}),
@@ -40,9 +41,7 @@ async function buildAll() {
     platform: "node",
     bundle: true,
     format: "cjs",
-    // Output to dist/server/index.js so __dirname = dist/server/ at runtime.
-    // Express then resolves ../../client/dist → <root>/client/dist correctly.
-    outfile: "dist/server/index.js",
+    outfile: "dist/index.cjs",
     define: {
       "process.env.NODE_ENV": '"production"',
     },
@@ -51,17 +50,11 @@ async function buildAll() {
     logLevel: "info",
   });
 
-  // Write a thin wrapper so the existing `node dist/index.cjs` start script
-  // also works (Node keeps __dirname = dist/server inside the required bundle).
-  const { writeFile } = await import("fs/promises");
-  await writeFile("dist/index.cjs", "require('./server/index.js');\n");
-
   console.log("\nBuild complete!");
-  console.log("  Frontend  →  client/dist");
-  console.log("  Server    →  dist/server/index.js");
-  console.log("  Wrapper   →  dist/index.cjs  (legacy compat)");
-  console.log("\ncPanel:  node dist/server/index.js");
-  console.log("Replit:  node dist/index.cjs");
+  console.log("  Frontend  →  client/dist/");
+  console.log("  Server    →  dist/index.cjs");
+  console.log("\nStartup:  node dist/index.cjs");
+  console.log("cPanel:   Set startup file to dist/index.cjs");
 }
 
 buildAll().catch((err) => {

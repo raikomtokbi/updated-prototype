@@ -406,7 +406,9 @@ CREATE TABLE IF NOT EXISTS `email_templates` (
   `footer_text` VARCHAR(500) DEFAULT NULL,
   `button_text` VARCHAR(191) DEFAULT NULL,
   `button_link` VARCHAR(500) DEFAULT NULL,
+  `copy_email`  VARCHAR(191) DEFAULT NULL,
   `is_enabled`  TINYINT(1)   NOT NULL DEFAULT 1,
+  `styles`      TEXT         DEFAULT NULL,
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -423,10 +425,53 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
   UNIQUE KEY `site_settings_key_uq` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── fees ─────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `fees` (
+  `id`          VARCHAR(36)    NOT NULL,
+  `name`        VARCHAR(100)   NOT NULL,
+  `description` TEXT           DEFAULT NULL,
+  `amount`      DECIMAL(10,2)  NOT NULL,
+  `type`        VARCHAR(20)    NOT NULL DEFAULT 'fixed',
+  `is_active`   TINYINT(1)     NOT NULL DEFAULT 1,
+  `sort_order`  INT            NOT NULL DEFAULT 0,
+  `created_at`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fees_is_active_idx` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── smile_one_configs ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `smile_one_configs` (
+  `id`           VARCHAR(36)  NOT NULL,
+  `uid`          VARCHAR(191) DEFAULT NULL,
+  `api_key`      VARCHAR(255) DEFAULT NULL,
+  `license_key`  VARCHAR(255) DEFAULT NULL,
+  `region`       VARCHAR(50)  NOT NULL DEFAULT 'global',
+  `email`        VARCHAR(191) DEFAULT NULL,
+  `is_active`    TINYINT(1)   NOT NULL DEFAULT 1,
+  `updated_at`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── smile_one_mappings ───────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `smile_one_mappings` (
+  `id`                  VARCHAR(36)  NOT NULL,
+  `cms_product_id`      VARCHAR(36)  NOT NULL,
+  `cms_product_name`    VARCHAR(191) DEFAULT NULL,
+  `smile_product_id`    VARCHAR(191) NOT NULL,
+  `smile_product_name`  VARCHAR(191) DEFAULT NULL,
+  `game_slug`           VARCHAR(191) NOT NULL,
+  `region`              VARCHAR(50)  NOT NULL DEFAULT 'global',
+  `created_at`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `smile_one_mappings_game_slug_idx` (`game_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
---  Table summary (20 tables total)
+--  Table summary (26 tables total)
 -- ============================================================
 --   users                      — registered accounts
 --   sessions                   — server-side user sessions
@@ -449,6 +494,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   payment_methods            — configured payment gateways
 --   plugins                    — installed integrations / plugins
 --   notifications              — admin notification inbox
---   email_templates            — transactional email templates
+--   email_templates            — transactional email templates (incl. copy_email, styles)
 --   site_settings              — key-value site configuration
+--   fees                       — processing / service fees
+--   smile_one_configs          — Smile.one API credentials & settings
+--   smile_one_mappings         — product ID mappings for Smile.one
 -- ============================================================
