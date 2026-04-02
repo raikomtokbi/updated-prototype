@@ -566,6 +566,287 @@ function TrendingGames() {
   );
 }
 
+// ─── Vouchers Section ─────────────────────────────────────────────────────────
+function VouchersSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: products = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/products"],
+    staleTime: 60_000,
+  });
+
+  const vouchers = products.filter(
+    (p: any) => p.category === "voucher" || p.category === "gift_card"
+  );
+
+  if (!isLoading && vouchers.length === 0) return null;
+
+  return (
+    <section style={{ padding: "3.5rem 0", background: "#070b14" }}>
+      <div style={{ maxWidth: "1320px", margin: "0 auto" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "1.5rem",
+            padding: "0 1.5rem",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+              <Gift size={16} color="#a78bfa" />
+              <span
+                className="font-orbitron"
+                style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+              >
+                Vouchers & Gift Cards
+              </span>
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+              Top up instantly with vouchers and gift cards
+            </p>
+          </div>
+          <Link
+            href="/products?category=voucher"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.25rem",
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              color: "#a78bfa",
+              textDecoration: "none",
+            }}
+          >
+            View All <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        <div
+          ref={scrollRef}
+          style={{
+            display: "flex",
+            gap: "1rem",
+            overflowX: "auto",
+            padding: "0.5rem 1.5rem 1rem",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+          } as React.CSSProperties}
+        >
+          {isLoading ? (
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} style={{ flexShrink: 0, width: "180px", height: "190px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+              ))}
+            </>
+          ) : (
+            vouchers.map((product: any, idx: number) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                data-testid={`card-voucher-${idx}`}
+                style={{
+                  flexShrink: 0,
+                  width: "180px",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  textDecoration: "none",
+                  display: "block",
+                  border: "1px solid rgba(124,58,237,0.15)",
+                  background: "#0b1020",
+                  transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                }}
+              >
+                {/* Image area */}
+                <div style={{ width: "100%", aspectRatio: "16/10", overflow: "hidden", position: "relative", background: "hsl(258,35%,12%)" }}>
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Gift size={28} style={{ color: "rgba(167,139,250,0.3)" }} />
+                    </div>
+                  )}
+                  {/* Category badge */}
+                  <span style={{
+                    position: "absolute", top: "0.4rem", left: "0.4rem",
+                    padding: "0.15rem 0.45rem", borderRadius: "4px",
+                    background: product.category === "gift_card" ? "#0e7490" : "#7c3aed",
+                    color: "white", fontSize: "0.58rem", fontWeight: 800, letterSpacing: "0.05em",
+                  }}>
+                    {product.category === "gift_card" ? "GIFT" : "VOUCHER"}
+                  </span>
+                </div>
+                {/* Info */}
+                <div style={{ padding: "0.65rem 0.75rem" }}>
+                  <p style={{
+                    fontSize: "0.75rem", fontWeight: 700, color: "#e5e7eb",
+                    margin: "0 0 0.25rem",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    {product.name}
+                  </p>
+                  {product.price && (
+                    <p style={{ fontSize: "0.68rem", color: "#a78bfa", margin: 0, fontWeight: 600 }}>
+                      From {typeof product.price === "number"
+                        ? `$${(product.price / 100).toFixed(2)}`
+                        : product.price}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Games Grid (3x3) ─────────────────────────────────────────────────────────
+function GamesGrid() {
+  const { data: games = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/games"],
+    staleTime: 60_000,
+  });
+
+  const displayGames = games.slice(0, 9);
+
+  if (!isLoading && games.length === 0) return null;
+
+  return (
+    <section style={{ padding: "3.5rem 0 1rem", background: "#070b14" }}>
+      <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 1.5rem" }}>
+        {/* Header */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+            <Gamepad2 size={16} color="#a78bfa" />
+            <span
+              className="font-orbitron"
+              style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+            >
+              All Games
+            </span>
+          </div>
+          <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+            Browse our full game catalog and top up instantly
+          </p>
+        </div>
+
+        {/* 3×3 Grid */}
+        {isLoading ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.875rem" }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+              <div key={i} style={{ borderRadius: "10px", aspectRatio: "1/1", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.875rem" }}>
+            {displayGames.map((game: any, idx: number) => (
+              <Link
+                key={game.id}
+                href={`/products/${game.slug}`}
+                data-testid={`grid-game-${idx}`}
+                style={{
+                  display: "block",
+                  textDecoration: "none",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(124,58,237,0.15)",
+                  background: "#0b1020",
+                  transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                }}
+              >
+                {/* Square image */}
+                <div style={{ width: "100%", aspectRatio: "1/1", background: "hsl(258,35%,12%)", position: "relative", overflow: "hidden" }}>
+                  {game.logoUrl ? (
+                    <img
+                      src={game.logoUrl}
+                      alt={game.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Gamepad2 size={28} style={{ color: "rgba(167,139,250,0.3)" }} />
+                    </div>
+                  )}
+                </div>
+                {/* Name */}
+                <div style={{ padding: "0.5rem 0.6rem" }}>
+                  <p style={{
+                    fontSize: "0.7rem", fontWeight: 700, color: "#e5e7eb",
+                    margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    {game.name}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* More Games button */}
+        {!isLoading && (
+          <div style={{ textAlign: "center", marginTop: "1.75rem", paddingBottom: "1rem" }}>
+            <Link
+              href="/products"
+              data-testid="link-more-games"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.7rem 2rem",
+                borderRadius: "8px",
+                background: "rgba(124,58,237,0.12)",
+                border: "1px solid rgba(124,58,237,0.35)",
+                color: "#a78bfa",
+                fontSize: "0.875rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                transition: "background 0.2s, border-color 0.2s, box-shadow 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.22)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.6)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(124,58,237,0.25)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.12)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+              }}
+            >
+              More Games <ArrowRight size={15} />
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─── Weekend Bonus Banner ─────────────────────────────────────────────────────
 function BonusBanner() {
   const { data: siteSettings = {} } = useQuery<Record<string, string>>({
@@ -1026,9 +1307,11 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", background: "#070b14" }}>
       <HeroSlider />
-      <FeaturesStrip />
       <TrendingGames />
+      <FeaturesStrip />
+      <VouchersSection />
       <BonusBanner />
+      <GamesGrid />
       <Footer />
     </div>
   );
