@@ -55,7 +55,7 @@ export function useNavGuard(isDirty: boolean): NavGuard {
   useEffect(() => {
     const handler = () => {
       if (!bypassRef.current && isDirtyRef.current) {
-        history.pushState(null, "", window.location.pathname);
+        history.forward();
         setPendingPath("__back__");
         setLeaveDialog(true);
       }
