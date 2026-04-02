@@ -117,6 +117,7 @@ const navSections: NavSection[] = [
       { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel" },
       { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method" },
       { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration" },
+      { label: "Smile.one", icon: <Plug size={15} />, path: "/admin/smileone" },
       { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins" },
       { label: "Email Templates", icon: <Mail size={15} />, path: "/admin/email-templates" },
     ],

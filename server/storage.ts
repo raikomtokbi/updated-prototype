@@ -21,10 +21,13 @@ import {
   type EmailTemplate,
   type PasswordResetToken,
   type Fee, type InsertFee,
+  type SmileOneConfig,
+  type SmileOneMapping, type InsertSmileOneMapping,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
   notifications, siteSettings, emailTemplates, passwordResetTokens, fees,
+  smileOneConfigs, smileOneMappings,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -157,6 +160,17 @@ export interface IStorage {
   createFee(data: InsertFee): Promise<Fee>;
   updateFee(id: string, data: Partial<Fee>): Promise<Fee | undefined>;
   deleteFee(id: string): Promise<void>;
+
+  // Smile.one Config
+  getSmileOneConfig(): Promise<SmileOneConfig | undefined>;
+  upsertSmileOneConfig(data: Partial<SmileOneConfig>): Promise<SmileOneConfig>;
+
+  // Smile.one Mappings
+  getAllSmileOneMappings(): Promise<SmileOneMapping[]>;
+  getSmileOneMappingsByGame(gameSlug: string): Promise<SmileOneMapping[]>;
+  createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping>;
+  updateSmileOneMapping(id: string, data: Partial<SmileOneMapping>): Promise<SmileOneMapping | undefined>;
+  deleteSmileOneMapping(id: string): Promise<void>;
 
   // Password Reset Tokens
   createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -723,6 +737,59 @@ export class DatabaseStorage implements IStorage {
     }));
 
     return { salesTrend, orderStatus };
+  }
+
+  // ── Smile.one Config ────────────────────────────────────────────────────────
+  async getSmileOneConfig(): Promise<SmileOneConfig | undefined> {
+    const rows = await db.select().from(smileOneConfigs).limit(1);
+    return rows[0];
+  }
+
+  async upsertSmileOneConfig(data: Partial<SmileOneConfig>): Promise<SmileOneConfig> {
+    const existing = await this.getSmileOneConfig();
+    if (existing) {
+      const [updated] = await db
+        .update(smileOneConfigs)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(smileOneConfigs.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db
+      .insert(smileOneConfigs)
+      .values({ id: randomUUID(), ...data, updatedAt: new Date() } as SmileOneConfig)
+      .returning();
+    return created;
+  }
+
+  // ── Smile.one Mappings ───────────────────────────────────────────────────────
+  async getAllSmileOneMappings(): Promise<SmileOneMapping[]> {
+    return db.select().from(smileOneMappings).orderBy(desc(smileOneMappings.createdAt));
+  }
+
+  async getSmileOneMappingsByGame(gameSlug: string): Promise<SmileOneMapping[]> {
+    return db.select().from(smileOneMappings).where(eq(smileOneMappings.gameSlug, gameSlug));
+  }
+
+  async createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping> {
+    const [created] = await db
+      .insert(smileOneMappings)
+      .values({ id: randomUUID(), ...data })
+      .returning();
+    return created;
+  }
+
+  async updateSmileOneMapping(id: string, data: Partial<SmileOneMapping>): Promise<SmileOneMapping | undefined> {
+    const [updated] = await db
+      .update(smileOneMappings)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(smileOneMappings.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSmileOneMapping(id: string): Promise<void> {
+    await db.delete(smileOneMappings).where(eq(smileOneMappings.id, id));
   }
 }
 

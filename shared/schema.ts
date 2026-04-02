@@ -413,6 +413,39 @@ export const insertFeeSchema = createInsertSchema(fees).omit({ id: true, created
 export type Fee = typeof fees.$inferSelect;
 export type InsertFee = z.infer<typeof insertFeeSchema>;
 
+// ─── Smile.one Config ─────────────────────────────────────────────────────────
+export const smileOneConfigs = pgTable("smile_one_configs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  uid: varchar("uid", { length: 191 }),
+  apiKey: varchar("api_key", { length: 255 }),
+  licenseKey: varchar("license_key", { length: 255 }),
+  region: varchar("region", { length: 50 }).notNull().default("global"),
+  email: varchar("email", { length: 191 }),
+  isActive: boolean("is_active").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertSmileOneConfigSchema = createInsertSchema(smileOneConfigs).omit({ id: true, updatedAt: true });
+export type SmileOneConfig = typeof smileOneConfigs.$inferSelect;
+export type InsertSmileOneConfig = z.infer<typeof insertSmileOneConfigSchema>;
+
+// ─── Smile.one Product Mappings ───────────────────────────────────────────────
+export const smileOneMappings = pgTable("smile_one_mappings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  cmsProductId: varchar("cms_product_id", { length: 36 }).notNull(),
+  cmsProductName: varchar("cms_product_name", { length: 191 }),
+  smileProductId: varchar("smile_product_id", { length: 191 }).notNull(),
+  smileProductName: varchar("smile_product_name", { length: 191 }),
+  gameSlug: varchar("game_slug", { length: 191 }).notNull(),
+  region: varchar("region", { length: 50 }).notNull().default("global"),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertSmileOneMappingSchema = createInsertSchema(smileOneMappings).omit({ id: true, createdAt: true, updatedAt: true });
+export type SmileOneMapping = typeof smileOneMappings.$inferSelect;
+export type InsertSmileOneMapping = z.infer<typeof insertSmileOneMappingSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Game = typeof games.$inferSelect;

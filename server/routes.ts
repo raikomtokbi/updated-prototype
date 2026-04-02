@@ -26,7 +26,7 @@ import {
   processTemplate,
   DEFAULT_EMAIL_TEMPLATES,
 } from "./lib/emailService";
-import { insertFeeSchema } from "@shared/schema";
+import { insertFeeSchema, insertSmileOneMappingSchema } from "@shared/schema";
 import {
   getProductList as smileGetProductList,
   validatePlayer as smileValidatePlayer,
@@ -1680,6 +1680,107 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (error: any) {
       console.error("Payment callback error:", error);
       res.status(500).send("Error");
+    }
+  });
+
+  // ── Smile.one Admin Config & Mappings ─────────────────────────────────────────
+
+  app.get("/api/admin/smileone/config", requireAdmin, async (_req, res) => {
+    try {
+      const config = await storage.getSmileOneConfig();
+      return res.json(config ?? null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.post("/api/admin/smileone/config", requireAdmin, async (req, res) => {
+    try {
+      const { uid, apiKey, licenseKey, region, email } = req.body as Record<string, string>;
+      const config = await storage.upsertSmileOneConfig({ uid, apiKey, licenseKey, region: region || "global", email });
+      return res.json(config);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.post("/api/admin/smileone/test-connection", requireAdmin, async (req, res) => {
+    try {
+      const { uid, apiKey, email, region } = req.body as Record<string, string>;
+      if (!uid || !apiKey || !email) {
+        return res.status(400).json({ success: false, message: "uid, apiKey and email are required" });
+      }
+      // Use the provided credentials (or saved ones) to fetch balance
+      const ts = Math.floor(Date.now() / 1000);
+      const sign = createHash("md5").update(`${uid}${apiKey}${ts}`).digest("hex");
+      const baseUrl = region === "global" || !region
+        ? "https://www.smile.one/merchant/"
+        : `https://www.smile.one/${region}/merchant/`;
+      const body = new URLSearchParams({ uid, email, time: String(ts), sign });
+      const apiRes = await fetch(`${baseUrl}getbalance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+        signal: AbortSignal.timeout(10000),
+      });
+      const text = await apiRes.text();
+      let data: Record<string, unknown>;
+      try { data = JSON.parse(text); } catch { return res.status(502).json({ success: false, message: "Invalid response from Smile.one API", raw: text.slice(0, 200) }); }
+      const code = Number(data.code ?? data.status ?? -1);
+      if (code === 200 || code === 0 || data.success === true) {
+        const balance = data.balance ?? data.amount ?? data.data ?? null;
+        return res.json({ success: true, message: "Connection successful", balance });
+      }
+      const errMsg = typeof data.msg === "string" ? data.msg : typeof data.message === "string" ? data.message : `Error code: ${data.code ?? data.status}`;
+      return res.status(422).json({ success: false, message: errMsg });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(502).json({ success: false, message: `Connection failed: ${message}` });
+    }
+  });
+
+  app.get("/api/admin/smileone/mappings", requireAdmin, async (_req, res) => {
+    try {
+      const mappings = await storage.getAllSmileOneMappings();
+      return res.json(mappings);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.post("/api/admin/smileone/mappings", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertSmileOneMappingSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ success: false, message: "Invalid mapping data", errors: parsed.error.flatten() });
+      const mapping = await storage.createSmileOneMapping(parsed.data);
+      return res.status(201).json(mapping);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.put("/api/admin/smileone/mappings/:id", requireAdmin, async (req, res) => {
+    try {
+      const updated = await storage.updateSmileOneMapping(req.params.id, req.body);
+      if (!updated) return res.status(404).json({ success: false, message: "Mapping not found" });
+      return res.json(updated);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.delete("/api/admin/smileone/mappings/:id", requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteSmileOneMapping(req.params.id);
+      return res.json({ success: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
     }
   });
 
