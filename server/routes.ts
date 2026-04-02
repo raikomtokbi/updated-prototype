@@ -1698,8 +1698,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/admin/smileone/config", requireAdmin, async (req, res) => {
     try {
-      const { uid, apiKey, licenseKey, region, email } = req.body as Record<string, string>;
-      const config = await storage.upsertSmileOneConfig({ uid, apiKey, licenseKey, region: region || "global", email });
+      const { uid, apiKey, licenseKey, region, email, isActive } = req.body as Record<string, any>;
+      const config = await storage.upsertSmileOneConfig({ 
+        uid, 
+        apiKey, 
+        licenseKey, 
+        region: region || "global", 
+        email,
+        isActive: isActive !== false,
+      });
       return res.json(config);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";
@@ -1827,6 +1834,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(400).json({ success: false, message: "game query parameter is required" });
     }
     try {
+      const config = await storage.getSmileOneConfig();
+      if (!config?.isActive) {
+        return res.status(400).json({ success: false, message: "Smile.one is currently disabled" });
+      }
       const credentials = await resolveSmileCredentials();
       const result = await smileGetProductList(game, region, credentials);
       if (Array.isArray(result)) {
@@ -1846,6 +1857,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(400).json({ success: false, message: "game is required" });
     }
     try {
+      const config = await storage.getSmileOneConfig();
+      if (!config?.isActive) {
+        return res.status(400).json({ success: false, message: "Smile.one is currently disabled" });
+      }
       // Look up the game to get its configured required fields
       const games = await storage.getAllGames();
       const gameRecord = games.find((g) => g.slug === game || g.id === game);
@@ -1882,6 +1897,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(400).json({ success: false, message: "product_id is required" });
     }
     try {
+      const config = await storage.getSmileOneConfig();
+      if (!config?.isActive) {
+        return res.status(400).json({ success: false, message: "Smile.one is currently disabled" });
+      }
       // Look up game to get required fields for this top-up
       const games = await storage.getAllGames();
       const gameRecord = games.find((g) => g.slug === game || g.id === game);
