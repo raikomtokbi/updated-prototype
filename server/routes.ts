@@ -1685,7 +1685,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── Smile.one API ─────────────────────────────────────────────────────────────
 
-  app.get("/api/smileone/products", async (req, res) => {
+  app.get("/api/smileone/products", requireUser, async (req, res) => {
     const { game, region } = req.query as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game query parameter is required" });
@@ -1702,7 +1702,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  app.post("/api/smileone/validate-player", async (req, res) => {
+  app.post("/api/smileone/validate-player", requireUser, async (req, res) => {
     const { game, region, ...userInput } = req.body as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game is required" });
@@ -1723,7 +1723,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  app.post("/api/smileone/purchase", async (req, res) => {
+  app.post("/api/smileone/purchase", requireUser, async (req, res) => {
     const { game, product_id, region, ...userInput } = req.body as Record<string, string>;
     if (!game) {
       return res.status(400).json({ success: false, message: "game is required" });
