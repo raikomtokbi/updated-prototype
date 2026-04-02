@@ -1900,6 +1900,44 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (result.success === false) {
         return res.status(smileErrorStatus(result)).json(result);
       }
+
+      // Send order confirmation email on successful purchase
+      try {
+        const userEmail = (req as any).user?.email;
+        if (userEmail && result.success) {
+          const template = await storage.getEmailTemplate("order_confirmation");
+          const smtpConfig = await storage.getSmtpConfig();
+          const settings = await storage.getAllSiteSettings();
+          if (template && smtpConfig && smtpConfig.SMTP_HOST) {
+            const siteObj: Record<string, string> = {};
+            settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+            const siteName = siteObj.site_name || "WebCMS";
+            
+            await sendTemplatedEmail({
+              to: userEmail,
+              template: template as any,
+              cc: template.copyEmail ?? undefined,
+              vars: {
+                user_name: (req as any).user?.fullName || (req as any).user?.username || userEmail,
+                user_email: userEmail,
+                order_id: `SMS_${Date.now()}`,
+                order_amount: "0.00",
+                order_currency: "$",
+                order_date: new Date().toLocaleDateString(),
+                game_name: gameRecord?.name || game,
+                product_id,
+                site_name: siteName,
+                site_url: "",
+              },
+              siteName,
+              smtpConfig,
+            });
+          }
+        }
+      } catch (emailErr) {
+        console.error("[smileone/purchase] Email send error (non-blocking):", emailErr);
+      }
+
       return res.json(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";

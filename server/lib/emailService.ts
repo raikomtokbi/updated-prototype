@@ -170,10 +170,11 @@ export interface SendEmailOptions {
   vars: Record<string, string>;
   siteName?: string;
   smtpConfig: SmtpConfig;
+  cc?: string; // Optional CC email address
 }
 
 export async function sendTemplatedEmail(opts: SendEmailOptions): Promise<{ ok: boolean; error?: string }> {
-  const { to, template, vars, siteName = "WebCMS", smtpConfig } = opts;
+  const { to, template, vars, siteName = "WebCMS", smtpConfig, cc } = opts;
 
   if (!template.isEnabled) {
     return { ok: false, error: "Email template is disabled" };
@@ -190,7 +191,19 @@ export async function sendTemplatedEmail(opts: SendEmailOptions): Promise<{ ok: 
     const fromEmail = smtpConfig.SMTP_FROM_EMAIL || smtpConfig.SMTP_USER;
     const fromName = smtpConfig.SMTP_FROM_NAME || siteName;
 
-    await transporter.sendMail({ from: `${fromName} <${fromEmail}>`, to, subject, html });
+    const mailOptions: Record<string, unknown> = {
+      from: `${fromName} <${fromEmail}>`,
+      to,
+      subject,
+      html,
+    };
+
+    // Add CC if provided and valid
+    if (cc && cc.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cc)) {
+      mailOptions.cc = cc;
+    }
+
+    await transporter.sendMail(mailOptions);
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
