@@ -449,7 +449,7 @@ function TrendingGames() {
   });
 
   return (
-    <section style={{ padding: "3.5rem 0", maxWidth: "1320px", margin: "0 auto" }}>
+    <section style={{ padding: "1.25rem 0 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
       <div
         style={{
           display: "flex",
@@ -862,7 +862,7 @@ function BonusBanner() {
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
   return (
-    <section style={{ padding: "0 1.5rem 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
+    <section style={{ padding: "3.5rem 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
       <div
         style={{
           borderRadius: "16px",
