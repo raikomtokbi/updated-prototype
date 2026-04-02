@@ -838,7 +838,7 @@ function GamesGrid() {
                 (e.currentTarget as HTMLElement).style.boxShadow = "none";
               }}
             >
-              More Games <ArrowRight size={15} />
+              All Products <ArrowRight size={15} />
             </Link>
           </div>
         )}
