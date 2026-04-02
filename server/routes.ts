@@ -27,6 +27,11 @@ import {
   DEFAULT_EMAIL_TEMPLATES,
 } from "./lib/emailService";
 import { insertFeeSchema } from "@shared/schema";
+import {
+  getProductList as smileGetProductList,
+  validatePlayer as smileValidatePlayer,
+  createPurchase as smileCreatePurchase,
+} from "./lib/smileone/smileoneService";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
 const uploadsDir = path.resolve(process.cwd(), "public/uploads");
@@ -1675,6 +1680,70 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (error: any) {
       console.error("Payment callback error:", error);
       res.status(500).send("Error");
+    }
+  });
+
+  // ── Smile.one API ─────────────────────────────────────────────────────────────
+
+  app.get("/api/smileone/products", async (req, res) => {
+    const { game, region } = req.query as Record<string, string>;
+    if (!game) {
+      return res.status(400).json({ success: false, message: "game query parameter is required" });
+    }
+    try {
+      const result = await smileGetProductList(game, region);
+      if ("success" in result && result.success === false) {
+        return res.status(502).json(result);
+      }
+      return res.json({ success: true, products: result });
+    } catch (err: any) {
+      console.error("[smileone/products] unexpected error:", err);
+      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/smileone/validate-player", async (req, res) => {
+    const { game, region, ...userInput } = req.body as Record<string, string>;
+    if (!game) {
+      return res.status(400).json({ success: false, message: "game is required" });
+    }
+    const userId = userInput.user_id ?? userInput.userId ?? userInput.userid ?? "";
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "user_id is required" });
+    }
+    try {
+      const result = await smileValidatePlayer(game, userInput, region);
+      if ("success" in result && result.success === false) {
+        return res.status(502).json(result);
+      }
+      return res.json(result);
+    } catch (err: any) {
+      console.error("[smileone/validate-player] unexpected error:", err);
+      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/smileone/purchase", async (req, res) => {
+    const { game, product_id, region, ...userInput } = req.body as Record<string, string>;
+    if (!game) {
+      return res.status(400).json({ success: false, message: "game is required" });
+    }
+    if (!product_id) {
+      return res.status(400).json({ success: false, message: "product_id is required" });
+    }
+    const userId = userInput.user_id ?? userInput.userId ?? userInput.userid ?? "";
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "user_id is required" });
+    }
+    try {
+      const result = await smileCreatePurchase(game, product_id, userInput, region);
+      if ("success" in result && result.success === false) {
+        return res.status(502).json(result);
+      }
+      return res.json(result);
+    } catch (err: any) {
+      console.error("[smileone/purchase] unexpected error:", err);
+      return res.status(500).json({ success: false, message: err.message || "Internal server error" });
     }
   });
 
