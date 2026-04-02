@@ -49,6 +49,26 @@ const upload = multer({
   },
 });
 
+// ─── Ticket Attachment Multer ──────────────────────────────────────────────────
+const attachmentUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `attach-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = ["image/", "video/", "application/pdf", "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain"];
+    const ok = allowed.some((t) => file.mimetype.startsWith(t) || file.mimetype === t);
+    if (!ok) return cb(new Error("File type not allowed"));
+    cb(null, true);
+  },
+});
+
 // ─── Plugin Upload Multer ─────────────────────────────────────────────────────
 const pluginUploadsDir = path.resolve(process.cwd(), "uploads/plugins");
 if (!fs.existsSync(pluginUploadsDir)) fs.mkdirSync(pluginUploadsDir, { recursive: true });
@@ -630,6 +650,68 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true, message: "Account deleted successfully" });
   });
 
+  // ── User-facing Support Tickets ────────────────────────────────────────────
+  app.post("/api/tickets", async (req: any, res) => {
+    const { subject, message, category, priority } = req.body;
+    if (!subject?.trim() || !message?.trim()) {
+      return res.status(400).json({ message: "Subject and message are required" });
+    }
+    const userId = req.currentUser?.id ?? req.body.userId ?? null;
+    const ticket = await storage.createTicket({
+      userId,
+      subject: subject.trim(),
+      message: message.trim(),
+      category: category?.trim() || null,
+      priority: priority || "medium",
+    } as any);
+    res.status(201).json(ticket);
+  });
+
+  app.get("/api/tickets", requireUser, async (req: any, res) => {
+    const userTickets = await storage.getUserTickets(req.currentUser.id);
+    res.json(userTickets);
+  });
+
+  app.get("/api/tickets/:id", requireUser, async (req: any, res) => {
+    const ticket = await storage.getTicket(req.params.id);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+    const isOwner = ticket.userId === req.currentUser.id;
+    const isAdminOrStaff = ["super_admin", "admin", "staff"].includes(req.currentUser.role);
+    if (!isOwner && !isAdminOrStaff) return res.status(403).json({ message: "Forbidden" });
+    const replies = await storage.getTicketReplies(req.params.id);
+    res.json({ ...ticket, replies });
+  });
+
+  app.post("/api/tickets/:id/reply", requireUser, attachmentUpload.single("attachment"), async (req: any, res) => {
+    const ticket = await storage.getTicket(req.params.id);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+    const isOwner = ticket.userId === req.currentUser.id;
+    const isAdminOrStaff = ["super_admin", "admin", "staff"].includes(req.currentUser.role);
+    if (!isOwner && !isAdminOrStaff) return res.status(403).json({ message: "Forbidden" });
+    if (!req.body.message?.trim()) return res.status(400).json({ message: "Message is required" });
+    const attachmentUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const reply = await storage.replyToTicket(
+      req.params.id,
+      req.currentUser.id,
+      req.body.message.trim(),
+      isAdminOrStaff,
+      attachmentUrl,
+    );
+    if (ticket.status === "closed" || ticket.status === "resolved") {
+      await storage.updateTicketStatus(req.params.id, "open");
+    }
+    res.status(201).json(reply);
+  });
+
+  app.patch("/api/tickets/:id/status", requireUser, async (req: any, res) => {
+    const ticket = await storage.getTicket(req.params.id);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+    const isAdminOrStaff = ["super_admin", "admin", "staff"].includes(req.currentUser.role);
+    if (!isAdminOrStaff) return res.status(403).json({ message: "Forbidden" });
+    const updated = await storage.updateTicketStatus(req.params.id, req.body.status);
+    res.json(updated);
+  });
+
   // ── Dashboard stats ────────────────────────────────────────────────────────
   app.get("/api/admin/stats", requireAdmin, async (_req, res) => {
     const stats = await storage.getDashboardStats();
@@ -880,9 +962,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(t);
   });
 
-  app.post("/api/admin/tickets/:id/reply", requireAdmin, async (req, res) => {
+  app.post("/api/admin/tickets/:id/reply", requireAdmin, attachmentUpload.single("attachment"), async (req: any, res) => {
     const ticket = await storage.getTicket(req.params.id);
-    const reply = await storage.replyToTicket(req.params.id, req.body.userId, req.body.message, true);
+    const attachmentUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const reply = await storage.replyToTicket(req.params.id, req.body.userId, req.body.message, true, attachmentUrl);
     res.status(201).json(reply);
     // Send email notification only if email_notifications is enabled
     if (ticket) {

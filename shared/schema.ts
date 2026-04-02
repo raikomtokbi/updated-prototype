@@ -156,6 +156,7 @@ export const tickets = pgTable("tickets", {
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   subject: varchar("subject", { length: 255 }).notNull(),
   message: text("message").notNull(),
+  category: varchar("category", { length: 100 }),
   status: ticketStatusEnum("status").notNull().default("open"),
   priority: ticketPriorityEnum("priority").notNull().default("medium"),
   assignedTo: varchar("assigned_to", { length: 36 }).references(() => users.id),
@@ -169,6 +170,7 @@ export const ticketReplies = pgTable("ticket_replies", {
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   message: text("message").notNull(),
   isStaff: boolean("is_staff").notNull().default(false),
+  attachmentUrl: text("attachment_url"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

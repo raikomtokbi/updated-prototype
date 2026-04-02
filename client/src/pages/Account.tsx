@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
   User, LogOut, ShoppingBag, Shield, Lock, ChevronRight,
   Package, Settings, Eye, EyeOff, Check, X, Loader2,
-  Calendar, Hash, Clock
+  Calendar, Hash, Clock, Headphones, Send, Paperclip, ArrowLeft, ChevronDown
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-type Tab = "info" | "orders" | "security";
+type Tab = "info" | "orders" | "security" | "tickets";
 
 function formatDate(dateStr: string | Date | null | undefined) {
   if (!dateStr) return "—";
@@ -712,6 +712,346 @@ function DeleteAccountSection() {
   );
 }
 
+// ── Ticket Status Badge ───────────────────────────────────────────────────────
+const TICKET_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  open: { bg: "hsla(213,90%,55%,0.12)", text: "hsl(213,90%,65%)" },
+  in_progress: { bg: "hsla(40,90%,55%,0.12)", text: "hsl(40,90%,60%)" },
+  resolved: { bg: "hsla(145,70%,50%,0.12)", text: "hsl(145,70%,55%)" },
+  closed: { bg: "hsla(220,10%,40%,0.12)", text: "hsl(220,10%,55%)" },
+};
+
+function TicketStatusBadge({ status }: { status: string }) {
+  const c = TICKET_STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(220,10%,55%)" };
+  return (
+    <span style={{
+      display: "inline-block", fontSize: "0.72rem", fontWeight: 600,
+      padding: "2px 8px", borderRadius: "999px",
+      background: c.bg, color: c.text, textTransform: "capitalize",
+    }}>
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
+// ── Tickets Tab ───────────────────────────────────────────────────────────────
+function TicketsTab({ user }: { user: any }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [replyMsg, setReplyMsg] = useState("");
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const authHeaders = { "X-Username": user.username };
+
+  const { data: tickets = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/tickets"],
+    queryFn: async () => {
+      const res = await fetch("/api/tickets", { credentials: "include", headers: authHeaders });
+      if (!res.ok) throw new Error("Failed to load tickets");
+      return res.json();
+    },
+  });
+
+  const { data: ticketDetail, isLoading: detailLoading } = useQuery<any>({
+    queryKey: ["/api/tickets", selectedTicketId],
+    queryFn: async () => {
+      const res = await fetch(`/api/tickets/${selectedTicketId}`, { credentials: "include", headers: authHeaders });
+      if (!res.ok) throw new Error("Failed to load ticket");
+      return res.json();
+    },
+    enabled: !!selectedTicketId,
+    refetchInterval: 8000,
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.append("message", replyMsg);
+      if (attachment) formData.append("attachment", attachment);
+      const res = await fetch(`/api/tickets/${selectedTicketId}/reply`, {
+        method: "POST",
+        credentials: "include",
+        headers: authHeaders,
+        body: formData,
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.message || "Failed to send reply");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setReplyMsg("");
+      setAttachment(null);
+      if (fileRef.current) fileRef.current.value = "";
+      qc.invalidateQueries({ queryKey: ["/api/tickets", selectedTicketId] });
+      qc.invalidateQueries({ queryKey: ["/api/tickets"] });
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const baseBox: React.CSSProperties = {
+    background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+    borderRadius: "0.75rem", overflow: "hidden",
+  };
+
+  if (selectedTicketId) {
+    const ticket = ticketDetail;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <button
+          onClick={() => setSelectedTicketId(null)}
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "none", border: "none", cursor: "pointer", color: "hsl(258,90%,70%)", fontSize: "0.85rem", fontWeight: 600, padding: 0 }}
+        >
+          <ArrowLeft size={15} /> Back to tickets
+        </button>
+
+        {detailLoading || !ticket ? (
+          <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)" }}>
+            <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
+          </div>
+        ) : (
+          <>
+            <div style={{ ...baseBox, padding: "1.25rem 1.5rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.3rem" }}>{ticket.subject}</div>
+                  <div style={{ fontSize: "0.78rem", color: "hsl(220,10%,45%)" }}>
+                    #{ticket.ticketNumber} · {formatDate(ticket.createdAt)}
+                    {ticket.category && <> · {ticket.category}</>}
+                  </div>
+                </div>
+                <TicketStatusBadge status={ticket.status} />
+              </div>
+            </div>
+
+            <div style={baseBox}>
+              <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                  Conversation
+                </span>
+              </div>
+              <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {/* Original message */}
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  <div style={{
+                    width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
+                    background: "linear-gradient(135deg,hsl(258,90%,45%),hsl(196,100%,40%))",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.75rem", fontWeight: 700, color: "white",
+                  }}>
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+                      <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(210,40%,85%)" }}>{user.username}</span>
+                      <span style={{ fontSize: "0.72rem", color: "hsl(220,10%,40%)" }}>{formatDate(ticket.createdAt)}</span>
+                    </div>
+                    <div style={{
+                      background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,20%)",
+                      borderRadius: "0 0.75rem 0.75rem 0.75rem", padding: "0.75rem 1rem",
+                      fontSize: "0.85rem", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                    }}>
+                      {ticket.message}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Replies */}
+                {(ticket.replies ?? []).map((r: any) => {
+                  const isAdmin = r.isStaff;
+                  return (
+                    <div key={r.id} style={{ display: "flex", gap: "0.75rem", flexDirection: isAdmin ? "row-reverse" : "row" }}>
+                      <div style={{
+                        width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
+                        background: isAdmin ? "linear-gradient(135deg,hsl(258,90%,55%),hsl(196,100%,45%))" : "hsl(220,20%,18%)",
+                        border: isAdmin ? "none" : "1px solid hsl(220,15%,24%)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "0.75rem", fontWeight: 700, color: "white",
+                      }}>
+                        {isAdmin ? "S" : user.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, maxWidth: "85%" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", justifyContent: isAdmin ? "flex-end" : "flex-start" }}>
+                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: isAdmin ? "hsl(258,90%,70%)" : "hsl(210,40%,85%)" }}>
+                            {isAdmin ? "Support" : user.username}
+                          </span>
+                          <span style={{ fontSize: "0.72rem", color: "hsl(220,10%,40%)" }}>{formatDate(r.createdAt)}</span>
+                        </div>
+                        <div style={{
+                          background: isAdmin ? "hsla(258,90%,55%,0.12)" : "hsl(220,20%,12%)",
+                          border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.25)" : "hsl(220,15%,20%)"}`,
+                          borderRadius: isAdmin ? "0.75rem 0 0.75rem 0.75rem" : "0 0.75rem 0.75rem 0.75rem",
+                          padding: "0.75rem 1rem",
+                          fontSize: "0.85rem", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                        }}>
+                          {r.message}
+                        </div>
+                        {r.attachmentUrl && (
+                          <div style={{ marginTop: "0.35rem", textAlign: isAdmin ? "right" : "left" }}>
+                            <a href={r.attachmentUrl} target="_blank" rel="noreferrer"
+                              style={{ fontSize: "0.75rem", color: "hsl(258,90%,70%)", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                              <Paperclip size={12} /> Attachment
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {ticket.replies?.length === 0 && (
+                  <div style={{ textAlign: "center", fontSize: "0.8rem", color: "hsl(220,10%,38%)", padding: "1rem 0" }}>
+                    No replies yet. We'll respond within 24 hours.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Reply form — only if ticket is not closed */}
+            {ticket.status !== "closed" && (
+              <div style={baseBox}>
+                <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                    Send Reply
+                  </span>
+                </div>
+                <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  <textarea
+                    value={replyMsg}
+                    onChange={(e) => setReplyMsg(e.target.value)}
+                    placeholder="Type your reply..."
+                    rows={4}
+                    style={{
+                      width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                      borderRadius: "0.5rem", padding: "0.7rem 1rem",
+                      fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none",
+                      resize: "vertical", minHeight: "80px", boxSizing: "border-box",
+                    }}
+                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                      style={{ display: "none" }}
+                      onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                        background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
+                        borderRadius: "0.5rem", padding: "0.45rem 0.85rem",
+                        fontSize: "0.78rem", fontWeight: 600, color: "hsl(220,10%,60%)", cursor: "pointer",
+                      }}
+                    >
+                      <Paperclip size={13} />
+                      {attachment ? attachment.name.slice(0, 20) + (attachment.name.length > 20 ? "…" : "") : "Attach file"}
+                    </button>
+                    {attachment && (
+                      <button onClick={() => { setAttachment(null); if (fileRef.current) fileRef.current.value = ""; }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(0,72%,60%)", fontSize: "0.75rem", padding: 0 }}>
+                        Remove
+                      </button>
+                    )}
+                    <button
+                      onClick={() => replyMutation.mutate()}
+                      disabled={!replyMsg.trim() || replyMutation.isPending}
+                      style={{
+                        marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                        background: "linear-gradient(135deg,hsl(258,90%,55%),hsl(258,90%,45%))",
+                        border: "none", borderRadius: "0.5rem", padding: "0.5rem 1.1rem",
+                        fontSize: "0.85rem", fontWeight: 600, color: "white", cursor: "pointer",
+                        opacity: !replyMsg.trim() || replyMutation.isPending ? 0.6 : 1,
+                      }}
+                    >
+                      {replyMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                      {replyMutation.isPending ? "Sending…" : "Send Reply"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ ...baseBox, padding: "1.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "0.6rem", flexShrink: 0,
+            background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Headphones size={18} style={{ color: "hsl(258,90%,70%)" }} />
+          </div>
+          <div>
+            <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Support Tickets</div>
+            <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,45%)" }}>View and manage your submitted support requests</div>
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)" }}>
+          <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
+        </div>
+      ) : tickets.length === 0 ? (
+        <div style={{
+          ...baseBox, padding: "3rem 1.5rem", textAlign: "center",
+          color: "hsl(220,10%,40%)", fontSize: "0.875rem",
+        }}>
+          <Headphones size={36} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
+          <p style={{ fontWeight: 600, marginBottom: "0.4rem" }}>No tickets yet</p>
+          <p style={{ fontSize: "0.8rem" }}>
+            Visit the{" "}
+            <Link href="/support" style={{ color: "hsl(258,90%,70%)" }}>Support page</Link>
+            {" "}to submit a ticket.
+          </p>
+        </div>
+      ) : (
+        <div style={baseBox}>
+          {tickets.map((t: any, i: number) => (
+            <div
+              key={t.id}
+              onClick={() => setSelectedTicketId(t.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: "1rem",
+                padding: "1rem 1.25rem", cursor: "pointer",
+                borderBottom: i < tickets.length - 1 ? "1px solid hsl(220,15%,14%)" : "none",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220,20%,11%)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {t.subject}
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,40%)" }}>
+                  #{t.ticketNumber} · {formatDate(t.createdAt)}
+                  {t.category && <> · {t.category}</>}
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
+                <TicketStatusBadge status={t.status} />
+                <ChevronRight size={15} style={{ color: "hsl(220,10%,35%)" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Account component ─────────────────────────────────────────────────────
 export default function Account() {
   const [, navigate] = useLocation();
@@ -728,6 +1068,7 @@ export default function Account() {
   const TABS: { id: Tab; label: string; icon: typeof User }[] = [
     { id: "info", label: "Account Info", icon: User },
     { id: "orders", label: "Orders", icon: Package },
+    { id: "tickets", label: "Tickets", icon: Headphones },
     { id: "security", label: "Security", icon: Shield },
   ];
 
@@ -744,54 +1085,58 @@ export default function Account() {
       {/* Header */}
       <div style={{
         background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
-        borderRadius: "1rem", padding: "1.5rem 1.75rem",
-        display: "flex", alignItems: "center", gap: "1.25rem",
-        marginBottom: "1.5rem", flexWrap: "wrap",
+        borderRadius: "1rem", padding: "1.25rem 1.5rem",
+        marginBottom: "1.5rem",
       }}>
-        <div style={{
-          width: "62px", height: "62px", borderRadius: "50%", flexShrink: 0,
-          background: "linear-gradient(135deg, hsl(258,90%,45%), hsl(196,100%,40%))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.username}
-              style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
-          ) : (
-            <span className="font-orbitron" style={{ fontSize: "1.4rem", fontWeight: 800, color: "white" }}>
-              {user.username.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.25rem" }}
-            data-testid="text-username">
-            {user.fullName || user.username}
-          </h1>
-          {user.email && (
-            <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", marginBottom: "0.4rem" }}>{user.email}</p>
-          )}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
-              {roleInfo.label}
-            </span>
-            <span style={{ fontFamily: "monospace", fontSize: "0.75rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
-              #{user.id}
-            </span>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+          {/* Avatar */}
+          <div style={{
+            width: "58px", height: "58px", borderRadius: "50%", flexShrink: 0,
+            background: "linear-gradient(135deg, hsl(258,90%,45%), hsl(196,100%,40%))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.username}
+                style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+            ) : (
+              <span className="font-orbitron" style={{ fontSize: "1.3rem", fontWeight: 800, color: "white" }}>
+                {user.username.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          {isStaff() && (
-            <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.8rem" }} data-testid="button-go-to-admin">
-              <Lock size={13} />
-              Admin Panel
+          {/* Info */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 className="font-orbitron" style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.2rem" }}
+              data-testid="text-username">
+              {user.fullName || user.username}
+            </h1>
+            {user.email && (
+              <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", marginBottom: "0.4rem" }}>{user.email}</p>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
+                {roleInfo.label}
+              </span>
+              <span style={{ fontFamily: "monospace", fontSize: "0.72rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
+                #{user.id.slice(0, 12)}…
+              </span>
+            </div>
+          </div>
+          {/* Actions — always top-right, never overlapping */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", flexShrink: 0, alignItems: "flex-end" }}>
+            {isStaff() && (
+              <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.78rem", whiteSpace: "nowrap" }} data-testid="button-go-to-admin">
+                <Lock size={12} />
+                Admin Panel
+              </button>
+            )}
+            <button onClick={handleLogout} className="btn-secondary"
+              style={{ fontSize: "0.78rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)", whiteSpace: "nowrap" }}
+              data-testid="button-logout">
+              <LogOut size={12} />
+              Sign Out
             </button>
-          )}
-          <button onClick={handleLogout} className="btn-secondary"
-            style={{ fontSize: "0.8rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
-            data-testid="button-logout">
-            <LogOut size={13} />
-            Sign Out
-          </button>
+          </div>
         </div>
       </div>
 
@@ -829,6 +1174,7 @@ export default function Account() {
         <AccountInfoTab user={user} setUser={(u) => setUser(u)} />
       )}
       {activeTab === "orders" && <OrdersTab user={user} />}
+      {activeTab === "tickets" && <TicketsTab user={user} />}
       {activeTab === "security" && <SecurityTab user={user} />}
     </div>
   );

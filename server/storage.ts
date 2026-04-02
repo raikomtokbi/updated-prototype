@@ -89,10 +89,11 @@ export interface IStorage {
 
   // Tickets
   getAllTickets(limit?: number, offset?: number): Promise<Ticket[]>;
+  getUserTickets(userId: string): Promise<Ticket[]>;
   getTicket(id: string): Promise<Ticket | undefined>;
   createTicket(data: InsertTicket): Promise<Ticket>;
   updateTicketStatus(id: string, status: string): Promise<Ticket | undefined>;
-  replyToTicket(ticketId: string, userId: string, message: string, isStaff?: boolean): Promise<TicketReply>;
+  replyToTicket(ticketId: string, userId: string, message: string, isStaff?: boolean, attachmentUrl?: string): Promise<TicketReply>;
   getTicketReplies(ticketId: string): Promise<TicketReply[]>;
 
   // Campaigns
@@ -374,6 +375,9 @@ export class DatabaseStorage implements IStorage {
   async getAllTickets(limit = 50, offset = 0) {
     return db.select().from(tickets).orderBy(desc(tickets.createdAt)).limit(limit).offset(offset);
   }
+  async getUserTickets(userId: string) {
+    return db.select().from(tickets).where(eq(tickets.userId, userId)).orderBy(desc(tickets.createdAt));
+  }
   async getTicket(id: string) {
     const [t] = await db.select().from(tickets).where(eq(tickets.id, id));
     return t;
@@ -388,9 +392,9 @@ export class DatabaseStorage implements IStorage {
     await db.update(tickets).set({ status: status as any, updatedAt: new Date() }).where(eq(tickets.id, id));
     return fetchAfter<Ticket>(tickets, id, tickets.id);
   }
-  async replyToTicket(ticketId: string, userId: string, message: string, isStaff = false) {
+  async replyToTicket(ticketId: string, userId: string, message: string, isStaff = false, attachmentUrl?: string) {
     const id = randomUUID();
-    await db.insert(ticketReplies).values({ id, ticketId, userId, message, isStaff });
+    await db.insert(ticketReplies).values({ id, ticketId, userId, message, isStaff, attachmentUrl });
     return fetchAfter<TicketReply>(ticketReplies, id, ticketReplies.id);
   }
   async getTicketReplies(ticketId: string) {
