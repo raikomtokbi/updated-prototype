@@ -61,6 +61,7 @@ interface FormState {
   footerText: string;
   buttonText: string;
   buttonLink: string;
+  copyEmail: string;
   isEnabled: boolean;
   styles: EmailStyles;
 }
@@ -832,6 +833,7 @@ function TemplateEditor({
     footerText: "",
     buttonText: "",
     buttonLink: "",
+    copyEmail: "",
     isEnabled: true,
     styles: { ...DEFAULT_STYLES },
   });
@@ -859,6 +861,7 @@ function TemplateEditor({
         footerText: template.footerText ?? "",
         buttonText: template.buttonText ?? "",
         buttonLink: template.buttonLink ?? "",
+        copyEmail: template.copyEmail ?? "",
         isEnabled: template.isEnabled ?? true,
         styles: parsedStyles,
       });
@@ -890,6 +893,7 @@ function TemplateEditor({
           footerText: data.footerText,
           buttonText: data.buttonText,
           buttonLink: data.buttonLink,
+          copyEmail: data.copyEmail,
           isEnabled: data.isEnabled,
           styles: JSON.stringify(data.styles),
         }),
@@ -1150,6 +1154,19 @@ function TemplateEditor({
                 placeholder="Footer text shown at the bottom..."
                 style={inputStyle}
                 {...trackFocus("footerText", "Footer Text")}
+              />
+            </div>
+
+            {/* Email Copy */}
+            <div>
+              <label style={labelStyle}>Email Copy (CC)</label>
+              <input
+                type="email"
+                value={form.copyEmail}
+                onChange={(e) => setField("copyEmail", e.target.value)}
+                placeholder="admin@example.com"
+                style={inputStyle}
+                {...trackFocus("copyEmail", "Email Copy")}
               />
             </div>
           </div>
