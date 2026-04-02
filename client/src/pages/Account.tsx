@@ -982,32 +982,29 @@ function TicketsTab({ user }: { user: any }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={{ ...baseBox, padding: "1.25rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{
-            width: "40px", height: "40px", borderRadius: "0.6rem", flexShrink: 0,
-            background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Headphones size={18} style={{ color: "hsl(258,90%,70%)" }} />
-          </div>
-          <div>
-            <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Support Tickets</div>
-            <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,45%)" }}>View and manage your submitted support requests</div>
-          </div>
+    <div style={baseBox}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 1.25rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+        <div style={{
+          width: "36px", height: "36px", borderRadius: "0.6rem", flexShrink: 0,
+          background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Headphones size={16} style={{ color: "hsl(258,90%,70%)" }} />
+        </div>
+        <div>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Support Tickets</div>
+          <div style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)" }}>View and manage your submitted support requests</div>
         </div>
       </div>
 
+      {/* Content */}
       {isLoading ? (
         <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)" }}>
           <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
         </div>
       ) : tickets.length === 0 ? (
-        <div style={{
-          ...baseBox, padding: "3rem 1.5rem", textAlign: "center",
-          color: "hsl(220,10%,40%)", fontSize: "0.875rem",
-        }}>
+        <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "0.875rem" }}>
           <Headphones size={36} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
           <p style={{ fontWeight: 600, marginBottom: "0.4rem" }}>No tickets yet</p>
           <p style={{ fontSize: "0.8rem" }}>
@@ -1017,7 +1014,7 @@ function TicketsTab({ user }: { user: any }) {
           </p>
         </div>
       ) : (
-        <div style={baseBox}>
+        <>
           {tickets.map((t: any, i: number) => (
             <div
               key={t.id}
@@ -1046,7 +1043,7 @@ function TicketsTab({ user }: { user: any }) {
               </div>
             </div>
           ))}
-        </div>
+        </>
       )}
     </div>
   );
@@ -1121,8 +1118,8 @@ export default function Account() {
         </div>
         {/* Bottom row: actions */}
         <div style={{
-          borderTop: "1px solid hsl(220,15%,14%)", paddingTop: "0.85rem",
-          display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "flex-end",
+          borderTop: "1px solid hsl(220,15%,14%)", padding: "0.75rem 0 0",
+          display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center",
         }}>
           {isStaff() && (
             <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.78rem" }} data-testid="button-go-to-admin">
