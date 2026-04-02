@@ -246,12 +246,23 @@ export async function validatePlayer(
 
     if (zoneId) payload.zoneid = zoneId;
 
+    // Forward additional dynamic fields (e.g. server_id for some games)
+    const knownAliases = new Set([
+      "user_id", "userId", "userid",
+      "zone_id", "zoneId", "zoneid",
+    ]);
+    for (const [k, v] of Object.entries(userInput)) {
+      if (!knownAliases.has(k) && v) {
+        payload[k] = v;
+      }
+    }
+
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
       const message = parseErrorMessage(data);
       console.warn(`[SmileOne] validatePlayer failed for ${gameSlug} uid=${userId}:`, message);
-      return { valid: false, message };
+      return { success: false, valid: false, message };
     }
 
     const username =
