@@ -95,6 +95,7 @@ export interface IStorage {
   updateTicketStatus(id: string, status: string): Promise<Ticket | undefined>;
   replyToTicket(ticketId: string, userId: string, message: string, isStaff?: boolean, attachmentUrl?: string): Promise<TicketReply>;
   getTicketReplies(ticketId: string): Promise<TicketReply[]>;
+  clearTicketAttachments(ticketId: string): Promise<string[]>;
 
   // Campaigns
   getAllCampaigns(): Promise<Campaign[]>;
@@ -399,6 +400,18 @@ export class DatabaseStorage implements IStorage {
   }
   async getTicketReplies(ticketId: string) {
     return db.select().from(ticketReplies).where(eq(ticketReplies.ticketId, ticketId)).orderBy(ticketReplies.createdAt);
+  }
+  async clearTicketAttachments(ticketId: string): Promise<string[]> {
+    const replies = await db.select({ id: ticketReplies.id, attachmentUrl: ticketReplies.attachmentUrl })
+      .from(ticketReplies)
+      .where(eq(ticketReplies.ticketId, ticketId));
+    const urls: string[] = replies.filter((r) => r.attachmentUrl).map((r) => r.attachmentUrl as string);
+    if (urls.length > 0) {
+      await db.update(ticketReplies)
+        .set({ attachmentUrl: null })
+        .where(eq(ticketReplies.ticketId, ticketId));
+    }
+    return urls;
   }
 
   // ── Campaigns ──────────────────────────────────────────────────────────────

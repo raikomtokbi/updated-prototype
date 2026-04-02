@@ -58,7 +58,7 @@ const attachmentUpload = multer({
       cb(null, `attach-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
     },
   }),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowed = ["image/", "video/", "application/pdf", "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -959,6 +959,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.patch("/api/admin/tickets/:id/status", requireAdmin, async (req, res) => {
     const t = await storage.updateTicketStatus(req.params.id, req.body.status);
     if (!t) return res.status(404).json({ message: "Not found" });
+    if (req.body.status === "closed") {
+      try {
+        const attachmentUrls = await storage.clearTicketAttachments(req.params.id);
+        for (const url of attachmentUrls) {
+          const filename = path.basename(url);
+          const filePath = path.join(uploadsDir, filename);
+          fs.unlink(filePath, () => {});
+        }
+      } catch (_) {}
+    }
     res.json(t);
   });
 
