@@ -181,6 +181,13 @@ const GATEWAY_CONFIGS: Record<string, {
     ],
     notes: "Bank transfer, UPI, or other manual payment methods.",
   },
+  xyzpay: {
+    label: "XYZPay",
+    fields: [
+      { key: "secretKey", label: "API Token", placeholder: "••••••••••••••••", isSecret: true },
+    ],
+    notes: "XYZPay Payment Gateway. Get your API token from XYZPay dashboard at https://www.xyzpay.site/",
+  },
 };
 
 const EMPTY_PM = {
@@ -217,6 +224,7 @@ function getGatewayBadgeColor(type: string): string {
     stripe: "#635BFF",
     paypal: "#0070BA",
     manual: "#6B7280",
+    xyzpay: "#FF6B6B",
   };
   return colors[type] || "#6B7280";
 }
@@ -449,7 +457,7 @@ export default function PaymentMethodPage() {
       {/* Info banner */}
       <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", lineHeight: 1.6, margin: 0 }}>
-          Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, Manual</span>.
+          Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual</span>.
           The first active gateway is shown to users at checkout. Enable multiple to let users choose.
         </p>
       </div>
