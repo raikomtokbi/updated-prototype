@@ -562,11 +562,18 @@ export default function Checkout() {
                       {item.packageName} × {item.quantity}
                     </div>
                     {/* Player info */}
-                    {(item.userId || item.playerId) && (
-                      <div style={{ fontSize: "0.7rem", color: "hsl(220,10%,42%)", marginTop: "3px" }}>
-                        {item.playerId && <span>ID: {item.playerId}</span>}
-                        {item.zoneId && <span style={{ marginLeft: "8px" }}>Zone: {item.zoneId}</span>}
-                        {!item.playerId && item.userId && <span>User: {item.userId}</span>}
+                    {(item.userId || item.playerId || item.zoneId) && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginTop: "5px" }}>
+                        {(item.userId || item.playerId) && (
+                          <span style={{ fontSize: "0.7rem", color: "hsl(220,10%,42%)" }}>
+                            User ID: {item.playerId || item.userId}
+                          </span>
+                        )}
+                        {item.zoneId && (
+                          <span style={{ fontSize: "0.7rem", color: "hsl(220,10%,42%)" }}>
+                            Zone / Server: {item.zoneId}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
