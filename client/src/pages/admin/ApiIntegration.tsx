@@ -336,7 +336,6 @@ function BusanMappingTab() {
   const isMobile = useMobile(640);
 
   // Left (CMS) side state
-  const [selectedGame, setSelectedGame] = useState("all");
   const [selectedCmsProduct, setSelectedCmsProduct] = useState("");
 
   // Right (Busan) side state
@@ -382,10 +381,8 @@ function BusanMappingTab() {
     if (isConfigured) fetchBusanProducts();
   }, [isConfigured]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filtered CMS products by selected game
-  const filteredCmsProducts = selectedGame === "all"
-    ? cmsProducts
-    : cmsProducts.filter(p => p.gameId === selectedGame);
+  // Build a gameId → game name map for display
+  const gameNameMap = Object.fromEntries(games.map(g => [g.id, g.name]));
 
   const effectiveBusanId = busanProducts.length > 0 ? selectedBusanProduct : manualBusanId;
 
@@ -405,6 +402,7 @@ function BusanMappingTab() {
       qc.invalidateQueries({ queryKey: ["/api/admin/busan/mappings"] });
       refetchMappings();
       setSelectedCmsProduct(""); setSelectedBusanProduct(""); setManualBusanId(""); setRequiresZone(false);
+
     },
   });
 
@@ -426,16 +424,6 @@ function BusanMappingTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Add Product Mapping</p>
 
-        {/* Filter by game — full width above the columns */}
-        <div style={{ marginBottom: "14px" }}>
-          <label style={labelStyle}>Filter by Game</label>
-          <select style={selectStyle} value={selectedGame} onChange={e => { setSelectedGame(e.target.value); setSelectedCmsProduct(""); }}
-            data-testid="select-filter-game">
-            <option value="all">All Games</option>
-            {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-          </select>
-        </div>
-
         {/* Even two-column picker */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto 1fr", gap: isMobile ? "12px" : "16px", alignItems: "start" }}>
 
@@ -449,17 +437,18 @@ function BusanMappingTab() {
               <select style={selectStyle} value={selectedCmsProduct} onChange={e => setSelectedCmsProduct(e.target.value)}
                 data-testid="select-cms-product">
                 <option value="">— Choose product —</option>
-                {filteredCmsProducts.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}{p.finalPrice ? ` — ${p.currency} ${p.finalPrice}` : ""}
-                  </option>
-                ))}
+                {cmsProducts.map(p => {
+                  const gameName = gameNameMap[p.gameId] ?? "Unknown Game";
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {gameName} — {p.name}{p.finalPrice ? ` (${p.currency} ${p.finalPrice})` : ""}
+                    </option>
+                  );
+                })}
               </select>
-              {filteredCmsProducts.length === 0 && (
+              {cmsProducts.length === 0 && (
                 <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
-                  {selectedGame === "all"
-                    ? "No services found. Add them in the Services section."
-                    : "No services for this game."}
+                  No services found. Add them in the Services section.
                 </p>
               )}
             </div>
