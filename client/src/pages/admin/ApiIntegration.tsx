@@ -7,7 +7,7 @@ import {
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
-import type { Plugin, Product, BusanMapping, Game } from "@shared/schema";
+import type { Plugin, Service, BusanMapping, Game } from "@shared/schema";
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -181,7 +181,7 @@ function ConfigureModal({
 
 // ─── Busan Types ──────────────────────────────────────────────────────────────
 interface BusanConfig { id?: string; apiToken?: string; apiBaseUrl?: string; currency?: string; isActive?: boolean; }
-interface BusanProduct { id: string; name: string; price: number; currency: string; category?: string; }
+interface BusanProduct { id: string; name: string; price: number; priceRaw?: string; currency: string; category?: string; }
 
 // ─── Busan Config Tab ─────────────────────────────────────────────────────────
 function BusanConfigTab() {
@@ -340,9 +340,9 @@ function BusanMappingTab() {
     queryKey: ["/api/admin/games"],
     queryFn: () => adminApi.get("/games"),
   });
-  const { data: cmsProducts = [] } = useQuery<Product[]>({
-    queryKey: ["/api/admin/products"],
-    queryFn: () => adminApi.get("/products"),
+  const { data: cmsProducts = [] } = useQuery<Service[]>({
+    queryKey: ["/api/admin/services"],
+    queryFn: () => adminApi.get("/services"),
   });
   const { data: mappings = [], refetch: refetchMappings } = useQuery<BusanMapping[]>({
     queryKey: ["/api/admin/busan/mappings"],
@@ -367,7 +367,7 @@ function BusanMappingTab() {
   // Filtered products
   const filteredCmsProducts = selectedGame === "all"
     ? cmsProducts
-    : cmsProducts.filter(p => (p as any).gameId === selectedGame || (p as any).gameSlug === selectedGame);
+    : cmsProducts.filter(p => p.gameId === selectedGame);
 
   const filteredBusanProducts = busanCategory === "all"
     ? busanProducts
@@ -381,7 +381,7 @@ function BusanMappingTab() {
       const busanProduct = busanProducts.find(p => p.id === selectedBusanProduct);
       return adminApi.post("/busan/mappings", {
         cmsProductId: selectedCmsProduct,
-        cmsProductName: cmsProduct?.title ?? "",
+        cmsProductName: cmsProduct?.name ?? "",
         busanProductId: effectiveBusanId,
         busanProductName: busanProduct?.name ?? effectiveBusanId,
         requiresZone,
@@ -424,7 +424,7 @@ function BusanMappingTab() {
               <select style={selectStyle} value={selectedGame} onChange={e => { setSelectedGame(e.target.value); setSelectedCmsProduct(""); }}
                 data-testid="select-filter-game">
                 <option value="all">All Games</option>
-                {games.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+                {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>
             <div>
@@ -432,10 +432,18 @@ function BusanMappingTab() {
               <select style={selectStyle} value={selectedCmsProduct} onChange={e => setSelectedCmsProduct(e.target.value)}
                 data-testid="select-cms-product">
                 <option value="">— Choose product —</option>
-                {filteredCmsProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                {filteredCmsProducts.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}{p.finalPrice ? ` — ${p.currency} ${p.finalPrice}` : ""}
+                  </option>
+                ))}
               </select>
-              {filteredCmsProducts.length === 0 && selectedGame !== "all" && (
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>No products for this game.</p>
+              {filteredCmsProducts.length === 0 && (
+                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
+                  {selectedGame === "all"
+                    ? "No services found. Add them in the Services section."
+                    : "No services for this game."}
+                </p>
               )}
             </div>
           </div>
@@ -477,7 +485,9 @@ function BusanMappingTab() {
                     data-testid="select-busan-product">
                     <option value="">— Choose product —</option>
                     {filteredBusanProducts.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} — {p.currency} {p.price}</option>
+                      <option key={p.id} value={p.id}>
+                        {p.name} — {p.priceRaw ?? `${p.currency} ${p.price}`}
+                      </option>
                     ))}
                   </select>
                 </div>
