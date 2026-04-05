@@ -277,7 +277,7 @@ export default function Users() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return users.filter((u) => {
-      const matchSearch = !q || u.username.toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q) || (u.fullName ?? "").toLowerCase().includes(q);
+      const matchSearch = !q || (u.username ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q) || (u.fullName ?? "").toLowerCase().includes(q);
       const matchRole = !roleFilter || u.role === roleFilter;
       const matchStatus = !statusFilter || (statusFilter === "active" ? u.isActive : !u.isActive);
       return matchSearch && matchRole && matchStatus;

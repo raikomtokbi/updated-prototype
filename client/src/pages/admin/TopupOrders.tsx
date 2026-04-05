@@ -41,7 +41,7 @@ export default function TopupOrders() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return orders.filter((o) => {
-      const matchSearch = !q || o.orderNumber.toLowerCase().includes(q) || (o.userId ?? "").toLowerCase().includes(q);
+      const matchSearch = !q || (o.orderNumber ?? "").toLowerCase().includes(q) || (o.userId ?? "").toLowerCase().includes(q);
       const matchStatus = !statusFilter || o.status === statusFilter;
       return matchSearch && matchStatus;
     });

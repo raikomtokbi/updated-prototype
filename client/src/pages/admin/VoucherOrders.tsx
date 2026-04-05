@@ -43,9 +43,9 @@ export default function VoucherOrders() {
     return orders.filter((o) => {
       const matchSearch =
         !q ||
-        o.orderNumber.toLowerCase().includes(q) ||
+        (o.orderNumber ?? "").toLowerCase().includes(q) ||
         (o.userId ?? "").toLowerCase().includes(q) ||
-        o.productTitle.toLowerCase().includes(q);
+        (o.productTitle ?? "").toLowerCase().includes(q);
       const matchStatus = !statusFilter || o.status === statusFilter;
       return matchSearch && matchStatus;
     });
