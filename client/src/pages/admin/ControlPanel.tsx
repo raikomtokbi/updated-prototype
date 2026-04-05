@@ -922,7 +922,7 @@ export default function ControlPanel() {
               <label style={labelStyle}>{item.label}</label>
               <textarea
                 data-testid={`input-${item.key}`}
-                style={{ ...textareaStyle, minHeight: "110px" }}
+                style={{ ...textareaStyle, minHeight: "250px" }}
                 value={local[item.key] ?? ""}
                 onChange={(e) => set(item.key, e.target.value)}
                 placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
