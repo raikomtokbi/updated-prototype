@@ -1684,6 +1684,56 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ── XYZPay Webhook Handler ────────────────────────────────────────────────────
+  app.post("/api/xyzpay/webhook", async (req, res) => {
+    try {
+      const { order_id, status } = req.body;
+      
+      if (!order_id) {
+        return res.status(400).json({ error: "Missing order_id" });
+      }
+
+      // Fetch the order to verify amount
+      const order = await storage.getOrderById(order_id);
+      if (!order) {
+        console.error(`XYZPay webhook: Order not found - ${order_id}`);
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Get XYZPay payment method for status verification
+      const xyzpayMethod = await storage.getPaymentMethodByType("xyzpay");
+      if (xyzpayMethod && xyzpayMethod.secretKey) {
+        // Verify payment status with XYZPay API
+        const formData = new URLSearchParams();
+        formData.append("user_token", xyzpayMethod.secretKey);
+        formData.append("order_id", order_id);
+
+        const response = await fetch("https://www.xyzpay.site/api/check-order-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData.toString(),
+        });
+
+        const data = await response.json();
+        
+        if (data.result?.txnStatus === "COMPLETED") {
+          // Update order status to completed
+          await storage.updateOrderStatus(order_id, "completed");
+          console.log(`XYZPay payment confirmed for order: ${order_id}`);
+          
+          // Process the order (handle top-ups, etc.)
+          // This would be done by the existing order processing system
+          return res.json({ success: true, message: "Payment verified and order updated" });
+        }
+      }
+
+      return res.json({ success: false, message: "Payment verification failed" });
+    } catch (error: any) {
+      console.error("XYZPay webhook error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // ── Smile.one Admin Config & Mappings ─────────────────────────────────────────
 
   app.get("/api/admin/smileone/config", requireAdmin, async (_req, res) => {

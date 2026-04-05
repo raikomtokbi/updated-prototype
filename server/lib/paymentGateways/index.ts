@@ -8,6 +8,7 @@ import { phonepeGateway } from "./phonepe";
 import { paytmGateway } from "./paytm";
 import { easybuzzGateway } from "./easybuzz";
 import { bharatpeGateway } from "./bharatpe";
+import { xyzpayGateway } from "./xyzpay";
 
 export const GATEWAY_HANDLERS: Record<string, PaymentGatewayHandler> = {
   razorpay: razorpayGateway,
@@ -19,6 +20,7 @@ export const GATEWAY_HANDLERS: Record<string, PaymentGatewayHandler> = {
   paytm: paytmGateway,
   easybuzz: easybuzzGateway,
   bharatpe: bharatpeGateway,
+  xyzpay: xyzpayGateway,
 };
 
 export function getGatewayHandler(type: string): PaymentGatewayHandler | null {

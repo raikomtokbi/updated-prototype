@@ -74,6 +74,7 @@ export interface IStorage {
 
   // Orders
   getAllOrders(limit?: number, offset?: number): Promise<Order[]>;
+  getOrderById(id: string): Promise<Order | undefined>;
   getOrdersByUser(userId: string): Promise<Order[]>;
   getOrderItemsByOrder(orderId: string): Promise<any[]>;
   countOrders(): Promise<number>;
@@ -341,6 +342,10 @@ export class DatabaseStorage implements IStorage {
   // ── Orders ─────────────────────────────────────────────────────────────────
   async getAllOrders(limit = 50, offset = 0) {
     return db.select().from(orders).orderBy(desc(orders.createdAt)).limit(limit).offset(offset);
+  }
+  async getOrderById(id: string) {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order;
   }
   async getOrdersByUser(userId: string) {
     return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
