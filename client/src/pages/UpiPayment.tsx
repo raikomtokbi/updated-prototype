@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "wouter";
-import { CheckCircle, Clock, Copy, AlertTriangle, Loader2 } from "lucide-react";
+import { Link, useLocation, useParams } from "wouter";
+import { CheckCircle, Clock, Copy, AlertTriangle, Loader2, ArrowRight, RotateCcw, XCircle } from "lucide-react";
 import { getCurrencySymbol } from "@/lib/currency";
 
 interface OrderStatus {
@@ -137,55 +137,58 @@ export default function UpiPayment() {
 
   if (isSuccess) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", background: "hsl(220,20%,6%)" }}>
-        <div style={{ ...card, maxWidth: "420px", width: "100%", textAlign: "center" }}>
-          <CheckCircle size={52} style={{ color: "#22c55e", marginBottom: "1rem" }} />
-          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}>
-            Payment Confirmed!
-          </h2>
-          <p style={{ color: "hsl(220,10%,60%)", fontSize: "14px", marginBottom: "1rem" }}>
-            Your payment has been verified. Your order is being processed.
-          </p>
-          {orderStatus?.utr && (
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>
-              UTR: {orderStatus.utr}
-            </p>
-          )}
-          <p style={{ fontSize: "13px", color: "hsl(220,10%,50%)", marginTop: "1rem" }}>
-            Redirecting to your orders...
-          </p>
+      <div style={{ maxWidth: "520px", margin: "4rem auto", padding: "2rem 1.5rem", textAlign: "center" }}>
+        <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "hsla(142,70%,55%,0.15)", border: "2px solid hsl(142,70%,55%)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+          <CheckCircle size={40} style={{ color: "hsl(142,70%,55%)" }} />
         </div>
+        <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.75rem" }}>
+          Payment Confirmed!
+        </h2>
+        <p style={{ color: "hsl(220,10%,60%)", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+          Your UPI payment has been verified. Your order is being processed and digital products will be delivered shortly.
+        </p>
+        {orderStatus?.utr && (
+          <div style={{ background: "hsla(258,70%,65%,0.08)", border: "1px solid hsla(258,70%,65%,0.2)", borderRadius: "8px", padding: "0.75rem 1rem", marginBottom: "1.5rem", textAlign: "left" }}>
+            <p style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>UTR Reference</p>
+            <p style={{ fontSize: "13px", color: "hsl(210,40%,85%)", fontFamily: "monospace", wordBreak: "break-all", margin: 0 }}>{orderStatus.utr}</p>
+          </div>
+        )}
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/orders" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="link-view-orders">
+            View Orders <ArrowRight size={16} />
+          </Link>
+          <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }}>
+            Continue Shopping
+          </Link>
+        </div>
+        <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", marginTop: "1.5rem" }}>
+          Redirecting to your orders automatically...
+        </p>
       </div>
     );
   }
 
-  if (isExpired) {
+  if (isExpired || error) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", background: "hsl(220,20%,6%)" }}>
-        <div style={{ ...card, maxWidth: "420px", width: "100%", textAlign: "center" }}>
-          <AlertTriangle size={48} style={{ color: "#f59e0b", marginBottom: "1rem" }} />
-          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}>
-            Payment Window Expired
-          </h2>
-          <p style={{ color: "hsl(220,10%,60%)", fontSize: "14px", marginBottom: "1.5rem" }}>
-            The payment window has closed. If you completed the payment, our system will still verify it within a few minutes.
-          </p>
-          <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
-            <button
-              onClick={() => navigate("/orders")}
-              style={{ padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(258,90%,66%)", color: "#fff", border: "none", cursor: "pointer", fontSize: "14px" }}
-              data-testid="button-check-orders"
-            >
-              Check My Orders
-            </button>
-            <button
-              onClick={() => navigate("/checkout")}
-              style={{ padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(220,20%,14%)", color: "hsl(210,40%,85%)", border: "1px solid hsl(220,15%,20%)", cursor: "pointer", fontSize: "14px" }}
-              data-testid="button-try-again"
-            >
-              Try Again
-            </button>
-          </div>
+      <div style={{ maxWidth: "480px", margin: "4rem auto", padding: "2rem 1.5rem", textAlign: "center" }}>
+        <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "hsla(0,70%,55%,0.15)", border: "2px solid hsl(0,70%,55%)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+          {isExpired ? <AlertTriangle size={40} style={{ color: "hsl(0,70%,55%)" }} /> : <XCircle size={40} style={{ color: "hsl(0,70%,55%)" }} />}
+        </div>
+        <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.75rem" }}>
+          {isExpired ? "Payment Window Expired" : "Payment Failed"}
+        </h2>
+        <p style={{ color: "hsl(220,10%,60%)", fontSize: "0.875rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+          {isExpired
+            ? "The payment window has closed. If you completed the payment, our system will still verify it within a few minutes."
+            : error || "Your payment could not be processed. Please try again or use a different payment method."}
+        </p>
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/orders" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-check-orders">
+            View Orders
+          </Link>
+          <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }} data-testid="link-try-again">
+            <RotateCcw size={15} /> Try Again
+          </Link>
         </div>
       </div>
     );
