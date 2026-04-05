@@ -104,11 +104,13 @@ export default function Dashboard() {
   const { data: stats } = useQuery<{ totalUsers: number; totalOrders: number; totalRevenue: number; openTickets: number }>({
     queryKey: statsQueryKey,
     queryFn: () => adminApi.get(statsUrl),
+    refetchInterval: 1000,
   });
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/admin/settings"],
     queryFn: () => adminApi.get("/settings"),
+    refetchInterval: 5000,
   });
 
   const currency = siteSettings?.default_currency ?? "USD";
@@ -117,6 +119,7 @@ export default function Dashboard() {
     queryKey: ["/api/admin/plugins"],
     queryFn: () => adminApi.get("/plugins"),
     staleTime: 60000,
+    refetchInterval: 5000,
   });
 
   const activeModules = plugins.filter((p) => p.isEnabled);
@@ -136,6 +139,7 @@ export default function Dashboard() {
     queryKey: salesQueryKey,
     queryFn: () => adminApi.get(salesUrl),
     staleTime: 60000,
+    refetchInterval: 2000,
   });
 
   const orderQueryKey = orderRangeKey === "custom" && orderCustomRange?.from
@@ -153,6 +157,7 @@ export default function Dashboard() {
     queryKey: orderQueryKey,
     queryFn: () => adminApi.get(orderUrl),
     staleTime: 60000,
+    refetchInterval: 2000,
   });
 
   const placeholderSalesData = [
