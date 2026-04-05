@@ -35,6 +35,7 @@ import VoucherOrders from "./pages/admin/VoucherOrders";
 import Payments from "./pages/admin/Payments";
 import Refunds from "./pages/admin/Refunds";
 import SupportTickets from "./pages/admin/SupportTickets";
+import ContactSubmissions from "./pages/admin/ContactSubmissions";
 import Games from "./pages/admin/Games";
 import AdminVouchers from "./pages/admin/Vouchers";
 import GiftCards from "./pages/admin/GiftCards";
@@ -61,6 +62,7 @@ function AdminRoutes() {
       <Route path="/admin/payments" component={Payments} />
       <Route path="/admin/refunds" component={Refunds} />
       <Route path="/admin/support-tickets" component={SupportTickets} />
+      <Route path="/admin/contact-submissions" component={ContactSubmissions} />
       <Route path="/admin/games" component={Games} />
       <Route path="/admin/gift-cards" component={GiftCards} />
       <Route path="/admin/vouchers" component={AdminVouchers} />

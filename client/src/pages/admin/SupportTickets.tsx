@@ -314,7 +314,8 @@ export default function SupportTickets() {
     return tickets.filter((t) => {
       const matchSearch = !q || t.subject.toLowerCase().includes(q) || (t.userId ?? "").toLowerCase().includes(q) || t.id.toLowerCase().includes(q) || (t.ticketNumber ?? "").toLowerCase().includes(q);
       const matchStatus = !statusFilter || t.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchCategory = t.category !== "contact";
+      return matchSearch && matchStatus && matchCategory;
     });
   }, [tickets, search, statusFilter]);
 

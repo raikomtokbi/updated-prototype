@@ -83,8 +83,9 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "TICKET",
+    title: "SUPPORT",
     items: [
+      { label: "Contact submissions", icon: <Mail size={15} />, path: "/admin/contact-submissions" },
       { label: "Support tickets", icon: <LifeBuoy size={15} />, path: "/admin/support-tickets" },
     ],
   },

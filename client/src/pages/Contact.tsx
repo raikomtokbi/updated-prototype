@@ -28,7 +28,7 @@ export default function Contact() {
       const res = await fetch("/api/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject: `Contact from ${name}`, message, email }),
+        body: JSON.stringify({ subject: `Contact from ${name}`, message, email, category: "contact" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to send message");
