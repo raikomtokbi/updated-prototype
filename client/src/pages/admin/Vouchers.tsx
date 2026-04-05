@@ -196,17 +196,22 @@ export default function Vouchers() {
 
   const vouchers = useMemo(() => allProducts.filter((p) => p.category === "voucher"), [allProducts]);
 
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey: ["/api/admin/products"] });
+    qc.invalidateQueries({ queryKey: ["/api/products"] });
+  };
+
   const addMut = useMutation({
     mutationFn: (d: any) => adminApi.post("/products", d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/products"] }); setShowAdd(false); },
+    onSuccess: () => { invalidateAll(); setShowAdd(false); },
   });
   const editMut = useMutation({
     mutationFn: ({ id, data }: any) => adminApi.patch(`/products/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/products"] }); setEditProduct(null); },
+    onSuccess: () => { invalidateAll(); setEditProduct(null); },
   });
   const delMut = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/products/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products"] }),
+    onSuccess: () => invalidateAll(),
   });
 
   const filtered = useMemo(() => {
