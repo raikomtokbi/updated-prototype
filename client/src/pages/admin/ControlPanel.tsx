@@ -234,6 +234,7 @@ const DEFAULTS: SettingsMap = {
   terms_content: "",
   privacy_content: "",
   refund_content: "",
+  delivery_cancellation_content: "",
   // About page
   about_headline: "",
   about_tagline: "",
@@ -915,6 +916,7 @@ export default function ControlPanel() {
             { key: "terms_content", label: "Terms of Service" },
             { key: "privacy_content", label: "Privacy Policy" },
             { key: "refund_content", label: "Refund Policy" },
+            { key: "delivery_cancellation_content", label: "Delivery & Cancellation Policy" },
           ].map((item) => (
             <div key={item.key}>
               <label style={labelStyle}>{item.label}</label>
