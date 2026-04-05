@@ -66,6 +66,7 @@ export const services = pgTable("services", {
   sortOrder: integer("sort_order").notNull().default(0),
   pluginSlug: varchar("plugin_slug", { length: 100 }),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Products ─────────────────────────────────────────────────────────────────
@@ -90,6 +91,7 @@ export const productPackages = pgTable("product_packages", {
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
@@ -132,6 +134,8 @@ export const transactions = pgTable("transactions", {
   failureReason: text("failure_reason"),
   isRefund: boolean("is_refund").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  completedAt: timestamp("completed_at"),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Coupons ──────────────────────────────────────────────────────────────────
@@ -230,6 +234,7 @@ export const paymentMethods = pgTable("payment_methods", {
   config: text("config"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── Relations ────────────────────────────────────────────────────────────────
@@ -310,7 +315,9 @@ export const notifications = pgTable("notifications", {
   message: text("message").notNull(),
   isRead: boolean("is_read").notNull().default(false),
   metadata: text("metadata"),
+  readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
