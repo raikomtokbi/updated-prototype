@@ -468,10 +468,34 @@ CREATE TABLE IF NOT EXISTS `smile_one_mappings` (
   KEY `smile_one_mappings_game_slug_idx` (`game_slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── busan_configs ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `busan_configs` (
+  `id`          VARCHAR(36)  NOT NULL,
+  `api_token`   VARCHAR(255) DEFAULT NULL,
+  `currency`    VARCHAR(20)  NOT NULL DEFAULT 'IDR',
+  `is_active`   TINYINT(1)   NOT NULL DEFAULT 1,
+  `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── busan_mappings ───────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `busan_mappings` (
+  `id`                  VARCHAR(36)  NOT NULL,
+  `cms_product_id`      VARCHAR(36)  NOT NULL,
+  `cms_product_name`    VARCHAR(191) DEFAULT NULL,
+  `busan_product_id`    VARCHAR(191) NOT NULL,
+  `busan_product_name`  VARCHAR(191) DEFAULT NULL,
+  `requires_zone`       TINYINT(1)   NOT NULL DEFAULT 0,
+  `created_at`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `busan_mappings_cms_product_id_idx` (`cms_product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
---  Table summary (26 tables total)
+--  Table summary (28 tables total)
 -- ============================================================
 --   users                      — registered accounts
 --   sessions                   — server-side user sessions

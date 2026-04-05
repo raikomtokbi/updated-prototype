@@ -3,7 +3,8 @@ import express from "express";
 import type { Server } from "http";
 import path from "path";
 import fs from "fs";
-import { createHash, randomBytes, createHmac } from "crypto";
+import { createHash, randomBytes, createHmac, randomUUID } from "crypto";
+import { generateOrderNumber } from "./lib/idGenerator";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import AdmZip from "adm-zip";
@@ -26,13 +27,18 @@ import {
   processTemplate,
   DEFAULT_EMAIL_TEMPLATES,
 } from "./lib/emailService";
-import { insertFeeSchema, insertSmileOneMappingSchema } from "@shared/schema";
+import { insertFeeSchema, insertSmileOneMappingSchema, insertBusanMappingSchema } from "@shared/schema";
 import {
   getProductList as smileGetProductList,
   validatePlayer as smileValidatePlayer,
   createPurchase as smileCreatePurchase,
   type SmileOneCredentials,
 } from "./lib/smileone/smileoneService";
+import {
+  getBusanBalance,
+  getBusanProducts,
+  createBusanOrder,
+} from "./lib/busanApi";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
 const uploadsDir = path.resolve(process.cwd(), "public/uploads");
@@ -1593,7 +1599,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Initiate payment for any gateway
   app.post("/api/payment/initiate", async (req, res) => {
     try {
-      const { gatewayId, amount, currency = "INR", email, name, phone, productInfo } = req.body;
+      const { gatewayId, amount, currency = "INR", email, name, phone, productInfo, cartItems } = req.body;
 
       if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
       if (!email) return res.status(400).json({ error: "Email is required" });
@@ -1610,7 +1616,35 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!handler) return res.status(400).json({ error: `Unsupported gateway type: ${method.type}` });
 
       const baseUrl = getBaseUrl(req);
-      const orderId = `ORD_${Date.now()}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+      const orderId = randomUUID();
+
+      // Persist order to DB (with cart items in notes for fulfillment)
+      try {
+        await storage.createOrder({
+          id: orderId,
+          orderNumber: generateOrderNumber(),
+          totalAmount: String(amount),
+          currency,
+          notes: cartItems ? JSON.stringify(cartItems) : undefined,
+          status: "pending",
+        });
+        if (Array.isArray(cartItems)) {
+          for (const item of cartItems) {
+            await storage.createOrderItem({
+              orderId,
+              productId: item.productId,
+              packageId: item.packageId,
+              productTitle: item.productTitle || item.packageName || "Order",
+              packageLabel: item.packageName,
+              quantity: item.quantity || 1,
+              unitPrice: String(item.price || 0),
+              totalPrice: String((item.price || 0) * (item.quantity || 1)),
+            });
+          }
+        }
+      } catch (dbErr) {
+        console.warn("Order DB persist warning:", dbErr);
+      }
 
       const result = await handler.initiatePayment(
         {
@@ -1731,9 +1765,39 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           // Update order status to completed
           await storage.updateOrderStatus(order_id, "completed");
           console.log(`XYZPay payment confirmed for order: ${order_id}`);
-          
-          // Process the order (handle top-ups, etc.)
-          // This would be done by the existing order processing system
+
+          // Trigger Busan top-up if mapping exists
+          try {
+            const busanConfig = await storage.getBusanConfig();
+            if (busanConfig?.apiToken && busanConfig.isActive) {
+              // Parse cart items from order notes
+              let cartItems: any[] = [];
+              if (order.notes) {
+                try { cartItems = JSON.parse(order.notes); } catch { cartItems = []; }
+              }
+              // Also check order items in DB
+              if (!Array.isArray(cartItems) || cartItems.length === 0) {
+                const dbItems = await storage.getOrderItemsByOrder(order_id);
+                cartItems = dbItems.map(i => ({ productId: i.productId }));
+              }
+              for (const item of cartItems) {
+                if (!item.productId) continue;
+                const mapping = await storage.getBusanMappingByCmsProductId(item.productId);
+                if (!mapping) continue;
+                const orderResult = await createBusanOrder(busanConfig.apiToken, {
+                  product_id: mapping.busanProductId,
+                  player_id: item.playerId || item.userId || "",
+                  zone_id: item.zoneId,
+                  ref_id: order_id,
+                  quantity: item.quantity || 1,
+                });
+                console.log(`Busan order for product ${mapping.busanProductId}:`, orderResult);
+              }
+            }
+          } catch (busanErr) {
+            console.error("Busan top-up error:", busanErr);
+          }
+
           return res.json({ success: true, message: "Payment verified and order updated" });
         }
       }
@@ -1846,6 +1910,89 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.delete("/api/admin/smileone/mappings/:id", requireAdmin, async (req, res) => {
     try {
       await storage.deleteSmileOneMapping(req.params.id);
+      return res.json({ success: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  // ── Busan Admin Config & Mappings ─────────────────────────────────────────────
+
+  app.get("/api/admin/busan/config", requireAdmin, async (_req, res) => {
+    try {
+      const config = await storage.getBusanConfig();
+      return res.json(config ?? null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.post("/api/admin/busan/config", requireAdmin, async (req, res) => {
+    try {
+      const { apiToken, currency, isActive } = req.body as Record<string, any>;
+      const config = await storage.upsertBusanConfig({
+        apiToken,
+        currency: currency || "IDR",
+        isActive: isActive !== false,
+      });
+      return res.json(config);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.get("/api/admin/busan/balance", requireAdmin, async (_req, res) => {
+    try {
+      const config = await storage.getBusanConfig();
+      if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
+      const balance = await getBusanBalance(config.apiToken);
+      return res.json({ success: true, ...balance });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(502).json({ success: false, message });
+    }
+  });
+
+  app.get("/api/admin/busan/products", requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.getBusanConfig();
+      if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
+      const products = await getBusanProducts(config.apiToken, config.currency);
+      return res.json(products);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(502).json({ success: false, message });
+    }
+  });
+
+  app.get("/api/admin/busan/mappings", requireAdmin, async (_req, res) => {
+    try {
+      const mappings = await storage.getAllBusanMappings();
+      return res.json(mappings);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.post("/api/admin/busan/mappings", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertBusanMappingSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ success: false, message: "Invalid mapping data", errors: parsed.error.flatten() });
+      const mapping = await storage.createBusanMapping(parsed.data);
+      return res.status(201).json(mapping);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return res.status(500).json({ success: false, message });
+    }
+  });
+
+  app.delete("/api/admin/busan/mappings/:id", requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteBusanMapping(req.params.id);
       return res.json({ success: true });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";

@@ -421,6 +421,35 @@ export const insertFeeSchema = createInsertSchema(fees).omit({ id: true, created
 export type Fee = typeof fees.$inferSelect;
 export type InsertFee = z.infer<typeof insertFeeSchema>;
 
+// ─── Busan Config ─────────────────────────────────────────────────────────────
+export const busanConfigs = pgTable("busan_configs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  apiToken: varchar("api_token", { length: 255 }),
+  currency: varchar("currency", { length: 20 }).notNull().default("IDR"),
+  isActive: boolean("is_active").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertBusanConfigSchema = createInsertSchema(busanConfigs).omit({ id: true, updatedAt: true });
+export type BusanConfig = typeof busanConfigs.$inferSelect;
+export type InsertBusanConfig = z.infer<typeof insertBusanConfigSchema>;
+
+// ─── Busan Product Mappings ───────────────────────────────────────────────────
+export const busanMappings = pgTable("busan_mappings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  cmsProductId: varchar("cms_product_id", { length: 36 }).notNull(),
+  cmsProductName: varchar("cms_product_name", { length: 191 }),
+  busanProductId: varchar("busan_product_id", { length: 191 }).notNull(),
+  busanProductName: varchar("busan_product_name", { length: 191 }),
+  requiresZone: boolean("requires_zone").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertBusanMappingSchema = createInsertSchema(busanMappings).omit({ id: true, createdAt: true, updatedAt: true });
+export type BusanMapping = typeof busanMappings.$inferSelect;
+export type InsertBusanMapping = z.infer<typeof insertBusanMappingSchema>;
+
 // ─── Smile.one Config ─────────────────────────────────────────────────────────
 export const smileOneConfigs = pgTable("smile_one_configs", {
   id: varchar("id", { length: 36 }).primaryKey(),

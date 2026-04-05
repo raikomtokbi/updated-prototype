@@ -91,11 +91,40 @@ All gateways are configured via **Admin → Payment Gateways** and stored in the
 
 All redirect gateways return to `/payment-return` with query params that indicate status. The `PaymentReturn` page handles verification and shows success/failure UI.
 
+## Busan Game Top-up API Integration
+
+Automatically fulfilment of game top-up orders after XYZPay (or other) payment confirmation.
+
+### How It Works
+
+1. **Admin Setup**: Configure API token + currency in **Admin → API Integration → Game Top-up Integration**
+2. **Product Mapping**: Map each CMS product to a Busan product ID (with optional "Requires Zone ID" flag)
+3. **Checkout**: Cart items (including `playerId`, `zoneId`, `userId`) are sent with payment initiation and persisted in `orders.notes` as JSON
+4. **Webhook**: `POST /api/xyzpay/webhook` — after XYZPay confirms `COMPLETED`, the Busan API is called for each mapped product in the order
+
+### Key Files
+
+- `server/lib/busanApi.ts` — Busan API client (`getBusanBalance`, `getBusanProducts`, `createBusanOrder`)
+- `shared/schema.ts` — `busanConfigs` + `busanMappings` tables
+- `server/storage.ts` — `getBusanConfig`, `upsertBusanConfig`, `getAllBusanMappings`, `createBusanMapping`, etc.
+- `client/src/pages/admin/ApiIntegration.tsx` — Admin UI with dual config cards + product mapping table
+
+### Admin API Endpoints
+
+- `GET/POST /api/admin/busan/config` — Busan API token + currency
+- `GET /api/admin/busan/balance` — Live balance check
+- `GET /api/admin/busan/products` — Product list from Busan API
+- `GET/POST/DELETE /api/admin/busan/mappings` — CMS ↔ Busan product mappings
+
+## Smile.one Integration
+
+Player lookup + automatic purchase via Smile.one API. Configured in **Admin → Smile.one**.
+
 ## Features
 
 - Role-based access control (super_admin, admin, staff, user)
 - Digital product storefront with packages/pricing tiers
-- Order and transaction management
+- Order and transaction management (orders persisted in DB with player/zone IDs in notes)
 - Support ticket system
 - Hero sliders, campaigns, coupons
 - Email templates, plugins system
@@ -105,3 +134,5 @@ All redirect gateways return to `/payment-return` with query params that indicat
 - Customisable themes (stored in settings)
 - Admin notifications
 - Multi-gateway payment support (9 Indian + global gateways)
+- Busan API game top-up automatic fulfilment
+- Smile.one game top-up integration

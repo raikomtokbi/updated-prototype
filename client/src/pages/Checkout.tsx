@@ -196,6 +196,20 @@ export default function Checkout() {
           name: "Guest",
           productInfo,
           couponCode: couponApplied ? couponCode : undefined,
+          cartItems: items.map(i => ({
+            productId: i.productId,
+            productTitle: i.productTitle,
+            packageId: i.packageId,
+            packageName: i.packageName,
+            price: i.price,
+            quantity: i.quantity,
+            userId: i.userId,
+            zoneId: i.zoneId,
+            playerId: i.playerId,
+            loginId: i.loginId,
+            characterName: i.characterName,
+            email: i.email,
+          })),
         }),
       });
 

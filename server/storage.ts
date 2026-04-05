@@ -23,11 +23,14 @@ import {
   type Fee, type InsertFee,
   type SmileOneConfig,
   type SmileOneMapping, type InsertSmileOneMapping,
+  type BusanConfig,
+  type BusanMapping, type InsertBusanMapping,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
   notifications, siteSettings, emailTemplates, passwordResetTokens, fees,
   smileOneConfigs, smileOneMappings,
+  busanConfigs, busanMappings,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -172,6 +175,20 @@ export interface IStorage {
   createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping>;
   updateSmileOneMapping(id: string, data: Partial<SmileOneMapping>): Promise<SmileOneMapping | undefined>;
   deleteSmileOneMapping(id: string): Promise<void>;
+
+  // Busan Config
+  getBusanConfig(): Promise<BusanConfig | undefined>;
+  upsertBusanConfig(data: Partial<BusanConfig>): Promise<BusanConfig>;
+
+  // Busan Mappings
+  getAllBusanMappings(): Promise<BusanMapping[]>;
+  getBusanMappingByCmsProductId(cmsProductId: string): Promise<BusanMapping | undefined>;
+  createBusanMapping(data: InsertBusanMapping): Promise<BusanMapping>;
+  deleteBusanMapping(id: string): Promise<void>;
+
+  // Orders (create)
+  createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string }): Promise<Order>;
+  createOrderItem(data: { orderId: string; productId?: string; packageId?: string; productTitle: string; packageLabel?: string; quantity: number; unitPrice: string; totalPrice: string }): Promise<void>;
 
   // Password Reset Tokens
   createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -795,6 +812,82 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSmileOneMapping(id: string): Promise<void> {
     await db.delete(smileOneMappings).where(eq(smileOneMappings.id, id));
+  }
+
+  // ── Busan Config ─────────────────────────────────────────────────────────────
+  async getBusanConfig(): Promise<BusanConfig | undefined> {
+    const rows = await db.select().from(busanConfigs).limit(1);
+    return rows[0];
+  }
+
+  async upsertBusanConfig(data: Partial<BusanConfig>): Promise<BusanConfig> {
+    const existing = await this.getBusanConfig();
+    if (existing) {
+      const [updated] = await db
+        .update(busanConfigs)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(busanConfigs.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db
+      .insert(busanConfigs)
+      .values({ id: randomUUID(), ...data, updatedAt: new Date() } as BusanConfig)
+      .returning();
+    return created;
+  }
+
+  // ── Busan Mappings ───────────────────────────────────────────────────────────
+  async getAllBusanMappings(): Promise<BusanMapping[]> {
+    return db.select().from(busanMappings).orderBy(desc(busanMappings.createdAt));
+  }
+
+  async getBusanMappingByCmsProductId(cmsProductId: string): Promise<BusanMapping | undefined> {
+    const [row] = await db.select().from(busanMappings).where(eq(busanMappings.cmsProductId, cmsProductId));
+    return row;
+  }
+
+  async createBusanMapping(data: InsertBusanMapping): Promise<BusanMapping> {
+    const [created] = await db
+      .insert(busanMappings)
+      .values({ id: randomUUID(), ...data })
+      .returning();
+    return created;
+  }
+
+  async deleteBusanMapping(id: string): Promise<void> {
+    await db.delete(busanMappings).where(eq(busanMappings.id, id));
+  }
+
+  // ── Orders (create) ──────────────────────────────────────────────────────────
+  async createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string }): Promise<Order> {
+    const [created] = await db
+      .insert(orders)
+      .values({
+        id: data.id,
+        orderNumber: data.orderNumber,
+        userId: data.userId,
+        totalAmount: data.totalAmount,
+        currency: data.currency,
+        notes: data.notes,
+        status: (data.status as any) ?? "pending",
+      })
+      .returning();
+    return created;
+  }
+
+  async createOrderItem(data: { orderId: string; productId?: string; packageId?: string; productTitle: string; packageLabel?: string; quantity: number; unitPrice: string; totalPrice: string }): Promise<void> {
+    await db.insert(orderItems).values({
+      id: randomUUID(),
+      orderId: data.orderId,
+      productId: data.productId,
+      packageId: data.packageId,
+      productTitle: data.productTitle,
+      packageLabel: data.packageLabel,
+      quantity: data.quantity,
+      unitPrice: data.unitPrice,
+      totalPrice: data.totalPrice,
+    });
   }
 }
 

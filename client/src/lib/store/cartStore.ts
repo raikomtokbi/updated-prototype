@@ -11,6 +11,9 @@ export interface CartItem {
   price: number;
   userId: string;
   zoneId?: string;
+  playerId?: string;
+  loginId?: string;
+  characterName?: string;
   email?: string;
   quantity: number;
 }
