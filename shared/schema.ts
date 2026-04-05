@@ -425,6 +425,7 @@ export type InsertFee = z.infer<typeof insertFeeSchema>;
 export const busanConfigs = pgTable("busan_configs", {
   id: varchar("id", { length: 36 }).primaryKey(),
   apiToken: varchar("api_token", { length: 255 }),
+  apiBaseUrl: varchar("api_base_url", { length: 500 }).notNull().default("https://busangame.com/api"),
   currency: varchar("currency", { length: 20 }).notNull().default("IDR"),
   isActive: boolean("is_active").notNull().default(true),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),

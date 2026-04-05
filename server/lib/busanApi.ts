@@ -1,5 +1,3 @@
-const BUSAN_BASE_URL = "https://busangame.com/api";
-
 export interface BusanProduct {
   id: string;
   name: string;
@@ -28,7 +26,7 @@ export interface BusanOrderResult {
   status?: string;
 }
 
-function headers(apiToken: string): Record<string, string> {
+function makeHeaders(apiToken: string): Record<string, string> {
   return {
     "Authorization": `Bearer ${apiToken}`,
     "Content-Type": "application/json",
@@ -36,36 +34,58 @@ function headers(apiToken: string): Record<string, string> {
   };
 }
 
-export async function getBusanBalance(apiToken: string): Promise<BusanBalance> {
-  const res = await fetch(`${BUSAN_BASE_URL}/balance`, {
+function cleanBase(url: string): string {
+  return url.replace(/\/+$/, "");
+}
+
+export async function getBusanBalance(apiToken: string, apiBaseUrl: string): Promise<BusanBalance> {
+  const base = cleanBase(apiBaseUrl);
+  const res = await fetch(`${base}/balance`, {
     method: "GET",
-    headers: headers(apiToken),
+    headers: makeHeaders(apiToken),
   });
+
+  const text = await res.text();
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Busan balance check failed (${res.status}): ${text}`);
+    throw new Error(`Busan balance check failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
   }
-  const data = await res.json();
+
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Busan API returned non-JSON response. Check your API Base URL. Response: ${text.slice(0, 200)}`);
+  }
+
   return {
     balance: parseFloat(data.balance ?? data.data?.balance ?? "0"),
     currency: data.currency ?? data.data?.currency ?? "IDR",
   };
 }
 
-export async function getBusanProducts(apiToken: string, currency?: string): Promise<BusanProduct[]> {
-  const url = new URL(`${BUSAN_BASE_URL}/products`);
+export async function getBusanProducts(apiToken: string, apiBaseUrl: string, currency?: string): Promise<BusanProduct[]> {
+  const base = cleanBase(apiBaseUrl);
+  const url = new URL(`${base}/products`);
   if (currency) url.searchParams.set("currency", currency);
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: headers(apiToken),
+    headers: makeHeaders(apiToken),
   });
+
+  const text = await res.text();
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Busan products fetch failed (${res.status}): ${text}`);
+    throw new Error(`Busan products fetch failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
   }
-  const data = await res.json();
-  const list: any[] = data.data ?? data.products ?? data ?? [];
+
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Busan API returned non-JSON response. Check your API Base URL. Response: ${text.slice(0, 200)}`);
+  }
+
+  const list: any[] = data.data ?? data.products ?? (Array.isArray(data) ? data : []);
   return list.map((p: any) => ({
     id: String(p.id ?? p.product_id ?? ""),
     name: String(p.name ?? p.product_name ?? ""),
@@ -75,7 +95,8 @@ export async function getBusanProducts(apiToken: string, currency?: string): Pro
   }));
 }
 
-export async function createBusanOrder(apiToken: string, payload: BusanOrderPayload): Promise<BusanOrderResult> {
+export async function createBusanOrder(apiToken: string, apiBaseUrl: string, payload: BusanOrderPayload): Promise<BusanOrderResult> {
+  const base = cleanBase(apiBaseUrl);
   const body: Record<string, any> = {
     product_id: payload.product_id,
     player_id: payload.player_id,
@@ -84,17 +105,20 @@ export async function createBusanOrder(apiToken: string, payload: BusanOrderPayl
   };
   if (payload.zone_id) body.zone_id = payload.zone_id;
 
-  const res = await fetch(`${BUSAN_BASE_URL}/order`, {
+  const res = await fetch(`${base}/order`, {
     method: "POST",
-    headers: headers(apiToken),
+    headers: makeHeaders(apiToken),
     body: JSON.stringify(body),
   });
 
-  const data = await res.json();
+  const text = await res.text();
+  let data: any = {};
+  try { data = JSON.parse(text); } catch { /* ignore */ }
+
   if (!res.ok) {
     return {
       success: false,
-      message: data.message ?? data.error ?? `HTTP ${res.status}`,
+      message: data.message ?? data.error ?? `HTTP ${res.status}: ${text.slice(0, 200)}`,
     };
   }
 

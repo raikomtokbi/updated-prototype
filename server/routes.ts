@@ -1784,7 +1784,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
                 if (!item.productId) continue;
                 const mapping = await storage.getBusanMappingByCmsProductId(item.productId);
                 if (!mapping) continue;
-                const orderResult = await createBusanOrder(busanConfig.apiToken, {
+                const orderResult = await createBusanOrder(busanConfig.apiToken, busanConfig.apiBaseUrl ?? "https://busangame.com/api", {
                   product_id: mapping.busanProductId,
                   player_id: item.playerId || item.userId || "",
                   zone_id: item.zoneId,
@@ -1948,7 +1948,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const config = await storage.getBusanConfig();
       if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
-      const balance = await getBusanBalance(config.apiToken);
+      const balance = await getBusanBalance(config.apiToken, config.apiBaseUrl ?? "https://busangame.com/api");
       return res.json({ success: true, ...balance });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";
@@ -1960,7 +1960,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const config = await storage.getBusanConfig();
       if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
-      const products = await getBusanProducts(config.apiToken, config.currency);
+      const products = await getBusanProducts(config.apiToken, config.apiBaseUrl ?? "https://busangame.com/api", config.currency);
       return res.json(products);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";

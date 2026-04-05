@@ -470,11 +470,12 @@ CREATE TABLE IF NOT EXISTS `smile_one_mappings` (
 
 -- ─── busan_configs ────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `busan_configs` (
-  `id`          VARCHAR(36)  NOT NULL,
-  `api_token`   VARCHAR(255) DEFAULT NULL,
-  `currency`    VARCHAR(20)  NOT NULL DEFAULT 'IDR',
-  `is_active`   TINYINT(1)   NOT NULL DEFAULT 1,
-  `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id`            VARCHAR(36)   NOT NULL,
+  `api_token`     VARCHAR(255)  DEFAULT NULL,
+  `api_base_url`  VARCHAR(500)  NOT NULL DEFAULT 'https://busangame.com/api',
+  `currency`      VARCHAR(20)   NOT NULL DEFAULT 'IDR',
+  `is_active`     TINYINT(1)    NOT NULL DEFAULT 1,
+  `updated_at`    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

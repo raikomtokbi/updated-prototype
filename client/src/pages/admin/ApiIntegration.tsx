@@ -180,13 +180,14 @@ function ConfigureModal({
 }
 
 // ─── Busan Types ──────────────────────────────────────────────────────────────
-interface BusanConfig { id?: string; apiToken?: string; currency?: string; isActive?: boolean; }
+interface BusanConfig { id?: string; apiToken?: string; apiBaseUrl?: string; currency?: string; isActive?: boolean; }
 interface BusanProduct { id: string; name: string; price: number; currency: string; category?: string; }
 
 // ─── Busan Config Tab ─────────────────────────────────────────────────────────
 function BusanConfigTab() {
   const qc = useQueryClient();
   const [apiToken, setApiToken] = useState("");
+  const [apiBaseUrl, setApiBaseUrl] = useState("https://busangame.com/api");
   const [currency, setCurrency] = useState("IDR");
   const [saved, setSaved] = useState(false);
   const [balanceData, setBalanceData] = useState<{ balance: number; currency: string } | null>(null);
@@ -201,12 +202,13 @@ function BusanConfigTab() {
   useEffect(() => {
     if (configData) {
       setApiToken(configData.apiToken ?? "");
+      setApiBaseUrl(configData.apiBaseUrl ?? "https://busangame.com/api");
       setCurrency(configData.currency ?? "IDR");
     }
   }, [configData]);
 
   const saveMut = useMutation({
-    mutationFn: () => adminApi.post("/busan/config", { apiToken, currency, isActive: true }),
+    mutationFn: () => adminApi.post("/busan/config", { apiToken, apiBaseUrl, currency, isActive: true }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/busan/config"] });
       setSaved(true);
@@ -232,6 +234,16 @@ function BusanConfigTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>API Credentials</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>API Base URL</label>
+            <input style={inputStyle} type="url" value={apiBaseUrl}
+              onChange={e => setApiBaseUrl(e.target.value)}
+              placeholder="e.g. https://busangame.com/api or https://api.yourdomain.com/v1"
+              data-testid="input-busan-api-base-url" />
+            <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
+              The base URL for the Busan API (without trailing slash). Correct this if you see HTML errors.
+            </p>
+          </div>
           <div>
             <label style={labelStyle}>API Token</label>
             <input style={inputStyle} type="password" value={apiToken}
