@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2, AlertTriangle } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useAuthStore } from "@/lib/store/authstore";
 import { getCurrencySymbol } from "@/lib/currency";
 import type { Game, Product, Service, ProductPackage } from "@shared/schema";
 
@@ -191,6 +192,9 @@ function GameDetailView({ game }: { game: Game }) {
   const [validateStatus, setValidateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [validatedName, setValidatedName] = useState<string | null>(null);
   const [validateError, setValidateError] = useState<string | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"buy" | "cart" | null>(null);
+  const { user } = useAuthStore();
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -271,6 +275,11 @@ function GameDetailView({ game }: { game: Game }) {
   }
 
   function handleAddToCart() {
+    if (!user) {
+      setPendingAction("cart");
+      setShowRegisterModal(true);
+      return;
+    }
     if (!validate() || !selectedService) return;
     addItem(buildCartPayload());
     setAdded(true);
@@ -278,9 +287,19 @@ function GameDetailView({ game }: { game: Game }) {
   }
 
   function handleBuyNow() {
+    if (!user) {
+      setPendingAction("buy");
+      setShowRegisterModal(true);
+      return;
+    }
     if (!validate() || !selectedService) return;
     addItem(buildCartPayload());
     navigate("/checkout");
+  }
+
+  function proceedAfterRegister() {
+    setShowRegisterModal(false);
+    navigate("/register");
   }
 
   const infoItems = [
@@ -630,6 +649,88 @@ function GameDetailView({ game }: { game: Game }) {
           )}
         </div>
       </div>
+
+      {/* Registration Modal */}
+      {showRegisterModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 50,
+        }}>
+          <div style={{
+            background: "hsl(220,13%,10%)",
+            border: "1px solid hsl(220,15%,16%)",
+            borderRadius: "12px",
+            padding: "2rem",
+            maxWidth: "400px",
+            width: "90%",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.7)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1rem" }}>
+              <AlertTriangle size={24} style={{ color: "hsl(38,92%,50%)", flexShrink: 0 }} />
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "hsl(210,40%,96%)", margin: 0 }}>
+                Registration Required
+              </h2>
+            </div>
+            <p style={{ color: "hsl(220,10%,60%)", marginBottom: "1rem", lineHeight: 1.6 }}>
+              To purchase products, you must create an account first.
+            </p>
+            <div style={{
+              background: "hsl(38,92%,50%)",
+              borderRadius: "8px",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              color: "hsl(220,13%,10%)",
+              fontSize: "13px",
+              lineHeight: 1.6,
+            }}>
+              <strong>Important Disclaimer:</strong> Any issue related to your order won't be solved if you don't register and verify your account.
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => setShowRegisterModal(false)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "8px",
+                  background: "transparent",
+                  border: "1px solid hsl(220,15%,25%)",
+                  color: "hsl(210,40%,80%)",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={proceedAfterRegister}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "8px",
+                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                }}
+                data-testid="button-register-now"
+              >
+                Register Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

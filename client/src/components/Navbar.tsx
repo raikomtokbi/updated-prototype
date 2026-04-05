@@ -526,7 +526,7 @@ export default function Navbar() {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    padding: "0.38rem 0.9rem",
+                    padding: "0.5rem 0.9rem",
                     borderRadius: "8px",
                     background: "transparent",
                     border: "1px solid rgba(124, 58, 237, 0.42)",
@@ -548,7 +548,7 @@ export default function Navbar() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "0.3rem",
-                    padding: "0.38rem 0.9rem",
+                    padding: "0.5rem 0.9rem",
                     borderRadius: "8px",
                     background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
                     color: "white",
