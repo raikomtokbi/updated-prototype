@@ -1,34 +1,39 @@
+export const BUSAN_DEFAULT_BASE_URL = "https://1gamestopup.com/api/v1";
+
 export interface BusanProduct {
   id: string;
   name: string;
   price: number;
+  priceRaw: string;
   currency: string;
   category?: string;
 }
 
 export interface BusanBalance {
   balance: number;
+  balanceRaw: string;
   currency: string;
 }
 
 export interface BusanOrderPayload {
-  product_id: string;
-  player_id: string;
-  zone_id?: string;
-  quantity?: number;
-  ref_id: string;
+  productId: string;
+  playerId: string;
+  zoneId?: string;
+  currency?: string;
 }
 
 export interface BusanOrderResult {
   success: boolean;
-  order_id?: string;
+  orderId?: string;
   message?: string;
   status?: string;
+  title?: string;
+  price?: string;
 }
 
-function makeHeaders(apiToken: string): Record<string, string> {
+function makeHeaders(apiKey: string): Record<string, string> {
   return {
-    "Authorization": `Bearer ${apiToken}`,
+    "x-api-key": apiKey,
     "Content-Type": "application/json",
     "Accept": "application/json",
   };
@@ -38,94 +43,120 @@ function cleanBase(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
-export async function getBusanBalance(apiToken: string, apiBaseUrl: string): Promise<BusanBalance> {
+function parsePriceString(raw: string | number | undefined): number {
+  if (raw === undefined || raw === null) return 0;
+  if (typeof raw === "number") return raw;
+  const cleaned = String(raw).replace(/[₹$,\s]/g, "").replace(/[^0-9.]/g, "");
+  return parseFloat(cleaned) || 0;
+}
+
+function parseBalanceString(raw: string | undefined): { balance: number; currency: string } {
+  if (!raw) return { balance: 0, currency: "INR" };
+  const str = String(raw).trim();
+  const num = parsePriceString(str);
+  const currency = str.includes("USD") ? "USD" : "INR";
+  return { balance: num, currency };
+}
+
+async function safeJson(res: Response): Promise<any> {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      `API returned non-JSON response (HTTP ${res.status}). Check your API Base URL is correct. Got: ${text.slice(0, 200)}`
+    );
+  }
+}
+
+export async function getBusanBalance(apiKey: string, apiBaseUrl: string, currency = "INR"): Promise<BusanBalance> {
   const base = cleanBase(apiBaseUrl);
-  const res = await fetch(`${base}/balance`, {
+  const url = `${base}/api-service/balance?currency=${encodeURIComponent(currency)}`;
+
+  const res = await fetch(url, {
     method: "GET",
-    headers: makeHeaders(apiToken),
+    headers: makeHeaders(apiKey),
   });
 
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`Busan balance check failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
+  const data = await safeJson(res);
+
+  if (!res.ok || data.success === false) {
+    throw new Error(data.error ?? data.message ?? `Balance check failed (HTTP ${res.status})`);
   }
 
-  let data: any;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error(`Busan API returned non-JSON response. Check your API Base URL. Response: ${text.slice(0, 200)}`);
-  }
+  const balanceRaw = String(data.data?.balance ?? "0");
+  const parsed = parseBalanceString(balanceRaw);
 
   return {
-    balance: parseFloat(data.balance ?? data.data?.balance ?? "0"),
-    currency: data.currency ?? data.data?.currency ?? "IDR",
+    balance: parsed.balance,
+    balanceRaw,
+    currency: parsed.currency,
   };
 }
 
-export async function getBusanProducts(apiToken: string, apiBaseUrl: string, currency?: string): Promise<BusanProduct[]> {
+export async function getBusanProducts(apiKey: string, apiBaseUrl: string, currency = "INR"): Promise<BusanProduct[]> {
   const base = cleanBase(apiBaseUrl);
-  const url = new URL(`${base}/products`);
-  if (currency) url.searchParams.set("currency", currency);
+  const url = `${base}/api-service/products?currency=${encodeURIComponent(currency)}`;
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(url, {
     method: "GET",
-    headers: makeHeaders(apiToken),
+    headers: makeHeaders(apiKey),
   });
 
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`Busan products fetch failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
+  const data = await safeJson(res);
+
+  if (!res.ok || data.success === false) {
+    throw new Error(data.error ?? data.message ?? `Products fetch failed (HTTP ${res.status})`);
   }
 
-  let data: any;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error(`Busan API returned non-JSON response. Check your API Base URL. Response: ${text.slice(0, 200)}`);
-  }
-
-  const list: any[] = data.data ?? data.products ?? (Array.isArray(data) ? data : []);
-  return list.map((p: any) => ({
-    id: String(p.id ?? p.product_id ?? ""),
-    name: String(p.name ?? p.product_name ?? ""),
-    price: parseFloat(p.price ?? p.amount ?? "0"),
-    currency: String(p.currency ?? currency ?? "IDR"),
-    category: p.category ?? p.type ?? undefined,
-  }));
+  const list: any[] = Array.isArray(data.data) ? data.data : [];
+  return list.map((p: any) => {
+    const priceRaw = String(p.price ?? "0");
+    return {
+      id: String(p.productId ?? p.id ?? ""),
+      name: String(p.productName ?? p.name ?? ""),
+      price: parsePriceString(priceRaw),
+      priceRaw,
+      currency,
+      category: p.category ?? p.type ?? undefined,
+    };
+  });
 }
 
-export async function createBusanOrder(apiToken: string, apiBaseUrl: string, payload: BusanOrderPayload): Promise<BusanOrderResult> {
+export async function createBusanOrder(
+  apiKey: string,
+  apiBaseUrl: string,
+  payload: BusanOrderPayload
+): Promise<BusanOrderResult> {
   const base = cleanBase(apiBaseUrl);
   const body: Record<string, any> = {
-    product_id: payload.product_id,
-    player_id: payload.player_id,
-    ref_id: payload.ref_id,
-    quantity: payload.quantity ?? 1,
+    playerId: payload.playerId,
+    productId: payload.productId,
+    currency: payload.currency ?? "INR",
   };
-  if (payload.zone_id) body.zone_id = payload.zone_id;
+  if (payload.zoneId) body.zoneId = payload.zoneId;
 
-  const res = await fetch(`${base}/order`, {
+  const res = await fetch(`${base}/api-service/order`, {
     method: "POST",
-    headers: makeHeaders(apiToken),
+    headers: makeHeaders(apiKey),
     body: JSON.stringify(body),
   });
 
-  const text = await res.text();
-  let data: any = {};
-  try { data = JSON.parse(text); } catch { /* ignore */ }
+  const data = await safeJson(res);
 
-  if (!res.ok) {
+  if (!res.ok || data.success === false) {
     return {
       success: false,
-      message: data.message ?? data.error ?? `HTTP ${res.status}: ${text.slice(0, 200)}`,
+      message: data.error ?? data.message ?? `HTTP ${res.status}`,
     };
   }
 
   return {
     success: true,
-    order_id: String(data.order_id ?? data.data?.order_id ?? ""),
-    message: data.message ?? "Order created",
-    status: data.status ?? data.data?.status ?? "processing",
+    orderId: String(data.data?.orderId ?? ""),
+    status: String(data.data?.status ?? "success"),
+    title: data.data?.title ?? "",
+    price: String(data.data?.price ?? ""),
+    message: data.message ?? "Order created successfully",
   };
 }

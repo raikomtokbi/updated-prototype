@@ -472,7 +472,7 @@ CREATE TABLE IF NOT EXISTS `smile_one_mappings` (
 CREATE TABLE IF NOT EXISTS `busan_configs` (
   `id`            VARCHAR(36)   NOT NULL,
   `api_token`     VARCHAR(255)  DEFAULT NULL,
-  `api_base_url`  VARCHAR(500)  NOT NULL DEFAULT 'https://busangame.com/api',
+  `api_base_url`  VARCHAR(500)  NOT NULL DEFAULT 'https://1gamestopup.com/api/v1',
   `currency`      VARCHAR(20)   NOT NULL DEFAULT 'IDR',
   `is_active`     TINYINT(1)    NOT NULL DEFAULT 1,
   `updated_at`    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

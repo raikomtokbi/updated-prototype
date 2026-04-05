@@ -1784,12 +1784,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
                 if (!item.productId) continue;
                 const mapping = await storage.getBusanMappingByCmsProductId(item.productId);
                 if (!mapping) continue;
-                const orderResult = await createBusanOrder(busanConfig.apiToken, busanConfig.apiBaseUrl ?? "https://busangame.com/api", {
-                  product_id: mapping.busanProductId,
-                  player_id: item.playerId || item.userId || "",
-                  zone_id: item.zoneId,
-                  ref_id: order_id,
-                  quantity: item.quantity || 1,
+                const orderResult = await createBusanOrder(busanConfig.apiToken!, busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1", {
+                  productId: mapping.busanProductId,
+                  playerId: item.playerId || item.userId || "",
+                  zoneId: item.zoneId || undefined,
+                  currency: busanConfig.currency ?? "INR",
                 });
                 console.log(`Busan order for product ${mapping.busanProductId}:`, orderResult);
               }
@@ -1948,7 +1947,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const config = await storage.getBusanConfig();
       if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
-      const balance = await getBusanBalance(config.apiToken, config.apiBaseUrl ?? "https://busangame.com/api");
+      const balance = await getBusanBalance(config.apiToken, config.apiBaseUrl ?? "https://1gamestopup.com/api/v1", config.currency ?? "INR");
       return res.json({ success: true, ...balance });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";
@@ -1960,7 +1959,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const config = await storage.getBusanConfig();
       if (!config?.apiToken) return res.status(400).json({ success: false, message: "Busan API token not configured" });
-      const products = await getBusanProducts(config.apiToken, config.apiBaseUrl ?? "https://busangame.com/api", config.currency);
+      const products = await getBusanProducts(config.apiToken, config.apiBaseUrl ?? "https://1gamestopup.com/api/v1", config.currency ?? "INR");
       return res.json(products);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Internal server error";

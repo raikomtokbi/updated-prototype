@@ -187,7 +187,7 @@ interface BusanProduct { id: string; name: string; price: number; currency: stri
 function BusanConfigTab() {
   const qc = useQueryClient();
   const [apiToken, setApiToken] = useState("");
-  const [apiBaseUrl, setApiBaseUrl] = useState("https://busangame.com/api");
+  const [apiBaseUrl, setApiBaseUrl] = useState("https://1gamestopup.com/api/v1");
   const [currency, setCurrency] = useState("IDR");
   const [saved, setSaved] = useState(false);
   const [balanceData, setBalanceData] = useState<{ balance: number; currency: string } | null>(null);
@@ -202,7 +202,7 @@ function BusanConfigTab() {
   useEffect(() => {
     if (configData) {
       setApiToken(configData.apiToken ?? "");
-      setApiBaseUrl(configData.apiBaseUrl ?? "https://busangame.com/api");
+      setApiBaseUrl(configData.apiBaseUrl ?? "https://1gamestopup.com/api/v1");
       setCurrency(configData.currency ?? "IDR");
     }
   }, [configData]);
@@ -245,13 +245,13 @@ function BusanConfigTab() {
             </p>
           </div>
           <div>
-            <label style={labelStyle}>API Token</label>
+            <label style={labelStyle}>API Key <span style={{ fontWeight: 400, color: "hsl(220,10%,45%)" }}>(x-api-key header)</span></label>
             <input style={inputStyle} type="password" value={apiToken}
               onChange={e => setApiToken(e.target.value)}
-              placeholder="Enter your Busan API token" autoComplete="off"
+              placeholder="Enter your 1GameStopUp API key" autoComplete="off"
               data-testid="input-busan-api-token" />
             <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
-              Your token is stored securely and never exposed to the frontend.
+              Sent as the <code style={{ background: "rgba(255,255,255,0.06)", padding: "1px 4px", borderRadius: "3px" }}>x-api-key</code> header. Never exposed to the frontend.
             </p>
           </div>
           <div>
