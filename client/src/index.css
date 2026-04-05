@@ -221,6 +221,11 @@ textarea {
   display: inline-flex !important;
 }
 
+/* Contact page responsive */
+.contact-grid {
+  grid-template-columns: 1fr 1.6fr;
+}
+
 @media (max-width: 768px) {
   .search-bar-desktop {
     display: none !important;
@@ -242,6 +247,9 @@ textarea {
   }
   .bonus-img {
     display: none !important;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 

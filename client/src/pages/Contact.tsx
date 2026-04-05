@@ -60,10 +60,11 @@ export default function Contact() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1.6fr",
+          gridTemplateColumns: "1fr",
           gap: "2rem",
           alignItems: "start",
         }}
+        className="contact-grid"
       >
         {/* Contact info */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
