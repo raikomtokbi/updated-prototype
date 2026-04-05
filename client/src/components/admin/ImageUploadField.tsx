@@ -127,95 +127,100 @@ export function ImageUploadField({
         </div>
       )}
 
-      {/* Preview area — always visible */}
-      <div
-        style={{
-          marginBottom: "6px",
-          borderRadius: "6px",
-          border: value ? "1px solid hsl(220,15%,16%)" : "1px dashed hsl(220,15%,22%)",
-          background: value ? "transparent" : "hsl(220,20%,8%)",
-          overflow: "hidden",
-          position: "relative",
-          ...(previewAspect
-            ? { width: "100%", aspectRatio: previewAspect }
-            : { height: placeholderH }),
-        }}
-      >
-        {value ? (
-          <img
-            src={value}
-            alt="preview"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              cursor: "pointer",
-            }}
-            onClick={() => fileRef.current?.click()}
-          >
-            <ImageIcon size={22} style={{ color: "hsl(220,10%,30%)" }} />
-            <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)", letterSpacing: "0.04em" }}>
-              No image
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <input
-          style={{ ...inputStyle, flex: 1 }}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-        />
-        <button
-          type="button"
-          title="Upload image"
-          disabled={uploading || deleting}
-          onClick={() => fileRef.current?.click()}
+      {/* Horizontal layout: Preview on left, controls on right */}
+      <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+        {/* Preview area — compact on the left */}
+        <div
           style={{
-            ...btnBase,
-            background: "rgba(124,58,237,0.12)",
-            borderColor: "rgba(124,58,237,0.3)",
-            color: "#a78bfa",
-            opacity: uploading || deleting ? 0.7 : 1,
-            cursor: uploading || deleting ? "not-allowed" : "pointer",
+            width: "120px",
+            height: "120px",
+            flexShrink: 0,
+            borderRadius: "6px",
+            border: value ? "1px solid hsl(220,15%,16%)" : "1px dashed hsl(220,15%,22%)",
+            background: value ? "transparent" : "hsl(220,20%,8%)",
+            overflow: "hidden",
+            position: "relative",
           }}
         >
-          {uploading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Upload size={12} />}
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
-        {value && (
-          <button
-            type="button"
-            title="Remove image"
-            disabled={uploading || deleting}
-            onClick={handleDelete}
-            style={{
-              ...btnBase,
-              background: "rgba(239,68,68,0.08)",
-              borderColor: "rgba(239,68,68,0.25)",
-              color: "hsl(0,72%,60%)",
-              opacity: uploading || deleting ? 0.7 : 1,
-              cursor: uploading || deleting ? "not-allowed" : "pointer",
-            }}
-          >
-            {deleting ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Trash2 size={12} />}
-          </button>
-        )}
+          {value ? (
+            <img
+              src={value}
+              alt="preview"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "4px",
+                cursor: "pointer",
+              }}
+              onClick={() => fileRef.current?.click()}
+            >
+              <ImageIcon size={18} style={{ color: "hsl(220,10%,30%)" }} />
+              <span style={{ fontSize: "9px", color: "hsl(220,10%,35%)", letterSpacing: "0.04em", textAlign: "center" }}>
+                No image
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Controls on the right */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
+          <input
+            style={{ ...inputStyle, width: "100%" }}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+          />
+          <div style={{ display: "flex", gap: "6px" }}>
+            <button
+              type="button"
+              title="Upload image"
+              disabled={uploading || deleting}
+              onClick={() => fileRef.current?.click()}
+              style={{
+                ...btnBase,
+                background: "rgba(124,58,237,0.12)",
+                borderColor: "rgba(124,58,237,0.3)",
+                color: "#a78bfa",
+                opacity: uploading || deleting ? 0.7 : 1,
+                cursor: uploading || deleting ? "not-allowed" : "pointer",
+              }}
+            >
+              {uploading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Upload size={12} />}
+              {uploading ? "Uploading..." : "Upload"}
+            </button>
+            {value && (
+              <button
+                type="button"
+                title="Remove image"
+                disabled={uploading || deleting}
+                onClick={handleDelete}
+                style={{
+                  ...btnBase,
+                  background: "rgba(239,68,68,0.08)",
+                  borderColor: "rgba(239,68,68,0.25)",
+                  color: "hsl(0,72%,60%)",
+                  opacity: uploading || deleting ? 0.7 : 1,
+                  cursor: uploading || deleting ? "not-allowed" : "pointer",
+                }}
+              >
+                {deleting ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Trash2 size={12} />}
+              </button>
+            )}
+          </div>
+        </div>
         <input
           ref={fileRef}
           type="file"
@@ -224,7 +229,7 @@ export function ImageUploadField({
           onChange={handleFile}
         />
       </div>
-      {error && <p style={{ fontSize: "11px", color: "hsl(0,72%,55%)", margin: "3px 0 0" }}>{error}</p>}
+      {error && <p style={{ fontSize: "11px", color: "hsl(0,72%,55%)", margin: "6px 0 0" }}>{error}</p>}
     </div>
   );
 }
