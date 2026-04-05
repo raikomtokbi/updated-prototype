@@ -174,20 +174,24 @@ CREATE TABLE IF NOT EXISTS `product_packages` (
 
 -- ─── orders ───────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `orders` (
-  `id`           VARCHAR(36)   NOT NULL,
-  `user_id`      VARCHAR(36)   DEFAULT NULL,
-  `order_number` VARCHAR(191)  NOT NULL,
-  `status`       ENUM('pending','processing','completed','failed','refunded') NOT NULL DEFAULT 'pending',
-  `total_amount` DECIMAL(10,2) NOT NULL,
-  `currency`     VARCHAR(10)   NOT NULL DEFAULT 'USD',
-  `notes`        TEXT          DEFAULT NULL,
-  `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id`                   VARCHAR(36)   NOT NULL,
+  `user_id`              VARCHAR(36)   DEFAULT NULL,
+  `order_number`         VARCHAR(191)  NOT NULL,
+  `status`               ENUM('pending','processing','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `total_amount`         DECIMAL(10,2) NOT NULL,
+  `currency`             VARCHAR(10)   NOT NULL DEFAULT 'USD',
+  `notes`                TEXT          DEFAULT NULL,
+  `payment_method`       VARCHAR(100)  DEFAULT NULL,
+  `utr`                  VARCHAR(100)  DEFAULT NULL,
+  `payment_verified_at`  DATETIME      DEFAULT NULL,
+  `created_at`           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `orders_order_number_uq` (`order_number`),
   KEY `orders_user_id_idx` (`user_id`),
   KEY `orders_status_idx` (`status`),
   KEY `orders_created_at_idx` (`created_at`),
+  KEY `orders_payment_method_idx` (`payment_method`),
   CONSTRAINT `orders_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -493,10 +497,40 @@ CREATE TABLE IF NOT EXISTS `busan_mappings` (
   KEY `busan_mappings_cms_product_id_idx` (`cms_product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── upi_payment_settings ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `upi_payment_settings` (
+  `id`             VARCHAR(36)   NOT NULL,
+  `upi_id`         VARCHAR(191)  DEFAULT NULL,
+  `qr_code_url`    TEXT          DEFAULT NULL,
+  `email_address`  VARCHAR(191)  DEFAULT NULL,
+  `email_password` TEXT          DEFAULT NULL,
+  `imap_host`      VARCHAR(191)  NOT NULL DEFAULT 'imap.gmail.com',
+  `imap_port`      INT           NOT NULL DEFAULT 993,
+  `is_active`      TINYINT(1)    NOT NULL DEFAULT 0,
+  `created_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── unmatched_payments ───────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `unmatched_payments` (
+  `id`                    VARCHAR(36)   NOT NULL,
+  `amount`                DECIMAL(10,2) NOT NULL,
+  `utr`                   VARCHAR(100)  DEFAULT NULL,
+  `sender_name`           VARCHAR(191)  DEFAULT NULL,
+  `email_subject`         VARCHAR(500)  DEFAULT NULL,
+  `raw_body`              TEXT          DEFAULT NULL,
+  `detected_at`           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `assigned_to_order_id`  VARCHAR(36)   DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `unmatched_payments_amount_idx` (`amount`),
+  CONSTRAINT `unmatched_payments_order_fk` FOREIGN KEY (`assigned_to_order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
---  Table summary (28 tables total)
+--  Table summary (30 tables total)
 -- ============================================================
 --   users                      — registered accounts
 --   sessions                   — server-side user sessions
@@ -524,4 +558,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   fees                       — processing / service fees
 --   smile_one_configs          — Smile.one API credentials & settings
 --   smile_one_mappings         — product ID mappings for Smile.one
+--   upi_payment_settings       — UPI/IMAP email verification settings
+--   unmatched_payments         — UPI payments that couldn't be auto-matched
 -- ============================================================

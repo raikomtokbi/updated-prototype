@@ -136,3 +136,39 @@ Player lookup + automatic purchase via Smile.one API. Configured in **Admin → 
 - Multi-gateway payment support (9 Indian + global gateways)
 - Busan API game top-up automatic fulfilment
 - Smile.one game top-up integration
+- UPI manual payment with IMAP email auto-verification + auto-topup
+
+## UPI / Manual Payment System
+
+Email-based UPI payment verification with automatic order completion and Busan top-up trigger.
+
+### How It Works
+
+1. **Admin Setup**: Configure UPI ID, QR code URL, and IMAP credentials in **Admin → UPI Settings** (`/admin/upi-settings`)
+2. **Checkout**: Customer selects "UPI" gateway → click "Buy Now" → creates pending order → redirected to `/payment/upi/:orderId`
+3. **Payment Page**: Shows QR code, UPI ID, exact amount, countdown timer (10 min); polls `/api/orders/:id/status` every 5s
+4. **IMAP Polling**: Server polls configured email inbox every 60s for payment notification emails; parses amount + UTR
+5. **Auto-Match**: Matches payment to oldest pending UPI order with same amount (within 30-min window) → marks order completed
+6. **Auto-Topup**: Triggers Busan API for game top-up automatically after successful match
+7. **Unmatched**: Payments that can't be matched are stored in `unmatched_payments` table for manual admin assignment
+
+### Admin Pages
+
+- `/admin/upi-settings` — Configure UPI ID, QR code URL, IMAP host/port/credentials
+- `/admin/payment-logs` — View unmatched payments, manually assign to orders
+
+### Key Files
+
+- `server/services/emailPaymentService.ts` — IMAP polling + email parsing + order matching + Busan trigger
+- `shared/schema.ts` — `upiPaymentSettings` + `unmatchedPayments` tables; `orders` extended with `paymentMethod`, `utr`, `paymentVerifiedAt`
+- `client/src/pages/UpiPayment.tsx` — Customer-facing payment page with timer + polling
+- `client/src/pages/admin/UpiSettings.tsx` — Admin IMAP + UPI configuration
+- `client/src/pages/admin/PaymentLogs.tsx` — Admin unmatched payment review + manual assignment
+
+### API Endpoints
+
+- `POST /api/upi/initiate` — Create UPI order, return UPI details (upiId, qrCodeUrl, amount)
+- `GET /api/orders/:id/status` — Poll order payment status
+- `GET/POST /api/admin/upi-settings` — Get/save IMAP + UPI configuration
+- `GET /api/admin/unmatched-payments` — List unmatched payments
+- `POST /api/admin/unmatched-payments/:id/assign` — Manually assign unmatched payment to order

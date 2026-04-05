@@ -31,6 +31,9 @@ import {
   notifications, siteSettings, emailTemplates, passwordResetTokens, fees,
   smileOneConfigs, smileOneMappings,
   busanConfigs, busanMappings,
+  upiPaymentSettings, unmatchedPayments,
+  type UpiPaymentSettings, type InsertUpiPaymentSettings,
+  type UnmatchedPayment, type InsertUnmatchedPayment,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -187,8 +190,21 @@ export interface IStorage {
   deleteBusanMapping(id: string): Promise<void>;
 
   // Orders (create)
-  createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string }): Promise<Order>;
+  createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string; paymentMethod?: string }): Promise<Order>;
   createOrderItem(data: { orderId: string; productId?: string; packageId?: string; productTitle: string; packageLabel?: string; quantity: number; unitPrice: string; totalPrice: string }): Promise<void>;
+
+  // UPI Payment Settings
+  getUpiSettings(): Promise<UpiPaymentSettings | undefined>;
+  upsertUpiSettings(data: Partial<InsertUpiPaymentSettings>): Promise<UpiPaymentSettings>;
+
+  // Unmatched Payments
+  getUnmatchedPayments(): Promise<UnmatchedPayment[]>;
+  createUnmatchedPayment(data: Omit<InsertUnmatchedPayment, "assignedToOrderId">): Promise<UnmatchedPayment>;
+  assignUnmatchedPayment(id: string, orderId: string): Promise<void>;
+
+  // UPI Order Matching
+  getPendingUpiOrders(amount: string): Promise<Order[]>;
+  updateOrderPaymentVerified(orderId: string, utr: string): Promise<void>;
 
   // Password Reset Tokens
   createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -860,7 +876,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ── Orders (create) ──────────────────────────────────────────────────────────
-  async createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string }): Promise<Order> {
+  async createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string; paymentMethod?: string }): Promise<Order> {
     const [created] = await db
       .insert(orders)
       .values({
@@ -871,6 +887,7 @@ export class DatabaseStorage implements IStorage {
         currency: data.currency,
         notes: data.notes,
         status: (data.status as any) ?? "pending",
+        paymentMethod: data.paymentMethod,
       })
       .returning();
     return created;
@@ -888,6 +905,68 @@ export class DatabaseStorage implements IStorage {
       unitPrice: data.unitPrice,
       totalPrice: data.totalPrice,
     });
+  }
+
+  // ── UPI Payment Settings ──────────────────────────────────────────────────────
+  async getUpiSettings(): Promise<UpiPaymentSettings | undefined> {
+    const [row] = await db.select().from(upiPaymentSettings).limit(1);
+    return row;
+  }
+
+  async upsertUpiSettings(data: Partial<InsertUpiPaymentSettings>): Promise<UpiPaymentSettings> {
+    const existing = await this.getUpiSettings();
+    if (existing) {
+      await db.update(upiPaymentSettings)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(upiPaymentSettings.id, existing.id));
+      return (await this.getUpiSettings())!;
+    } else {
+      const id = randomUUID();
+      await db.insert(upiPaymentSettings).values({ id, ...data } as any);
+      return (await this.getUpiSettings())!;
+    }
+  }
+
+  // ── Unmatched Payments ────────────────────────────────────────────────────────
+  async getUnmatchedPayments(): Promise<UnmatchedPayment[]> {
+    return db.select().from(unmatchedPayments).orderBy(desc(unmatchedPayments.detectedAt));
+  }
+
+  async createUnmatchedPayment(data: Omit<InsertUnmatchedPayment, "assignedToOrderId">): Promise<UnmatchedPayment> {
+    const id = randomUUID();
+    await db.insert(unmatchedPayments).values({ id, ...data } as any);
+    const [row] = await db.select().from(unmatchedPayments).where(eq(unmatchedPayments.id, id));
+    return row;
+  }
+
+  async assignUnmatchedPayment(id: string, orderId: string): Promise<void> {
+    await db.update(unmatchedPayments)
+      .set({ assignedToOrderId: orderId })
+      .where(eq(unmatchedPayments.id, id));
+  }
+
+  // ── UPI Order Matching ────────────────────────────────────────────────────────
+  async getPendingUpiOrders(amount: string): Promise<Order[]> {
+    const windowStart = new Date(Date.now() - 30 * 60 * 1000);
+    return db.select().from(orders).where(
+      and(
+        eq(orders.status, "pending"),
+        eq(orders.paymentMethod as any, "manual_upi"),
+        eq(orders.totalAmount, amount),
+        gte(orders.createdAt, windowStart),
+      )
+    );
+  }
+
+  async updateOrderPaymentVerified(orderId: string, utr: string): Promise<void> {
+    await db.update(orders)
+      .set({
+        status: "completed",
+        utr,
+        paymentVerifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId));
   }
 }
 

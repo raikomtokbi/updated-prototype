@@ -28,6 +28,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import VerifyResetOtp from "./pages/VerifyResetOtp";
 import ResetPassword from "./pages/ResetPassword";
 import PaymentReturn from "./pages/PaymentReturn";
+import UpiPayment from "./pages/UpiPayment";
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import TopupOrders from "./pages/admin/TopupOrders";
@@ -51,6 +52,8 @@ import Plugins from "./pages/admin/Plugins";
 import EmailTemplates from "./pages/admin/EmailTemplates";
 import ChooseTheme from "./pages/admin/ChooseTheme";
 import EditContent from "./pages/admin/EditContent";
+import UpiSettings from "./pages/admin/UpiSettings";
+import PaymentLogs from "./pages/admin/PaymentLogs";
 
 function AdminRoutes() {
   return (
@@ -77,6 +80,8 @@ function AdminRoutes() {
       <Route path="/admin/email-templates" component={EmailTemplates} />
       <Route path="/admin/choose-theme" component={ChooseTheme} />
       <Route path="/admin/edit-content" component={EditContent} />
+      <Route path="/admin/upi-settings" component={UpiSettings} />
+      <Route path="/admin/payment-logs" component={PaymentLogs} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -95,6 +100,7 @@ function PublicRoutes() {
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/payment-return" component={PaymentReturn} />
+          <Route path="/payment/upi/:orderId" component={UpiPayment} />
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />

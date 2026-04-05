@@ -46,6 +46,8 @@ const GATEWAY_COLORS: Record<string, string> = {
   stripe: "#635BFF",
   paypal: "#0070BA",
   manual: "#6B7280",
+  manual_upi: "#7C3AED",
+  xyzpay: "#10B981",
 };
 
 const GATEWAY_LABELS: Record<string, string> = {
@@ -53,6 +55,7 @@ const GATEWAY_LABELS: Record<string, string> = {
   instamojo: "Instamojo", ccavenue: "CCAvenue", phonepe: "PhonePe",
   paytm: "Paytm", easybuzz: "EasyBuzz", bharatpe: "BharatPe",
   stripe: "Stripe", paypal: "PayPal", manual: "Manual",
+  manual_upi: "UPI / Bank Transfer", xyzpay: "XYZPay",
 };
 
 const card: React.CSSProperties = {
@@ -184,6 +187,46 @@ export default function Checkout() {
     setIsProcessing(true);
     try {
       const productInfo = items.map(i => i.productTitle).join(", ").slice(0, 100);
+      const cartItemsPayload = items.map(i => ({
+        productId: i.productId,
+        productTitle: i.productTitle,
+        packageId: i.packageId,
+        packageName: i.packageName,
+        price: i.price,
+        quantity: i.quantity,
+        userId: i.userId,
+        zoneId: i.zoneId,
+        playerId: i.playerId,
+        loginId: i.loginId,
+        characterName: i.characterName,
+        email: i.email,
+      }));
+
+      // ── Manual UPI Payment ──────────────────────────────────────
+      if (selectedGateway.type === "manual_upi") {
+        const upiRes = await fetch("/api/upi/initiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: total,
+            currency,
+            email: "guest@checkout.com",
+            name: "Guest",
+            productInfo,
+            cartItems: cartItemsPayload,
+          }),
+        });
+        if (!upiRes.ok) {
+          const err = await upiRes.json();
+          throw new Error(err.error || "Failed to initiate UPI payment");
+        }
+        const upiData = await upiRes.json();
+        clearCart();
+        // Store UPI info in sessionStorage for the payment page
+        sessionStorage.setItem(`upi_order_${upiData.orderId}`, JSON.stringify(upiData));
+        navigate(`/payment/upi/${upiData.orderId}`);
+        return;
+      }
 
       const initiateRes = await fetch("/api/payment/initiate", {
         method: "POST",

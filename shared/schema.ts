@@ -103,6 +103,9 @@ export const orders = pgTable("orders", {
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   notes: text("notes"),
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  utr: varchar("utr", { length: 100 }),
+  paymentVerifiedAt: timestamp("payment_verified_at"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -483,6 +486,40 @@ export const smileOneMappings = pgTable("smile_one_mappings", {
 export const insertSmileOneMappingSchema = createInsertSchema(smileOneMappings).omit({ id: true, createdAt: true, updatedAt: true });
 export type SmileOneMapping = typeof smileOneMappings.$inferSelect;
 export type InsertSmileOneMapping = z.infer<typeof insertSmileOneMappingSchema>;
+
+// ─── UPI Payment Settings ─────────────────────────────────────────────────────
+export const upiPaymentSettings = pgTable("upi_payment_settings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  upiId: varchar("upi_id", { length: 191 }),
+  qrCodeUrl: text("qr_code_url"),
+  emailAddress: varchar("email_address", { length: 191 }),
+  emailPassword: text("email_password"),
+  imapHost: varchar("imap_host", { length: 191 }).notNull().default("imap.gmail.com"),
+  imapPort: integer("imap_port").notNull().default(993),
+  isActive: boolean("is_active").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const insertUpiPaymentSettingsSchema = createInsertSchema(upiPaymentSettings).omit({ id: true, createdAt: true, updatedAt: true });
+export type UpiPaymentSettings = typeof upiPaymentSettings.$inferSelect;
+export type InsertUpiPaymentSettings = z.infer<typeof insertUpiPaymentSettingsSchema>;
+
+// ─── Unmatched Payments ───────────────────────────────────────────────────────
+export const unmatchedPayments = pgTable("unmatched_payments", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  utr: varchar("utr", { length: 100 }),
+  senderName: varchar("sender_name", { length: 191 }),
+  emailSubject: varchar("email_subject", { length: 500 }),
+  rawBody: text("raw_body"),
+  detectedAt: timestamp("detected_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  assignedToOrderId: varchar("assigned_to_order_id", { length: 36 }).references(() => orders.id, { onDelete: "set null" }),
+});
+
+export const insertUnmatchedPaymentSchema = createInsertSchema(unmatchedPayments).omit({ id: true, detectedAt: true });
+export type UnmatchedPayment = typeof unmatchedPayments.$inferSelect;
+export type InsertUnmatchedPayment = z.infer<typeof insertUnmatchedPaymentSchema>;
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;

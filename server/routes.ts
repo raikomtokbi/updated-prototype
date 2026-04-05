@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, createHmac, randomUUID } from "crypto";
 import { generateOrderNumber } from "./lib/idGenerator";
+import { startEmailPaymentPoller } from "./services/emailPaymentService";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import AdmZip from "adm-zip";
@@ -2198,6 +2199,143 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       res.status(500).json({ error: error.message || "Failed to create order" });
     }
   });
+
+  // ── UPI / Manual Payment Routes ───────────────────────────────────────────────
+
+  // Initiate UPI manual payment — create order + return UPI payment details
+  app.post("/api/upi/initiate", async (req, res) => {
+    try {
+      const { amount, currency = "INR", email, name, phone, productInfo, cartItems } = req.body;
+      if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+
+      const settings = await storage.getUpiSettings();
+      if (!settings?.isActive || !settings.upiId) {
+        return res.status(400).json({ error: "UPI payment is not configured or inactive" });
+      }
+
+      const orderId = randomUUID();
+      const orderNumber = generateOrderNumber();
+
+      await storage.createOrder({
+        id: orderId,
+        orderNumber,
+        totalAmount: String(amount),
+        currency,
+        notes: cartItems ? JSON.stringify(cartItems) : undefined,
+        status: "pending",
+        paymentMethod: "manual_upi",
+      });
+
+      if (Array.isArray(cartItems)) {
+        for (const item of cartItems) {
+          await storage.createOrderItem({
+            orderId,
+            productId: item.productId,
+            packageId: item.packageId,
+            productTitle: item.productTitle || item.packageName || "Order",
+            packageLabel: item.packageName,
+            quantity: item.quantity || 1,
+            unitPrice: String(item.price || 0),
+            totalPrice: String((item.price || 0) * (item.quantity || 1)),
+          });
+        }
+      }
+
+      return res.json({
+        success: true,
+        orderId,
+        orderNumber,
+        upiId: settings.upiId,
+        qrCodeUrl: settings.qrCodeUrl || null,
+        amount,
+        currency,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      });
+    } catch (err: any) {
+      console.error("UPI initiate error:", err);
+      res.status(500).json({ error: err.message || "Failed to initiate UPI payment" });
+    }
+  });
+
+  // Poll order payment status
+  app.get("/api/orders/:id/status", async (req, res) => {
+    try {
+      const order = await storage.getOrderById(req.params.id);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      return res.json({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        paymentMethod: order.paymentMethod,
+        utr: order.utr,
+        paymentVerifiedAt: order.paymentVerifiedAt,
+        totalAmount: order.totalAmount,
+        currency: order.currency,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to fetch order status" });
+    }
+  });
+
+  // Admin: Get UPI settings
+  app.get("/api/admin/upi-settings", requireAdmin, async (_req, res) => {
+    try {
+      const settings = await storage.getUpiSettings();
+      return res.json(settings ?? null);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: Save UPI settings
+  app.post("/api/admin/upi-settings", requireAdmin, async (req, res) => {
+    try {
+      const { upiId, qrCodeUrl, emailAddress, emailPassword, imapHost, imapPort, isActive } = req.body;
+      const updated = await storage.upsertUpiSettings({
+        upiId: upiId || undefined,
+        qrCodeUrl: qrCodeUrl || undefined,
+        emailAddress: emailAddress || undefined,
+        emailPassword: emailPassword || undefined,
+        imapHost: imapHost || "imap.gmail.com",
+        imapPort: imapPort ? parseInt(imapPort) : 993,
+        isActive: isActive !== false,
+      });
+      return res.json({ success: true, settings: updated });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: Get unmatched payments
+  app.get("/api/admin/unmatched-payments", requireAdmin, async (_req, res) => {
+    try {
+      const payments = await storage.getUnmatchedPayments();
+      return res.json(payments);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: Assign unmatched payment to an order
+  app.post("/api/admin/unmatched-payments/:id/assign", requireAdmin, async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      if (!orderId) return res.status(400).json({ error: "orderId required" });
+      const order = await storage.getOrderById(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      await storage.assignUnmatchedPayment(req.params.id, orderId);
+      // Also mark the order as verified
+      await storage.updateOrderPaymentVerified(orderId, `MANUAL_${Date.now()}`);
+
+      return res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Start UPI email payment poller
+  startEmailPaymentPoller();
 
   return httpServer;
 }
