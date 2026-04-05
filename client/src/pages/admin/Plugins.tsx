@@ -246,8 +246,7 @@ function PluginSettingsDialog({
                   value={String(values[field.key] ?? "")}
                   onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
                   placeholder={field.placeholder}
-                  rows={8}
-                  style={{ ...inputStyle, resize: "none", fontFamily: "monospace" }}
+                  style={{ ...inputStyle, resize: "none", fontFamily: "monospace", minHeight: "250px" }}
                 />
               ) : (
                 <input

@@ -47,7 +47,7 @@ const textareaStyle: React.CSSProperties = {
   outline: "none",
   boxSizing: "border-box",
   resize: "none",
-  minHeight: "120px",
+  minHeight: "250px",
   lineHeight: "1.5",
   fontFamily: "inherit",
 };
@@ -659,7 +659,7 @@ export default function EditContent() {
             <label style={labelStyle}>Default Hero Subtitle</label>
             <textarea
               data-testid="input-hero-subtitle"
-              style={{ ...textareaStyle, minHeight: "60px" }}
+              style={{ ...textareaStyle, minHeight: "250px" }}
               value={local.hero_subtitle ?? ""}
               onChange={(e) => set("hero_subtitle", e.target.value)}
             />
@@ -743,7 +743,7 @@ export default function EditContent() {
                 <label style={labelStyle}>Description</label>
                 <textarea
                   data-testid={`input-${feat.key}-desc`}
-                  style={{ ...textareaStyle, minHeight: "120px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
+                  style={{ ...textareaStyle, minHeight: "250px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
                   value={local[`${feat.key}_desc`] ?? feat.desc}
                   onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
                 />
@@ -979,7 +979,7 @@ export default function EditContent() {
                 <div>
                   <label style={labelStyle}>Answer</label>
                   <textarea
-                    style={{ ...textareaStyle, minHeight: "120px" }}
+                    style={{ ...textareaStyle, minHeight: "250px" }}
                     value={item.a}
                     onChange={(e) => {
                       const updated = items.map((it, i) => i === idx ? { ...it, a: e.target.value } : it);

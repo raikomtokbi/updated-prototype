@@ -39,8 +39,8 @@ const inputStyle: React.CSSProperties = {
   color: "hsl(210, 40%, 90%)",
   fontSize: "13px",
   outline: "none",
-  resize: "vertical",
-  minHeight: "90px",
+  resize: "none",
+  minHeight: "250px",
   boxSizing: "border-box",
 };
 

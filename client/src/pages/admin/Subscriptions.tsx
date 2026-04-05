@@ -105,7 +105,7 @@ function SubForm({ initial, onSubmit, loading }: { initial: Partial<Product>; on
       </div>
       <div>
         <label style={labelStyle}>Description</label>
-        <textarea style={{ ...inputStyle, resize: "none", minHeight: "120px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="What's included in this plan..." />
+        <textarea style={{ ...inputStyle, resize: "none", minHeight: "250px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="What's included in this plan..." />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div>

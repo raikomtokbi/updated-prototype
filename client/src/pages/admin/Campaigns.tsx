@@ -60,7 +60,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
       </div>
       <div>
         <label style={labelStyle}>Description</label>
-        <textarea style={{ ...inputStyle, resize: "none", minHeight: "120px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
+        <textarea style={{ ...inputStyle, resize: "none", minHeight: "250px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
       </div>
       <ImageUploadField
         label="Banner Image"
@@ -288,7 +288,7 @@ export default function Campaigns() {
             <label style={labelStyle}>Description</label>
             <textarea
               data-testid="input-bonus-desc"
-              style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "60px" }}
+              style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "250px", resize: "none" }}
               value={bonusDescription || (settings.bonus_description ?? "")}
               onChange={(e) => { setBonusDescription(e.target.value); saveAnnouncement.mutate({ bonus_description: e.target.value }); }}
               placeholder="Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday."

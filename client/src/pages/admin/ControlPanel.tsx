@@ -338,7 +338,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
               </button>
             </div>
             <textarea
-              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "60px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
               value={card.desc}
               onChange={(e) => update(idx, "desc", e.target.value)}
               placeholder="Short description for this feature card"
@@ -661,7 +661,7 @@ export default function ControlPanel() {
             <label style={labelStyle}>Meta Description</label>
             <textarea
               data-testid="input-seo-description"
-              style={{ ...textareaStyle, minHeight: "70px" } as React.CSSProperties}
+              style={{ ...textareaStyle, minHeight: "250px" } as React.CSSProperties}
               value={local.seo_description ?? ""}
               onChange={(e) => set("seo_description", e.target.value)}
             />
@@ -956,7 +956,7 @@ export default function ControlPanel() {
             <label style={labelStyle}>Tagline / Intro</label>
             <textarea
               data-testid="input-about-tagline"
-              style={{ ...textareaStyle, minHeight: "70px" }}
+              style={{ ...textareaStyle, minHeight: "250px" }}
               value={local.about_tagline ?? ""}
               onChange={(e) => set("about_tagline", e.target.value)}
               placeholder="Short intro paragraph shown under the headline…"

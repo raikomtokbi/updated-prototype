@@ -352,7 +352,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
       </div>
       <div>
         <label style={labelStyle}>Description</label>
-        <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "70px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
+        <textarea style={{ ...inputStyle, resize: "none", minHeight: "250px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <ImageUploadField
