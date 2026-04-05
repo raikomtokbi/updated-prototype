@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, Tag, X, Copy, Clock, Loader2,
          CreditCard, Smartphone, Building2, Wallet, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -243,7 +243,17 @@ function SuccessOverlay({ utr, onViewOrders, onContinue }: { utr?: string; onVie
 // ─── Main Checkout Component ──────────────────────────────────────────────────
 export default function Checkout() {
   const [, navigate] = useLocation();
+  const searchStr = useSearch();
   const { items, getCartTotal, clearCart } = useCartStore();
+
+  // Parse back-navigation context from query params
+  const searchParams = new URLSearchParams(searchStr);
+  const fromParam = searchParams.get("from") ?? "";
+  const fromName = searchParams.get("fromName") ?? "";
+  const backHref = fromParam === "cart" ? "/cart"
+    : fromParam === "product" ? "/products"
+    : "/products";
+  const backLabel = fromName ? fromName : fromParam === "cart" ? "Cart" : "Products";
 
   const [selectedPaymentType, setSelectedPaymentType] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -530,8 +540,8 @@ export default function Checkout() {
 
       {/* ─── Main Checkout ────────────────────────────────────────────────── */}
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "1.5rem 1rem 4rem" }}>
-        <Link href="/cart" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,55%)", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
-          <ArrowLeft size={15} /> Back to Cart
+        <Link href={backHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,55%)", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
+          <ArrowLeft size={15} /> Back to {backLabel}
         </Link>
 
         <h1 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "1.5rem" }}>Checkout</h1>
@@ -753,9 +763,6 @@ export default function Checkout() {
             </p>
           )}
 
-          <Link href="/products" data-testid="link-browse-more" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "0.75rem", borderRadius: "0.5rem", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,52%)", textDecoration: "none", fontSize: "0.875rem" }}>
-            <ArrowLeft size={14} /> Browse More Products
-          </Link>
         </div>
       </div>
 

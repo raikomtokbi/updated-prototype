@@ -285,7 +285,7 @@ export default function Cart() {
           className="btn-primary"
           style={{ width: "100%" }}
           data-testid="button-checkout"
-          onClick={() => navigate("/checkout")}
+          onClick={() => navigate("/checkout?from=cart&fromName=Cart")}
         >
           Proceed to Checkout <ArrowRight size={16} />
         </button>

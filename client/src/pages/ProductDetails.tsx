@@ -294,7 +294,7 @@ function GameDetailView({ game }: { game: Game }) {
     }
     if (!validate() || !selectedService) return;
     addItem(buildCartPayload());
-    navigate("/checkout");
+    navigate(`/checkout?from=product&fromName=${encodeURIComponent(product?.title ?? "Product")}`);
   }
 
   function proceedAfterRegister() {
@@ -795,7 +795,7 @@ function ProductDetailView({ product }: { product: Product }) {
       userId: userId.trim(),
       quantity,
     });
-    navigate("/checkout");
+    navigate(`/checkout?from=product&fromName=${encodeURIComponent(product?.title ?? "Product")}`);
   }
 
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category;
