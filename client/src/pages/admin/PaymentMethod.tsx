@@ -210,23 +210,9 @@ function getIcon(type: string) {
   return <CreditCard size={18} />;
 }
 
-function getGatewayBadgeColor(type: string): string {
-  const colors: Record<string, string> = {
-    razorpay: "#3395FF",
-    payu: "#FF6B35",
-    cashfree: "#2D8A4E",
-    instamojo: "#FFA500",
-    ccavenue: "#C41E3A",
-    phonepe: "#5F259F",
-    paytm: "#00B9F1",
-    easybuzz: "#E91E8C",
-    bharatpe: "#003366",
-    stripe: "#635BFF",
-    paypal: "#0070BA",
-    manual: "#6B7280",
-    xyzpay: "#FF6B6B",
-  };
-  return colors[type] || "#6B7280";
+function getGatewayBadgeColor(_type: string): string {
+  // Use site theme color for all gateways for consistency
+  return "hsl(258, 90%, 66%)";
 }
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
