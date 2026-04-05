@@ -167,6 +167,14 @@ function ConfigureModal({
 interface BusanConfig { id?: string; apiToken?: string; currency?: string; isActive?: boolean; }
 interface BusanProduct { id: string; name: string; price: number; currency: string; category?: string; }
 
+// ─── Inner card style (elevated within outer card) ───────────────────────────
+const innerCard: React.CSSProperties = {
+  background: "hsl(220, 20%, 12%)",
+  border: "1px solid hsl(220, 15%, 16%)",
+  borderRadius: "8px",
+  padding: "16px",
+};
+
 // ─── Busan Config Tab ─────────────────────────────────────────────────────────
 function BusanConfigTab() {
   const qc = useQueryClient();
@@ -211,9 +219,9 @@ function BusanConfigTab() {
   const isConfigured = Boolean(configData?.apiToken);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* API Credentials */}
-      <div style={card}>
+      <div style={innerCard}>
         <p style={sectionTitle}>API Credentials</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -254,7 +262,7 @@ function BusanConfigTab() {
       </div>
 
       {/* Balance Check */}
-      <div style={card}>
+      <div style={innerCard}>
         <p style={sectionTitle}>Account Balance</p>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "14px", lineHeight: 1.6 }}>
           Verify your Busan API balance before processing orders. Ensure sufficient funds are available for automatic top-up fulfilment.
@@ -296,7 +304,7 @@ function BusanConfigTab() {
       </div>
 
       {/* How it works */}
-      <div style={card}>
+      <div style={innerCard}>
         <p style={sectionTitle}>How Auto-Fulfilment Works</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {[
@@ -392,7 +400,7 @@ function BusanMappingTab() {
       )}
 
       {/* Add Mapping */}
-      <div style={card}>
+      <div style={innerCard}>
         <p style={sectionTitle}>Add Product Mapping</p>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "16px", lineHeight: 1.5 }}>
           Link each CMS product to its corresponding Busan API product ID. When a payment is confirmed, the system will automatically use this mapping to fulfil the top-up.
@@ -465,8 +473,8 @@ function BusanMappingTab() {
       </div>
 
       {/* Mapped Products Table */}
-      <div style={{ ...card, overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
+      <div style={{ ...innerCard, padding: 0, overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
           <p style={{ ...sectionTitle, marginBottom: 0 }}>
             Mapped Products {mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}>({mappings.length})</span>}
           </p>
@@ -625,33 +633,34 @@ export default function ApiIntegration() {
         </div>
 
         {/* ── Busan Game Top-up API (at the bottom) ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ ...card, padding: "0" }}>
+          {/* Card header */}
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
             <div>
-              <h2 style={{ fontSize: "16px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                <Zap size={16} color="hsl(258,90%,66%)" />
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", display: "flex", alignItems: "center", gap: "7px" }}>
+                <Zap size={14} color="hsl(258,90%,66%)" />
                 Busan Game Top-up API
-              </h2>
-              <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", marginTop: "4px" }}>
+              </div>
+              <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: "4px 0 0" }}>
                 Auto-fulfil game top-ups after XYZPay payment confirmation via the Busan API.
               </p>
             </div>
-          </div>
-
-          {/* Tab bar */}
-          <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
-            <button data-testid="tab-busan-config" style={tabBtn(busanTab === "config")} onClick={() => setBusanTab("config")}>
-              Configuration
-            </button>
-            <button data-testid="tab-busan-mapping" style={tabBtn(busanTab === "mapping")} onClick={() => setBusanTab("mapping")}>
-              Product Mapping
-            </button>
+            {/* Tab bar */}
+            <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,7%)", padding: "4px", borderRadius: "8px", border: "1px solid hsl(220,15%,11%)" }}>
+              <button data-testid="tab-busan-config" style={tabBtn(busanTab === "config")} onClick={() => setBusanTab("config")}>
+                Configuration
+              </button>
+              <button data-testid="tab-busan-mapping" style={tabBtn(busanTab === "mapping")} onClick={() => setBusanTab("mapping")}>
+                Product Mapping
+              </button>
+            </div>
           </div>
 
           {/* Tab content */}
-          {busanTab === "config" && <BusanConfigTab />}
-          {busanTab === "mapping" && <BusanMappingTab />}
+          <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "0" }}>
+            {busanTab === "config" && <BusanConfigTab />}
+            {busanTab === "mapping" && <BusanMappingTab />}
+          </div>
         </div>
 
       </div>
