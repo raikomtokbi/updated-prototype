@@ -722,7 +722,7 @@ function GamesGrid() {
     staleTime: 60_000,
   });
 
-  const displayGames = games.slice(0, 9);
+  const displayGames = games.slice(0, 12);
 
   if (!isLoading && games.length === 0) return null;
 
@@ -745,15 +745,15 @@ function GamesGrid() {
           </p>
         </div>
 
-        {/* 3×3 Grid */}
+        {/* Responsive Grid: 3 cols mobile, 6 cols desktop */}
         {isLoading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.875rem" }}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.875rem" }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
               <div key={i} style={{ borderRadius: "10px", aspectRatio: "1/1", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
             ))}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.875rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.875rem" }}>
             {displayGames.map((game: any, idx: number) => (
               <Link
                 key={game.id}
