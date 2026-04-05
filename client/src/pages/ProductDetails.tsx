@@ -330,25 +330,22 @@ function GameDetailView({ game }: { game: Game }) {
         {/* LEFT — banner + description */}
         <div className="w-full lg:w-2/5 flex flex-col gap-4">
           {/* Banner */}
-          <div style={{
-            width: "100%",
-            aspectRatio: "16/9",
-            borderRadius: "14px",
-            overflow: "hidden",
-            border: "1px solid hsl(220,15%,16%)",
-            background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {game.bannerUrl || game.logoUrl ? (
-              <img
-                src={game.bannerUrl ?? game.logoUrl ?? ""}
-                alt={game.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-              />
-            ) : (
+          {game.bannerUrl || game.logoUrl ? (
+            <img
+              src={game.bannerUrl ?? game.logoUrl ?? ""}
+              alt={game.name}
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(220,15%,16%)" }}
+            />
+          ) : (
+            <div style={{
+              width: "100%", aspectRatio: "16/9", borderRadius: "14px",
+              border: "1px solid hsl(220,15%,16%)",
+              background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
               <Gamepad2 size={72} style={{ color: "hsla(258,90%,66%,0.3)" }} />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Title + badge (mobile shows here too, desktop shows inside right panel) */}
           <div className="lg:hidden">
@@ -829,25 +826,22 @@ function ProductDetailView({ product }: { product: Product }) {
         {/* LEFT — image + description */}
         <div className="w-full lg:w-2/5 flex flex-col gap-4">
           {/* Image */}
-          <div style={{
-            width: "100%",
-            aspectRatio: "16/9",
-            borderRadius: "14px",
-            overflow: "hidden",
-            border: "1px solid hsl(220,15%,16%)",
-            background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.title}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-              />
-            ) : (
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.title}
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(220,15%,16%)" }}
+            />
+          ) : (
+            <div style={{
+              width: "100%", aspectRatio: "16/9", borderRadius: "14px",
+              border: "1px solid hsl(220,15%,16%)",
+              background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
               <Icon size={72} style={{ color: "hsla(258,90%,66%,0.3)" }} />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Title + badge mobile */}
           <div className="lg:hidden">

@@ -425,20 +425,23 @@ function BusanMappingTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Add Product Mapping</p>
 
+        {/* Filter by game — full width above the columns */}
+        <div style={{ marginBottom: "14px" }}>
+          <label style={labelStyle}>Filter by Game</label>
+          <select style={selectStyle} value={selectedGame} onChange={e => { setSelectedGame(e.target.value); setSelectedCmsProduct(""); }}
+            data-testid="select-filter-game">
+            <option value="all">All Games</option>
+            {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+          </select>
+        </div>
+
+        {/* Even two-column picker */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "16px", alignItems: "start" }}>
 
           {/* ── LEFT: CMS Side ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
               CMS Product
-            </div>
-            <div>
-              <label style={labelStyle}>Filter by Game</label>
-              <select style={selectStyle} value={selectedGame} onChange={e => { setSelectedGame(e.target.value); setSelectedCmsProduct(""); }}
-                data-testid="select-filter-game">
-                <option value="all">All Games</option>
-                {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select>
             </div>
             <div>
               <label style={labelStyle}>Select Product</label>
@@ -462,23 +465,23 @@ function BusanMappingTab() {
           </div>
 
           {/* ── Divider Arrow ── */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "36px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "30px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
             →
           </div>
 
           {/* ── RIGHT: Busan Side ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
               <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)" }}>Busan Product</span>
               {fetchingProducts && (
                 <span style={{ fontSize: "11px", color: "hsl(258,80%,70%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                  <RefreshCw size={10} style={{ animation: "spin 1s linear infinite" }} /> Loading products...
+                  <RefreshCw size={10} style={{ animation: "spin 1s linear infinite" }} /> Loading…
                 </span>
               )}
               {!fetchingProducts && busanProducts.length > 0 && (
                 <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
                   style={{
-                    padding: "3px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
+                    padding: "3px 8px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
                     border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
                     display: "inline-flex", alignItems: "center", gap: "4px",
                   }}
@@ -1068,33 +1071,31 @@ export default function ApiIntegration() {
   ) => (
     <div
       style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center",
         padding: "14px 0", borderBottom: isLast ? "none" : "1px solid hsl(220, 15%, 12%)",
-        gap: "12px", flexWrap: "wrap",
+        gap: "12px", minWidth: 0,
       }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{
-          width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
-          background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
-          color: configured ? "hsl(142,71%,48%)" : "hsl(220, 10%, 40%)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {icon}
-        </div>
-        <div>
-          <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)" }}>{name}</div>
-          <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{note}</div>
-        </div>
+      <div style={{
+        width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
+        background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
+        color: configured ? "hsl(142,71%,48%)" : "hsl(220, 10%, 40%)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        {icon}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
+        <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{note}</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, marginLeft: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           {configured
-            ? <><CheckCircle size={13} color="hsl(142,71%,48%)" /><span style={{ fontSize: "12px", color: "hsl(142,71%,48%)" }}>Configured</span></>
-            : <><XCircle size={13} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>Not configured</span></>
+            ? <><CheckCircle size={12} color="hsl(142,71%,48%)" /><span style={{ fontSize: "11px", color: "hsl(142,71%,48%)" }}>Configured</span></>
+            : <><XCircle size={12} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>Not set</span></>
           }
         </div>
         <button onClick={onConfigure}
-          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa", whiteSpace: "nowrap", flexShrink: 0 }}
           data-testid={testId}>
           <Settings size={11} /> Configure
         </button>
