@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plug, CheckCircle, XCircle, Settings, Zap,
-  RefreshCw, Trash2, Plus, Package, Save,
+  RefreshCw, Trash2, Plus, Package, Save, Smile,
+  Wifi, Loader2, Link2, ArrowRight,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
-import type { Plugin, Service, BusanMapping, Game } from "@shared/schema";
+import { useAuthStore } from "@/lib/store/authstore";
+import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMapping } from "@shared/schema";
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -152,7 +154,7 @@ function ConfigureModal({
   });
 
   return (
-    <Modal title={`Configure: ${service.name}`} onClose={onClose}>
+    <Modal title={`Configure: ${service.name}`} onClose={onClose} wide>
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", margin: 0 }}>
           {service.note}. Credentials are stored in the database.
@@ -206,6 +208,15 @@ function BusanConfigTab() {
       setCurrency(configData.currency ?? "IDR");
     }
   }, [configData]);
+
+  const isDirty = useMemo(() => {
+    if (!configData) return true; // Not yet saved
+    return (
+      apiToken !== (configData.apiToken ?? "") ||
+      apiBaseUrl !== (configData.apiBaseUrl ?? "https://1gamestopup.com/api/v1") ||
+      currency !== (configData.currency ?? "IDR")
+    );
+  }, [apiToken, apiBaseUrl, currency, configData]);
 
   const saveMut = useMutation({
     mutationFn: () => adminApi.post("/busan/config", { apiToken, apiBaseUrl, currency, isActive: true }),
@@ -262,15 +273,20 @@ function BusanConfigTab() {
             </select>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
-              style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
-              data-testid="button-save-busan-config">
-              <Save size={13} />
-              {saveMut.isPending ? "Saving..." : saved ? "Saved!" : "Save Configuration"}
-            </button>
+            {isDirty && (
+              <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
+                style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
+                data-testid="button-save-busan-config">
+                <Save size={13} />
+                {saveMut.isPending ? "Saving..." : "Save Configuration"}
+              </button>
+            )}
             {saved && <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
               <CheckCircle size={13} /> Configuration saved
             </span>}
+            {!isDirty && !saved && (
+              <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)" }}>No unsaved changes</span>
+            )}
           </div>
         </div>
       </div>
@@ -323,7 +339,6 @@ function BusanMappingTab() {
   const [selectedCmsProduct, setSelectedCmsProduct] = useState("");
 
   // Right (Busan) side state
-  const [busanCategory, setBusanCategory] = useState("all");
   const [selectedBusanProduct, setSelectedBusanProduct] = useState("");
   const [manualBusanId, setManualBusanId] = useState("");
   const [busanProducts, setBusanProducts] = useState<BusanProduct[]>([]);
@@ -361,17 +376,15 @@ function BusanMappingTab() {
     } finally { setFetchingProducts(false); }
   }
 
-  // Derived: unique categories from loaded busan products
-  const busanCategories = Array.from(new Set(busanProducts.map(p => p.category ?? "Other").filter(Boolean)));
+  // Auto-fetch Busan products when tab mounts and API is configured
+  useEffect(() => {
+    if (isConfigured) fetchBusanProducts();
+  }, [isConfigured]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filtered products
+  // Filtered CMS products by selected game
   const filteredCmsProducts = selectedGame === "all"
     ? cmsProducts
     : cmsProducts.filter(p => p.gameId === selectedGame);
-
-  const filteredBusanProducts = busanCategory === "all"
-    ? busanProducts
-    : busanProducts.filter(p => (p.category ?? "Other") === busanCategory);
 
   const effectiveBusanId = busanProducts.length > 0 ? selectedBusanProduct : manualBusanId;
 
@@ -457,51 +470,51 @@ function BusanMappingTab() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
               <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)" }}>Busan Product</span>
-              <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
-                style={{
-                  padding: "3px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
-                  border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
-                  display: "inline-flex", alignItems: "center", gap: "4px",
-                  opacity: (!isConfigured || fetchingProducts) ? 0.5 : 1,
-                }}
-                data-testid="button-fetch-busan-products">
-                <RefreshCw size={10} style={{ animation: fetchingProducts ? "spin 1s linear infinite" : "none" }} />
-                {fetchingProducts ? "Loading..." : "Load from API"}
-              </button>
+              {fetchingProducts && (
+                <span style={{ fontSize: "11px", color: "hsl(258,80%,70%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  <RefreshCw size={10} style={{ animation: "spin 1s linear infinite" }} /> Loading products...
+                </span>
+              )}
+              {!fetchingProducts && busanProducts.length > 0 && (
+                <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
+                  style={{
+                    padding: "3px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
+                    border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
+                    display: "inline-flex", alignItems: "center", gap: "4px",
+                  }}
+                  data-testid="button-refresh-busan-products">
+                  <RefreshCw size={10} /> Refresh
+                </button>
+              )}
             </div>
-            {busanProducts.length > 0 ? (
-              <>
+            <div>
+              <label style={labelStyle}>Select Product</label>
+              {fetchError ? (
                 <div>
-                  <label style={labelStyle}>Filter by Category</label>
-                  <select style={selectStyle} value={busanCategory} onChange={e => { setBusanCategory(e.target.value); setSelectedBusanProduct(""); }}
-                    data-testid="select-busan-category">
-                    <option value="all">All Categories</option>
-                    {busanCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <input style={inputStyle} type="text" value={manualBusanId} onChange={e => setManualBusanId(e.target.value)}
+                    placeholder="Enter Busan Product ID manually"
+                    data-testid="input-busan-product-id" />
+                  <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>
+                  <button onClick={fetchBusanProducts} disabled={!isConfigured}
+                    style={{ marginTop: "6px", padding: "4px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa", cursor: "pointer" }}>
+                    Retry
+                  </button>
                 </div>
-                <div>
-                  <label style={labelStyle}>Select Product</label>
-                  <select style={selectStyle} value={selectedBusanProduct} onChange={e => setSelectedBusanProduct(e.target.value)}
-                    data-testid="select-busan-product">
-                    <option value="">— Choose product —</option>
-                    {filteredBusanProducts.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} — {p.priceRaw ?? `${p.currency} ${p.price}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            ) : (
-              <div>
-                <label style={labelStyle}>Product ID</label>
-                <input style={inputStyle} type="text" value={manualBusanId} onChange={e => setManualBusanId(e.target.value)}
-                  placeholder="Enter Busan Product ID manually"
-                  data-testid="input-busan-product-id" />
-                {fetchError && <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>}
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>Or use "Load from API" to browse products.</p>
-              </div>
-            )}
+              ) : (
+                <select style={selectStyle} value={selectedBusanProduct} onChange={e => setSelectedBusanProduct(e.target.value)}
+                  disabled={fetchingProducts}
+                  data-testid="select-busan-product">
+                  <option value="">
+                    {fetchingProducts ? "Loading products..." : busanProducts.length === 0 ? "No products loaded yet" : "— Choose product —"}
+                  </option>
+                  {busanProducts.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — {p.priceRaw ?? `${p.currency} ${p.price}`}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
           </div>
         </div>
 
@@ -612,10 +625,394 @@ function BusanModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Smile.one Types ──────────────────────────────────────────────────────────
+interface SmileProduct { product_id: string; name: string; price: number; currency: string; }
+
+const REGIONS = [
+  { value: "global", label: "Global" },
+  { value: "ph", label: "Philippines" },
+  { value: "sg", label: "Singapore" },
+  { value: "my", label: "Malaysia" },
+  { value: "id", label: "Indonesia" },
+  { value: "th", label: "Thailand" },
+  { value: "br", label: "Brazil" },
+  { value: "vn", label: "Vietnam" },
+  { value: "tw", label: "Taiwan" },
+  { value: "hk", label: "Hong Kong" },
+  { value: "sa", label: "Saudi Arabia" },
+];
+
+// ─── Smile.one Config Tab ─────────────────────────────────────────────────────
+function SmileOneConfigTab() {
+  const qc = useQueryClient();
+  const { user } = useAuthStore();
+  const { data: config } = useQuery<SmileOneConfig | null>({
+    queryKey: ["/api/admin/smileone/config"],
+    queryFn: () => adminApi.get("/smileone/config"),
+  });
+
+  const [form, setForm] = useState({ uid: "", apiKey: "", licenseKey: "", region: "global", email: "", isActive: true });
+  const [testStatus, setTestStatus] = useState<null | { ok: boolean; message: string; balance?: unknown }>(null);
+  const [testing, setTesting] = useState(false);
+
+  useEffect(() => {
+    if (config) {
+      setForm({
+        uid: config.uid ?? "",
+        apiKey: config.apiKey ?? "",
+        licenseKey: config.licenseKey ?? "",
+        region: config.region ?? "global",
+        email: config.email ?? "",
+        isActive: config.isActive ?? true,
+      });
+    }
+  }, [config]);
+
+  const isDirty = useMemo(() => {
+    if (!config) return true;
+    return (
+      form.uid !== (config.uid ?? "") ||
+      form.apiKey !== (config.apiKey ?? "") ||
+      form.licenseKey !== (config.licenseKey ?? "") ||
+      form.region !== (config.region ?? "global") ||
+      form.email !== (config.email ?? "") ||
+      form.isActive !== (config.isActive ?? true)
+    );
+  }, [form, config]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => adminApi.post("/smileone/config", form),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/smileone/config"] }),
+  });
+
+  async function testConnection() {
+    setTesting(true); setTestStatus(null);
+    try {
+      const res = await fetch("/api/admin/smileone/test-connection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-role": user?.role ?? "super_admin" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      setTestStatus({ ok: data.success, message: data.message, balance: data.balance });
+    } catch { setTestStatus({ ok: false, message: "Connection failed" }); }
+    finally { setTesting(false); }
+  }
+
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm(p => ({ ...p, [k]: e.target.value }));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={innerCard}>
+        <p style={sectionTitle}>API Credentials</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>UID</label>
+            <input data-testid="input-smileone-uid" style={inputStyle} value={form.uid} onChange={set("uid")} placeholder="Your Smile.one UID" />
+          </div>
+          <div>
+            <label style={labelStyle}>API Key</label>
+            <input data-testid="input-smileone-apikey" type="password" style={inputStyle} value={form.apiKey} onChange={set("apiKey")} placeholder="••••••••" />
+          </div>
+          <div>
+            <label style={labelStyle}>License Key</label>
+            <input data-testid="input-smileone-licensekey" type="password" style={inputStyle} value={form.licenseKey} onChange={set("licenseKey")} placeholder="••••••••" />
+          </div>
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input data-testid="input-smileone-email" style={inputStyle} value={form.email} onChange={set("email")} placeholder="your@email.com" />
+          </div>
+          <div>
+            <label style={labelStyle}>Region</label>
+            <select data-testid="select-smileone-region" style={selectStyle} value={form.region} onChange={set("region")}>
+              {REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+            </select>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12px", color: "hsl(210,40%,80%)" }}>
+            <input data-testid="toggle-smileone-active" type="checkbox" checked={form.isActive}
+              onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
+              style={{ cursor: "pointer", width: "14px", height: "14px", accentColor: "hsl(258,90%,66%)" }} />
+            Enable Smile.one
+          </label>
+          {testStatus && (
+            <div style={{
+              padding: "10px 14px", borderRadius: "6px", fontSize: "12px",
+              background: testStatus.ok ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
+              border: `1px solid ${testStatus.ok ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"}`,
+              color: testStatus.ok ? "#4ade80" : "#f87171",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}>
+              {testStatus.ok ? <CheckCircle size={14} /> : <XCircle size={14} />}
+              {testStatus.message}{testStatus.balance != null ? ` — Balance: ${testStatus.balance}` : ""}
+            </div>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button data-testid="button-test-smileone-connection"
+              style={{ ...btnPrimary, background: "hsl(220,20%,16%)", border: "1px solid hsl(220,15%,22%)" }}
+              onClick={testConnection} disabled={testing}>
+              {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
+              Test Connection
+            </button>
+            {isDirty && (
+              <button data-testid="button-save-smileone-config" style={{ ...btnPrimary, opacity: saveMutation.isPending ? 0.7 : 1 }}
+                onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
+                Save Config
+              </button>
+            )}
+            {!isDirty && (
+              <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)" }}>No unsaved changes</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Smile.one Mapping Tab ────────────────────────────────────────────────────
+function SmileOneMappingTab() {
+  const qc = useQueryClient();
+  const { user } = useAuthStore();
+
+  const { data: games = [] } = useQuery<Game[]>({
+    queryKey: ["/api/admin/games"],
+    queryFn: () => adminApi.get("/games"),
+  });
+  const { data: mappings = [] } = useQuery<SmileOneMapping[]>({
+    queryKey: ["/api/admin/smileone/mappings"],
+    queryFn: () => adminApi.get("/smileone/mappings"),
+  });
+
+  const [leftGame, setLeftGame] = useState("");
+  const [selectedService, setSelectedService] = useState<{ id: string; name: string; price: string } | null>(null);
+  const [rightGame, setRightGame] = useState("");
+  const [rightRegion, setRightRegion] = useState("global");
+  const [smileProducts, setSmileProducts] = useState<SmileProduct[]>([]);
+  const [fetchingSmile, setFetchingSmile] = useState(false);
+  const [selectedSmile, setSelectedSmile] = useState<SmileProduct | null>(null);
+
+  const { data: services = [], isLoading: loadingServices } = useQuery<Service[]>({
+    queryKey: ["/api/admin/services", leftGame],
+    queryFn: () => adminApi.get(`/services?gameId=${leftGame}`),
+    enabled: !!leftGame,
+  });
+
+  async function fetchSmileProducts() {
+    if (!rightGame) return;
+    setFetchingSmile(true); setSmileProducts([]);
+    try {
+      const res = await fetch(`/api/smileone/products?game=${encodeURIComponent(rightGame)}&region=${rightRegion}`, {
+        headers: { "X-Username": user?.username ?? "", "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setSmileProducts(data.success && Array.isArray(data.products) ? data.products : []);
+    } catch { setSmileProducts([]); }
+    finally { setFetchingSmile(false); }
+  }
+
+  const createMutation = useMutation({
+    mutationFn: () => {
+      if (!selectedService || !selectedSmile) throw new Error("Select both products first");
+      const gameSlug = games.find(g => g.id === leftGame)?.slug ?? rightGame;
+      return adminApi.post("/smileone/mappings", {
+        cmsProductId: selectedService.id,
+        cmsProductName: selectedService.name,
+        smileProductId: selectedSmile.product_id,
+        smileProductName: selectedSmile.name,
+        gameSlug,
+        region: rightRegion,
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/smileone/mappings"] });
+      setSelectedService(null); setSelectedSmile(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => adminApi.delete(`/smileone/mappings/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/smileone/mappings"] }),
+  });
+
+  const canMap = selectedService && selectedSmile;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={innerCard}>
+        <p style={sectionTitle}>Add Product Mapping</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "start" }}>
+          {/* Left – CMS */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(220,15%,16%)", display: "block" }}>CMS Product</span>
+            <div>
+              <label style={labelStyle}>Select Game</label>
+              <select data-testid="select-smileone-cms-game" style={selectStyle} value={leftGame}
+                onChange={e => { setLeftGame(e.target.value); setSelectedService(null); }}>
+                <option value="">— Choose a game —</option>
+                {games.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+              </select>
+            </div>
+            {leftGame && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "220px", overflowY: "auto" }}>
+                {loadingServices && <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>Loading...</p>}
+                {!loadingServices && services.length === 0 && (
+                  <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>No services for this game.</p>
+                )}
+                {services.map(svc => (
+                  <div key={svc.id} data-testid={`smileone-cms-product-${svc.id}`}
+                    onClick={() => setSelectedService({ id: svc.id, name: svc.name, price: String(svc.finalPrice) })}
+                    style={{
+                      padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
+                      background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
+                      border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                      color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
+                    }}>
+                    <span>{svc.name}</span>
+                    <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>${svc.finalPrice}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!leftGame && <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>Select a game to see its products.</p>}
+          </div>
+
+          {/* Arrow + Map */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", paddingTop: "50px" }}>
+            <ArrowRight size={18} color="hsl(220,10%,40%)" />
+            <button data-testid="button-smileone-map"
+              style={{ ...btnPrimary, opacity: canMap ? 1 : 0.4, cursor: canMap ? "pointer" : "not-allowed", flexDirection: "column", gap: "3px" }}
+              onClick={() => canMap && createMutation.mutate()} disabled={!canMap || createMutation.isPending}>
+              {createMutation.isPending ? <Loader2 size={12} /> : <Link2 size={12} />}
+              MAP
+            </button>
+          </div>
+
+          {/* Right – Smile.one */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(220,15%,16%)", display: "block" }}>Smile.one Products</span>
+            <div>
+              <label style={labelStyle}>Game Slug</label>
+              <input data-testid="input-smileone-game-slug" style={inputStyle} value={rightGame}
+                onChange={e => setRightGame(e.target.value)} placeholder="e.g. mobile-legends" />
+            </div>
+            <div>
+              <label style={labelStyle}>Region</label>
+              <select data-testid="select-smileone-region-map" style={selectStyle} value={rightRegion}
+                onChange={e => setRightRegion(e.target.value)}>
+                {REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+            <button data-testid="button-fetch-smileone-products"
+              style={{ ...btnPrimary, background: "hsl(220,20%,14%)", border: "1px solid hsl(220,15%,20%)" }}
+              onClick={fetchSmileProducts} disabled={!rightGame || fetchingSmile}>
+              {fetchingSmile ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={12} />}
+              Fetch Products
+            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "160px", overflowY: "auto" }}>
+              {smileProducts.length === 0 && !fetchingSmile && (
+                <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>Enter game slug and fetch to see products.</p>
+              )}
+              {smileProducts.map(p => (
+                <div key={p.product_id} data-testid={`smileone-product-${p.product_id}`}
+                  onClick={() => setSelectedSmile(p)}
+                  style={{
+                    padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
+                    background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
+                    border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                    color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
+                  }}>
+                  <span>{p.name}</span>
+                  <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>{p.currency} {p.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Selection summary */}
+      {(selectedService || selectedSmile) && (
+        <div style={{ ...innerCard, padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(210,40%,80%)", flexWrap: "wrap" }}>
+          <span style={{ color: selectedService ? "#4ade80" : "hsl(220,10%,40%)" }}>
+            {selectedService ? `CMS: ${selectedService.name}` : "No CMS product selected"}
+          </span>
+          <ArrowRight size={12} color="hsl(220,10%,40%)" />
+          <span style={{ color: selectedSmile ? "#4ade80" : "hsl(220,10%,40%)" }}>
+            {selectedSmile ? `Smile: ${selectedSmile.name}` : "No Smile.one product selected"}
+          </span>
+        </div>
+      )}
+
+      {/* Mappings table */}
+      <div style={{ ...innerCard, padding: 0, overflow: "hidden" }}>
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
+          <p style={{ ...sectionTitle, marginBottom: 0 }}>
+            Mapped Products{mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}> ({mappings.length})</span>}
+          </p>
+        </div>
+        {mappings.length === 0 ? (
+          <div style={{ padding: "24px 16px", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "12px" }}>
+            No mappings yet. Use the form above to create your first mapping.
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
+                  {["Game", "Region", "CMS Product", "Smile.one Product", "Actions"].map(h => (
+                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {mappings.map(m => (
+                  <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.gameSlug}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(220,10%,60%)" }}>{m.region}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.cmsProductName ?? m.cmsProductId}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.smileProductName ?? m.smileProductId}</td>
+                    <td style={{ padding: "9px 14px" }}>
+                      <button data-testid={`button-delete-smileone-mapping-${m.id}`}
+                        onClick={() => deleteMutation.mutate(m.id)} disabled={deleteMutation.isPending}
+                        style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", color: "#f87171", borderRadius: "5px", padding: "3px 8px", cursor: "pointer", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <Trash2 size={11} /> Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Smile.one Modal ──────────────────────────────────────────────────────────
+function SmileOneModal({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<"config" | "mapping">("config");
+  return (
+    <Modal title="Smile.one Integration" onClose={onClose} wide>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+          <button data-testid="tab-smileone-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
+          <button data-testid="tab-smileone-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
+        </div>
+        {tab === "config" && <SmileOneConfigTab />}
+        {tab === "mapping" && <SmileOneMappingTab />}
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ApiIntegration() {
   const [configuring, setConfiguring] = useState<ServiceDef | null>(null);
   const [busanOpen, setBusanOpen] = useState(false);
+  const [smileOneOpen, setSmileOneOpen] = useState(false);
 
   const { data: plugins = [] } = useQuery<Plugin[]>({
     queryKey: ["/api/admin/plugins"],
@@ -625,6 +1022,11 @@ export default function ApiIntegration() {
   const { data: busanConfig } = useQuery<BusanConfig | null>({
     queryKey: ["/api/admin/busan/config"],
     queryFn: () => adminApi.get("/busan/config"),
+  });
+
+  const { data: smileOneConfig } = useQuery<SmileOneConfig | null>({
+    queryKey: ["/api/admin/smileone/config"],
+    queryFn: () => adminApi.get("/smileone/config"),
   });
 
   useEffect(() => {
@@ -656,6 +1058,7 @@ export default function ApiIntegration() {
   }
 
   const busanConfigured = Boolean(busanConfig?.apiToken);
+  const smileOneConfigured = Boolean(smileOneConfig?.apiKey);
 
   // Shared row renderer
   const renderRow = (
@@ -703,8 +1106,6 @@ export default function ApiIntegration() {
     </div>
   );
 
-  const totalRows = SERVICES.length + 1; // +1 for Busan
-
   return (
     <AdminLayout title="API Integration">
       <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -715,7 +1116,7 @@ export default function ApiIntegration() {
           <a href="/admin/payment-method" style={{ color: "hsl(258,90%,66%)", textDecoration: "none" }}>Payment Method</a> page.
         </div>
 
-        {/* ── All Integrations (including Busan at the bottom) ── */}
+        {/* ── All Integrations ── */}
         <div style={{ ...card, padding: "0" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Service Integrations</span>
@@ -725,7 +1126,7 @@ export default function ApiIntegration() {
           </div>
           <div style={{ padding: "0 20px" }}>
             {/* Standard services */}
-            {SERVICES.map((svc, i) => (
+            {SERVICES.map((svc) => (
               <div key={svc.slug} id={svc.slug}>
                 {renderRow(
                   <Plug size={14} />,
@@ -743,10 +1144,21 @@ export default function ApiIntegration() {
             {renderRow(
               <Zap size={14} />,
               "Busan Integration",
-              "Auto-fulfil game top-ups after payment confirmation",
+              "Auto-fulfil game top-ups via 1GameStopUp after payment confirmation",
               busanConfigured,
               () => setBusanOpen(true),
               "button-configure-busan",
+              false,
+            )}
+
+            {/* Smile.one Integration row */}
+            {renderRow(
+              <Smile size={14} />,
+              "Smile.one Integration",
+              "Auto-fulfil game top-ups via Smile.one after payment confirmation",
+              smileOneConfigured,
+              () => setSmileOneOpen(true),
+              "button-configure-smileone",
               true,
             )}
           </div>
@@ -758,6 +1170,7 @@ export default function ApiIntegration() {
         <ConfigureModal service={configuring} plugin={pluginMap[configuring.slug]} onClose={() => setConfiguring(null)} />
       )}
       {busanOpen && <BusanModal onClose={() => setBusanOpen(false)} />}
+      {smileOneOpen && <SmileOneModal onClose={() => setSmileOneOpen(false)} />}
     </AdminLayout>
   );
 }
