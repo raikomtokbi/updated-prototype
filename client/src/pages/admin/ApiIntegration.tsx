@@ -5,7 +5,7 @@ import {
   RefreshCw, Trash2, Plus, Package, Save, Smile,
   Wifi, Loader2, Link2, ArrowRight,
 } from "lucide-react";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
 import { useAuthStore } from "@/lib/store/authstore";
@@ -333,6 +333,7 @@ function BusanConfigTab() {
 // ─── Busan Mapping Tab ────────────────────────────────────────────────────────
 function BusanMappingTab() {
   const qc = useQueryClient();
+  const isMobile = useMobile(640);
 
   // Left (CMS) side state
   const [selectedGame, setSelectedGame] = useState("all");
@@ -436,11 +437,11 @@ function BusanMappingTab() {
         </div>
 
         {/* Even two-column picker */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "16px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto 1fr", gap: isMobile ? "12px" : "16px", alignItems: "start" }}>
 
           {/* ── LEFT: CMS Side ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,72%)", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               CMS Product
             </div>
             <div>
@@ -465,14 +466,16 @@ function BusanMappingTab() {
           </div>
 
           {/* ── Divider Arrow ── */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "30px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
-            →
-          </div>
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "30px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
+              →
+            </div>
+          )}
 
           {/* ── RIGHT: Busan Side ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
-              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)" }}>Busan Product</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,72%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Busan Product</span>
               {fetchingProducts && (
                 <span style={{ fontSize: "11px", color: "hsl(258,80%,70%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                   <RefreshCw size={10} style={{ animation: "spin 1s linear infinite" }} /> Loading…
