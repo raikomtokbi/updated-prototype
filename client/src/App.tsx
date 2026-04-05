@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import RefundPolicy from "./pages/RefundPolicy";
+import DeliveryCancellation from "./pages/DeliveryCancellation";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -108,6 +109,7 @@ function PublicRoutes() {
           <Route path="/privacy" component={Privacy} />
           <Route path="/terms" component={Terms} />
           <Route path="/refund-policy" component={RefundPolicy} />
+          <Route path="/delivery-cancellation" component={DeliveryCancellation} />
           <Route component={NotFound} />
         </Switch>
       </main>

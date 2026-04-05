@@ -975,13 +975,17 @@ function Footer() {
     { label: "Gift Cards", href: "/products?category=gift_card" },
     { label: "Subscriptions", href: "/products?category=subscription" },
   ];
-  const LEGAL_LINKS = [
+  const ABOUT_LINKS = [
     { label: "About Us", href: "/about" },
-    { label: "FAQ", href: "/faq" },
+    { label: "Contact", href: "/contact" },
     { label: "Support", href: "/support" },
+    { label: "FAQ", href: "/faq" },
+  ];
+  const LEGAL_LINKS = [
     { label: "Terms & Services", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Refund Policy", href: "/refund-policy" },
+    { label: "Delivery & Cancellation", href: "/delivery-cancellation" },
   ];
 
   return (
@@ -997,7 +1001,7 @@ function Footer() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr",
+            gridTemplateColumns: "2fr 1fr 1fr 1fr",
             gap: "3rem",
             marginBottom: "3rem",
           }}
@@ -1133,6 +1137,36 @@ function Footer() {
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {MARKETPLACE.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* About */}
+          <div>
+            <h4
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "#e5e7eb",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: "1rem",
+              }}
+            >
+              About
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              {ABOUT_LINKS.map((item) => (
                 <li key={item.label}>
                   <Link
                     href={item.href}
