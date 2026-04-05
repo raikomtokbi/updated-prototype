@@ -297,6 +297,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(await storage.getActiveHeroSliders());
   });
 
+  // ── Helper: Strip sensitive fields from payment methods ────────────────────
+  function sanitizePaymentMethod(pm: any) {
+    const { secretKey: _sk, webhookSecret: _ws, publicKey: _pk, ...safe } = pm;
+    return safe;
+  }
+
   // ── Public payment methods ─────────────────────────────────────────────────
   app.get("/api/payment-methods", async (_req, res) => {
     const all = await storage.getAllPaymentMethods();
@@ -304,7 +310,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(
       all
         .filter((p) => p.isActive)
-        .map(({ secretKey: _sk, webhookSecret: _ws, publicKey: _pk, ...safe }) => safe),
+        .map(sanitizePaymentMethod),
     );
   });
 
@@ -1085,24 +1091,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── Payment Methods ────────────────────────────────────────────────────────
   app.get("/api/admin/payment-methods", requireAdmin, async (_req, res) => {
-    res.json(await storage.getAllPaymentMethods());
+    const all = await storage.getAllPaymentMethods();
+    // Return sanitized data (no actual secret values) for admin
+    res.json(all.map(sanitizePaymentMethod));
   });
 
   app.post("/api/admin/payment-methods", requireAdmin, async (req, res) => {
     const p = await storage.createPaymentMethod(req.body);
-    res.status(201).json(p);
+    // Return sanitized data
+    res.status(201).json(sanitizePaymentMethod(p));
   });
 
   app.patch("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     const p = await storage.updatePaymentMethod(req.params.id, req.body);
     if (!p) return res.status(404).json({ message: "Not found" });
-    res.json(p);
+    // Return sanitized data
+    res.json(sanitizePaymentMethod(p));
   });
 
   app.put("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     const p = await storage.updatePaymentMethod(req.params.id, req.body);
     if (!p) return res.status(404).json({ message: "Not found" });
-    res.json(p);
+    // Return sanitized data
+    res.json(sanitizePaymentMethod(p));
   });
 
   app.delete("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
