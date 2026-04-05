@@ -219,11 +219,11 @@ export const tdStyle: React.CSSProperties = {
 };
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
-export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+export function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(220, 22%, 8%)", border: "1px solid rgba(124, 58, 237, 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: wide ? "820px" : "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(220, 22%, 8%)", border: "1px solid rgba(124, 58, 237, 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220, 10%, 50%)", cursor: "pointer", fontSize: "18px", lineHeight: 1 }}>✕</button>

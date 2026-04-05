@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plug, CheckCircle, XCircle, Settings, Zap,
-  RefreshCw, Trash2, Plus, Link2, DollarSign, Package, Save,
+  RefreshCw, Trash2, Plus, Package, Save,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
-import type { Plugin, Product, BusanMapping } from "@shared/schema";
+import type { Plugin, Product, BusanMapping, Game } from "@shared/schema";
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -34,6 +34,24 @@ const tabBtn = (active: boolean): React.CSSProperties => ({
   background: active ? "hsl(258, 90%, 62%)" : "transparent",
   color: active ? "white" : "hsl(220,10%,60%)",
 });
+const innerCard: React.CSSProperties = {
+  background: "hsl(220, 20%, 7%)",
+  border: "1px solid hsl(220, 15%, 13%)",
+  borderRadius: "8px",
+  padding: "16px",
+};
+
+// ─── CURRENCIES ───────────────────────────────────────────────────────────────
+const CURRENCIES = [
+  { value: "IDR", label: "IDR — Indonesian Rupiah" },
+  { value: "INR", label: "INR — Indian Rupee" },
+  { value: "MYR", label: "MYR — Malaysian Ringgit" },
+  { value: "PHP", label: "PHP — Philippine Peso" },
+  { value: "THB", label: "THB — Thai Baht" },
+  { value: "VND", label: "VND — Vietnamese Dong" },
+  { value: "USD", label: "USD — US Dollar" },
+  { value: "SGD", label: "SGD — Singapore Dollar" },
+];
 
 // ─── Service Integration Definitions ─────────────────────────────────────────
 interface ServiceDef {
@@ -88,9 +106,7 @@ const SERVICES: ServiceDef[] = [
     slug: "analytics",
     name: "Analytics",
     note: "Used for tracking visits and conversions",
-    fields: [
-      { key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" },
-    ],
+    fields: [{ key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" }],
   },
   {
     slug: "social-auth",
@@ -114,7 +130,7 @@ const SERVICES: ServiceDef[] = [
   },
 ];
 
-// ─── Configure Modal ──────────────────────────────────────────────────────────
+// ─── Configure Modal (for standard services) ──────────────────────────────────
 function ConfigureModal({
   service, plugin, onClose,
 }: { service: ServiceDef; plugin: Plugin | undefined; onClose: () => void }) {
@@ -166,14 +182,6 @@ function ConfigureModal({
 // ─── Busan Types ──────────────────────────────────────────────────────────────
 interface BusanConfig { id?: string; apiToken?: string; currency?: string; isActive?: boolean; }
 interface BusanProduct { id: string; name: string; price: number; currency: string; category?: string; }
-
-// ─── Inner card style (elevated within outer card) ───────────────────────────
-const innerCard: React.CSSProperties = {
-  background: "hsl(220, 20%, 12%)",
-  border: "1px solid hsl(220, 15%, 16%)",
-  borderRadius: "8px",
-  padding: "16px",
-};
 
 // ─── Busan Config Tab ─────────────────────────────────────────────────────────
 function BusanConfigTab() {
@@ -238,13 +246,7 @@ function BusanConfigTab() {
             <label style={labelStyle}>Default Currency</label>
             <select style={selectStyle} value={currency} onChange={e => setCurrency(e.target.value)}
               data-testid="select-busan-currency">
-              <option value="IDR">IDR — Indonesian Rupiah</option>
-              <option value="MYR">MYR — Malaysian Ringgit</option>
-              <option value="PHP">PHP — Philippine Peso</option>
-              <option value="THB">THB — Thai Baht</option>
-              <option value="VND">VND — Vietnamese Dong</option>
-              <option value="USD">USD — US Dollar</option>
-              <option value="SGD">SGD — Singapore Dollar</option>
+              {CURRENCIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
@@ -265,27 +267,21 @@ function BusanConfigTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Account Balance</p>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "14px", lineHeight: 1.6 }}>
-          Verify your Busan API balance before processing orders. Ensure sufficient funds are available for automatic top-up fulfilment.
+          Verify your Busan API balance before processing orders.
         </p>
-
         {balanceData && (
-          <div style={{
-            background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)",
-            borderRadius: "8px", padding: "16px", textAlign: "center", marginBottom: "14px",
-          }}>
+          <div style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "8px", padding: "16px", textAlign: "center", marginBottom: "14px" }}>
             <div style={{ fontSize: "26px", fontWeight: 800, color: "hsl(142,71%,55%)", fontFamily: "monospace" }}>
               {balanceData.currency} {balanceData.balance.toLocaleString()}
             </div>
             <div style={{ fontSize: "11px", color: "hsl(142,71%,40%)", marginTop: "3px" }}>Available Balance</div>
           </div>
         )}
-
         {balanceError && (
           <div style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", padding: "10px 14px", fontSize: "12px", color: "hsl(0,75%,65%)", marginBottom: "14px" }}>
             {balanceError}
           </div>
         )}
-
         <button onClick={checkBalance} disabled={balanceLoading || !isConfigured}
           style={{
             padding: "7px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
@@ -302,28 +298,6 @@ function BusanConfigTab() {
           <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "8px" }}>Save your API token first to check balance.</p>
         )}
       </div>
-
-      {/* How it works */}
-      <div style={innerCard}>
-        <p style={sectionTitle}>How Auto-Fulfilment Works</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {[
-            { n: "1", t: "Customer pays via XYZPay", d: "Player ID and zone ID are captured at checkout and stored securely with the order." },
-            { n: "2", t: "Webhook confirmation received", d: "When XYZPay confirms payment, the webhook at /api/xyzpay/webhook is triggered." },
-            { n: "3", t: "Busan top-up is initiated", d: "The system looks up the product mapping and automatically sends the top-up request to Busan API." },
-          ].map(step => (
-            <div key={step.n} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-              <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(124,58,237,0.15)", color: "hsl(258,90%,70%)", fontSize: "11px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
-                {step.n}
-              </div>
-              <div>
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,85%)" }}>{step.t}</div>
-                <div style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginTop: "2px", lineHeight: 1.5 }}>{step.d}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -331,17 +305,28 @@ function BusanConfigTab() {
 // ─── Busan Mapping Tab ────────────────────────────────────────────────────────
 function BusanMappingTab() {
   const qc = useQueryClient();
+
+  // Left (CMS) side state
+  const [selectedGame, setSelectedGame] = useState("all");
   const [selectedCmsProduct, setSelectedCmsProduct] = useState("");
+
+  // Right (Busan) side state
+  const [busanCategory, setBusanCategory] = useState("all");
   const [selectedBusanProduct, setSelectedBusanProduct] = useState("");
   const [manualBusanId, setManualBusanId] = useState("");
-  const [requiresZone, setRequiresZone] = useState(false);
-  const [fetchingProducts, setFetchingProducts] = useState(false);
   const [busanProducts, setBusanProducts] = useState<BusanProduct[]>([]);
+  const [fetchingProducts, setFetchingProducts] = useState(false);
   const [fetchError, setFetchError] = useState("");
+
+  const [requiresZone, setRequiresZone] = useState(false);
 
   const { data: configData } = useQuery<BusanConfig | null>({
     queryKey: ["/api/admin/busan/config"],
     queryFn: () => adminApi.get("/busan/config"),
+  });
+  const { data: games = [] } = useQuery<Game[]>({
+    queryKey: ["/api/admin/games"],
+    queryFn: () => adminApi.get("/games"),
   });
   const { data: cmsProducts = [] } = useQuery<Product[]>({
     queryKey: ["/api/admin/products"],
@@ -363,6 +348,18 @@ function BusanMappingTab() {
       setFetchError(e.message || "Failed to fetch Busan products");
     } finally { setFetchingProducts(false); }
   }
+
+  // Derived: unique categories from loaded busan products
+  const busanCategories = Array.from(new Set(busanProducts.map(p => p.category ?? "Other").filter(Boolean)));
+
+  // Filtered products
+  const filteredCmsProducts = selectedGame === "all"
+    ? cmsProducts
+    : cmsProducts.filter(p => (p as any).gameId === selectedGame || (p as any).gameSlug === selectedGame);
+
+  const filteredBusanProducts = busanCategory === "all"
+    ? busanProducts
+    : busanProducts.filter(p => (p.category ?? "Other") === busanCategory);
 
   const effectiveBusanId = busanProducts.length > 0 ? selectedBusanProduct : manualBusanId;
 
@@ -391,7 +388,7 @@ function BusanMappingTab() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {!isConfigured && (
         <div style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.2)", borderRadius: "8px", padding: "12px 16px", fontSize: "12px", color: "hsl(45,93%,65%)", display: "flex", alignItems: "center", gap: "8px" }}>
           <Zap size={14} />
@@ -399,28 +396,47 @@ function BusanMappingTab() {
         </div>
       )}
 
-      {/* Add Mapping */}
+      {/* Two-column mapping builder */}
       <div style={innerCard}>
         <p style={sectionTitle}>Add Product Mapping</p>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "16px", lineHeight: 1.5 }}>
-          Link each CMS product to its corresponding Busan API product ID. When a payment is confirmed, the system will automatically use this mapping to fulfil the top-up.
-        </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          {/* CMS Product */}
-          <div>
-            <label style={labelStyle}>CMS Product</label>
-            <select style={selectStyle} value={selectedCmsProduct} onChange={e => setSelectedCmsProduct(e.target.value)}
-              data-testid="select-cms-product">
-              <option value="">— Select a product —</option>
-              {cmsProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-            </select>
+        <div className="busan-mapping-cols">
+
+          {/* ── LEFT: CMS Side ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+              CMS Product
+            </div>
+            <div>
+              <label style={labelStyle}>Filter by Game</label>
+              <select style={selectStyle} value={selectedGame} onChange={e => { setSelectedGame(e.target.value); setSelectedCmsProduct(""); }}
+                data-testid="select-filter-game">
+                <option value="all">All Games</option>
+                {games.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Select Product</label>
+              <select style={selectStyle} value={selectedCmsProduct} onChange={e => setSelectedCmsProduct(e.target.value)}
+                data-testid="select-cms-product">
+                <option value="">— Choose product —</option>
+                {filteredCmsProducts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </select>
+              {filteredCmsProducts.length === 0 && selectedGame !== "all" && (
+                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>No products for this game.</p>
+              )}
+            </div>
           </div>
 
-          {/* Busan Product */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", marginBottom: "4px" }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Busan Product</label>
+          {/* ── Divider Arrow ── */}
+          <div className="busan-mapping-arrow" style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "36px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
+            →
+          </div>
+
+          {/* ── RIGHT: Busan Side ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)" }}>Busan Product</span>
               <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
                 style={{
                   padding: "3px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
@@ -434,62 +450,78 @@ function BusanMappingTab() {
               </button>
             </div>
             {busanProducts.length > 0 ? (
-              <select style={selectStyle} value={selectedBusanProduct} onChange={e => setSelectedBusanProduct(e.target.value)}
-                data-testid="select-busan-product">
-                <option value="">— Select Busan product —</option>
-                {busanProducts.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} — {p.currency} {p.price}</option>
-                ))}
-              </select>
+              <>
+                <div>
+                  <label style={labelStyle}>Filter by Category</label>
+                  <select style={selectStyle} value={busanCategory} onChange={e => { setBusanCategory(e.target.value); setSelectedBusanProduct(""); }}
+                    data-testid="select-busan-category">
+                    <option value="all">All Categories</option>
+                    {busanCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Select Product</label>
+                  <select style={selectStyle} value={selectedBusanProduct} onChange={e => setSelectedBusanProduct(e.target.value)}
+                    data-testid="select-busan-product">
+                    <option value="">— Choose product —</option>
+                    {filteredBusanProducts.map(p => (
+                      <option key={p.id} value={p.id}>{p.name} — {p.currency} {p.price}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
             ) : (
-              <input style={inputStyle} type="text" value={manualBusanId} onChange={e => setManualBusanId(e.target.value)}
-                placeholder="Enter Busan Product ID manually (or load from API above)"
-                data-testid="input-busan-product-id" />
+              <div>
+                <label style={labelStyle}>Product ID</label>
+                <input style={inputStyle} type="text" value={manualBusanId} onChange={e => setManualBusanId(e.target.value)}
+                  placeholder="Enter Busan Product ID manually"
+                  data-testid="input-busan-product-id" />
+                {fetchError && <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>}
+                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>Or use "Load from API" to browse products.</p>
+              </div>
             )}
-            {fetchError && <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>}
           </div>
+        </div>
 
-          {/* Requires Zone */}
+        {/* Requires Zone + Add button */}
+        <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid hsl(220,15%,16%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
           <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12px", color: "hsl(210,40%,80%)" }}>
             <input type="checkbox" checked={requiresZone} onChange={e => setRequiresZone(e.target.checked)}
               style={{ accentColor: "hsl(258,90%,66%)", width: "14px", height: "14px" }}
               data-testid="checkbox-requires-zone" />
             This product requires a Zone / Server ID
           </label>
-
-          <div>
-            <button onClick={() => addMappingMut.mutate()}
-              disabled={!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending}
-              style={{
-                ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px",
-                opacity: (!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending) ? 0.5 : 1,
-              }}
-              data-testid="button-add-mapping">
-              <Plus size={13} />
-              {addMappingMut.isPending ? "Saving..." : "Add Mapping"}
-            </button>
-          </div>
+          <button onClick={() => addMappingMut.mutate()}
+            disabled={!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending}
+            style={{
+              ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px",
+              opacity: (!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending) ? 0.5 : 1,
+            }}
+            data-testid="button-add-mapping">
+            <Plus size={13} />
+            {addMappingMut.isPending ? "Saving..." : "Add Mapping"}
+          </button>
         </div>
       </div>
 
       {/* Mapped Products Table */}
       <div style={{ ...innerCard, padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
           <p style={{ ...sectionTitle, marginBottom: 0 }}>
-            Mapped Products {mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}>({mappings.length})</span>}
+            Mapped Products{mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}> ({mappings.length})</span>}
           </p>
         </div>
         {mappings.length === 0 ? (
           <div style={{ padding: "32px 16px", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "12px" }}>
             <Package size={28} style={{ display: "block", margin: "0 auto 10px", color: "hsl(220,10%,28%)" }} />
-            No mappings yet. Use the panel above to add your first product mapping.
+            No mappings yet. Use the form above to add your first product mapping.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
-                  {["CMS Product", "Busan Product ID", "Zone Req.", "Actions"].map(h => (
+                  {["CMS Product", "Busan Product", "Zone Req.", "Actions"].map(h => (
                     <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -499,7 +531,6 @@ function BusanMappingTab() {
                   <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ fontWeight: 500, color: "hsl(210,40%,85%)" }}>{m.cmsProductName || m.cmsProductId}</div>
-                      <div style={{ fontSize: "10px", color: "hsl(220,10%,38%)", marginTop: "1px", fontFamily: "monospace" }}>{m.cmsProductId}</div>
                     </td>
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258,80%,72%)", background: "rgba(124,58,237,0.08)", padding: "2px 7px", borderRadius: "4px", display: "inline-block" }}>
@@ -532,14 +563,46 @@ function BusanMappingTab() {
   );
 }
 
+// ─── Busan Modal ──────────────────────────────────────────────────────────────
+function BusanModal({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<"config" | "mapping">("config");
+  return (
+    <Modal title="Busan Integration" onClose={onClose} wide>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .busan-mapping-cols { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
+        @media (max-width: 600px) { .busan-mapping-cols { grid-template-columns: 1fr; } .busan-mapping-arrow { display: none !important; } }
+      `}</style>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* Tab bar */}
+        <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+          <button data-testid="tab-busan-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>
+            Configuration
+          </button>
+          <button data-testid="tab-busan-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>
+            Product Mapping
+          </button>
+        </div>
+        {tab === "config" && <BusanConfigTab />}
+        {tab === "mapping" && <BusanMappingTab />}
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ApiIntegration() {
   const [configuring, setConfiguring] = useState<ServiceDef | null>(null);
-  const [busanTab, setBusanTab] = useState<"config" | "mapping">("config");
+  const [busanOpen, setBusanOpen] = useState(false);
 
   const { data: plugins = [] } = useQuery<Plugin[]>({
     queryKey: ["/api/admin/plugins"],
     queryFn: () => adminApi.get("/plugins"),
+  });
+
+  const { data: busanConfig } = useQuery<BusanConfig | null>({
+    queryKey: ["/api/admin/busan/config"],
+    queryFn: () => adminApi.get("/busan/config"),
   });
 
   useEffect(() => {
@@ -570,9 +633,58 @@ export default function ApiIntegration() {
     } catch { return false; }
   }
 
+  const busanConfigured = Boolean(busanConfig?.apiToken);
+
+  // Shared row renderer
+  const renderRow = (
+    icon: React.ReactNode,
+    name: string,
+    note: string,
+    configured: boolean,
+    onConfigure: () => void,
+    testId: string,
+    isLast: boolean,
+  ) => (
+    <div
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 0", borderBottom: isLast ? "none" : "1px solid hsl(220, 15%, 12%)",
+        gap: "12px", flexWrap: "wrap",
+      }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{
+          width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
+          background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
+          color: configured ? "hsl(142,71%,48%)" : "hsl(220, 10%, 40%)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {icon}
+        </div>
+        <div>
+          <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)" }}>{name}</div>
+          <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{note}</div>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          {configured
+            ? <><CheckCircle size={13} color="hsl(142,71%,48%)" /><span style={{ fontSize: "12px", color: "hsl(142,71%,48%)" }}>Configured</span></>
+            : <><XCircle size={13} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>Not configured</span></>
+          }
+        </div>
+        <button onClick={onConfigure}
+          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa" }}
+          data-testid={testId}>
+          <Settings size={11} /> Configure
+        </button>
+      </div>
+    </div>
+  );
+
+  const totalRows = SERVICES.length + 1; // +1 for Busan
+
   return (
     <AdminLayout title="API Integration">
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "24px" }}>
 
         <div style={{ fontSize: "13px", color: "hsl(220,10%,45%)", lineHeight: 1.6 }}>
@@ -581,7 +693,7 @@ export default function ApiIntegration() {
           <a href="/admin/payment-method" style={{ color: "hsl(258,90%,66%)", textDecoration: "none" }}>Payment Method</a> page.
         </div>
 
-        {/* ── Service Integrations ── */}
+        {/* ── All Integrations (including Busan at the bottom) ── */}
         <div style={{ ...card, padding: "0" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Service Integrations</span>
@@ -590,76 +702,31 @@ export default function ApiIntegration() {
             </p>
           </div>
           <div style={{ padding: "0 20px" }}>
-            {SERVICES.map((svc, i) => {
-              const configured = isConfigured(svc);
-              return (
-                <div key={svc.slug} id={svc.slug}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "14px 0", borderBottom: i < SERVICES.length - 1 ? "1px solid hsl(220, 15%, 12%)" : "none",
-                    gap: "12px", flexWrap: "wrap", borderRadius: "4px", transition: "box-shadow 0.3s",
-                  }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
-                      background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
-                      color: configured ? "hsl(142,71%,48%)" : "hsl(220, 10%, 40%)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      <Plug size={14} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)" }}>{svc.name}</div>
-                      <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{svc.note}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      {configured
-                        ? <><CheckCircle size={13} color="hsl(142,71%,48%)" /><span style={{ fontSize: "12px", color: "hsl(142,71%,48%)" }}>Configured</span></>
-                        : <><XCircle size={13} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>Not configured</span></>
-                      }
-                    </div>
-                    <button onClick={() => setConfiguring(svc)}
-                      style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa" }}
-                      data-testid={`button-configure-${svc.slug}`}>
-                      <Settings size={11} /> Configure
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Busan Game Top-up API (at the bottom) ── */}
-        <div style={{ ...card, padding: "0" }}>
-          {/* Card header */}
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", display: "flex", alignItems: "center", gap: "7px" }}>
-                <Zap size={14} color="hsl(258,90%,66%)" />
-                Busan Game Top-up API
+            {/* Standard services */}
+            {SERVICES.map((svc, i) => (
+              <div key={svc.slug} id={svc.slug}>
+                {renderRow(
+                  <Plug size={14} />,
+                  svc.name,
+                  svc.note,
+                  isConfigured(svc),
+                  () => setConfiguring(svc),
+                  `button-configure-${svc.slug}`,
+                  false,
+                )}
               </div>
-              <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: "4px 0 0" }}>
-                Auto-fulfil game top-ups after XYZPay payment confirmation via the Busan API.
-              </p>
-            </div>
-            {/* Tab bar */}
-            <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,7%)", padding: "4px", borderRadius: "8px", border: "1px solid hsl(220,15%,11%)" }}>
-              <button data-testid="tab-busan-config" style={tabBtn(busanTab === "config")} onClick={() => setBusanTab("config")}>
-                Configuration
-              </button>
-              <button data-testid="tab-busan-mapping" style={tabBtn(busanTab === "mapping")} onClick={() => setBusanTab("mapping")}>
-                Product Mapping
-              </button>
-            </div>
-          </div>
+            ))}
 
-          {/* Tab content */}
-          <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "0" }}>
-            {busanTab === "config" && <BusanConfigTab />}
-            {busanTab === "mapping" && <BusanMappingTab />}
+            {/* Busan Integration row */}
+            {renderRow(
+              <Zap size={14} />,
+              "Busan Integration",
+              "Auto-fulfil game top-ups after payment confirmation",
+              busanConfigured,
+              () => setBusanOpen(true),
+              "button-configure-busan",
+              true,
+            )}
           </div>
         </div>
 
@@ -668,6 +735,7 @@ export default function ApiIntegration() {
       {configuring && (
         <ConfigureModal service={configuring} plugin={pluginMap[configuring.slug]} onClose={() => setConfiguring(null)} />
       )}
+      {busanOpen && <BusanModal onClose={() => setBusanOpen(false)} />}
     </AdminLayout>
   );
 }
