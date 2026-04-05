@@ -294,7 +294,7 @@ function GameDetailView({ game }: { game: Game }) {
     }
     if (!validate() || !selectedService) return;
     addItem(buildCartPayload());
-    navigate(`/checkout?from=product&fromName=${encodeURIComponent(product?.title ?? "Product")}`);
+    navigate(`/checkout?from=product&fromName=${encodeURIComponent(game?.name ?? "Product")}`);
   }
 
   function proceedAfterRegister() {
