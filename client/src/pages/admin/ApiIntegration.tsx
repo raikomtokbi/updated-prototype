@@ -425,7 +425,7 @@ function BusanMappingTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Add Product Mapping</p>
 
-        <div className="busan-mapping-cols">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "16px", alignItems: "start" }}>
 
           {/* ── LEFT: CMS Side ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -462,7 +462,7 @@ function BusanMappingTab() {
           </div>
 
           {/* ── Divider Arrow ── */}
-          <div className="busan-mapping-arrow" style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "36px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "36px", color: "hsl(258,80%,65%)", fontSize: "18px", flexShrink: 0 }}>
             →
           </div>
 
@@ -603,11 +603,7 @@ function BusanModal({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<"config" | "mapping">("config");
   return (
     <Modal title="Busan Integration" onClose={onClose} wide>
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .busan-mapping-cols { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
-        @media (max-width: 600px) { .busan-mapping-cols { grid-template-columns: 1fr; } .busan-mapping-arrow { display: none !important; } }
-      `}</style>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {/* Tab bar */}
         <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
@@ -1108,7 +1104,7 @@ export default function ApiIntegration() {
 
   return (
     <AdminLayout title="API Integration">
-      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
         <div style={{ fontSize: "13px", color: "hsl(220,10%,45%)", lineHeight: 1.6 }}>
           Configure third-party integrations. Credentials are stored securely in the database.
