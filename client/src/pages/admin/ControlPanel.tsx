@@ -111,9 +111,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 
 function InfoNote({ text }: { text: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginTop: "6px", padding: "6px 8px", background: "hsl(220, 30%, 13%)", borderRadius: "5px", border: "1px solid hsl(220, 15%, 18%)" }}>
-      <Info size={11} style={{ color: "hsl(215, 80%, 60%)", flexShrink: 0, marginTop: "1px" }} />
-      <span style={{ fontSize: "10px", color: "hsl(215, 60%, 60%)", lineHeight: 1.5 }}>{text}</span>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginTop: "6px", padding: "6px 8px", background: "hsl(220, 20%, 11%)", borderRadius: "5px", border: "1px solid hsl(220, 15%, 18%)" }}>
+      <Info size={11} style={{ color: "hsl(220, 10%, 52%)", flexShrink: 0, marginTop: "1px" }} />
+      <span style={{ fontSize: "10px", color: "hsl(220, 10%, 48%)", lineHeight: 1.5 }}>{text}</span>
     </div>
   );
 }
