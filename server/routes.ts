@@ -1096,6 +1096,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  // ── Available payment types (public) ──────────────────────────────────────
+  app.get("/api/payment-types", async (_req, res) => {
+    try {
+      const all = await storage.getActivePaymentMethods();
+      const typeMap: Record<string, { label: string; providers: string[] }> = {
+        UPI: { label: "UPI", providers: [] },
+        CARD: { label: "Card", providers: [] },
+        NETBANKING: { label: "Net Banking", providers: [] },
+        WALLET: { label: "Wallet", providers: [] },
+      };
+      for (const m of all) {
+        const pt = (m as any).paymentType || "CARD";
+        if (typeMap[pt]) typeMap[pt].providers.push(m.type);
+      }
+      const available = Object.entries(typeMap)
+        .filter(([, v]) => v.providers.length > 0)
+        .map(([key, v]) => ({ key, label: v.label, providerCount: v.providers.length }));
+      res.json(available);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ── Payment Methods ────────────────────────────────────────────────────────
   app.get("/api/admin/payment-methods", requireAdmin, async (_req, res) => {
     const all = await storage.getAllPaymentMethods();
@@ -1597,29 +1620,34 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     return `${proto}://${host}`;
   }
 
-  // Initiate payment for any gateway
+  // Initiate payment for any gateway (supports paymentType-based routing + failover)
   app.post("/api/payment/initiate", async (req, res) => {
     try {
-      const { gatewayId, amount, currency = "INR", email, name, phone, productInfo, cartItems } = req.body;
+      const { gatewayId, paymentType, amount, currency = "INR", email = "guest@checkout.com", name, phone, productInfo, cartItems, couponCode } = req.body;
 
       if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
-      if (!email) return res.status(400).json({ error: "Email is required" });
 
       const activePaymentMethods = await storage.getActivePaymentMethods();
 
-      let method = gatewayId
-        ? activePaymentMethods.find(m => m.id === gatewayId)
-        : activePaymentMethods[0];
+      // Build ordered list of methods to try
+      let methodsToTry: typeof activePaymentMethods = [];
+      if (gatewayId) {
+        const m = activePaymentMethods.find(m => m.id === gatewayId);
+        if (m) methodsToTry = [m];
+      } else if (paymentType) {
+        methodsToTry = activePaymentMethods
+          .filter(m => ((m as any).paymentType || "CARD") === paymentType)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+      } else {
+        methodsToTry = activePaymentMethods.slice(0, 1);
+      }
 
-      if (!method) return res.status(400).json({ error: "No active payment gateway found" });
-
-      const handler = getGatewayHandler(method.type);
-      if (!handler) return res.status(400).json({ error: `Unsupported gateway type: ${method.type}` });
+      if (methodsToTry.length === 0) return res.status(400).json({ error: "No active payment gateway found for the selected method" });
 
       const baseUrl = getBaseUrl(req);
       const orderId = randomUUID();
 
-      // Persist order to DB (with cart items in notes for fulfillment)
+      // Persist order to DB once (before trying gateways)
       try {
         await storage.createOrder({
           id: orderId,
@@ -1647,22 +1675,36 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         console.warn("Order DB persist warning:", dbErr);
       }
 
-      const result = await handler.initiatePayment(
-        {
-          orderId,
-          amount,
-          currency,
-          name: name || email,
-          email,
-          phone,
-          productInfo: productInfo || "Nexcoin Order",
-          callbackUrl: `${baseUrl}/api/payment/callback/${method.type}`,
-          returnUrl: `${baseUrl}/payment-return`,
-        },
-        method
-      );
+      // Try each method in priority order (failover)
+      let lastError = "No gateway succeeded";
+      for (const method of methodsToTry) {
+        try {
+          const handler = getGatewayHandler(method.type);
+          if (!handler) { lastError = `Unsupported gateway: ${method.type}`; continue; }
 
-      res.json({ ...result, orderId, gatewayType: method.type });
+          const result = await handler.initiatePayment(
+            {
+              orderId,
+              amount,
+              currency,
+              name: name || email,
+              email,
+              phone,
+              productInfo: productInfo || "Nexcoin Order",
+              callbackUrl: `${baseUrl}/api/payment/callback/${method.type}`,
+              returnUrl: `${baseUrl}/payment-return`,
+            },
+            method
+          );
+
+          return res.json({ ...result, orderId, gatewayType: method.type, gatewayId: method.id });
+        } catch (err: any) {
+          lastError = err.message || `Gateway ${method.type} failed`;
+          console.warn(`Gateway ${method.type} failed, trying next:`, lastError);
+        }
+      }
+
+      res.status(500).json({ error: lastError });
     } catch (error: any) {
       console.error("Payment initiate error:", error);
       res.status(500).json({ error: error.message || "Failed to initiate payment" });

@@ -145,8 +145,8 @@ Email-based UPI payment verification with automatic order completion and Busan t
 ### How It Works
 
 1. **Admin Setup**: Configure UPI ID, QR code URL, and IMAP credentials in **Admin → UPI Settings** (`/admin/upi-settings`)
-2. **Checkout**: Customer selects "UPI" gateway → click "Buy Now" → creates pending order → redirected to `/payment/upi/:orderId`
-3. **Payment Page**: Shows QR code, UPI ID, exact amount, countdown timer (10 min); polls `/api/orders/:id/status` every 5s
+2. **Checkout**: Customer selects "UPI" payment type → click "Pay" → creates pending order → inline UPI modal opens (no page redirect)
+3. **UPI Modal**: Shows QR code, UPI ID, exact amount, countdown timer (10 min); polls `/api/orders/:id/status` every 5s; shows success/expired inline
 4. **IMAP Polling**: Server polls configured email inbox every 60s for payment notification emails; parses amount + UTR
 5. **Auto-Match**: Matches payment to oldest pending UPI order with same amount (within 30-min window) → marks order completed
 6. **Auto-Topup**: Triggers Busan API for game top-up automatically after successful match

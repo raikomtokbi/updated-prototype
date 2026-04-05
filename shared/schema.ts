@@ -227,6 +227,7 @@ export const paymentMethods = pgTable("payment_methods", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   type: varchar("type", { length: 50 }).notNull(),
+  paymentType: varchar("payment_type", { length: 20 }).notNull().default("CARD"),
   provider: varchar("provider", { length: 100 }),
   publicKey: text("public_key"),
   secretKey: text("secret_key"),

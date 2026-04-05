@@ -348,6 +348,7 @@ CREATE TABLE IF NOT EXISTS `payment_methods` (
   `id`                   VARCHAR(36)  NOT NULL,
   `name`                 VARCHAR(191) NOT NULL,
   `type`                 VARCHAR(50)  NOT NULL,
+  `payment_type`         VARCHAR(20)  NOT NULL DEFAULT 'CARD',
   `provider`             VARCHAR(100) DEFAULT NULL,
   `public_key`           TEXT         DEFAULT NULL,
   `secret_key`           TEXT         DEFAULT NULL,

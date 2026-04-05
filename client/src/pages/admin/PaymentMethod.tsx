@@ -191,9 +191,28 @@ const GATEWAY_CONFIGS: Record<string, {
   },
 };
 
+// Default paymentType per gateway type
+const GATEWAY_PAYMENT_TYPE: Record<string, string> = {
+  manual_upi: "UPI",
+  xyzpay: "UPI",
+  bharatpe: "UPI",
+  razorpay: "CARD",
+  cashfree: "CARD",
+  phonepe: "CARD",
+  paytm: "CARD",
+  ccavenue: "CARD",
+  stripe: "CARD",
+  paypal: "CARD",
+  easybuzz: "CARD",
+  manual: "CARD",
+  payu: "NETBANKING",
+  instamojo: "NETBANKING",
+};
+
 const EMPTY_PM = {
   name: "",
   type: "razorpay",
+  paymentType: "CARD",
   provider: "Razorpay",
   publicKey: "",
   secretKey: "",
@@ -288,6 +307,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
               onClick={() => {
                 set("type", type);
                 set("provider", cfg.label);
+                set("paymentType", GATEWAY_PAYMENT_TYPE[type] || "CARD");
                 if (form.supportedCurrencies === "INR" || form.supportedCurrencies === "USD,EUR") {
                   set("supportedCurrencies", ["stripe", "paypal"].includes(type) ? "USD,EUR,GBP" : "INR");
                 }
@@ -346,7 +366,16 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
       </div>
 
       {/* Settings */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <div>
+          <label style={labelStyle}>Payment Category *</label>
+          <select style={inputStyle} value={form.paymentType} onChange={(e) => set("paymentType", e.target.value)}>
+            <option value="UPI">UPI</option>
+            <option value="CARD">Card</option>
+            <option value="NETBANKING">Net Banking</option>
+            <option value="WALLET">Wallet</option>
+          </select>
+        </div>
         <div>
           <label style={labelStyle}>Mode</label>
           <select style={inputStyle} value={form.mode} onChange={(e) => set("mode", e.target.value as "test" | "live")}>
@@ -362,7 +391,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
           </select>
         </div>
         <div>
-          <label style={labelStyle}>Sort Order</label>
+          <label style={labelStyle}>Priority Order (lower = higher priority)</label>
           <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
       </div>
@@ -393,6 +422,7 @@ function buildEditInitial(m: PaymentMethod): typeof EMPTY_PM {
   return {
     name: m.name,
     type: m.type || "razorpay",
+    paymentType: (m as any).paymentType || GATEWAY_PAYMENT_TYPE[m.type] || "CARD",
     provider: m.provider ?? "",
     publicKey: m.publicKey ?? "",
     secretKey: "",
