@@ -1128,21 +1128,63 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/admin/payment-methods", requireAdmin, async (req, res) => {
     const p = await storage.createPaymentMethod(req.body);
-    // Return sanitized data
+    // Sync manual_upi config into upi_settings table for the email poller
+    if (req.body.type === "manual_upi") {
+      try {
+        const cfg = typeof req.body.config === "string" ? JSON.parse(req.body.config) : (req.body.config || {});
+        await storage.upsertUpiSettings({
+          upiId: cfg.upiId || undefined,
+          qrCodeUrl: cfg.qrCodeUrl || undefined,
+          emailAddress: cfg.emailAddress || undefined,
+          emailPassword: cfg.emailPassword || undefined,
+          imapHost: cfg.imapHost || "imap.gmail.com",
+          imapPort: cfg.imapPort ? parseInt(cfg.imapPort) : 993,
+          isActive: req.body.isActive !== false,
+        });
+      } catch {}
+    }
     res.status(201).json(sanitizePaymentMethod(p));
   });
 
   app.patch("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     const p = await storage.updatePaymentMethod(req.params.id, req.body);
     if (!p) return res.status(404).json({ message: "Not found" });
-    // Return sanitized data
+    // Sync manual_upi config into upi_settings table for the email poller
+    if (p.type === "manual_upi") {
+      try {
+        const cfg = typeof p.config === "string" ? JSON.parse(p.config) : (p.config || {});
+        await storage.upsertUpiSettings({
+          upiId: (cfg as any).upiId || undefined,
+          qrCodeUrl: (cfg as any).qrCodeUrl || undefined,
+          emailAddress: (cfg as any).emailAddress || undefined,
+          emailPassword: (cfg as any).emailPassword || undefined,
+          imapHost: (cfg as any).imapHost || "imap.gmail.com",
+          imapPort: (cfg as any).imapPort ? parseInt((cfg as any).imapPort) : 993,
+          isActive: p.isActive,
+        });
+      } catch {}
+    }
     res.json(sanitizePaymentMethod(p));
   });
 
   app.put("/api/admin/payment-methods/:id", requireAdmin, async (req, res) => {
     const p = await storage.updatePaymentMethod(req.params.id, req.body);
     if (!p) return res.status(404).json({ message: "Not found" });
-    // Return sanitized data
+    // Sync manual_upi config into upi_settings table for the email poller
+    if (p.type === "manual_upi") {
+      try {
+        const cfg = typeof p.config === "string" ? JSON.parse(p.config) : (p.config || {});
+        await storage.upsertUpiSettings({
+          upiId: (cfg as any).upiId || undefined,
+          qrCodeUrl: (cfg as any).qrCodeUrl || undefined,
+          emailAddress: (cfg as any).emailAddress || undefined,
+          emailPassword: (cfg as any).emailPassword || undefined,
+          imapHost: (cfg as any).imapHost || "imap.gmail.com",
+          imapPort: (cfg as any).imapPort ? parseInt((cfg as any).imapPort) : 993,
+          isActive: p.isActive,
+        });
+      } catch {}
+    }
     res.json(sanitizePaymentMethod(p));
   });
 

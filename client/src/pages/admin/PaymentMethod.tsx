@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, CreditCard, Wallet, Landmark, Loader2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, Save, Eye, EyeOff, Info, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, X, CreditCard, Wallet, Landmark, Loader2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
-import { apiRequest } from "@/lib/queryClient";
 import type { PaymentMethod } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -188,6 +187,18 @@ const GATEWAY_CONFIGS: Record<string, {
       { key: "secretKey", label: "API Token", placeholder: "••••••••••••••••", isSecret: true },
     ],
     notes: "XYZPay Payment Gateway. Get your API token from XYZPay dashboard at https://www.xyzpay.site/",
+  },
+  manual_upi: {
+    label: "Manual UPI",
+    fields: [
+      { key: "config.upiId", label: "UPI ID *", placeholder: "yourname@paytm or 9876543210@upi", isConfig: true },
+      { key: "config.qrCodeUrl", label: "QR Code Image URL", placeholder: "https://example.com/upi-qr.png", isConfig: true },
+      { key: "config.emailAddress", label: "IMAP Email Address", placeholder: "your-upi-email@gmail.com", isConfig: true },
+      { key: "config.emailPassword", label: "App Password (IMAP)", placeholder: "Gmail App Password (16 chars)", isSecret: true, isConfig: true },
+      { key: "config.imapHost", label: "IMAP Host", placeholder: "imap.gmail.com", isConfig: true },
+      { key: "config.imapPort", label: "IMAP Port", placeholder: "993", isConfig: true },
+    ],
+    notes: "Customers pay via UPI and the server auto-verifies payment by polling the configured email inbox (IMAP). For Gmail, generate an App Password (not your main password) at myaccount.google.com/apppasswords and use host imap.gmail.com port 993.",
   },
 };
 
@@ -435,240 +446,6 @@ function buildEditInitial(m: PaymentMethod): typeof EMPTY_PM {
   };
 }
 
-// ─── UPI Settings Section ─────────────────────────────────────────────────────
-interface UpiSettingsData {
-  id?: string;
-  upiId?: string;
-  qrCodeUrl?: string;
-  emailAddress?: string;
-  emailPassword?: string;
-  imapHost?: string;
-  imapPort?: number;
-  isActive?: boolean;
-}
-
-function UpiSettingsSection() {
-  const qc = useQueryClient();
-  const [form, setForm] = useState<UpiSettingsData>({
-    upiId: "",
-    qrCodeUrl: "",
-    emailAddress: "",
-    emailPassword: "",
-    imapHost: "imap.gmail.com",
-    imapPort: 993,
-    isActive: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const { isLoading, data: loadedSettings } = useQuery<UpiSettingsData | null>({
-    queryKey: ["/api/admin/upi-settings"],
-  });
-
-  useEffect(() => {
-    if (loadedSettings) {
-      setForm({
-        upiId: loadedSettings.upiId || "",
-        qrCodeUrl: loadedSettings.qrCodeUrl || "",
-        emailAddress: loadedSettings.emailAddress || "",
-        emailPassword: loadedSettings.emailPassword || "",
-        imapHost: loadedSettings.imapHost || "imap.gmail.com",
-        imapPort: loadedSettings.imapPort ?? 993,
-        isActive: loadedSettings.isActive ?? false,
-      });
-    }
-  }, [loadedSettings]);
-
-  const saveMutation = useMutation({
-    mutationFn: (data: UpiSettingsData) =>
-      apiRequest("POST", "/api/admin/upi-settings", data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/upi-settings"] });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    },
-  });
-
-  function set(field: keyof UpiSettingsData, value: any) {
-    setForm(f => ({ ...f, [field]: value }));
-  }
-
-  const upiInp: React.CSSProperties = { ...inputStyle, fontSize: "13px" };
-
-  return (
-    <div style={{ marginTop: "28px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-        <h2 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,90%)", margin: 0 }}>
-          UPI / Manual Payment Auto-Verification
-        </h2>
-      </div>
-
-      {isLoading ? (
-        <div style={{ padding: "1rem", color: "hsl(220,10%,45%)", fontSize: "13px" }}>Loading...</div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {/* Status + UPI ID row */}
-          <div style={{ ...card, padding: "14px 18px", display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "flex-start" }}>
-            {/* Toggle */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "160px" }}>
-              <div>
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,85%)" }}>Enable UPI</div>
-                <div style={{ fontSize: "11px", color: "hsl(220,10%,44%)" }}>Auto-verify via IMAP email</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "auto" }}>
-                {form.isActive ? (
-                  <span style={{ fontSize: "11px", color: "#22c55e", display: "flex", alignItems: "center", gap: "3px" }}>
-                    <CheckCircle size={12} /> Active
-                  </span>
-                ) : (
-                  <span style={{ fontSize: "11px", color: "hsl(220,10%,40%)", display: "flex", alignItems: "center", gap: "3px" }}>
-                    <XCircle size={12} /> Off
-                  </span>
-                )}
-                <button
-                  onClick={() => set("isActive", !form.isActive)}
-                  style={{
-                    width: "40px", height: "22px", borderRadius: "11px", border: "none", cursor: "pointer",
-                    background: form.isActive ? "hsl(258,90%,60%)" : "hsl(220,15%,22%)",
-                    position: "relative", transition: "background 0.2s", flexShrink: 0,
-                  }}
-                  data-testid="toggle-upi-active"
-                >
-                  <div style={{
-                    position: "absolute", top: "3px",
-                    left: form.isActive ? "20px" : "3px",
-                    width: "16px", height: "16px", borderRadius: "50%",
-                    background: "#fff", transition: "left 0.2s",
-                  }} />
-                </button>
-              </div>
-            </div>
-
-            <div style={{ width: "1px", background: "hsl(220,15%,15%)", alignSelf: "stretch", flexShrink: 0 }} />
-
-            {/* UPI ID */}
-            <div style={{ flex: 1, minWidth: "200px" }}>
-              <label style={labelStyle}>UPI ID *</label>
-              <input
-                type="text"
-                style={upiInp}
-                value={form.upiId || ""}
-                onChange={e => set("upiId", e.target.value)}
-                placeholder="e.g. yourname@upi or 9876543210@paytm"
-                data-testid="input-upi-id"
-              />
-            </div>
-
-            {/* QR Code URL */}
-            <div style={{ flex: 1, minWidth: "200px" }}>
-              <label style={labelStyle}>QR Code Image URL</label>
-              <input
-                type="url"
-                style={upiInp}
-                value={form.qrCodeUrl || ""}
-                onChange={e => set("qrCodeUrl", e.target.value)}
-                placeholder="https://example.com/upi-qr.png"
-                data-testid="input-qr-code-url"
-              />
-            </div>
-          </div>
-
-          {/* IMAP Config */}
-          <div style={{ ...card, padding: "14px 18px" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", background: "hsl(220,20%,7%)", borderRadius: "6px", padding: "8px 10px", marginBottom: "12px" }}>
-              <Info size={13} style={{ color: "hsl(258,90%,65%)", flexShrink: 0, marginTop: "1px" }} />
-              <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,55%)", lineHeight: 1.6 }}>
-                The server polls this mailbox every 60s for UPI payment notifications and auto-completes matching orders.
-                For Gmail use an <strong style={{ color: "hsl(210,40%,80%)" }}>App Password</strong> with host{" "}
-                <code style={{ color: "hsl(258,90%,72%)" }}>imap.gmail.com</code> port{" "}
-                <code style={{ color: "hsl(258,90%,72%)" }}>993</code>.
-              </p>
-            </div>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-              <div style={{ flex: 2, minWidth: "200px" }}>
-                <label style={labelStyle}>Email Address</label>
-                <input
-                  type="email"
-                  style={upiInp}
-                  value={form.emailAddress || ""}
-                  onChange={e => set("emailAddress", e.target.value)}
-                  placeholder="your-upi-email@gmail.com"
-                  data-testid="input-email-address"
-                />
-              </div>
-              <div style={{ flex: 2, minWidth: "200px", position: "relative" }}>
-                <label style={labelStyle}>App Password</label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    style={{ ...upiInp, paddingRight: "2.2rem" }}
-                    value={form.emailPassword || ""}
-                    onChange={e => set("emailPassword", e.target.value)}
-                    placeholder="Gmail App Password (16 chars)"
-                    data-testid="input-email-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(p => !p)}
-                    style={{ position: "absolute", right: "0.6rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,50%)", padding: 0 }}
-                    data-testid="button-toggle-password"
-                  >
-                    {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
-                  </button>
-                </div>
-              </div>
-              <div style={{ flex: 2, minWidth: "160px" }}>
-                <label style={labelStyle}>IMAP Host</label>
-                <input
-                  type="text"
-                  style={upiInp}
-                  value={form.imapHost || "imap.gmail.com"}
-                  onChange={e => set("imapHost", e.target.value)}
-                  placeholder="imap.gmail.com"
-                  data-testid="input-imap-host"
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: "90px" }}>
-                <label style={labelStyle}>Port</label>
-                <input
-                  type="number"
-                  style={upiInp}
-                  value={form.imapPort ?? 993}
-                  onChange={e => set("imapPort", parseInt(e.target.value) || 993)}
-                  placeholder="993"
-                  data-testid="input-imap-port"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Save */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={() => saveMutation.mutate(form)}
-              disabled={saveMutation.isPending}
-              style={btnPrimary}
-              data-testid="button-save-upi-settings"
-            >
-              <Save size={13} />
-              {saveMutation.isPending ? "Saving..." : "Save UPI Settings"}
-            </button>
-            {saved && (
-              <span style={{ fontSize: "12px", color: "#22c55e", display: "flex", alignItems: "center", gap: "4px" }}>
-                <CheckCircle size={13} /> Saved!
-              </span>
-            )}
-            {saveMutation.isError && (
-              <span style={{ fontSize: "12px", color: "#ef4444" }}>Failed to save</span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function PaymentMethodPage() {
   const qc = useQueryClient();
@@ -708,8 +485,8 @@ export default function PaymentMethodPage() {
       {/* Info banner */}
       <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", lineHeight: 1.6, margin: 0 }}>
-          Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual</span>.
-          The first active gateway is shown to users at checkout. Enable multiple to let users choose.
+          Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual UPI, Manual</span>.
+          Each gateway has a Payment Category (UPI / Card / Net Banking / Wallet). Customers choose their category at checkout; the highest-priority active gateway for that category is used.
         </p>
       </div>
 
@@ -776,8 +553,6 @@ export default function PaymentMethodPage() {
           })}
         </div>
       )}
-
-      <UpiSettingsSection />
 
       {showAdd && (
         <Modal title="Add Payment Gateway" onClose={() => setShowAdd(false)}>
