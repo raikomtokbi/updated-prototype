@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle, Link, Search, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Link, RefreshCw } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { btnPrimary } from "@/components/admin/shared";
+import AdminLayout from "@/components/admin/AdminLayout";
 
 interface UnmatchedPayment {
   id: string;
@@ -61,16 +62,9 @@ export default function PaymentLogs() {
   const assigned = payments.filter(p => p.assignedToOrderId);
 
   return (
-    <div style={{ padding: "1.5rem", maxWidth: "900px" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.5rem" }}>
-        <div>
-          <h1 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>
-            UPI Payment Logs
-          </h1>
-          <p style={{ color: "hsl(220,10%,50%)", fontSize: "13px", marginTop: "4px" }}>
-            Payments detected from email that couldn't be automatically matched to an order
-          </p>
-        </div>
+    <AdminLayout
+      title="UPI Payment Logs"
+      actions={
         <button
           onClick={() => refetch()}
           disabled={isFetching}
@@ -80,7 +74,9 @@ export default function PaymentLogs() {
           <RefreshCw size={14} style={{ animation: isFetching ? "spin 1s linear infinite" : "none" }} />
           Refresh
         </button>
-      </div>
+      }
+    >
+    <div style={{ maxWidth: "900px" }}>
 
       {isLoading ? (
         <div style={{ color: "hsl(220,10%,50%)", textAlign: "center", padding: "3rem" }}>Loading payment logs...</div>
@@ -233,5 +229,6 @@ export default function PaymentLogs() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
+    </AdminLayout>
   );
 }

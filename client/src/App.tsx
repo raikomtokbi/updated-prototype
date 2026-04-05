@@ -52,7 +52,6 @@ import Plugins from "./pages/admin/Plugins";
 import EmailTemplates from "./pages/admin/EmailTemplates";
 import ChooseTheme from "./pages/admin/ChooseTheme";
 import EditContent from "./pages/admin/EditContent";
-import UpiSettings from "./pages/admin/UpiSettings";
 import PaymentLogs from "./pages/admin/PaymentLogs";
 
 function AdminRoutes() {
@@ -80,7 +79,6 @@ function AdminRoutes() {
       <Route path="/admin/email-templates" component={EmailTemplates} />
       <Route path="/admin/choose-theme" component={ChooseTheme} />
       <Route path="/admin/edit-content" component={EditContent} />
-      <Route path="/admin/upi-settings" component={UpiSettings} />
       <Route path="/admin/payment-logs" component={PaymentLogs} />
       <Route component={NotFound} />
     </Switch>

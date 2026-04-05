@@ -117,7 +117,6 @@ const navSections: NavSection[] = [
     items: [
       { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel" },
       { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method" },
-      { label: "UPI Settings", icon: <CreditCard size={15} />, path: "/admin/upi-settings" },
       { label: "Payment Logs", icon: <LayoutDashboard size={15} />, path: "/admin/payment-logs" },
       { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration" },
       { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins" },
