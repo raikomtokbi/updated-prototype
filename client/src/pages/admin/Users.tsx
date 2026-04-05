@@ -261,6 +261,7 @@ export default function Users() {
   const { data: users = [], isLoading } = useQuery<Omit<User, "password">[]>({
     queryKey: ["/api/admin/users"],
     queryFn: () => adminApi.get("/users?limit=200"),
+    refetchInterval: 1000,
   });
 
   const addMut = useMutation({

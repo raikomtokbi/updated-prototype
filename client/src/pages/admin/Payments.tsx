@@ -28,6 +28,7 @@ export default function Payments() {
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
     queryFn: () => adminApi.get("/transactions?limit=200"),
+    refetchInterval: 1000,
   });
 
   const filtered = useMemo(() => {

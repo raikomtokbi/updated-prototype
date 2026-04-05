@@ -300,7 +300,7 @@ export default function SupportTickets() {
   const { data: tickets = [], isLoading } = useQuery<Ticket[]>({
     queryKey: ["/api/admin/tickets"],
     queryFn: () => adminApi.get("/tickets?limit=200"),
-    refetchInterval: 15000,
+    refetchInterval: 1000,
   });
 
   const statusMut = useMutation({

@@ -30,6 +30,7 @@ export default function TopupOrders() {
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
     queryFn: () => adminApi.get("/orders?limit=200"),
+    refetchInterval: 1000,
   });
 
   const statusMut = useMutation({
