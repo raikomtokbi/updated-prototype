@@ -60,7 +60,7 @@ function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaig
       </div>
       <div>
         <label style={labelStyle}>Description</label>
-        <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "60px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
+        <textarea style={{ ...inputStyle, resize: "none", minHeight: "120px" } as any} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Campaign details..." />
       </div>
       <ImageUploadField
         label="Banner Image"
