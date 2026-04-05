@@ -63,12 +63,13 @@ async function triggerBusanTopup(orderId: string): Promise<void> {
     }
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       const dbItems = await storage.getOrderItemsByOrder(orderId);
-      cartItems = dbItems.map(i => ({ productId: i.productId }));
+      cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
     }
 
     for (const item of cartItems) {
-      if (!item.productId) continue;
-      const mapping = await storage.getBusanMappingByCmsProductId(item.productId);
+      if (!item.packageId && !item.productId) continue;
+      // Mapping is keyed by service/package ID (set in admin), fall back to productId
+      const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
       if (!mapping) continue;
       const result = await createBusanOrder(
         busanConfig.apiToken!,
