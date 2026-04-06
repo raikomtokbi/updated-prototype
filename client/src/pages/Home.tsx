@@ -106,7 +106,7 @@ function HeroSlider() {
               src={s.bg}
               alt=""
               aria-hidden
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
             />
           )}
           {/* Dark wash gradient over bg */}
