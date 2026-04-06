@@ -392,7 +392,7 @@ function FeaturesStrip() {
         background: "#0b1020",
         borderTop: "1px solid rgba(124,58,237,0.12)",
         borderBottom: "1px solid rgba(124,58,237,0.12)",
-        padding: "2.5rem 1.5rem",
+        padding: "1.25rem 1.5rem",
       }}
     >
       <div
@@ -450,7 +450,7 @@ function TrendingGames() {
   });
 
   return (
-    <section style={{ padding: "1.25rem 0 3.5rem", maxWidth: "1320px", margin: "0 auto" }}>
+    <section style={{ padding: "1rem 0 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
       <div
         style={{
           display: "flex",
@@ -507,7 +507,7 @@ function TrendingGames() {
         {isLoading ? (
           <div style={{ display: "flex", gap: "1rem" }}>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ flexShrink: 0, width: "155px", height: "168px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+              <div key={i} style={{ flexShrink: 0, width: "110px", height: "120px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
             ))}
           </div>
         ) : trendingGames.length === 0 ? (
@@ -522,7 +522,7 @@ function TrendingGames() {
               data-testid={`card-game-${idx}`}
               style={{
                 flexShrink: 0,
-                width: "155px",
+                width: "110px",
                 borderRadius: "10px",
                 overflow: "hidden",
                 textDecoration: "none",
@@ -640,7 +640,7 @@ function VouchersSection() {
           {isLoading ? (
             <>
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} style={{ flexShrink: 0, width: "180px", height: "190px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+                <div key={i} style={{ flexShrink: 0, width: "140px", height: "150px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
               ))}
             </>
           ) : (
@@ -651,7 +651,7 @@ function VouchersSection() {
                 data-testid={`card-voucher-${idx}`}
                 style={{
                   flexShrink: 0,
-                  width: "180px",
+                  width: "140px",
                   borderRadius: "10px",
                   overflow: "hidden",
                   textDecoration: "none",
@@ -748,13 +748,13 @@ function GamesGrid() {
 
         {/* Responsive Grid: 3 cols mobile, 6 cols desktop */}
         {isLoading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.875rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "0.625rem" }}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
               <div key={i} style={{ borderRadius: "10px", aspectRatio: "1/1", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
             ))}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.875rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "0.625rem" }}>
             {displayGames.map((game: any, idx: number) => (
               <Link
                 key={game.id}
@@ -793,15 +793,6 @@ function GamesGrid() {
                       <Gamepad2 size={28} style={{ color: "rgba(167,139,250,0.3)" }} />
                     </div>
                   )}
-                </div>
-                {/* Name */}
-                <div style={{ padding: "0.5rem 0.6rem" }}>
-                  <p style={{
-                    fontSize: "0.7rem", fontWeight: 700, color: "#e5e7eb",
-                    margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  }}>
-                    {game.name}
-                  </p>
                 </div>
               </Link>
             ))}
