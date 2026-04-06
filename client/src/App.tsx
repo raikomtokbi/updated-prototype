@@ -119,12 +119,13 @@ function PublicRoutes() {
   );
 }
 
-function SiteHead({ siteName, seoTitle, seoDescription, seoKeywords, favicon }: {
+function SiteHead({ siteName, seoTitle, seoDescription, seoKeywords, favicon, ogImage }: {
   siteName?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
   favicon?: string;
+  ogImage?: string;
 }) {
   useEffect(() => {
     const title = seoTitle || siteName;
@@ -154,9 +155,22 @@ function SiteHead({ siteName, seoTitle, seoDescription, seoKeywords, favicon }: 
       }
       meta.content = content;
     };
+    const setOgMeta = (property: string, content: string | undefined) => {
+      if (!content) return;
+      let meta = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("property", property);
+        document.head.appendChild(meta);
+      }
+      meta.content = content;
+    };
     setMeta("description", seoDescription);
     setMeta("keywords", seoKeywords);
-  }, [seoDescription, seoKeywords]);
+    setOgMeta("og:image", ogImage);
+    setOgMeta("og:title", seoTitle || siteName);
+    setOgMeta("og:description", seoDescription);
+  }, [seoDescription, seoKeywords, ogImage, seoTitle, siteName]);
 
   return null;
 }
@@ -235,6 +249,7 @@ export default function App() {
         seoDescription={siteSettings?.seo_description}
         seoKeywords={siteSettings?.seo_keywords}
         favicon={siteSettings?.site_favicon}
+        ogImage={siteSettings?.og_image}
       />
       <PublicRoutes />
       <CookieBanner enabled={siteSettings?.cookie_consent_enabled !== "false"} />

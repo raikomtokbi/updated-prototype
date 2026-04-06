@@ -67,7 +67,7 @@ export default function About() {
             alt=""
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
-              objectFit: "cover", opacity: 0.12, borderRadius: "1.25rem",
+              objectFit: "cover", opacity: 0.35, borderRadius: "1.25rem",
             }}
           />
         )}
