@@ -146,7 +146,7 @@ function HeroSlider() {
           alignItems: "center",
         }}
       >
-        <div style={{ maxWidth: "580px" }}>
+        <div className="hero-text-content" style={{ maxWidth: "580px" }}>
           {/* Badge */}
           <div
             style={{
