@@ -52,4 +52,14 @@ export function applyThemeVars(
   root.style.setProperty("--primary", primary);
   root.style.setProperty("--ring", primary);
   root.style.setProperty("--accent", accent);
+
+  // Update browser tab color
+  const hex = hslToHex(primary);
+  let metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!metaTheme) {
+    metaTheme = document.createElement("meta");
+    metaTheme.name = "theme-color";
+    document.head.appendChild(metaTheme);
+  }
+  metaTheme.content = hex;
 }
