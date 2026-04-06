@@ -80,276 +80,207 @@ function HeroSlider() {
   const slide = SLIDES[current] ?? SLIDES[0];
 
   return (
-    <section
-      style={{
-        position: "relative",
-        height: "clamp(440px, 58vh, 620px)",
-        overflow: "hidden",
-        background: "#070b14",
-      }}
-    >
-      {/* Slide backgrounds — fade transition */}
-      {SLIDES.map((s, i) => (
-        <div
-          key={s.id}
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: i === current ? 1 : 0,
-            transition: "opacity 0.9s ease",
-          }}
-        >
-          {s.bg && (
-            <img
-              src={s.bg}
-              alt=""
-              aria-hidden
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
-            />
-          )}
-          {/* Dark wash gradient over bg */}
+    <section className="hero-section">
+
+      {/* ── Image layer (3:1 on mobile, full-bleed on desktop) ── */}
+      <div className="hero-image-wrap">
+
+        {/* Slide backgrounds — fade transition */}
+        {SLIDES.map((s, i) => (
           <div
+            key={s.id}
             style={{
               position: "absolute",
               inset: 0,
-              background:
-                "linear-gradient(90deg, rgba(7,11,20,0.90) 0%, rgba(7,11,20,0.55) 55%, rgba(7,11,20,0.15) 100%), linear-gradient(0deg, rgba(7,11,20,0.85) 0%, transparent 40%)",
-            }}
-          />
-        </div>
-      ))}
-
-      {/* Glow accent */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background: "radial-gradient(ellipse 40% 60% at 20% 50%, rgba(124,58,237,0.18) 0%, transparent 65%)",
-        }}
-      />
-
-      {/* Content */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          maxWidth: "1320px",
-          margin: "0 auto",
-          padding: "0 1.5rem",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ maxWidth: "580px" }}>
-          {/* Badge */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.3rem 0.8rem",
-              borderRadius: "9999px",
-              background: "rgba(124, 58, 237, 0.2)",
-              border: "1px solid rgba(124, 58, 237, 0.4)",
-              marginBottom: "1.5rem",
+              opacity: i === current ? 1 : 0,
+              transition: "opacity 0.9s ease",
             }}
           >
-            <Zap size={12} color="#a78bfa" />
-            <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
-              {slide.badge}
-            </span>
+            {s.bg && (
+              <img
+                src={s.bg}
+                alt=""
+                aria-hidden
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
+              />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(90deg, rgba(7,11,20,0.90) 0%, rgba(7,11,20,0.55) 55%, rgba(7,11,20,0.15) 100%), linear-gradient(0deg, rgba(7,11,20,0.85) 0%, transparent 40%)",
+              }}
+            />
           </div>
+        ))}
 
-          {/* Headline */}
-          <h1
-            className="font-orbitron"
-            style={{ lineHeight: 1.05, marginBottom: "1.25rem" }}
-          >
-            {slide.title.map((line, i) => (
-              <div
-                key={i}
+        {/* Glow accent */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background: "radial-gradient(ellipse 40% 60% at 20% 50%, rgba(124,58,237,0.18) 0%, transparent 65%)",
+          }}
+        />
+
+        {/* Prev button */}
+        <button
+          onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
+          data-testid="button-slide-prev"
+          style={{
+            position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)",
+            zIndex: 10, width: "40px", height: "40px", borderRadius: "50%",
+            background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)",
+            color: "white", cursor: "pointer", display: "flex", alignItems: "center",
+            justifyContent: "center", backdropFilter: "blur(4px)", transition: "background 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        {/* Next button */}
+        <button
+          onClick={() => goTo((current + 1) % SLIDES.length)}
+          data-testid="button-slide-next"
+          style={{
+            position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)",
+            zIndex: 10, width: "40px", height: "40px", borderRadius: "50%",
+            background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)",
+            color: "white", cursor: "pointer", display: "flex", alignItems: "center",
+            justifyContent: "center", backdropFilter: "blur(4px)", transition: "background 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
+        >
+          <ChevronRight size={18} />
+        </button>
+
+        {/* Dot indicators — always inside the image strip */}
+        <div
+          style={{
+            position: "absolute", bottom: "0.6rem", left: "50%", transform: "translateX(-50%)",
+            zIndex: 10, display: "flex", gap: "0.5rem",
+          }}
+        >
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              data-testid={`button-slide-dot-${i}`}
+              style={{
+                width: i === current ? "24px" : "8px", height: "8px", borderRadius: "9999px",
+                background: i === current ? "#7c3aed" : "rgba(255,255,255,0.25)",
+                border: "none", cursor: "pointer", transition: "all 0.3s ease",
+                boxShadow: i === current ? "0 0 8px rgba(124,58,237,0.6)" : "none",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Content layer (overlaid on desktop, stacked below on mobile) ── */}
+      <div className="hero-content-wrap">
+        <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 1.5rem", width: "100%" }}>
+          <div style={{ maxWidth: "580px" }}>
+
+            {/* Badge */}
+            <div
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                padding: "0.3rem 0.8rem", borderRadius: "9999px",
+                background: "rgba(124, 58, 237, 0.2)", border: "1px solid rgba(124, 58, 237, 0.4)",
+                marginBottom: "1.5rem",
+              }}
+            >
+              <Zap size={12} color="#a78bfa" />
+              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+                {slide.badge}
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-orbitron" style={{ lineHeight: 1.05, marginBottom: "1.25rem" }}>
+              {slide.title.map((line, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "block",
+                    fontSize: "clamp(1.875rem, 6vw, 4.5rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.02em",
+                    color: i === slide.highlight ? "transparent" : "#e5e7eb",
+                    background: i === slide.highlight ? "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)" : undefined,
+                    WebkitBackgroundClip: i === slide.highlight ? "text" : undefined,
+                    WebkitTextFillColor: i === slide.highlight ? "transparent" : undefined,
+                    backgroundClip: i === slide.highlight ? "text" : undefined,
+                    textShadow: i !== slide.highlight ? "0 0 40px rgba(124,58,237,0.3)" : undefined,
+                  }}
+                >
+                  {line}
+                </div>
+              ))}
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              style={{
+                fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
+                color: "rgba(229, 231, 235, 0.65)",
+                lineHeight: 1.7, marginBottom: "2rem", maxWidth: "460px",
+              }}
+            >
+              {slide.sub}
+            </p>
+
+            {/* CTAs */}
+            <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap" }}>
+              <Link
+                href={slide.cta1.href}
+                data-testid="link-browse-games"
                 style={{
-                  display: "block",
-                  fontSize: "clamp(1.875rem, 6vw, 4.5rem)",
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  color: i === slide.highlight
-                    ? "transparent"
-                    : "#e5e7eb",
-                  background: i === slide.highlight
-                    ? "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)"
-                    : undefined,
-                  WebkitBackgroundClip: i === slide.highlight ? "text" : undefined,
-                  WebkitTextFillColor: i === slide.highlight ? "transparent" : undefined,
-                  backgroundClip: i === slide.highlight ? "text" : undefined,
-                  textShadow: i !== slide.highlight ? "0 0 40px rgba(124,58,237,0.3)" : undefined,
+                  display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                  padding: "0.7rem 1.5rem", borderRadius: "8px",
+                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)", color: "white",
+                  fontSize: "0.875rem", fontWeight: 700, textDecoration: "none",
+                  boxShadow: "0 0 20px rgba(124,58,237,0.45)", transition: "box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
+              >
+                <Gamepad2 size={16} />
+                {slide.cta1.label}
+              </Link>
+              <Link
+                href={slide.cta2.href}
+                data-testid="link-view-offers"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                  padding: "0.7rem 1.5rem", borderRadius: "8px",
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)",
+                  color: "rgba(229,231,235,0.9)", fontSize: "0.875rem", fontWeight: 600,
+                  textDecoration: "none", backdropFilter: "blur(6px)", transition: "border-color 0.2s, background 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
+                  e.currentTarget.style.background = "rgba(124,58,237,0.12)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
                 }}
               >
-                {line}
-              </div>
-            ))}
-          </h1>
-
-          {/* Sub */}
-          <p
-            style={{
-              fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
-              color: "rgba(229, 231, 235, 0.65)",
-              lineHeight: 1.7,
-              marginBottom: "2rem",
-              maxWidth: "460px",
-            }}
-          >
-            {slide.sub}
-          </p>
-
-          {/* CTAs */}
-          <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap" }}>
-            <Link
-              href={slide.cta1.href}
-              data-testid="link-browse-games"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.7rem 1.5rem",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
-                color: "white",
-                fontSize: "0.875rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 0 20px rgba(124,58,237,0.45)",
-                transition: "opacity 0.2s, box-shadow 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
-            >
-              <Gamepad2 size={16} />
-              {slide.cta1.label}
-            </Link>
-            <Link
-              href={slide.cta2.href}
-              data-testid="link-view-offers"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.7rem 1.5rem",
-                borderRadius: "8px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                color: "rgba(229,231,235,0.9)",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                backdropFilter: "blur(6px)",
-                transition: "border-color 0.2s, background 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
-                e.currentTarget.style.background = "rgba(124,58,237,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-              }}
-            >
-              {slide.cta2.label}
-            </Link>
+                {slide.cta2.label}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Slider controls */}
-      <button
-        onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
-        data-testid="button-slide-prev"
-        style={{
-          position: "absolute",
-          left: "1rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid rgba(124,58,237,0.3)",
-          color: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(4px)",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronLeft size={18} />
-      </button>
-      <button
-        onClick={() => goTo((current + 1) % SLIDES.length)}
-        data-testid="button-slide-next"
-        style={{
-          position: "absolute",
-          right: "1rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 10,
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)",
-          border: "1px solid rgba(124,58,237,0.3)",
-          color: "white",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(4px)",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronRight size={18} />
-      </button>
-
-      {/* Dot indicators */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "1.5rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 10,
-          display: "flex",
-          gap: "0.5rem",
-        }}
-      >
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            data-testid={`button-slide-dot-${i}`}
-            style={{
-              width: i === current ? "24px" : "8px",
-              height: "8px",
-              borderRadius: "9999px",
-              background: i === current ? "#7c3aed" : "rgba(255,255,255,0.25)",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: i === current ? "0 0 8px rgba(124,58,237,0.6)" : "none",
-            }}
-          />
-        ))}
-      </div>
     </section>
   );
 }

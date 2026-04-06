@@ -264,3 +264,44 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
+/* ── Hero section – responsive layout ────────────────────────────────────── */
+.hero-section { background: #070b14; }
+
+@media (min-width: 768px) {
+  .hero-section {
+    position: relative;
+    height: clamp(440px, 58vh, 620px);
+    overflow: hidden;
+  }
+  .hero-image-wrap {
+    position: absolute;
+    inset: 0;
+  }
+  .hero-content-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 1;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .hero-content-wrap {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem 1.25rem;
+  }
+}
+
