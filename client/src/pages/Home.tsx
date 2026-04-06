@@ -165,7 +165,7 @@ function HeroSlider() {
                 key={i}
                 style={{
                   display: "block",
-                  fontSize: "clamp(1.4rem, 5vw, 4.5rem)",
+                  fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
                   fontWeight: 900,
                   letterSpacing: "-0.02em",
                   color: i === slide.highlight ? "transparent" : "#e5e7eb",
