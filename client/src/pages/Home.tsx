@@ -35,7 +35,7 @@ function HeroSlider() {
 
   const defaultSlide = {
     id: "default",
-    bg: "",
+    bg: siteSettings.hero_bg_image || "",
     badge: "FEATURED",
     title: [(siteSettings.hero_title || "Welcome to Game Marketplace").split(" ")].flat(),
     highlight: 0,
