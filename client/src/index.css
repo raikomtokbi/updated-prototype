@@ -289,7 +289,5 @@ textarea {
     gap: 0.25rem !important;
     white-space: nowrap;
   }
-  .hero-headline { margin-bottom: 0.5rem !important; }
-  .hero-headline div { font-size: clamp(1.1rem, 4.5vw, 2rem) !important; }
 }
 
