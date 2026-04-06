@@ -123,6 +123,47 @@ export async function getBusanProducts(apiKey: string, apiBaseUrl: string, curre
   });
 }
 
+export interface BusanPlayerResult {
+  success: boolean;
+  username?: string;
+  message?: string;
+}
+
+export async function validateBusanPlayer(
+  apiKey: string,
+  apiBaseUrl: string,
+  playerId: string,
+  zoneId?: string,
+  productId?: string
+): Promise<BusanPlayerResult> {
+  const base = cleanBase(apiBaseUrl);
+  const body: Record<string, any> = { playerId };
+  if (zoneId) body.zoneId = zoneId;
+  if (productId) body.productId = productId;
+
+  try {
+    const res = await fetch(`${base}/api-service/validate-player`, {
+      method: "POST",
+      headers: makeHeaders(apiKey),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    const data = await safeJson(res);
+
+    if (!res.ok || data.success === false) {
+      return { success: false, message: data.error ?? data.message ?? `Validation failed (HTTP ${res.status})` };
+    }
+
+    const username =
+      String(data.data?.playerName ?? data.data?.username ?? data.data?.name ?? data.data?.nickname ?? data.playerName ?? data.username ?? data.name ?? "").trim() || undefined;
+
+    return { success: true, username };
+  } catch (err: any) {
+    return { success: false, message: err?.message ?? "Could not reach Busan validation service" };
+  }
+}
+
 export async function createBusanOrder(
   apiKey: string,
   apiBaseUrl: string,

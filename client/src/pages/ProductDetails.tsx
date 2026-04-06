@@ -484,18 +484,38 @@ function GameDetailView({ game }: { game: Game }) {
             </div>
           )}
 
-          {/* Validate Player button — shown below zone/user ID fields */}
+          {/* Validate Player button — name left, button right */}
           {needsUserId && (
-            <div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", minHeight: "32px" }}>
+              {/* Left: validated name or error */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {validateStatus === "success" && validatedName && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "6px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    <CheckCircle2 size={12} style={{ color: "hsl(142,71%,52%)", flexShrink: 0 }} />
+                    <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {validatedName}
+                    </span>
+                  </div>
+                )}
+                {validateStatus === "error" && validateError && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "6px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                    <AlertCircle size={12} style={{ color: "hsl(0,72%,60%)", flexShrink: 0 }} />
+                    <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{validateError}</span>
+                  </div>
+                )}
+              </div>
+              {/* Right: validate button */}
               <button
                 type="button"
                 onClick={handleValidate}
                 disabled={validateStatus === "loading"}
                 data-testid="button-validate-player"
                 style={{
+                  flexShrink: 0,
                   display: "inline-flex", alignItems: "center", gap: "6px",
-                  padding: "7px 16px", borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: validateStatus === "loading" ? "not-allowed" : "pointer",
-                  border: validateStatus === "success" ? "1px solid rgba(34,197,94,0.5)" : "1px solid rgba(124,58,237,0.4)",
+                  padding: "6px 14px", borderRadius: "7px", fontSize: "12px", fontWeight: 600,
+                  cursor: validateStatus === "loading" ? "not-allowed" : "pointer",
+                  border: validateStatus === "success" ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(124,58,237,0.4)",
                   background: validateStatus === "success" ? "rgba(34,197,94,0.1)" : "rgba(124,58,237,0.1)",
                   color: validateStatus === "success" ? "hsl(142,71%,52%)" : "#a78bfa",
                   opacity: validateStatus === "loading" ? 0.7 : 1,
@@ -503,26 +523,10 @@ function GameDetailView({ game }: { game: Game }) {
                 }}
               >
                 {validateStatus === "loading"
-                  ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
-                  : validateStatus === "success"
-                    ? <CheckCircle2 size={12} />
-                    : <CheckCircle2 size={12} />}
+                  ? <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />
+                  : <CheckCircle2 size={11} />}
                 {validateStatus === "loading" ? "Validating…" : "Validate ID"}
               </button>
-              {validateStatus === "success" && validatedName && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px", padding: "6px 10px", borderRadius: "6px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                  <CheckCircle2 size={12} style={{ color: "hsl(142,71%,52%)", flexShrink: 0 }} />
-                  <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", fontWeight: 600 }}>
-                    {validatedName}
-                  </span>
-                </div>
-              )}
-              {validateStatus === "error" && validateError && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px", padding: "6px 10px", borderRadius: "6px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                  <AlertCircle size={12} style={{ color: "hsl(0,72%,60%)", flexShrink: 0 }} />
-                  <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)" }}>{validateError}</span>
-                </div>
-              )}
             </div>
           )}
 

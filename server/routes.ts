@@ -39,6 +39,7 @@ import {
   getBusanBalance,
   getBusanProducts,
   createBusanOrder,
+  validateBusanPlayer,
 } from "./lib/busanApi";
 
 // ─── Multer setup ─────────────────────────────────────────────────────────────
@@ -296,6 +297,31 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.json({ playerName });
       }
       return res.status(400).json({ message: (result as any).message ?? "Player not found. Check your User ID and Zone ID." });
+    }
+
+    // ── 3. Busan validation ───────────────────────────────────────────────────
+    const busanConfig = await storage.getBusanConfig();
+    if (busanConfig?.apiToken && busanConfig.isActive) {
+      // Find any Busan-mapped package for this game to use as productId context
+      const services = await storage.getAllServices(g.id);
+      const allBusanMappings = await storage.getAllBusanMappings();
+      const serviceIds = new Set(services.map((s) => s.id));
+      const busanMapping = allBusanMappings.find((m) => serviceIds.has(m.cmsProductId));
+      const busanProductId = busanMapping?.busanProductId;
+
+      const result = await validateBusanPlayer(
+        busanConfig.apiToken,
+        busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
+        userId,
+        zoneId,
+        busanProductId
+      );
+      if (result.success) {
+        const playerName = result.username ?? "";
+        if (!playerName) return res.status(400).json({ message: "Player not found. Check your User ID and Zone ID." });
+        return res.json({ playerName });
+      }
+      return res.status(400).json({ message: result.message ?? "Player not found. Check your User ID and Zone ID." });
     }
 
     return res.status(400).json({ message: "Player validation is not configured for this game." });
