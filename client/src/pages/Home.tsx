@@ -23,7 +23,7 @@ function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { data: apiSliders = [], isSuccess } = useQuery<any[]>({
+  const { data: apiSliders = [] } = useQuery<any[]>({
     queryKey: ["/api/hero-sliders/active"],
     staleTime: 60_000,
   });
@@ -76,8 +76,6 @@ function HeroSlider() {
     if (timerRef.current) clearInterval(timerRef.current);
     startTimer();
   }
-
-  if (!isSuccess) return null;
 
   const slide = SLIDES[current] ?? SLIDES[0];
 
