@@ -44,18 +44,19 @@ function HeroSlider() {
     cta2: { label: "View Offers", href: "/offers" },
   };
 
-  const SLIDES = apiSliders.length > 0 
-    ? apiSliders.map((s: any) => ({
-        id: s.id,
-        bg: s.bannerUrl || "",
-        badge: "FEATURED",
-        title: [s.title],
-        highlight: 0,
-        sub: s.subtitle || "",
-        cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
-        cta2: { label: "View Offers", href: "/offers" },
-      }))
-    : [defaultSlide];
+  const apiMapped = apiSliders.map((s: any) => ({
+    id: s.id,
+    bg: s.bannerUrl || "",
+    badge: "FEATURED",
+    title: [s.title || siteSettings.hero_title || "Welcome to Game Marketplace"],
+    highlight: 0,
+    sub: s.subtitle || siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
+    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
+    cta2: { label: "View Offers", href: "/offers" },
+  }));
+
+  // Always keep the default slide in rotation so it shows even after uploading banners
+  const SLIDES = apiMapped.length > 0 ? [...apiMapped, defaultSlide] : [defaultSlide];
 
   function startTimer() {
     timerRef.current = setInterval(() => {
@@ -175,7 +176,7 @@ function HeroSlider() {
                 key={i}
                 style={{
                   display: "block",
-                  fontSize: "clamp(1.75rem, 3.5vw, 2.6rem)",
+                  fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
                   fontWeight: 900,
                   letterSpacing: "-0.02em",
                   color: i === slide.highlight
