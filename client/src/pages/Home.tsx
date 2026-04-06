@@ -1224,24 +1224,19 @@ function Footer() {
               href={siteSettings.footer_button_link || "#"}
               data-testid="link-footer-button"
               style={{
-                display: "inline-block",
-                padding: "0.35rem 0.9rem",
-                borderRadius: "6px",
-                background: "rgba(124,58,237,0.15)",
-                border: "1px solid rgba(124,58,237,0.35)",
-                color: "#a78bfa",
                 fontSize: "0.75rem",
-                fontWeight: 600,
+                color: "rgba(148,163,184,0.45)",
                 textDecoration: "none",
-                transition: "background 0.15s, border-color 0.15s",
+                transition: "color 0.15s",
+                cursor: "pointer",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(124,58,237,0.28)";
-                e.currentTarget.style.borderColor = "rgba(124,58,237,0.6)";
+                e.currentTarget.style.color = "rgba(148,163,184,0.75)";
+                e.currentTarget.style.textDecoration = "underline";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(124,58,237,0.15)";
-                e.currentTarget.style.borderColor = "rgba(124,58,237,0.35)";
+                e.currentTarget.style.color = "rgba(148,163,184,0.45)";
+                e.currentTarget.style.textDecoration = "none";
               }}
             >
               {siteSettings.footer_button_name}
