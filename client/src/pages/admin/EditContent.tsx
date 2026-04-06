@@ -691,7 +691,7 @@ export default function EditContent() {
       <div style={card}>
         <div style={sectionHeader}>
           <Zap size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Features Strip (Above Trending Now)</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Features Strip</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
@@ -743,7 +743,7 @@ export default function EditContent() {
                 <label style={labelStyle}>Description</label>
                 <textarea
                   data-testid={`input-${feat.key}-desc`}
-                  style={{ ...textareaStyle, minHeight: "250px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
+                  style={{ ...textareaStyle, minHeight: "60px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
                   value={local[`${feat.key}_desc`] ?? feat.desc}
                   onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
                 />
