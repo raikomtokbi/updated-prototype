@@ -284,9 +284,9 @@ textarea {
   .hero-sub      { display: none !important; }
   .hero-cta-row  { gap: 0.4rem !important; flex-wrap: nowrap !important; }
   .hero-cta-row a {
-    padding: 0.38rem 0.7rem !important;
-    font-size: 0.68rem !important;
-    gap: 0.25rem !important;
+    padding: 0.28rem 0.55rem !important;
+    font-size: 0.62rem !important;
+    gap: 0.2rem !important;
     white-space: nowrap;
   }
 }
