@@ -279,3 +279,17 @@ textarea {
   }
 }
 
+@media (max-width: 767px) {
+  .hero-badge    { display: none !important; }
+  .hero-sub      { display: none !important; }
+  .hero-cta-row  { gap: 0.4rem !important; flex-wrap: nowrap !important; }
+  .hero-cta-row a {
+    padding: 0.38rem 0.7rem !important;
+    font-size: 0.68rem !important;
+    gap: 0.25rem !important;
+    white-space: nowrap;
+  }
+  .hero-headline { margin-bottom: 0.5rem !important; }
+  .hero-headline div { font-size: clamp(1.1rem, 4.5vw, 2rem) !important; }
+}
+

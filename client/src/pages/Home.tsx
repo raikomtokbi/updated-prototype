@@ -140,6 +140,7 @@ function HeroSlider() {
 
           {/* Badge */}
           <div
+            className="hero-badge"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -158,7 +159,7 @@ function HeroSlider() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-orbitron" style={{ lineHeight: 1.05, marginBottom: "0.85rem" }}>
+          <h1 className="font-orbitron hero-headline" style={{ lineHeight: 1.05, marginBottom: "0.85rem" }}>
             {slide.title.map((line, i) => (
               <div
                 key={i}
@@ -182,6 +183,7 @@ function HeroSlider() {
 
           {/* Subtitle */}
           <p
+            className="hero-sub"
             style={{
               fontSize: "clamp(0.75rem, 1.3vw, 1rem)",
               color: "rgba(229, 231, 235, 0.65)",
@@ -194,7 +196,7 @@ function HeroSlider() {
           </p>
 
           {/* CTAs */}
-          <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
+          <div className="hero-cta-row" style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
             <Link
               href={slide.cta1.href}
               data-testid="link-browse-games"
