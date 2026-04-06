@@ -135,6 +135,7 @@ function HeroSlider() {
 
       {/* Content */}
       <div
+        className="hero-outer-content"
         style={{
           position: "relative",
           zIndex: 2,
@@ -146,7 +147,7 @@ function HeroSlider() {
           alignItems: "center",
         }}
       >
-        <div className="hero-text-content" style={{ maxWidth: "580px" }}>
+        <div style={{ maxWidth: "580px" }}>
           {/* Badge */}
           <div
             style={{

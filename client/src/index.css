@@ -264,9 +264,10 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
-/* Hero text: offset from left slider button on mobile */
+/* Hero text: clear left/right slider buttons on mobile */
 @media (max-width: 640px) {
-  .hero-text-content {
-    padding-left: 2.5rem;
+  .hero-outer-content {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
   }
 }
