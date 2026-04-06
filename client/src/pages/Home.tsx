@@ -84,8 +84,8 @@ function HeroSlider() {
     <section
       style={{
         position: "relative",
-        height: "min(100vh, 520px)",
-        minHeight: "540px",
+        height: "min(52vh, 400px)",
+        minHeight: "300px",
         overflow: "hidden",
         background: "#070b14",
       }}
@@ -156,7 +156,7 @@ function HeroSlider() {
               borderRadius: "9999px",
               background: "rgba(124, 58, 237, 0.2)",
               border: "1px solid rgba(124, 58, 237, 0.4)",
-              marginBottom: "1.5rem",
+              marginBottom: "0.9rem",
             }}
           >
             <Zap size={12} color="#a78bfa" />
@@ -168,7 +168,7 @@ function HeroSlider() {
           {/* Headline */}
           <h1
             className="font-orbitron"
-            style={{ lineHeight: 1.05, marginBottom: "1.25rem" }}
+            style={{ lineHeight: 1.05, marginBottom: "0.75rem" }}
           >
             {slide.title.map((line, i) => (
               <div
@@ -200,8 +200,8 @@ function HeroSlider() {
             style={{
               fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
               color: "rgba(229, 231, 235, 0.65)",
-              lineHeight: 1.7,
-              marginBottom: "2rem",
+              lineHeight: 1.6,
+              marginBottom: "1.25rem",
               maxWidth: "460px",
             }}
           >
