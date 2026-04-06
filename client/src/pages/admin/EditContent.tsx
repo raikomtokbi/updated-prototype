@@ -709,9 +709,21 @@ export default function EditContent() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
                   <div>
                     <label style={labelStyle}>Title</label>
-                    <textarea
+                    <input
+                      type="text"
                       data-testid={`input-${feat.key}-title`}
-                      style={{ ...textareaStyle, minHeight: "40px" }}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        background: "hsl(220, 20%, 11%)",
+                        border: "1px solid hsl(220, 15%, 18%)",
+                        borderRadius: "6px",
+                        color: "hsl(210, 40%, 92%)",
+                        fontSize: "13px",
+                        outline: "none",
+                        boxSizing: "border-box",
+                        fontFamily: "inherit",
+                      }}
                       value={local[`${feat.key}_title`] ?? feat.title}
                       onChange={(e) => set(`${feat.key}_title`, e.target.value)}
                     />
