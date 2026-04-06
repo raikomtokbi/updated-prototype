@@ -129,6 +129,16 @@ export interface BusanPlayerResult {
   message?: string;
 }
 
+function extractPlayerName(data: any): string | undefined {
+  return (
+    String(
+      data?.data?.playerName ?? data?.data?.username ?? data?.data?.name ??
+      data?.data?.nickname ?? data?.data?.roleName ?? data?.data?.role_name ??
+      data?.playerName ?? data?.username ?? data?.name ?? data?.nickname ?? ""
+    ).trim() || undefined
+  );
+}
+
 export async function validateBusanPlayer(
   apiKey: string,
   apiBaseUrl: string,
@@ -137,31 +147,75 @@ export async function validateBusanPlayer(
   productId?: string
 ): Promise<BusanPlayerResult> {
   const base = cleanBase(apiBaseUrl);
-  const body: Record<string, any> = { playerId };
-  if (zoneId) body.zoneId = zoneId;
-  if (productId) body.productId = productId;
+  const headers = makeHeaders(apiKey);
 
-  try {
-    const res = await fetch(`${base}/api-service/validate-player`, {
-      method: "POST",
-      headers: makeHeaders(apiKey),
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(8000),
-    });
+  // Build multiple body variants (different APIs use different param names)
+  const bodies: Record<string, any>[] = [
+    { playerId, ...(zoneId ? { zoneId } : {}), ...(productId ? { productId } : {}) },
+    { userId: playerId, ...(zoneId ? { zoneId } : {}), ...(productId ? { productId } : {}) },
+    { player_id: playerId, ...(zoneId ? { zone_id: zoneId } : {}), ...(productId ? { product_id: productId } : {}) },
+  ];
 
-    const data = await safeJson(res);
+  // ── Try POST patterns ────────────────────────────────────────────────────────
+  const postEndpoints = [
+    `${base}/api-service/validate`,
+    `${base}/api-service/validate-user`,
+    `${base}/api-service/validate-player`,
+    `${base}/api-service/check-user`,
+    `${base}/api-service/role`,
+    `${base}/api-service/player`,
+    `${base}/api-service/check`,
+  ];
 
-    if (!res.ok || data.success === false) {
-      return { success: false, message: data.error ?? data.message ?? `Validation failed (HTTP ${res.status})` };
+  for (const url of postEndpoints) {
+    for (const body of bodies) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(5000),
+        });
+        // skip if HTML (404/500 page)
+        const contentType = res.headers.get("content-type") ?? "";
+        if (!contentType.includes("json")) continue;
+        const data = await safeJson(res);
+        if (res.ok && data.success !== false) {
+          const username = extractPlayerName(data);
+          return { success: true, username };
+        }
+        // If we got a real JSON error (not just 404), stop trying other bodies for this endpoint
+        if (res.ok === false && data.success === false && data.error) break;
+      } catch {
+        // try next
+      }
     }
-
-    const username =
-      String(data.data?.playerName ?? data.data?.username ?? data.data?.name ?? data.data?.nickname ?? data.playerName ?? data.username ?? data.name ?? "").trim() || undefined;
-
-    return { success: true, username };
-  } catch (err: any) {
-    return { success: false, message: err?.message ?? "Could not reach Busan validation service" };
   }
+
+  // ── Try GET pattern ──────────────────────────────────────────────────────────
+  try {
+    const params = new URLSearchParams({ playerId });
+    if (zoneId) params.append("zoneId", zoneId);
+    if (productId) params.append("productId", productId);
+
+    const res = await fetch(`${base}/api-service/validate?${params}`, {
+      method: "GET",
+      headers,
+      signal: AbortSignal.timeout(5000),
+    });
+    const contentType = res.headers.get("content-type") ?? "";
+    if (contentType.includes("json")) {
+      const data = await safeJson(res);
+      if (res.ok && data.success !== false) {
+        const username = extractPlayerName(data);
+        return { success: true, username };
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  return { success: false, message: "Busan API does not support player validation for this game." };
 }
 
 export async function createBusanOrder(

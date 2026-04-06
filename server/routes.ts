@@ -282,21 +282,32 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
     }
 
-    // ── 2. Smile One validation ───────────────────────────────────────────────
-    const smileConfig = await storage.getSmileOneConfig();
-    if (smileConfig?.uid && smileConfig?.key && smileConfig?.isActive) {
+    // ── 2. Smile One validation (DB config or env vars) ───────────────────────
+    {
+      const smileConfig = await storage.getSmileOneConfig();
+      const credentials: { uid: string; key: string; email: string; defaultRegion: string } | undefined =
+        (smileConfig?.uid && smileConfig?.key && smileConfig?.isActive)
+          ? { uid: smileConfig.uid, key: smileConfig.key, email: smileConfig.email ?? "", defaultRegion: smileConfig.region ?? "ph" }
+          : undefined; // will fall back to env vars inside the function
+
       const result = await smileValidatePlayer(
         g.slug,
         { userId, ...(zoneId ? { zoneId } : {}) },
-        smileConfig.region ?? undefined,
-        { uid: smileConfig.uid, key: smileConfig.key, email: smileConfig.email ?? "", defaultRegion: smileConfig.region ?? "ph" }
+        smileConfig?.region ?? undefined,
+        credentials
       );
       if (result.success && "username" in result) {
         const playerName = result.username ?? "";
         if (!playerName) return res.status(400).json({ message: "Player not found. Check your User ID and Zone ID." });
         return res.json({ playerName });
       }
-      return res.status(400).json({ message: (result as any).message ?? "Player not found. Check your User ID and Zone ID." });
+      // Only return the error if it's a real player validation failure (not a config/setup issue)
+      const errMsg = (result as any).message ?? "";
+      const isConfigError = !errMsg || ["credentials", "not configured", "unsupported game", "unsupported slug", "add it to"].some((kw) => errMsg.toLowerCase().includes(kw));
+      if (!isConfigError) {
+        return res.status(400).json({ message: errMsg });
+      }
+      // Config/setup issue — fall through to Busan
     }
 
     // ── 3. Busan validation ───────────────────────────────────────────────────
@@ -321,10 +332,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (!playerName) return res.status(400).json({ message: "Player not found. Check your User ID and Zone ID." });
         return res.json({ playerName });
       }
-      return res.status(400).json({ message: result.message ?? "Player not found. Check your User ID and Zone ID." });
+      // If Busan returned a real player error (not just "no endpoint"), surface it
+      const busanMsg = result.message ?? "";
+      const isBusanConfigIssue = busanMsg.toLowerCase().includes("does not support") || busanMsg.toLowerCase().includes("not available");
+      if (!isBusanConfigIssue) {
+        return res.status(400).json({ message: busanMsg || "Player not found. Check your User ID and Zone ID." });
+      }
+      // Fall through to NO_VALIDATOR
     }
 
-    return res.status(400).json({ message: "Player validation is not configured for this game." });
+    return res.status(400).json({
+      message: "Player validation is not available. Please configure Smile.one API credentials in Admin → Smile.one to enable player validation.",
+      code: "NO_VALIDATOR",
+    });
   });
 
   app.get("/api/games/:id", async (req, res) => {

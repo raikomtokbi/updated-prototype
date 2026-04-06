@@ -189,7 +189,7 @@ function GameDetailView({ game }: { game: Game }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [validateStatus, setValidateStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [validateStatus, setValidateStatus] = useState<"idle" | "loading" | "success" | "error" | "unavailable">("idle");
   const [validatedName, setValidatedName] = useState<string | null>(null);
   const [validateError, setValidateError] = useState<string | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -214,7 +214,13 @@ function GameDetailView({ game }: { game: Game }) {
       if (zoneId.trim()) params.append("zoneId", zoneId.trim());
       const res = await fetch(`/api/games/${game.slug}/validate?${params}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Validation failed");
+      if (!res.ok) {
+        if (data.code === "NO_VALIDATOR") {
+          setValidateStatus("unavailable");
+          return;
+        }
+        throw new Error(data.message ?? "Validation failed");
+      }
       setValidatedName(data.playerName);
       setValidateStatus("success");
     } catch (err: any) {
@@ -458,7 +464,7 @@ function GameDetailView({ game }: { game: Game }) {
                 className="input-field"
                 placeholder="Enter User ID"
                 value={userId}
-                onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); setValidateStatus("idle"); setValidatedName(null); setValidateError(null); }}
+                onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); if (validateStatus !== "unavailable") { setValidateStatus("idle"); setValidatedName(null); setValidateError(null); } }}
                 data-testid="input-player-id"
                 autoComplete="off"
               />
@@ -484,10 +490,10 @@ function GameDetailView({ game }: { game: Game }) {
             </div>
           )}
 
-          {/* Validate Player button — name left, button right */}
+          {/* Validate Player — name left, button right */}
           {needsUserId && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", minHeight: "32px" }}>
-              {/* Left: validated name or error */}
+              {/* Left: result message */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 {validateStatus === "success" && validatedName && (
                   <div style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "6px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
@@ -503,21 +509,38 @@ function GameDetailView({ game }: { game: Game }) {
                     <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{validateError}</span>
                   </div>
                 )}
+                {validateStatus === "unavailable" && (
+                  <span style={{ fontSize: "11px", color: "hsl(220,10%,55%)", fontStyle: "italic" }}>
+                    Validation not set up for this game
+                  </span>
+                )}
               </div>
               {/* Right: validate button */}
               <button
                 type="button"
-                onClick={handleValidate}
-                disabled={validateStatus === "loading"}
+                onClick={validateStatus === "unavailable" ? undefined : handleValidate}
+                disabled={validateStatus === "loading" || validateStatus === "unavailable"}
                 data-testid="button-validate-player"
                 style={{
                   flexShrink: 0,
                   display: "inline-flex", alignItems: "center", gap: "6px",
                   padding: "6px 14px", borderRadius: "7px", fontSize: "12px", fontWeight: 600,
-                  cursor: validateStatus === "loading" ? "not-allowed" : "pointer",
-                  border: validateStatus === "success" ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(124,58,237,0.4)",
-                  background: validateStatus === "success" ? "rgba(34,197,94,0.1)" : "rgba(124,58,237,0.1)",
-                  color: validateStatus === "success" ? "hsl(142,71%,52%)" : "#a78bfa",
+                  cursor: validateStatus === "loading" || validateStatus === "unavailable" ? "not-allowed" : "pointer",
+                  border: validateStatus === "success"
+                    ? "1px solid rgba(34,197,94,0.4)"
+                    : validateStatus === "unavailable"
+                      ? "1px solid rgba(100,100,120,0.3)"
+                      : "1px solid rgba(124,58,237,0.4)",
+                  background: validateStatus === "success"
+                    ? "rgba(34,197,94,0.1)"
+                    : validateStatus === "unavailable"
+                      ? "rgba(100,100,120,0.06)"
+                      : "rgba(124,58,237,0.1)",
+                  color: validateStatus === "success"
+                    ? "hsl(142,71%,52%)"
+                    : validateStatus === "unavailable"
+                      ? "hsl(220,10%,55%)"
+                      : "#a78bfa",
                   opacity: validateStatus === "loading" ? 0.7 : 1,
                   transition: "all 0.2s",
                 }}
