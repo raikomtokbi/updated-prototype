@@ -135,7 +135,6 @@ function HeroSlider() {
 
       {/* Content */}
       <div
-        className="hero-outer-content"
         style={{
           position: "relative",
           zIndex: 2,
