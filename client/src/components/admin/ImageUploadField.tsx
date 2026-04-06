@@ -18,7 +18,7 @@ interface ImageUploadFieldProps {
 const RATIO_META: Record<AspectRatio, { aspect: string | undefined; hint: string | null }> = {
   any:       { aspect: undefined,   hint: null },
   square:    { aspect: "1 / 1",     hint: "Recommended: 500 × 500 px (1:1)" },
-  rectangle: { aspect: "3 / 1",    hint: "Recommended: 1500 × 500 px (3:1 landscape)" },
+  rectangle: { aspect: "3 / 2",    hint: "Recommended: 1500 × 1000 px (3:2 landscape)" },
 };
 
 export function ImageUploadField({
