@@ -106,7 +106,14 @@ const PREVIEW_VARS: Record<string, string> = {
   order_amount: "₹499.00",
   order_status: "Confirmed",
   order_date: new Date().toLocaleDateString(),
+  order_time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  order_currency: "₹",
   payment_method: "Razorpay",
+  product_name: "Mobile Legends Diamonds",
+  product_quantity: "1",
+  game_name: "Mobile Legends: Bang Bang",
+  player_id: "262918936",
+  zone_id: "9398",
   otp_code: "847291",
   reset_link: "https://nexcoin.store/reset?token=abc123",
   verification_link: "https://nexcoin.store/verify?token=abc123",
@@ -115,7 +122,6 @@ const PREVIEW_VARS: Record<string, string> = {
   ticket_id: "TKT-00042",
   ticket_subject: "Issue with my order",
   reply_message: "We have resolved your issue. Please check your account.",
-  order_currency: "₹",
 };
 
 const ALL_VARIABLES = [
@@ -132,7 +138,17 @@ const ALL_VARIABLES = [
   {
     category: "Order",
     color: "#f59e0b",
-    vars: ["{{order_id}}", "{{order_amount}}", "{{order_status}}", "{{order_date}}", "{{payment_method}}"],
+    vars: ["{{order_id}}", "{{order_date}}", "{{order_time}}", "{{order_amount}}", "{{order_currency}}", "{{order_status}}", "{{payment_method}}"],
+  },
+  {
+    category: "Product",
+    color: "#06b6d4",
+    vars: ["{{product_name}}", "{{product_quantity}}", "{{game_name}}", "{{player_id}}", "{{zone_id}}"],
+  },
+  {
+    category: "Support",
+    color: "#f97316",
+    vars: ["{{ticket_id}}", "{{ticket_subject}}", "{{reply_message}}"],
   },
   {
     category: "Security",
