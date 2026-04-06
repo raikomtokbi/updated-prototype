@@ -458,7 +458,7 @@ function GameDetailView({ game }: { game: Game }) {
                 className="input-field"
                 placeholder="Enter User ID"
                 value={userId}
-                onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); }}
+                onChange={(e) => { setUserId(e.target.value); setErrors((p) => ({ ...p, userId: "" })); setValidateStatus("idle"); setValidatedName(null); setValidateError(null); }}
                 data-testid="input-player-id"
                 autoComplete="off"
               />
@@ -476,11 +476,53 @@ function GameDetailView({ game }: { game: Game }) {
                 className="input-field"
                 placeholder="Enter Zone ID or Server ID"
                 value={zoneId}
-                onChange={(e) => { setZoneId(e.target.value); setErrors((p) => ({ ...p, zoneId: "" })); }}
+                onChange={(e) => { setZoneId(e.target.value); setErrors((p) => ({ ...p, zoneId: "" })); setValidateStatus("idle"); setValidatedName(null); setValidateError(null); }}
                 data-testid="input-zone-id"
                 autoComplete="off"
               />
               {errors.zoneId && <FieldError message={errors.zoneId} />}
+            </div>
+          )}
+
+          {/* Validate Player button — shown below zone/user ID fields */}
+          {needsUserId && (
+            <div>
+              <button
+                type="button"
+                onClick={handleValidate}
+                disabled={validateStatus === "loading"}
+                data-testid="button-validate-player"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: "7px 16px", borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: validateStatus === "loading" ? "not-allowed" : "pointer",
+                  border: validateStatus === "success" ? "1px solid rgba(34,197,94,0.5)" : "1px solid rgba(124,58,237,0.4)",
+                  background: validateStatus === "success" ? "rgba(34,197,94,0.1)" : "rgba(124,58,237,0.1)",
+                  color: validateStatus === "success" ? "hsl(142,71%,52%)" : "#a78bfa",
+                  opacity: validateStatus === "loading" ? 0.7 : 1,
+                  transition: "all 0.2s",
+                }}
+              >
+                {validateStatus === "loading"
+                  ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                  : validateStatus === "success"
+                    ? <CheckCircle2 size={12} />
+                    : <CheckCircle2 size={12} />}
+                {validateStatus === "loading" ? "Validating…" : "Validate ID"}
+              </button>
+              {validateStatus === "success" && validatedName && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px", padding: "6px 10px", borderRadius: "6px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                  <CheckCircle2 size={12} style={{ color: "hsl(142,71%,52%)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", fontWeight: 600 }}>
+                    {validatedName}
+                  </span>
+                </div>
+              )}
+              {validateStatus === "error" && validateError && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px", padding: "6px 10px", borderRadius: "6px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  <AlertCircle size={12} style={{ color: "hsl(0,72%,60%)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)" }}>{validateError}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -551,38 +593,6 @@ function GameDetailView({ game }: { game: Game }) {
                 autoComplete="off"
               />
               {errors.characterName && <FieldError message={errors.characterName} />}
-            </div>
-          )}
-
-          {/* Plugin validate button */}
-          {game.pluginSlug && needsUserId && (
-            <div>
-              <button
-                type="button"
-                onClick={handleValidate}
-                disabled={validateStatus === "loading"}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "6px",
-                  padding: "7px 14px", borderRadius: "7px", fontSize: "12px", fontWeight: 600, cursor: "pointer",
-                  border: "1px solid rgba(124,58,237,0.4)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
-                  opacity: validateStatus === "loading" ? 0.7 : 1,
-                }}
-              >
-                {validateStatus === "loading" ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <CheckCircle2 size={12} />}
-                {validateStatus === "loading" ? "Validating…" : "Validate Player"}
-              </button>
-              {validateStatus === "success" && validatedName && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px" }}>
-                  <CheckCircle2 size={12} style={{ color: "hsl(142,71%,52%)", flexShrink: 0 }} />
-                  <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", fontWeight: 600 }}>{validatedName}</span>
-                </div>
-              )}
-              {validateStatus === "error" && validateError && (
-                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "6px" }}>
-                  <AlertCircle size={12} style={{ color: "hsl(0,72%,60%)", flexShrink: 0 }} />
-                  <span style={{ fontSize: "12px", color: "hsl(0,72%,60%)" }}>{validateError}</span>
-                </div>
-              )}
             </div>
           )}
 
