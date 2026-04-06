@@ -85,8 +85,8 @@ function HeroSlider() {
     <section
       style={{
         position: "relative",
-        height: "min(100vh, 520px)",
-        minHeight: "540px",
+        height: "min(100vh, 440px)",
+        minHeight: "440px",
         overflow: "hidden",
         background: "#070b14",
       }}
@@ -176,7 +176,7 @@ function HeroSlider() {
                 key={i}
                 style={{
                   display: "block",
-                  fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
+                  fontSize: "clamp(1.875rem, 6vw, 4.5rem)",
                   fontWeight: 900,
                   letterSpacing: "-0.02em",
                   color: i === slide.highlight
