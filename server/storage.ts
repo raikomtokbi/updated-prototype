@@ -86,6 +86,7 @@ export interface IStorage {
   countOrders(): Promise<number>;
   getTotalRevenue(): Promise<number>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
+  updateOrderAmount(id: string, amount: string): Promise<void>;
 
   // Transactions
   getAllTransactions(limit?: number, offset?: number): Promise<Transaction[]>;
@@ -397,6 +398,9 @@ export class DatabaseStorage implements IStorage {
   async updateOrderStatus(id: string, status: string) {
     await db.update(orders).set({ status: status as any, updatedAt: new Date() }).where(eq(orders.id, id));
     return fetchAfter<Order>(orders, id, orders.id);
+  }
+  async updateOrderAmount(id: string, amount: string): Promise<void> {
+    await db.update(orders).set({ totalAmount: amount, updatedAt: new Date() }).where(eq(orders.id, id));
   }
 
   // ── Transactions ───────────────────────────────────────────────────────────

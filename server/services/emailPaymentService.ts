@@ -191,12 +191,12 @@ let pollingInterval: NodeJS.Timeout | null = null;
 
 export function startEmailPaymentPoller(): void {
   if (pollingInterval) return;
-  console.log("[UPI] Starting email payment poller (60s interval)");
-  // Run immediately on start, then every 60 seconds
+  console.log("[UPI] Starting email payment poller (15s interval)");
+  // Run immediately on start, then every 15 seconds
   processEmails().catch(console.error);
   pollingInterval = setInterval(() => {
     processEmails().catch(console.error);
-  }, 60_000);
+  }, 15_000);
 }
 
 export function stopEmailPaymentPoller(): void {
