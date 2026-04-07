@@ -490,6 +490,19 @@ export default function Checkout() {
         });
         rzp.open();
 
+      } else if (result.type === "upi") {
+        // manual_upi gateway responded via generic initiate — show UPI overlay
+        clearCart();
+        setUpiModalData({
+          orderId: result.orderId,
+          orderNumber: result.orderNumber || "",
+          upiId: result.upiId || "",
+          amount: String(result.amount || total),
+          currency: result.currency || currency,
+          expiresAt: result.expiresAt,
+        });
+        setIsProcessing(false);
+
       } else if (result.type === "redirect_url") {
         clearCart();
         window.location.href = result.url;

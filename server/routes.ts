@@ -1822,6 +1822,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       let lastError = "No gateway succeeded";
       for (const method of methodsToTry) {
         try {
+          // manual_upi is handled via /api/upi/initiate — inline the same logic here so the
+          // generic initiate route works when the frontend falls through to it.
+          if (method.type === "manual_upi") {
+            const upiSettings = await storage.getUpiSettings();
+            if (!upiSettings?.isActive || !upiSettings.upiId) {
+              lastError = "UPI payment is not configured or inactive"; continue;
+            }
+            const orderNumber = generateOrderNumber();
+            return res.json({
+              success: true,
+              type: "upi",
+              orderId,
+              internalOrderId: orderId,
+              orderNumber,
+              upiId: upiSettings.upiId,
+              amount,
+              currency,
+              expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+              gatewayType: "manual_upi",
+              gatewayId: method.id,
+            });
+          }
+
           const handler = getGatewayHandler(method.type);
           if (!handler) { lastError = `Unsupported gateway: ${method.type}`; continue; }
 
@@ -2501,16 +2524,20 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       if (Array.isArray(cartItems)) {
         for (const item of cartItems) {
-          await storage.createOrderItem({
-            orderId,
-            productId: item.productId,
-            packageId: item.packageId,
-            productTitle: item.productTitle || item.packageName || "Order",
-            packageLabel: item.packageName,
-            quantity: item.quantity || 1,
-            unitPrice: String(item.price || 0),
-            totalPrice: String((item.price || 0) * (item.quantity || 1)),
-          });
+          try {
+            await storage.createOrderItem({
+              orderId,
+              productId: item.productId,
+              packageId: item.packageId,
+              productTitle: item.productTitle || item.packageName || "Order",
+              packageLabel: item.packageName,
+              quantity: item.quantity || 1,
+              unitPrice: String(item.price || 0),
+              totalPrice: String((item.price || 0) * (item.quantity || 1)),
+            });
+          } catch (_itemErr) {
+            // productId may reference a game/service row — ignore FK errors; cart data is in order.notes
+          }
         }
       }
 
@@ -2519,7 +2546,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         orderId,
         orderNumber,
         upiId: settings.upiId,
-        qrCodeUrl: settings.qrCodeUrl || null,
         amount,
         currency,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
