@@ -192,7 +192,6 @@ const GATEWAY_CONFIGS: Record<string, {
     label: "Manual UPI",
     fields: [
       { key: "config.upiId", label: "UPI ID *", placeholder: "yourname@paytm or 9876543210@upi", isConfig: true },
-      { key: "config.qrCodeUrl", label: "QR Code Image URL", placeholder: "https://example.com/upi-qr.png", isConfig: true },
       { key: "config.emailAddress", label: "IMAP Email Address", placeholder: "your-upi-email@gmail.com", isConfig: true },
       { key: "config.emailPassword", label: "App Password (IMAP)", placeholder: "Gmail App Password (16 chars)", isSecret: true, isConfig: true },
       { key: "config.imapHost", label: "IMAP Host", placeholder: "imap.gmail.com", isConfig: true },
@@ -379,15 +378,6 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
       {/* Settings */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div>
-          <label style={labelStyle}>Payment Category *</label>
-          <select style={inputStyle} value={form.paymentType} onChange={(e) => set("paymentType", e.target.value)}>
-            <option value="UPI">UPI</option>
-            <option value="CARD">Card</option>
-            <option value="NETBANKING">Net Banking</option>
-            <option value="WALLET">Wallet</option>
-          </select>
-        </div>
-        <div>
           <label style={labelStyle}>Mode</label>
           <select style={inputStyle} value={form.mode} onChange={(e) => set("mode", e.target.value as "test" | "live")}>
             <option value="test">Test</option>
@@ -402,7 +392,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
           </select>
         </div>
         <div>
-          <label style={labelStyle}>Priority Order (lower = higher priority)</label>
+          <label style={labelStyle}>Priority (lower = first)</label>
           <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
       </div>
@@ -486,7 +476,7 @@ export default function PaymentMethodPage() {
       <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", lineHeight: 1.6, margin: 0 }}>
           Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual UPI, Manual</span>.
-          Each gateway has a Payment Category (UPI / Card / Net Banking / Wallet). Customers choose their category at checkout; the highest-priority active gateway for that category is used.
+          Set a lower priority number to make a gateway take precedence over others when multiple gateways are active.
         </p>
       </div>
 
