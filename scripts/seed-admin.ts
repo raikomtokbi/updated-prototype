@@ -8,7 +8,7 @@ async function seedAdmin() {
   const existing = await db.select().from(users).where(eq(users.id, userId));
   if (existing.length > 0) {
     console.log(`User with ID ${userId} found. Updating role to super_admin...`);
-    await db.update(users).set({ role: "admin" }).where(eq(users.id, userId));
+    await db.update(users).set({ role: "super_admin" }).where(eq(users.id, userId));
     console.log("Done. User is now super_admin.");
     process.exit(0);
   }
