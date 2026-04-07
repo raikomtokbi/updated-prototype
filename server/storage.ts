@@ -947,7 +947,7 @@ export class DatabaseStorage implements IStorage {
 
   // ── UPI Order Matching ────────────────────────────────────────────────────────
   async getPendingUpiOrders(amount: string): Promise<Order[]> {
-    const windowStart = new Date(Date.now() - 30 * 60 * 1000);
+    const windowStart = new Date(Date.now() - 2 * 60 * 60 * 1000);
     return db.select().from(orders).where(
       and(
         eq(orders.status, "pending"),

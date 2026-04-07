@@ -148,9 +148,9 @@ async function processEmails(): Promise<void> {
         const pendingOrders = await storage.getPendingUpiOrders(String(parsed.amount.toFixed(2)));
 
         if (pendingOrders.length > 0) {
-          // Match the oldest pending order
+          // Match the newest pending order — the customer most likely just placed it and just paid
           const matchedOrder = pendingOrders.sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
 
           await storage.updateOrderPaymentVerified(matchedOrder.id, parsed.utr || `AUTO_${Date.now()}`);
