@@ -139,6 +139,12 @@ function extractPlayerName(data: any): string | undefined {
   );
 }
 
+/**
+ * Validate a player against the Busan API.
+ * Uses the documented endpoint: POST /api-service/validate
+ * Body: { productId, playerId, zoneId? }
+ * Success response: { status: true, data: { username: "...", valid: true } }
+ */
 export async function validateBusanPlayer(
   apiKey: string,
   apiBaseUrl: string,
@@ -149,73 +155,57 @@ export async function validateBusanPlayer(
   const base = cleanBase(apiBaseUrl);
   const headers = makeHeaders(apiKey);
 
-  // Build multiple body variants (different APIs use different param names)
-  const bodies: Record<string, any>[] = [
-    { playerId, ...(zoneId ? { zoneId } : {}), ...(productId ? { productId } : {}) },
-    { userId: playerId, ...(zoneId ? { zoneId } : {}), ...(productId ? { productId } : {}) },
-    { player_id: playerId, ...(zoneId ? { zone_id: zoneId } : {}), ...(productId ? { product_id: productId } : {}) },
-  ];
+  const body: Record<string, any> = { playerId };
+  if (productId) body.productId = productId;
+  if (zoneId) body.zoneId = zoneId;
 
-  // ── Try POST patterns ────────────────────────────────────────────────────────
-  const postEndpoints = [
-    `${base}/api-service/validate`,
-    `${base}/api-service/validate-user`,
-    `${base}/api-service/validate-player`,
-    `${base}/api-service/check-user`,
-    `${base}/api-service/role`,
-    `${base}/api-service/player`,
-    `${base}/api-service/check`,
-  ];
-
-  for (const url of postEndpoints) {
-    for (const body of bodies) {
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(body),
-          signal: AbortSignal.timeout(5000),
-        });
-        // skip if HTML (404/500 page)
-        const contentType = res.headers.get("content-type") ?? "";
-        if (!contentType.includes("json")) continue;
-        const data = await safeJson(res);
-        if (res.ok && data.success !== false) {
-          const username = extractPlayerName(data);
-          return { success: true, username };
-        }
-        // If we got a real JSON error (not just 404), stop trying other bodies for this endpoint
-        if (res.ok === false && data.success === false && data.error) break;
-      } catch {
-        // try next
-      }
-    }
-  }
-
-  // ── Try GET pattern ──────────────────────────────────────────────────────────
   try {
-    const params = new URLSearchParams({ playerId });
-    if (zoneId) params.append("zoneId", zoneId);
-    if (productId) params.append("productId", productId);
-
-    const res = await fetch(`${base}/api-service/validate?${params}`, {
-      method: "GET",
+    const res = await fetch(`${base}/api-service/validate`, {
+      method: "POST",
       headers,
-      signal: AbortSignal.timeout(5000),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8000),
     });
-    const contentType = res.headers.get("content-type") ?? "";
-    if (contentType.includes("json")) {
-      const data = await safeJson(res);
-      if (res.ok && data.success !== false) {
-        const username = extractPlayerName(data);
-        return { success: true, username };
-      }
-    }
-  } catch {
-    // fall through
-  }
 
-  return { success: false, message: "Busan API does not support player validation for this game." };
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.includes("json")) {
+      return {
+        success: false,
+        message: "Validation service returned a non-JSON response. Check your API Base URL.",
+      };
+    }
+
+    const data = await safeJson(res);
+
+    // Busan docs: success response has status:true and data.valid:true
+    const isStatusOk = data.status === true || data.success === true || data.success !== false;
+
+    if (!res.ok || !isStatusOk) {
+      return {
+        success: false,
+        message: data.message ?? data.error ?? `Validation failed (HTTP ${res.status})`,
+      };
+    }
+
+    // If data.data.valid is explicitly false, the player was not found
+    if (data.data?.valid === false) {
+      return {
+        success: false,
+        message: data.message ?? data.data?.message ?? "Invalid player ID or server ID. Please double-check.",
+      };
+    }
+
+    const username = extractPlayerName(data);
+    return { success: true, username };
+  } catch (err: any) {
+    if (err.name === "TimeoutError" || err.name === "AbortError") {
+      return { success: false, message: "Validation request timed out. Please try again." };
+    }
+    if (err.message?.includes("non-JSON") || err.message?.includes("Check your API Base URL")) {
+      return { success: false, message: err.message };
+    }
+    return { success: false, message: "Validation service unavailable. Please try again." };
+  }
 }
 
 export async function createBusanOrder(

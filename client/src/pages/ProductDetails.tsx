@@ -212,6 +212,8 @@ function GameDetailView({ game }: { game: Game }) {
     try {
       const params = new URLSearchParams({ userId: userId.trim() });
       if (zoneId.trim()) params.append("zoneId", zoneId.trim());
+      // Pass the selected service/package ID so the backend can find the correct Busan productId
+      if (selectedSvc) params.append("serviceId", selectedSvc);
       const res = await fetch(`/api/games/${game.slug}/validate?${params}`);
       const data = await res.json();
       if (!res.ok) {

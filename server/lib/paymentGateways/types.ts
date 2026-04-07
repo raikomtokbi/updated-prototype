@@ -20,6 +20,7 @@ export type GatewayInitiateResult =
 export interface VerifyResult {
   success: boolean;
   transactionId?: string;
+  orderId?: string;
   error?: string;
 }
 

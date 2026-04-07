@@ -256,6 +256,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
     const userId = req.query.userId as string | undefined;
     const zoneId = req.query.zoneId as string | undefined;
+    // serviceId helps us find the correct Busan productId for this specific package
+    const serviceId = req.query.serviceId as string | undefined;
     if (!userId) return res.status(400).json({ message: "userId is required" });
 
     // ── 1. Plugin-based validation ────────────────────────────────────────────
@@ -313,12 +315,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     // ── 3. Busan validation ───────────────────────────────────────────────────
     const busanConfig = await storage.getBusanConfig();
     if (busanConfig?.apiToken && busanConfig.isActive) {
-      // Find any Busan-mapped package for this game to use as productId context
-      const services = await storage.getAllServices(g.id);
       const allBusanMappings = await storage.getAllBusanMappings();
-      const serviceIds = new Set(services.map((s) => s.id));
-      const busanMapping = allBusanMappings.find((m) => serviceIds.has(m.cmsProductId));
-      const busanProductId = busanMapping?.busanProductId;
+
+      // Try to find the specific mapping for the selected service first
+      let busanProductId: string | undefined;
+      if (serviceId) {
+        const specificMapping = allBusanMappings.find((m) => m.cmsProductId === serviceId);
+        busanProductId = specificMapping?.busanProductId;
+      }
+
+      // Fall back to any mapping for this game's services
+      if (!busanProductId) {
+        const services = await storage.getAllServices(g.id);
+        const serviceIds = new Set(services.map((s) => s.id));
+        const busanMapping = allBusanMappings.find((m) => serviceIds.has(m.cmsProductId));
+        busanProductId = busanMapping?.busanProductId;
+      }
 
       const result = await validateBusanPlayer(
         busanConfig.apiToken,
@@ -328,13 +340,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         busanProductId
       );
       if (result.success) {
-        const playerName = result.username ?? "";
-        if (!playerName) return res.status(400).json({ message: "Player not found. Check your User ID and Zone ID." });
+        // Return the player's name, or fall back to their userId so the UI can confirm it
+        const playerName = result.username || userId;
         return res.json({ playerName });
       }
-      // If Busan returned a real player error (not just "no endpoint"), surface it
+      // If Busan returned a real player error, surface it
       const busanMsg = result.message ?? "";
-      const isBusanConfigIssue = busanMsg.toLowerCase().includes("does not support") || busanMsg.toLowerCase().includes("not available");
+      const isBusanConfigIssue =
+        busanMsg.toLowerCase().includes("does not support") ||
+        busanMsg.toLowerCase().includes("not available") ||
+        busanMsg.toLowerCase().includes("timed out") ||
+        busanMsg.toLowerCase().includes("unavailable") ||
+        busanMsg.toLowerCase().includes("non-json");
       if (!isBusanConfigIssue) {
         return res.status(400).json({ message: busanMsg || "Player not found. Check your User ID and Zone ID." });
       }
@@ -342,7 +359,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
 
     return res.status(400).json({
-      message: "Player validation is not available. Please configure Smile.one API credentials in Admin → Smile.one to enable player validation.",
+      message: "Player validation is not configured. Please set up the Busan or Smile.one API in Admin → API Integration.",
       code: "NO_VALIDATOR",
     });
   });
@@ -1823,7 +1840,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             method
           );
 
-          return res.json({ ...result, orderId, gatewayType: method.type, gatewayId: method.id });
+          // Keep gateway-specific orderId (e.g. Razorpay's order_id) as gatewayOrderId,
+          // and expose our internal UUID as internalOrderId so the frontend can pass it back to verify.
+          const { orderId: gatewayOrderId, ...restResult } = result as any;
+          return res.json({
+            ...restResult,
+            orderId: gatewayOrderId,       // gateway's own order ID (used by Razorpay modal)
+            internalOrderId: orderId,       // our internal UUID (sent back in verify for fulfillment)
+            gatewayType: method.type,
+            gatewayId: method.id,
+          });
         } catch (err: any) {
           lastError = err.message || `Gateway ${method.type} failed`;
           console.warn(`Gateway ${method.type} failed, trying next:`, lastError);
@@ -1837,10 +1863,49 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ── Helper: fulfill Busan top-ups for an order ───────────────────────────────
+  async function fulfillBusanOrder(orderId: string): Promise<void> {
+    try {
+      const busanConfig = await storage.getBusanConfig();
+      if (!busanConfig?.apiToken || !busanConfig.isActive) return;
+
+      const order = await storage.getOrderById(orderId);
+      if (!order) return;
+
+      let cartItems: any[] = [];
+      if (order.notes) {
+        try { cartItems = JSON.parse(order.notes); } catch { cartItems = []; }
+      }
+      if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        const dbItems = await storage.getOrderItemsByOrder(orderId);
+        cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
+      }
+
+      for (const item of cartItems) {
+        if (!item.packageId && !item.productId) continue;
+        const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
+        if (!mapping) continue;
+        const orderResult = await createBusanOrder(
+          busanConfig.apiToken!,
+          busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
+          {
+            productId: mapping.busanProductId,
+            playerId: item.playerId || item.userId || "",
+            zoneId: item.zoneId || undefined,
+            currency: busanConfig.currency ?? "INR",
+          }
+        );
+        console.log(`[Busan] Fulfilled order item for product ${mapping.busanProductId}:`, orderResult);
+      }
+    } catch (err) {
+      console.error("[Busan] fulfillBusanOrder error:", err);
+    }
+  }
+
   // Verify payment (used by modal gateways like Razorpay and for polling)
   app.post("/api/payment/verify", async (req, res) => {
     try {
-      const { gatewayId, ...params } = req.body;
+      const { gatewayId, internalOrderId, ...params } = req.body;
 
       const activePaymentMethods = await storage.getActivePaymentMethods();
       let method = gatewayId
@@ -1860,7 +1925,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           if (!keySecret) return res.status(400).json({ success: false, error: "No gateway configured" });
           const body = razorpay_order_id + "|" + razorpay_payment_id;
           const expected = createHmac("sha256", keySecret).update(body).digest("hex");
-          if (expected === razorpay_signature) return res.json({ success: true });
+          if (expected === razorpay_signature) {
+            if (internalOrderId) {
+              await storage.updateOrderStatus(internalOrderId, "completed").catch(() => {});
+              fulfillBusanOrder(internalOrderId).catch(() => {});
+            }
+            return res.json({ success: true });
+          }
           return res.status(400).json({ success: false, error: "Signature mismatch" });
         }
         return res.status(400).json({ success: false, error: "No matching gateway found" });
@@ -1870,6 +1941,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!handler) return res.status(400).json({ success: false, error: "Unsupported gateway" });
 
       const result = await handler.verifyPayment(params, method);
+
+      // After successful verification, mark order complete and trigger Busan fulfillment
+      if (result.success && internalOrderId) {
+        await storage.updateOrderStatus(internalOrderId, "completed").catch(() => {});
+        fulfillBusanOrder(internalOrderId).catch(() => {});
+      }
+
       res.json(result);
     } catch (error: any) {
       console.error("Payment verify error:", error);
@@ -1891,6 +1969,23 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       const result = await handler.verifyPayment(req.body, method);
       console.log(`Payment callback [${gatewayType}]:`, result);
+
+      if (result.success) {
+        // Try to extract orderId from the result or from common callback body fields
+        const callbackOrderId =
+          result.orderId ||
+          req.body.order_id ||
+          req.body.txnid ||
+          req.body.merchantOrderId ||
+          req.body.udf1 ||
+          null;
+
+        if (callbackOrderId) {
+          await storage.updateOrderStatus(callbackOrderId, "completed").catch(() => {});
+          fulfillBusanOrder(callbackOrderId).catch(() => {});
+        }
+      }
+
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("Payment callback error:", error);
