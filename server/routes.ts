@@ -1829,12 +1829,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             if (!upiSettings?.isActive || !upiSettings.upiId) {
               lastError = "UPI payment is not configured or inactive"; continue;
             }
-            // Add 1–99 paise to make every order's amount unique for exact matching
-            const upiPaise = Math.floor(Math.random() * 99) + 1;
-            const upiUniqueAmount = Math.round((parseFloat(String(amount)) + upiPaise / 100) * 100) / 100;
-            // Update the already-created order with the unique amount and payment method
-            await storage.updateOrderAmount(orderId, upiUniqueAmount.toFixed(2));
-            await storage.updateOrderStatus(orderId, "pending"); // ensure paymentMethod is set via notes
             const orderNumber = generateOrderNumber();
             return res.json({
               success: true,
@@ -1843,7 +1837,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
               internalOrderId: orderId,
               orderNumber,
               upiId: upiSettings.upiId,
-              amount: upiUniqueAmount,
+              amount,
               currency,
               expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
               gatewayType: "manual_upi",
@@ -2507,7 +2501,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Initiate UPI manual payment — create order + return UPI payment details
   app.post("/api/upi/initiate", async (req, res) => {
     try {
-      const { amount, currency = "INR", email, name, phone, productInfo, cartItems } = req.body;
+      const { amount, currency = "INR", email, name, phone, productInfo, cartItems, payerName } = req.body;
       if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
 
       const settings = await storage.getUpiSettings();
@@ -2515,20 +2509,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ error: "UPI payment is not configured or inactive" });
       }
 
-      // Add 1–99 paise to make every order's amount unique.
-      // This allows exact matching even when multiple customers buy the same product simultaneously.
-      const paise = Math.floor(Math.random() * 99) + 1;
-      const uniqueAmount = Math.round((parseFloat(String(amount)) + paise / 100) * 100) / 100;
-
       const orderId = randomUUID();
       const orderNumber = generateOrderNumber();
+
+      // Store payerName alongside cart items so the IMAP matcher can use it for name scoring
+      const notesPayload = { payerName: (payerName || "").trim(), items: cartItems || [] };
 
       await storage.createOrder({
         id: orderId,
         orderNumber,
-        totalAmount: uniqueAmount.toFixed(2),
+        totalAmount: String(amount),
         currency,
-        notes: cartItems ? JSON.stringify(cartItems) : undefined,
+        notes: JSON.stringify(notesPayload),
         status: "pending",
         paymentMethod: "manual_upi",
       });
@@ -2557,7 +2549,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         orderId,
         orderNumber,
         upiId: settings.upiId,
-        amount: uniqueAmount,
+        amount,
         currency,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       });

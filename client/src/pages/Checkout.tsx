@@ -280,6 +280,7 @@ export default function Checkout() {
   // UPI inline modal state
   const [upiModalData, setUpiModalData] = useState<UpiData | null>(null);
   const [upiSuccess, setUpiSuccess] = useState<{ utr?: string } | null>(null);
+  const [payerName, setPayerName] = useState("");
 
   const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"] });
   const { data: paymentTypes = [] } = useQuery<PaymentTypeOption[]>({ queryKey: ["/api/payment-types"] });
@@ -403,6 +404,7 @@ export default function Checkout() {
             name: "Guest",
             productInfo,
             cartItems: cartItemsPayload,
+            payerName: payerName.trim(),
           }),
         });
         if (upiRes.ok) {
@@ -755,6 +757,36 @@ export default function Checkout() {
               </div>
             )}
           </div>
+
+          {/* ── Payer Name (UPI only) ── */}
+          {selectedPaymentType === "UPI" && (
+            <div style={card}>
+              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(210,40%,80%)", marginBottom: "0.5rem" }}>
+                Your name (as in UPI / bank account)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Rahul Sharma"
+                value={payerName}
+                onChange={e => setPayerName(e.target.value)}
+                data-testid="input-payer-name"
+                style={{
+                  width: "100%",
+                  padding: "0.7rem 0.875rem",
+                  borderRadius: "0.5rem",
+                  border: "1px solid hsl(220,15%,22%)",
+                  background: "hsl(220,20%,11%)",
+                  color: "hsl(210,40%,92%)",
+                  fontSize: "0.9rem",
+                  outline: "none",
+                  boxSizing: "border-box",
+                }}
+              />
+              <p style={{ margin: "0.375rem 0 0", fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+                Optional — helps us match your payment faster when multiple orders arrive at the same time.
+              </p>
+            </div>
+          )}
 
           {/* ── Error ── */}
           {errorMsg && (

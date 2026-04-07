@@ -8,6 +8,49 @@ interface ParsedPayment {
   senderName: string;
 }
 
+/** Parse order notes — handles legacy array format and new { payerName, items } format */
+function parseOrderNotes(notes?: string | null): { payerName: string; items: any[] } {
+  if (!notes) return { payerName: "", items: [] };
+  try {
+    const parsed = JSON.parse(notes);
+    if (Array.isArray(parsed)) return { payerName: "", items: parsed };
+    return {
+      payerName: typeof parsed.payerName === "string" ? parsed.payerName : "",
+      items: Array.isArray(parsed.items) ? parsed.items : [],
+    };
+  } catch {
+    return { payerName: "", items: [] };
+  }
+}
+
+/**
+ * Score how well an email sender name matches the stored payer name.
+ * Returns 0 (no match) → 1 (exact match).  Any score > 0 means at least one word matched.
+ */
+function nameScore(emailSender: string, payerName: string): number {
+  if (!emailSender || !payerName) return 0;
+  const a = emailSender.toLowerCase().trim();
+  const b = payerName.toLowerCase().trim();
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (a.includes(b) || b.includes(a)) return 0.85;
+  const aWords = a.split(/\s+/).filter(w => w.length > 1);
+  const bWords = b.split(/\s+/).filter(w => w.length > 1);
+  const matches = aWords.filter(aw => bWords.some(bw => aw === bw || aw.startsWith(bw) || bw.startsWith(aw)));
+  if (matches.length > 0) return 0.5 + (matches.length / Math.max(aWords.length, bWords.length)) * 0.35;
+  return 0;
+}
+
+/** Extract the human-readable name from a FROM header value like "Rahul Sharma <rahul@gmail.com>" */
+function extractSenderName(fromHeader: string): string {
+  // "Display Name <email@example.com>" → "Display Name"
+  const angleMatch = fromHeader.match(/^([^<]+?)\s*</);
+  if (angleMatch) return angleMatch[1].trim().replace(/^["']|["']$/g, "");
+  // "email@example.com" fallback — grab local part
+  const atMatch = fromHeader.match(/^([^@\s]+)@/);
+  return atMatch ? atMatch[1] : fromHeader.trim();
+}
+
 function parsePaymentEmail(subject: string, body: string): ParsedPayment | null {
   const text = `${subject} ${body}`;
 
@@ -42,7 +85,7 @@ function parsePaymentEmail(subject: string, body: string): ParsedPayment | null 
     if (m) { utr = m[1]; break; }
   }
 
-  // Extract sender name from email body (fallback to empty)
+  // Extract sender name from body (FROM header extraction is done at call site using extractSenderName)
   const nameMatch = text.match(/(?:from|by|sender)[:\s]+([A-Za-z ]{2,50})/i);
   const senderName = nameMatch ? nameMatch[1].trim() : "";
 
@@ -57,11 +100,8 @@ async function triggerBusanTopup(orderId: string): Promise<void> {
     const order = await storage.getOrderById(orderId);
     if (!order) return;
 
-    let cartItems: any[] = [];
-    if (order.notes) {
-      try { cartItems = JSON.parse(order.notes); } catch { cartItems = []; }
-    }
-    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    let cartItems: any[] = parseOrderNotes(order.notes).items;
+    if (cartItems.length === 0) {
       const dbItems = await storage.getOrderItemsByOrder(orderId);
       cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
     }
@@ -133,6 +173,7 @@ async function processEmails(): Promise<void> {
         const bodyPart = msg.parts.find(p => p.which === "TEXT");
 
         const subject = String(subjectPart?.body?.subject?.[0] || "");
+        const fromHeader = String(subjectPart?.body?.from?.[0] || "");
         const body = String(bodyPart?.body || "");
 
         // Only process payment-related emails
@@ -142,16 +183,39 @@ async function processEmails(): Promise<void> {
         const parsed = parsePaymentEmail(subject, body);
         if (!parsed || parsed.amount <= 0) continue;
 
-        console.log(`[UPI] Parsed payment: amount=${parsed.amount}, utr=${parsed.utr}`);
+        // Prefer the FROM header name over the body-parsed name — it's more reliable
+        const emailSenderName = fromHeader ? extractSenderName(fromHeader) : parsed.senderName;
+        console.log(`[UPI] Parsed payment: amount=${parsed.amount}, utr=${parsed.utr}, sender="${emailSenderName}"`);
 
-        // Find matching pending UPI order
+        // Find all pending UPI orders for this exact amount
         const pendingOrders = await storage.getPendingUpiOrders(String(parsed.amount.toFixed(2)));
 
         if (pendingOrders.length > 0) {
-          // Match the newest pending order — the customer most likely just placed it and just paid
-          const matchedOrder = pendingOrders.sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )[0];
+          let matchedOrder = pendingOrders[0];
+
+          if (pendingOrders.length > 1 && emailSenderName) {
+            // Score each order by name similarity; fall back to newest if no name data
+            const scored = pendingOrders.map(order => {
+              const { payerName } = parseOrderNotes(order.notes);
+              return { order, score: nameScore(emailSenderName, payerName) };
+            });
+
+            const bestScore = Math.max(...scored.map(s => s.score));
+            if (bestScore > 0) {
+              // Pick the highest-scored order (tie-break: newest first)
+              matchedOrder = scored
+                .filter(s => s.score === bestScore)
+                .sort((a, b) => new Date(b.order.createdAt).getTime() - new Date(a.order.createdAt).getTime())
+                [0].order;
+              console.log(`[UPI] Name match: sender="${emailSenderName}" matched order ${matchedOrder.id} (score=${bestScore.toFixed(2)})`);
+            } else {
+              // No name data / no match — fall back to newest order
+              matchedOrder = pendingOrders.sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              )[0];
+              console.log(`[UPI] No name match for sender="${emailSenderName}"; falling back to newest order ${matchedOrder.id}`);
+            }
+          }
 
           await storage.updateOrderPaymentVerified(matchedOrder.id, parsed.utr || `AUTO_${Date.now()}`);
           console.log(`[UPI] Order ${matchedOrder.id} (${matchedOrder.orderNumber}) matched and verified`);
@@ -163,7 +227,7 @@ async function processEmails(): Promise<void> {
           await storage.createUnmatchedPayment({
             amount: String(parsed.amount.toFixed(2)),
             utr: parsed.utr || undefined,
-            senderName: parsed.senderName || undefined,
+            senderName: emailSenderName || undefined,
             emailSubject: subject.slice(0, 500) || undefined,
             rawBody: body.slice(0, 2000) || undefined,
           });
