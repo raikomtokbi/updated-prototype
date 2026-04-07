@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Save, Eye, EyeOff, Info, CheckCircle, XCircle } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { btnPrimary } from "@/components/admin/shared";
 
@@ -51,7 +52,6 @@ const row: React.CSSProperties = {
 export default function UpiSettings() {
   const [form, setForm] = useState<UpiSettingsData>({
     upiId: "",
-    qrCodeUrl: "",
     emailAddress: "",
     emailPassword: "",
     imapHost: "imap.gmail.com",
@@ -69,7 +69,6 @@ export default function UpiSettings() {
     if (loadedSettings) {
       setForm({
         upiId: loadedSettings.upiId || "",
-        qrCodeUrl: loadedSettings.qrCodeUrl || "",
         emailAddress: loadedSettings.emailAddress || "",
         emailPassword: loadedSettings.emailPassword || "",
         imapHost: loadedSettings.imapHost || "imap.gmail.com",
@@ -96,6 +95,10 @@ export default function UpiSettings() {
   function handleSave() {
     saveMutation.mutate(form);
   }
+
+  const upiQrValue = form.upiId
+    ? `upi://pay?pa=${encodeURIComponent(form.upiId)}&pn=Nexcoin`
+    : "";
 
   return (
     <div style={{ padding: "1.5rem", maxWidth: "760px" }}>
@@ -154,32 +157,57 @@ export default function UpiSettings() {
             <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,90%)", marginTop: 0, marginBottom: "1rem" }}>
               UPI Payment Details
             </h3>
-            <div style={{ marginBottom: "0.85rem" }}>
-              <label style={label}>UPI ID *</label>
-              <input
-                type="text"
-                style={inp}
-                value={form.upiId || ""}
-                onChange={e => set("upiId", e.target.value)}
-                placeholder="e.g. yourname@upi or 9876543210@paytm"
-                data-testid="input-upi-id"
-              />
-              <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "3px" }}>
-                This UPI ID will be shown to customers at checkout
+
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", alignItems: "flex-start" }}>
+              {/* Left: UPI ID input */}
+              <div style={{ flex: 1, minWidth: "220px" }}>
+                <div style={{ marginBottom: "0.85rem" }}>
+                  <label style={label}>UPI ID *</label>
+                  <input
+                    type="text"
+                    style={inp}
+                    value={form.upiId || ""}
+                    onChange={e => set("upiId", e.target.value)}
+                    placeholder="e.g. yourname@upi or 9876543210@paytm"
+                    data-testid="input-upi-id"
+                  />
+                  <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "3px" }}>
+                    This UPI ID will be shown to customers at checkout. A QR code is auto-generated from this value.
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <label style={label}>QR Code Image URL</label>
-              <input
-                type="url"
-                style={inp}
-                value={form.qrCodeUrl || ""}
-                onChange={e => set("qrCodeUrl", e.target.value)}
-                placeholder="https://example.com/upi-qr.png"
-                data-testid="input-qr-code-url"
-              />
-              <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "3px" }}>
-                Optional — upload your QR code image and paste the URL here
+
+              {/* Right: Live QR preview */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  QR Preview
+                </span>
+                {upiQrValue ? (
+                  <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px", display: "inline-block" }}>
+                    <QRCodeSVG
+                      value={upiQrValue}
+                      size={140}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="M"
+                    />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: "160px", height: "160px", borderRadius: "0.5rem",
+                    border: "1px dashed hsl(220,15%,22%)", background: "hsl(220,20%,10%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: "11px", color: "hsl(220,10%,40%)", textAlign: "center", padding: "0.5rem" }}>
+                      Enter UPI ID to preview QR code
+                    </span>
+                  </div>
+                )}
+                {upiQrValue && (
+                  <span style={{ fontSize: "10px", color: "hsl(220,10%,40%)", textAlign: "center", maxWidth: "160px" }}>
+                    Customers will scan this at checkout
+                  </span>
+                )}
               </div>
             </div>
           </div>

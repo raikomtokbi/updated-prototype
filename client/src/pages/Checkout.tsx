@@ -1,6 +1,7 @@
 import { Link, useLocation, useSearch } from "wouter";
 import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, Tag, X, Copy, Clock, Loader2,
          CreditCard, Smartphone, Building2, Wallet, ChevronRight } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect, useRef } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useQuery } from "@tanstack/react-query";
@@ -149,13 +150,23 @@ function UpiPaymentOverlay({
           </div>
         </div>
 
-        {/* QR Code */}
-        {data.qrCodeUrl && (
+        {/* QR Code — auto-generated from UPI ID + amount */}
+        {data.upiId && (
           <div style={{ ...card, padding: "1rem", marginBottom: "0.875rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
             <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Scan QR to pay</p>
             <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px" }}>
-              <img src={data.qrCodeUrl} alt="UPI QR" style={{ width: "180px", height: "180px", display: "block" }} data-testid="img-upi-qr" />
+              <QRCodeSVG
+                value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=Nexcoin&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&tn=Order+Payment`}
+                size={180}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="M"
+                data-testid="img-upi-qr"
+              />
             </div>
+            <p style={{ margin: 0, fontSize: "11px", color: "hsl(220,10%,40%)" }}>
+              Opens GPay, PhonePe, Paytm, or BHIM with amount pre-filled
+            </p>
           </div>
         )}
 
