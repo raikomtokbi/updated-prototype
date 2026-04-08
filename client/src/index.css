@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --background: 220 20% 6%;
+    --background: 220 20% 8%;
     --foreground: 210 40% 95%;
     --card: 220 20% 9%;
     --card-foreground: 210 40% 95%;
@@ -33,7 +33,7 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: hsl(220, 20%, 6%);
+  background-color: hsl(220, 20%, 8%);
   color: hsl(210, 40%, 95%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

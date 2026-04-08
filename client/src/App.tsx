@@ -231,12 +231,6 @@ export default function App() {
     return <AdminRoutes />;
   }
 
-  if (settingsLoading) {
-    return (
-      <div style={{ minHeight: "100vh", background: "hsl(220, 20%, 6%)" }} />
-    );
-  }
-
   if (maintenanceMode) {
     return <MaintenancePage siteName={siteSettings?.site_name} />;
   }
