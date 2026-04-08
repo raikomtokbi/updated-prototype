@@ -153,44 +153,38 @@ function UpiPaymentOverlay({
 
         {/* UPI App Deep Link Buttons */}
         {data.upiId && (() => {
-          const upiParams = `pa=${encodeURIComponent(data.upiId)}&pn=${encodeURIComponent("Nexcoin")}&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&tn=${encodeURIComponent("Order " + (data.orderNumber || data.orderId.slice(0, 8)))}`;
-          const upiApps = [
-            { name: "GPay", link: `tez://upi/pay?${upiParams}`, color: "#4285F4", bg: "rgba(66,133,244,0.12)", border: "rgba(66,133,244,0.3)", icon: "G" },
-            { name: "PhonePe", link: `phonepe://pay?${upiParams}`, color: "#7B3FE4", bg: "rgba(123,63,228,0.12)", border: "rgba(123,63,228,0.3)", icon: "P" },
-            { name: "Paytm", link: `paytm://pay?${upiParams}`, color: "#00B9F1", bg: "rgba(0,185,241,0.12)", border: "rgba(0,185,241,0.3)", icon: "P" },
-            { name: "FamApp", link: `fampay://upi/pay?${upiParams}`, color: "#FFCE00", bg: "rgba(255,206,0,0.10)", border: "rgba(255,206,0,0.3)", icon: "F" },
-          ];
+          const pa = encodeURIComponent(data.upiId);
+          const pn = encodeURIComponent("Nexcoin");
+          const am = parseFloat(data.amount).toFixed(2);
+          const tn = encodeURIComponent("Order " + (data.orderNumber || data.orderId.slice(0, 8)));
+          // Intent URI: works on Android Chrome — opens GPay directly if installed,
+          // falls back to Play Store otherwise. Do NOT use target="_blank" for deeplinks.
+          const gpayLink = `intent://upi/pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;end`;
           return (
             <div style={{ marginBottom: "0.875rem" }}>
               <p style={{ margin: "0 0 8px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pay instantly with</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                {upiApps.map(app => (
-                  <a
-                    key={app.name}
-                    href={app.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid={`button-open-${app.name.toLowerCase()}`}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "10px",
-                      padding: "10px 14px", borderRadius: "8px",
-                      background: app.bg, border: `1px solid ${app.border}`,
-                      textDecoration: "none", cursor: "pointer",
-                    }}
-                  >
-                    <span style={{
-                      width: "28px", height: "28px", borderRadius: "6px",
-                      background: app.color, display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "#fff", fontWeight: 800, fontSize: "12px", flexShrink: 0,
-                    }}>{app.icon}</span>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>
-                      Open {app.name}
-                    </span>
-                  </a>
-                ))}
-              </div>
+              <a
+                href={gpayLink}
+                data-testid="button-open-gpay"
+                style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "12px 16px", borderRadius: "8px",
+                  background: "rgba(66,133,244,0.12)", border: "1px solid rgba(66,133,244,0.3)",
+                  textDecoration: "none", cursor: "pointer",
+                }}
+              >
+                <span style={{
+                  width: "32px", height: "32px", borderRadius: "8px",
+                  background: "#4285F4", display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#fff", fontWeight: 800, fontSize: "14px", flexShrink: 0,
+                }}>G</span>
+                <div>
+                  <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>Open Google Pay</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,48%)", marginTop: "1px" }}>Amount &amp; UPI ID pre-filled</span>
+                </div>
+              </a>
               <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(220,10%,38%)", textAlign: "center" }}>
-                Amount and UPI ID are pre-filled — just confirm and pay
+                Tap the button to open Google Pay — just confirm and pay
               </p>
             </div>
           );
@@ -241,9 +235,9 @@ function UpiPaymentOverlay({
         <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
           <p style={{ margin: "0 0 0.5rem", fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>How to pay</p>
           <ol style={{ margin: 0, paddingLeft: "1.1rem", color: "hsl(220,10%,55%)", fontSize: "12px", lineHeight: 1.8 }}>
-            <li>Open PhonePe, GPay, Paytm, or BHIM</li>
-            <li>Scan the QR code or enter the UPI ID</li>
-            <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> shown above</li>
+            <li>Tap "Open Google Pay" above — amount &amp; UPI ID are pre-filled</li>
+            <li>Or scan the QR code / enter the UPI ID manually</li>
+            <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> if asked</li>
             <li>Complete the payment and wait for confirmation</li>
           </ol>
           <p style={{ margin: "0.5rem 0 0", fontSize: "11px", color: "hsl(258,80%,68%)" }}>

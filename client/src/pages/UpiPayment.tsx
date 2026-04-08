@@ -289,7 +289,7 @@ export default function UpiPayment() {
             How to Pay
           </p>
           <ol style={{ color: "hsl(220,10%,60%)", fontSize: "13px", margin: 0, paddingLeft: "1.25rem", lineHeight: 1.8 }}>
-            <li>Open any UPI app (PhonePe, GPay, Paytm, BHIM, etc.)</li>
+            <li>Open Google Pay on your phone</li>
             <li>Scan the QR code OR enter the UPI ID above</li>
             <li>Enter the <strong style={{ color: "hsl(210,40%,90%)" }}>exact amount</strong> shown</li>
             <li>Complete the payment and wait for confirmation</li>
