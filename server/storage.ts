@@ -222,7 +222,7 @@ export interface IStorage {
     totalRevenue: number;
     openTickets: number;
   }>;
-  getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month"): Promise<{
+  getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone?: string): Promise<{
     salesTrend: { label: string; sales: number }[];
     orderStatus: { name: string; value: number }[];
   }>;
@@ -733,7 +733,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ── Analytics ──────────────────────────────────────────────────────────────
-  async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month") {
+  async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone = "UTC") {
     const trunc =
       groupBy === "hour" ? sql`TO_CHAR(DATE_TRUNC('hour', ${orders.createdAt}), 'YYYY-MM-DD HH24:00:00')`
       : groupBy === "day" ? sql`TO_CHAR(DATE_TRUNC('day', ${orders.createdAt}), 'YYYY-MM-DD')`
@@ -751,11 +751,21 @@ export class DatabaseStorage implements IStorage {
       .orderBy(trunc);
 
     function fmtLabel(period: unknown, gb: string) {
-      const d = new Date(period as string);
-      if (gb === "hour") return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
-      if (gb === "day") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      if (gb === "week") return `W${Math.ceil(d.getDate() / 7)} ${d.toLocaleDateString("en-US", { month: "short" })}`;
-      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+      // PostgreSQL returns plain UTC strings like "2026-04-08 14:00:00" (no timezone marker).
+      // Append "Z" so JavaScript parses them as UTC, then format using the site timezone
+      // so hourly labels appear in the admin's local time, not UTC.
+      const raw = (period as string).trim();
+      const iso = raw.includes("T") ? raw : raw.replace(" ", "T") + "Z";
+      const d = new Date(iso);
+      const tz = timezone || "UTC";
+      if (gb === "hour") return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: tz });
+      if (gb === "day") return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: tz });
+      if (gb === "week") {
+        // Compute the day-of-month in the target timezone to derive week number
+        const dayInTz = parseInt(d.toLocaleDateString("en-US", { day: "numeric", timeZone: tz }), 10);
+        return `W${Math.ceil(dayInTz / 7)} ${d.toLocaleDateString("en-US", { month: "short", timeZone: tz })}`;
+      }
+      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit", timeZone: tz });
     }
 
     const salesTrend = trendRows.map((r) => ({

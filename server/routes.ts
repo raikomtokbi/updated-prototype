@@ -856,13 +856,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     let from: Date;
     let groupBy: "hour" | "day" | "week" | "month" = "month";
 
+    // Fetch the configured site timezone so chart labels display in the admin's timezone
+    const allSettings = await storage.getAllSiteSettings();
+    const settingsMap: Record<string, string> = {};
+    allSettings.forEach(s => { settingsMap[s.key] = s.value ?? ""; });
+    const siteTimezone = settingsMap.site_timezone || "UTC";
+
     if (range === "custom" && req.query.from && req.query.to) {
       from = new Date(req.query.from as string);
       const to = new Date(req.query.to as string);
       to.setHours(23, 59, 59, 999);
       const days = Math.round((to.getTime() - from.getTime()) / 86400000);
       groupBy = days <= 1 ? "hour" : days <= 60 ? "day" : days <= 180 ? "week" : "month";
-      const data = await storage.getAnalytics(from, to, groupBy);
+      const data = await storage.getAnalytics(from, to, groupBy, siteTimezone);
       return res.json(data);
     }
 
@@ -879,7 +885,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
 
     const to = new Date(now); to.setHours(23, 59, 59, 999);
-    const data = await storage.getAnalytics(from, to, groupBy);
+    const data = await storage.getAnalytics(from, to, groupBy, siteTimezone);
     res.json(data);
   });
 
