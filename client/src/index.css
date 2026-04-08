@@ -289,5 +289,10 @@ textarea {
     gap: 0.2rem !important;
     white-space: nowrap;
   }
+  .tab-label-text { display: none; }
+}
+
+@media (min-width: 768px) {
+  .tab-label-text { display: inline; }
 }
 

@@ -1185,6 +1185,7 @@ export default function Account() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
+              title={label}
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
                 gap: "0.5rem", padding: "0.6rem 0.5rem", borderRadius: "0.5rem",
@@ -1195,8 +1196,8 @@ export default function Account() {
               }}
               data-testid={`tab-${id}`}
             >
-              <Icon size={14} />
-              <span style={{ display: "flex" }}>{label}</span>
+              <Icon size={15} />
+              <span className="tab-label-text">{label}</span>
             </button>
           );
         })}
