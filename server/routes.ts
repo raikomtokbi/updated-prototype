@@ -1025,6 +1025,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  app.patch("/api/admin/products/:id/packages/:pkgId", requireAdmin, async (req, res) => {
+    const pkg = await storage.updateProductPackage(req.params.pkgId, req.body);
+    if (!pkg) return res.status(404).json({ message: "Not found" });
+    res.json(pkg);
+  });
+
   app.delete("/api/admin/products/:id/packages/:pkgId", requireAdmin, async (req, res) => {
     await storage.deleteProductPackage(req.params.pkgId);
     res.json({ ok: true });
@@ -2659,6 +2665,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           } catch (_itemErr) {
             // productId may reference a game/service row — ignore FK errors; cart data is in order.notes
           }
+          // Decrement stock
+          try {
+            if (item.serviceId) await storage.decrementServiceStock(item.serviceId, item.quantity || 1);
+            else if (item.packageId) await storage.decrementPackageStock(item.packageId, item.quantity || 1);
+          } catch (_stockErr) { /* non-fatal */ }
         }
       }
 

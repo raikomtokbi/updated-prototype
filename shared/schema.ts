@@ -56,6 +56,7 @@ export const services = mysqlTable("services", {
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
   sortOrder: int("sort_order").notNull().default(0),
+  stock: int("stock"),
   pluginSlug: varchar("plugin_slug", { length: 100 }),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -82,6 +83,7 @@ export const productPackages = mysqlTable("product_packages", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").notNull().default(true),
+  stock: int("stock"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `services` (
   `status`           VARCHAR(20)      NOT NULL DEFAULT 'active',
   `sort_order`       INT              NOT NULL DEFAULT 0,
   `plugin_slug`      VARCHAR(100),
+  `stock`            INT,
   `created_at`       TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`       TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_services_game` FOREIGN KEY (`game_id`) REFERENCES `games`(`id`) ON DELETE CASCADE
@@ -86,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `product_packages` (
   `price`          DECIMAL(10,2) NOT NULL,
   `original_price` DECIMAL(10,2),
   `is_active`      TINYINT(1)    NOT NULL DEFAULT 1,
+  `stock`          INT,
   `created_at`     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_packages_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE

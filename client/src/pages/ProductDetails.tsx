@@ -23,6 +23,7 @@ function PackageCard({
   currencySymbol,
   discount,
   selected,
+  outOfStock,
   onSelect,
 }: {
   id: string;
@@ -32,14 +33,16 @@ function PackageCard({
   currencySymbol: string;
   discount?: string | number | null;
   selected: boolean;
+  outOfStock?: boolean;
   onSelect: (id: string) => void;
 }) {
-  const hasDiscount = discount && parseFloat(String(discount)) > 0 && originalPrice && originalPrice > price;
+  const hasDiscount = !outOfStock && discount && parseFloat(String(discount)) > 0 && originalPrice && originalPrice > price;
 
   return (
     <button
-      onClick={() => onSelect(id)}
+      onClick={() => !outOfStock && onSelect(id)}
       data-testid={`button-package-${id}`}
+      disabled={outOfStock}
       style={{
         position: "relative",
         display: "flex",
@@ -49,20 +52,31 @@ function PackageCard({
         gap: "4px",
         padding: "12px 8px",
         borderRadius: "10px",
-        background: selected
-          ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
-          : "hsl(220,20%,11%)",
-        border: `2px solid ${selected ? "hsl(258,90%,62%)" : "hsl(220,15%,18%)"}`,
-        cursor: "pointer",
-        color: selected ? "hsl(210,40%,96%)" : "hsl(210,40%,80%)",
+        background: outOfStock
+          ? "hsl(220,15%,9%)"
+          : selected
+            ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
+            : "hsl(220,20%,11%)",
+        border: `2px solid ${outOfStock ? "hsl(220,15%,14%)" : selected ? "hsl(258,90%,62%)" : "hsl(220,15%,18%)"}`,
+        cursor: outOfStock ? "not-allowed" : "pointer",
+        color: outOfStock ? "hsl(220,10%,35%)" : selected ? "hsl(210,40%,96%)" : "hsl(210,40%,80%)",
         transition: "all 0.15s ease",
         minHeight: "72px",
         width: "100%",
         textAlign: "center",
         overflow: "hidden",
+        opacity: outOfStock ? 0.55 : 1,
       }}
     >
-      {selected && (
+      {outOfStock && (
+        <span style={{
+          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "hsla(220,20%,7%,0.6)", borderRadius: "8px", zIndex: 1,
+        }}>
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "hsl(0,60%,50%)", letterSpacing: "0.04em", textTransform: "uppercase" }}>Out of Stock</span>
+        </span>
+      )}
+      {!outOfStock && selected && (
         <span style={{
           position: "absolute", top: "5px", right: "5px",
           color: "hsl(258,90%,66%)", display: "flex",
@@ -91,7 +105,7 @@ function PackageCard({
         )}
         <span style={{
           fontSize: "13px", fontWeight: 700,
-          color: selected ? "hsl(258,80%,78%)" : "hsl(258,90%,70%)",
+          color: outOfStock ? "hsl(220,10%,32%)" : selected ? "hsl(258,80%,78%)" : "hsl(258,90%,70%)",
         }}>
           {currencySymbol} {price.toFixed(2)}
         </span>
@@ -449,6 +463,7 @@ function GameDetailView({ game }: { game: Game }) {
                     currencySymbol={currencySymbol}
                     discount={svc.discountPercent}
                     selected={selectedSvc === svc.id}
+                    outOfStock={(svc as any).stock === 0}
                     onSelect={setSelectedSvc}
                   />
                 ))}
@@ -978,6 +993,7 @@ function ProductDetailView({ product }: { product: Product }) {
                       originalPrice={orig}
                       currencySymbol={currencySymbol}
                       selected={selectedPkg === pkg.id}
+                      outOfStock={(pkg as any).stock === 0}
                       onSelect={setSelectedPkg}
                     />
                   );

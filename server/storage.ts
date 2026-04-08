@@ -75,8 +75,11 @@ export interface IStorage {
 
   // Product Packages
   getProductPackages(productId: string): Promise<ProductPackage[]>;
-  createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean }): Promise<ProductPackage>;
+  createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean; stock?: number | null }): Promise<ProductPackage>;
+  updateProductPackage(id: string, data: Partial<ProductPackage>): Promise<ProductPackage | undefined>;
   deleteProductPackage(id: string): Promise<void>;
+  decrementServiceStock(serviceId: string, qty: number): Promise<void>;
+  decrementPackageStock(packageId: string, qty: number): Promise<void>;
 
   // Orders
   getAllOrders(limit?: number, offset?: number): Promise<Order[]>;
@@ -365,13 +368,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(productPackages.productId, productId))
       .orderBy(productPackages.createdAt);
   }
-  async createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean }) {
+  async createProductPackage(data: { productId: string; label: string; price: string; originalPrice?: string; isActive?: boolean; stock?: number | null }) {
     const id = randomUUID();
     await db.insert(productPackages).values({ id, ...data, isActive: data.isActive ?? true });
     return fetchAfter<ProductPackage>(productPackages, id, productPackages.id);
   }
+  async updateProductPackage(id: string, data: Partial<ProductPackage>) {
+    await db.update(productPackages).set(data).where(eq(productPackages.id, id));
+    return fetchAfter<ProductPackage>(productPackages, id, productPackages.id);
+  }
   async deleteProductPackage(id: string) {
     await db.delete(productPackages).where(eq(productPackages.id, id));
+  }
+  async decrementServiceStock(serviceId: string, qty: number) {
+    const [svc] = await db.select({ stock: services.stock }).from(services).where(eq(services.id, serviceId));
+    if (svc && svc.stock !== null) {
+      const next = Math.max(0, (svc.stock ?? 0) - qty);
+      await db.update(services).set({ stock: next }).where(eq(services.id, serviceId));
+    }
+  }
+  async decrementPackageStock(packageId: string, qty: number) {
+    const [pkg] = await db.select({ stock: productPackages.stock }).from(productPackages).where(eq(productPackages.id, packageId));
+    if (pkg && pkg.stock !== null) {
+      const next = Math.max(0, (pkg.stock ?? 0) - qty);
+      await db.update(productPackages).set({ stock: next }).where(eq(productPackages.id, packageId));
+    }
   }
 
   // ── Orders ─────────────────────────────────────────────────────────────────

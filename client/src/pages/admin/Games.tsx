@@ -99,7 +99,7 @@ const EMPTY_GAME = {
   instantDelivery: true,
   pluginSlug: "",
 };
-const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0 };
+const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -451,7 +451,11 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      onSubmit({ ...form, finalPrice: form.finalPrice || computeFinal(form.price, form.discountPercent) });
+      onSubmit({
+        ...form,
+        finalPrice: form.finalPrice || computeFinal(form.price, form.discountPercent),
+        stock: (form.stock as string) !== "" ? parseInt(form.stock as string) : null,
+      });
     }} style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
       <div>
         <label style={labelStyle}>Name *</label>
@@ -488,6 +492,10 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         <div>
           <label style={labelStyle}>Sort Order</label>
           <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
+        </div>
+        <div>
+          <label style={labelStyle}>Stock <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(blank = unlimited)</span></label>
+          <input style={inputStyle} type="number" min="0" value={form.stock} onChange={(e) => set("stock", e.target.value)} placeholder="Unlimited" />
         </div>
       </div>
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
@@ -549,7 +557,7 @@ function ServicesPanel({ game }: { game: Game }) {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
               <tr>
-                {["Name", "Price", "Discount", "Final", "Status", ""].map((h) => (
+                {["Name", "Price", "Discount", "Final", "Stock", "Status", ""].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(220,10%,38%)", borderBottom: "1px solid hsl(220,15%,13%)" }}>{h}</th>
                 ))}
               </tr>
@@ -569,6 +577,14 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px", color: "hsl(210,40%,70%)" }}>{s.price}</td>
                   <td style={{ padding: "8px 10px", color: "hsl(220,10%,55%)" }}>{s.discountPercent}%</td>
                   <td style={{ padding: "8px 10px", color: "#a78bfa", fontWeight: 600 }}>{s.finalPrice}</td>
+                  <td style={{ padding: "8px 10px" }}>
+                    {(s as any).stock === null || (s as any).stock === undefined
+                      ? <span style={{ color: "hsl(220,10%,40%)", fontSize: "11px" }}>∞</span>
+                      : (s as any).stock === 0
+                        ? <span style={{ color: "hsl(0,72%,55%)", fontWeight: 700, fontSize: "11px" }}>Out</span>
+                        : <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600, fontSize: "11px" }}>{(s as any).stock}</span>
+                    }
+                  </td>
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
@@ -605,7 +621,7 @@ function ServicesPanel({ game }: { game: Game }) {
       {editSvc && (
         <Modal title="Edit Service" onClose={() => setEditSvc(null)}>
           <ServiceForm
-            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder }}
+            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder, stock: (editSvc as any).stock !== null && (editSvc as any).stock !== undefined ? String((editSvc as any).stock) : "" }}
             onSubmit={(d) => editMut.mutate({ id: editSvc.id, data: d })}
             loading={editMut.isPending}
           />

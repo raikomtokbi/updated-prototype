@@ -40,6 +40,8 @@ function PackageManager({ productId }: { productId: string }) {
   const [newLabel, setNewLabel] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newOrigPrice, setNewOrigPrice] = useState("");
+  const [newStock, setNewStock] = useState("");
+  const [editingStock, setEditingStock] = useState<Record<string, string>>({});
 
   const { data: packages = [] } = useQuery<ProductPackage[]>({
     queryKey: ["/api/admin/products", productId, "packages"],
@@ -49,10 +51,11 @@ function PackageManager({ productId }: { productId: string }) {
   const addPkg = useMutation({
     mutationFn: () => adminApi.post(`/products/${productId}/packages`, {
       label: newLabel, price: newPrice, originalPrice: newOrigPrice || undefined,
+      stock: newStock !== "" ? parseInt(newStock) : null,
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] });
-      setNewLabel(""); setNewPrice(""); setNewOrigPrice("");
+      setNewLabel(""); setNewPrice(""); setNewOrigPrice(""); setNewStock("");
     },
   });
 
@@ -61,23 +64,43 @@ function PackageManager({ productId }: { productId: string }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] }),
   });
 
+  const patchStock = (pkgId: string, val: string) => {
+    const stock = val === "" ? null : parseInt(val);
+    adminApi.patch(`/products/${productId}/packages/${pkgId}`, { stock }).then(() =>
+      qc.invalidateQueries({ queryKey: ["/api/admin/products", productId, "packages"] })
+    );
+  };
+
   return (
     <div style={{ marginTop: "1rem" }}>
       <label style={labelStyle}>Price Packages</label>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", marginBottom: "0.6rem" }}>
-        {packages.map((pkg) => (
-          <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
-            <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
-              <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
-              <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+        {packages.map((pkg) => {
+          const stockVal = editingStock[pkg.id] !== undefined ? editingStock[pkg.id] : ((pkg as any).stock !== null && (pkg as any).stock !== undefined ? String((pkg as any).stock) : "");
+          return (
+            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
+              <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                  <span style={{ fontSize: "9px", color: "hsl(220,10%,40%)", textTransform: "uppercase" }}>Stock:</span>
+                  <input
+                    type="number" min="0" value={stockVal} placeholder="∞"
+                    onChange={(e) => setEditingStock((p) => ({ ...p, [pkg.id]: e.target.value }))}
+                    onBlur={() => { patchStock(pkg.id, stockVal); setEditingStock((p) => { const n = { ...p }; delete n[pkg.id]; return n; }); }}
+                    style={{ ...inputStyle, width: "52px", padding: "2px 5px", fontSize: "11px", textAlign: "center" }}
+                    title="Stock (blank = unlimited)"
+                  />
+                </div>
+                <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No packages yet.</p>}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 80px auto" : "1fr 90px 90px auto", gap: "0.4rem", alignItems: "end" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 70px 60px auto" : "1fr 90px 90px 70px auto", gap: "0.4rem", alignItems: "end" }}>
         <div>
           <label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label>
           <input style={inputStyle} placeholder="e.g. $10 Voucher" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
@@ -87,8 +110,12 @@ function PackageManager({ productId }: { productId: string }) {
           <input style={inputStyle} type="number" placeholder="10.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
         </div>
         <div>
-          <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig Price</label>
-          <input style={inputStyle} type="number" placeholder="Optional" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
+          <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label>
+          <input style={inputStyle} type="number" placeholder="Opt" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
+        </div>
+        <div>
+          <label style={{ ...labelStyle, marginBottom: "2px" }}>Stock</label>
+          <input style={inputStyle} type="number" min="0" placeholder="∞" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
         </div>
         <button type="button" onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }} disabled={!newLabel || !newPrice || addPkg.isPending} style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}>
           <PlusCircle size={14} />
