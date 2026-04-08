@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "G_GCljzT0wh60NsjcHKiZ"
+uri = "file://nexcoin-deploy.zip"
+type = "unspecified"
+title = "nexcoin-deploy.zip — cPanel Deployment Package"
