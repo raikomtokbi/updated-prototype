@@ -345,7 +345,6 @@ function BusanMappingTab() {
   const [fetchingProducts, setFetchingProducts] = useState(false);
   const [fetchError, setFetchError] = useState("");
 
-  const [requiresZone, setRequiresZone] = useState(false);
 
   const { data: configData } = useQuery<BusanConfig | null>({
     queryKey: ["/api/admin/busan/config"],
@@ -395,14 +394,12 @@ function BusanMappingTab() {
         cmsProductName: cmsProduct?.name ?? "",
         busanProductId: effectiveBusanId,
         busanProductName: busanProduct?.name ?? effectiveBusanId,
-        requiresZone,
       });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/busan/mappings"] });
       refetchMappings();
-      setSelectedCmsProduct(""); setSelectedBusanProduct(""); setManualBusanId(""); setRequiresZone(false);
-
+      setSelectedCmsProduct(""); setSelectedBusanProduct(""); setManualBusanId("");
     },
   });
 
@@ -513,14 +510,8 @@ function BusanMappingTab() {
           </div>
         </div>
 
-        {/* Requires Zone + Add button */}
-        <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid hsl(220,15%,16%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12px", color: "hsl(210,40%,80%)" }}>
-            <input type="checkbox" checked={requiresZone} onChange={e => setRequiresZone(e.target.checked)}
-              style={{ accentColor: "hsl(258,90%,66%)", width: "14px", height: "14px" }}
-              data-testid="checkbox-requires-zone" />
-            This product requires a Zone / Server ID
-          </label>
+        {/* Add button */}
+        <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid hsl(220,15%,16%)", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
           <button onClick={() => addMappingMut.mutate()}
             disabled={!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending}
             style={{
@@ -551,7 +542,7 @@ function BusanMappingTab() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
-                  {["CMS Product", "Busan Product", "Zone Req.", "Actions"].map(h => (
+                  {["CMS Product", "Busan Product ID", "Actions"].map(h => (
                     <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -567,13 +558,6 @@ function BusanMappingTab() {
                         {m.busanProductId}
                       </div>
                       {m.busanProductName && <div style={{ fontSize: "10px", color: "hsl(220,10%,45%)", marginTop: "2px" }}>{m.busanProductName}</div>}
-                    </td>
-                    <td style={{ padding: "10px 14px" }}>
-                      {m.requiresZone ? (
-                        <span style={{ fontSize: "10px", fontWeight: 600, padding: "2px 8px", borderRadius: "10px", background: "rgba(234,179,8,0.1)", color: "hsl(45,93%,60%)", border: "1px solid rgba(234,179,8,0.2)" }}>Yes</span>
-                      ) : (
-                        <span style={{ fontSize: "10px", color: "hsl(220,10%,38%)" }}>No</span>
-                      )}
                     </td>
                     <td style={{ padding: "10px 14px" }}>
                       <button onClick={() => deleteMappingMut.mutate(m.id)} disabled={deleteMappingMut.isPending}

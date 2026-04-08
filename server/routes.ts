@@ -276,10 +276,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!g) return res.status(404).json({ message: "Game not found" });
 
     const userId = req.query.userId as string | undefined;
-    const zoneId = req.query.zoneId as string | undefined;
-    // serviceId helps us find the correct Busan productId for this specific package
     const serviceId = req.query.serviceId as string | undefined;
+
+    // Derive required fields from the game configuration
+    const gameRequiredFields = (g.requiredFields ?? "userId").split(",").map((f: string) => f.trim()).filter(Boolean);
+    const gameNeedsZone = gameRequiredFields.includes("zoneId");
+
+    // Only use zoneId if the game is configured to require it
+    const zoneId = gameNeedsZone ? (req.query.zoneId as string | undefined) : undefined;
+
     if (!userId) return res.status(400).json({ message: "userId is required" });
+    if (gameNeedsZone && !zoneId) return res.status(400).json({ message: "Zone / Server ID is required for this game" });
 
     // ── 1. Plugin-based validation ────────────────────────────────────────────
     if (g.pluginSlug) {
