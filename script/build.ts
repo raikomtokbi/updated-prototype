@@ -1,11 +1,11 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp, mkdir } from "fs/promises";
 
-// Packages bundled into the server output for self-contained deployment.
-// mysql2 and bcrypt are intentionally excluded so their native bindings
-// load from node_modules at runtime (run `npm install` on the server).
+// All pure-JS packages bundled into dist/index.cjs for zero-install deployment.
+// Only packages with compiled native bindings need to be excluded.
 const bundleList = [
+  "bcryptjs",
   "drizzle-orm",
   "drizzle-zod",
   "express",
@@ -14,10 +14,13 @@ const bundleList = [
   "jsonwebtoken",
   "memorystore",
   "multer",
+  "mysql2",
   "nanoid",
   "nodemailer",
   "passport",
   "passport-local",
+  "razorpay",
+  "adm-zip",
   "zod",
   "zod-validation-error",
 ];
@@ -50,11 +53,16 @@ async function buildAll() {
     logLevel: "info",
   });
 
-  console.log("\nBuild complete!");
+  // Copy uploads dir placeholder so the folder exists in deployment
+  try {
+    await mkdir("dist/uploads", { recursive: true });
+  } catch {}
+
+  console.log("\n✓ Build complete!");
   console.log("  Frontend  →  client/dist/");
   console.log("  Server    →  dist/index.cjs");
-  console.log("\nStartup:  node dist/index.cjs");
-  console.log("cPanel:   Set startup file to dist/index.cjs");
+  console.log("\ncPanel startup file: dist/index.cjs");
+  console.log("Environment variable required: DATABASE_URL=mysql://user:pass@localhost:3306/dbname");
 }
 
 buildAll().catch((err) => {

@@ -6,7 +6,7 @@ import fs from "fs";
 import { createHash, randomBytes, createHmac, randomUUID } from "crypto";
 import { generateOrderNumber } from "./lib/idGenerator";
 import { startEmailPaymentPoller } from "./services/emailPaymentService";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import multer from "multer";
 import AdmZip from "adm-zip";
 import Razorpay from "razorpay";
