@@ -165,6 +165,27 @@ async function getSetting(key: string, fallback = ""): Promise<string> {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   app.use("/api/admin", injectAdminRole);
 
+  // ── Seed default admin on first run ──────────────────────────────────────
+  try {
+    const existingUsers = await storage.getAllUsers(1, 0);
+    if (existingUsers.length === 0) {
+      const defaultPassword = "admin123456";
+      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      await storage.createUser({
+        username: "admin",
+        email: "admin@example.com",
+        password: hashedPassword,
+        fullName: "Admin",
+        role: "super_admin",
+        isActive: true,
+      });
+      console.log("[Seed] Default admin created — username: admin | password: admin123456");
+      console.log("[Seed] Please change the default password after logging in.");
+    }
+  } catch (err) {
+    console.warn("[Seed] Could not seed default admin:", err);
+  }
+
   // ── Initialize active plugins on startup ─────────────────────────────────
   try {
     const allPlugins = await storage.getAllPlugins();

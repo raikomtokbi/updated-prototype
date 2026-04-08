@@ -217,14 +217,22 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
 // ── Orders Tab ────────────────────────────────────────────────────────────────
 function OrdersTab({ user }: { user: any }) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const logout = useAuthStore((s) => s.logout);
+  const [, navigate] = useLocation();
 
-  const { data: orders, isLoading } = useQuery<any[]>({
+  const { data: orders, isLoading, error } = useQuery<any[]>({
     queryKey: ["/api/user/orders"],
     queryFn: async () => {
       const res = await fetch("/api/user/orders", {
         headers: { "X-Username": user.username },
         credentials: "include",
       });
+      if (res.status === 401) {
+        const body = await res.json().catch(() => ({}));
+        const err: any = new Error(body.message || "Unauthorized");
+        err.status = 401;
+        throw err;
+      }
       if (!res.ok) throw new Error("Failed to load orders");
       return res.json();
     },
@@ -241,6 +249,34 @@ function OrdersTab({ user }: { user: any }) {
             height: "90px",
           }} />
         ))}
+      </div>
+    );
+  }
+
+  if (error && (error as any).status === 401) {
+    return (
+      <div style={{
+        background: "hsl(220,20%,9%)", border: "1px solid hsla(0,72%,55%,0.25)",
+        borderRadius: "0.75rem", padding: "4rem 2rem", textAlign: "center",
+      }}>
+        <div style={{
+          width: "56px", height: "56px", borderRadius: "50%",
+          background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.2)",
+          display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem",
+        }}>
+          <Lock size={24} style={{ color: "hsl(0,72%,65%)" }} />
+        </div>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,85%)", marginBottom: "0.5rem" }}>Session Expired</h3>
+        <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,45%)", marginBottom: "1.5rem" }}>
+          Your session is no longer valid. Please sign in again to view your orders.
+        </p>
+        <button
+          className="btn-primary"
+          style={{ fontSize: "0.85rem" }}
+          onClick={() => { logout(); navigate("/login"); }}
+        >
+          Sign In Again
+        </button>
       </div>
     );
   }
