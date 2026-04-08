@@ -1,6 +1,5 @@
 import imapSimple from "imap-simple";
 import { storage } from "../storage";
-import { createBusanOrder } from "../lib/busanApi";
 
 interface ParsedPayment {
   amount: number;
@@ -92,43 +91,9 @@ function parsePaymentEmail(subject: string, body: string): ParsedPayment | null 
   return { amount, utr, senderName };
 }
 
-async function triggerBusanTopup(orderId: string): Promise<void> {
-  try {
-    const busanConfig = await storage.getBusanConfig();
-    if (!busanConfig?.apiToken || !busanConfig.isActive) return;
+type OrderCompletedCallback = (orderId: string) => Promise<void>;
 
-    const order = await storage.getOrderById(orderId);
-    if (!order) return;
-
-    let cartItems: any[] = parseOrderNotes(order.notes).items;
-    if (cartItems.length === 0) {
-      const dbItems = await storage.getOrderItemsByOrder(orderId);
-      cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
-    }
-
-    for (const item of cartItems) {
-      if (!item.packageId && !item.productId) continue;
-      // Mapping is keyed by service/package ID (set in admin), fall back to productId
-      const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
-      if (!mapping) continue;
-      const result = await createBusanOrder(
-        busanConfig.apiToken!,
-        busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
-        {
-          productId: mapping.busanProductId,
-          playerId: item.playerId || item.userId || "",
-          zoneId: item.zoneId || undefined,
-          currency: busanConfig.currency ?? "INR",
-        }
-      );
-      console.log(`[UPI] Busan topup for order ${orderId}, product ${mapping.busanProductId}:`, result);
-    }
-  } catch (err) {
-    console.error(`[UPI] Busan topup error for order ${orderId}:`, err);
-  }
-}
-
-async function processEmails(): Promise<void> {
+async function processEmails(onOrderCompleted?: OrderCompletedCallback): Promise<void> {
   let settings: Awaited<ReturnType<typeof storage.getUpiSettings>>;
   try {
     settings = await storage.getUpiSettings();
@@ -220,8 +185,12 @@ async function processEmails(): Promise<void> {
           await storage.updateOrderPaymentVerified(matchedOrder.id, parsed.utr || `AUTO_${Date.now()}`);
           console.log(`[UPI] Order ${matchedOrder.id} (${matchedOrder.orderNumber}) matched and verified`);
 
-          // Trigger Busan topup
-          await triggerBusanTopup(matchedOrder.id);
+          // Trigger fulfillment + confirmation email via callback
+          if (onOrderCompleted) {
+            onOrderCompleted(matchedOrder.id).catch((err) =>
+              console.error(`[UPI] onOrderCompleted error for order ${matchedOrder.id}:`, err)
+            );
+          }
         } else {
           // Store as unmatched payment
           await storage.createUnmatchedPayment({
@@ -252,14 +221,16 @@ async function processEmails(): Promise<void> {
 }
 
 let pollingInterval: NodeJS.Timeout | null = null;
+let _onOrderCompleted: OrderCompletedCallback | undefined;
 
-export function startEmailPaymentPoller(): void {
+export function startEmailPaymentPoller(onOrderCompleted?: OrderCompletedCallback): void {
   if (pollingInterval) return;
+  _onOrderCompleted = onOrderCompleted;
   console.log("[UPI] Starting email payment poller (15s interval)");
   // Run immediately on start, then every 15 seconds
-  processEmails().catch(console.error);
+  processEmails(_onOrderCompleted).catch(console.error);
   pollingInterval = setInterval(() => {
-    processEmails().catch(console.error);
+    processEmails(_onOrderCompleted).catch(console.error);
   }, 15_000);
 }
 

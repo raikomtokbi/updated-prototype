@@ -1037,58 +1037,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!o) return res.status(404).json({ message: "Not found" });
     res.json(o);
 
-    // Send order confirmation email when payment is confirmed
-    if (newStatus === "completed" && o.userId) {
-      (async () => {
-        try {
-          const [user, smtpConfig, template, settings] = await Promise.all([
-            storage.getUser(o.userId!),
-            getSmtpConfig(),
-            getEmailTemplateWithDefault("order_confirmation"),
-            storage.getAllSiteSettings(),
-          ]);
-          if (!user?.email || !smtpConfig || !template) return;
-          const siteObj: Record<string, string> = {};
-          settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
-          const siteName = siteObj.site_name || "Nexcoin";
-          let cartItems: any[] = [];
-          try {
-            const parsed = o.notes ? JSON.parse(o.notes) : null;
-            cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
-          } catch {}
-          const firstItem = cartItems[0];
-          const now = new Date();
-          await sendTemplatedEmail({
-            to: user.email,
-            template: template as any,
-            cc: (template as any).copyEmail ?? undefined,
-            vars: {
-              user_name: user.fullName || user.username,
-              user_email: user.email,
-              user_id: user.id,
-              order_id: o.orderNumber,
-              order_amount: `${o.currency === "INR" ? "₹" : "$"}${Number(o.totalAmount).toFixed(2)}`,
-              order_currency: o.currency,
-              order_date: now.toLocaleDateString(),
-              order_time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              order_status: "Confirmed",
-              payment_method: o.paymentMethod ?? "Manual",
-              game_name: firstItem?.productTitle ?? "",
-              product_name: firstItem?.packageName ?? firstItem?.productTitle ?? "",
-              product_quantity: String(firstItem?.quantity ?? 1),
-              player_id: firstItem?.userId ?? "",
-              zone_id: firstItem?.zoneId ?? "",
-              site_name: siteName,
-              site_url: siteObj.site_url || "",
-              support_email: siteObj.contact_email || "",
-            },
-            siteName,
-            smtpConfig,
-          });
-        } catch (emailErr) {
-          console.error("[admin/orders/status] order confirmation email error:", emailErr);
-        }
-      })();
+    // After responding, trigger fulfillment + confirmation email for completed orders
+    if (newStatus === "completed") {
+      handleOrderCompleted(req.params.id).catch((err) =>
+        console.error("[admin/orders/status] handleOrderCompleted error:", err)
+      );
     }
   });
 
@@ -1979,7 +1932,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   async function fulfillBusanOrder(orderId: string): Promise<void> {
     try {
       const busanConfig = await storage.getBusanConfig();
-      if (!busanConfig?.apiToken || !busanConfig.isActive) return;
+      if (!busanConfig?.apiToken || !busanConfig.isActive) {
+        await storage.updateOrderDelivery(orderId, "not_applicable");
+        return;
+      }
 
       const order = await storage.getOrderById(orderId);
       if (!order) return;
@@ -1996,11 +1952,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       let anySuccess = false;
       let lastError = "";
+      const deliveryResponses: any[] = [];
 
       for (const item of cartItems) {
         if (!item.packageId && !item.productId) continue;
         const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
-        if (!mapping) continue;
+        if (!mapping) {
+          console.log(`[Busan] No mapping for package/product ${item.packageId || item.productId} in order ${orderId}`);
+          continue;
+        }
 
         const orderResult = await createBusanOrder(
           busanConfig.apiToken!,
@@ -2013,6 +1973,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           }
         );
         console.log(`[Busan] Top-up for order ${orderId}, product ${mapping.busanProductId}:`, orderResult);
+        deliveryResponses.push({
+          cmsProduct: item.packageId || item.productId,
+          busanProduct: mapping.busanProductId,
+          playerId: item.playerId || item.userId || "",
+          zoneId: item.zoneId || null,
+          ...orderResult,
+        });
         if (orderResult.success) {
           anySuccess = true;
         } else {
@@ -2020,18 +1987,84 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Save delivery status on the order
+      // Save delivery status on the order with full Busan response stored as note
+      const noteJson = deliveryResponses.length > 0 ? JSON.stringify(deliveryResponses) : undefined;
       if (cartItems.length === 0) {
         await storage.updateOrderDelivery(orderId, "not_applicable");
       } else if (anySuccess) {
-        await storage.updateOrderDelivery(orderId, "delivered");
+        await storage.updateOrderDelivery(orderId, "delivered", noteJson);
       } else {
-        await storage.updateOrderDelivery(orderId, "failed", lastError || "No mapping or top-up failed");
+        await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "No mapping or top-up failed"));
       }
     } catch (err) {
       console.error("[Busan] fulfillBusanOrder error:", err);
       await storage.updateOrderDelivery(orderId, "failed", String(err));
     }
+  }
+
+  // ── Shared order-completion handler ──────────────────────────────────────────
+  // Called from every payment confirmation path. Runs Busan fulfillment then
+  // fires the customer confirmation email. Always non-blocking at call sites.
+  async function sendOrderConfirmationEmail(orderId: string): Promise<void> {
+    try {
+      const o = await storage.getOrderById(orderId);
+      if (!o?.userId) return; // guest orders — no email address available
+
+      const [user, smtpConfig, template, settings] = await Promise.all([
+        storage.getUser(o.userId),
+        getSmtpConfig(),
+        getEmailTemplateWithDefault("order_confirmation"),
+        storage.getAllSiteSettings(),
+      ]);
+      if (!user?.email || !smtpConfig || !template) return;
+
+      const siteObj: Record<string, string> = {};
+      settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+      const siteName = siteObj.site_name || "Nexcoin";
+
+      let cartItems: any[] = [];
+      try {
+        const parsed = o.notes ? JSON.parse(o.notes) : null;
+        cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
+      } catch {}
+      const firstItem = cartItems[0];
+      const now = new Date();
+
+      await sendTemplatedEmail({
+        to: user.email,
+        template: template as any,
+        cc: (template as any).copyEmail ?? undefined,
+        vars: {
+          user_name: user.fullName || user.username,
+          user_email: user.email,
+          user_id: user.id,
+          order_id: o.orderNumber,
+          order_amount: `${o.currency === "INR" ? "₹" : "$"}${Number(o.totalAmount).toFixed(2)}`,
+          order_currency: o.currency,
+          order_date: now.toLocaleDateString(),
+          order_time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          order_status: "Confirmed",
+          payment_method: o.paymentMethod ?? "Manual",
+          game_name: firstItem?.productTitle ?? "",
+          product_name: firstItem?.packageName ?? firstItem?.productTitle ?? "",
+          product_quantity: String(firstItem?.quantity ?? 1),
+          player_id: firstItem?.userId ?? firstItem?.playerId ?? "",
+          zone_id: firstItem?.zoneId ?? "",
+          site_name: siteName,
+          site_url: siteObj.site_url || "",
+          support_email: siteObj.contact_email || "",
+        },
+        siteName,
+        smtpConfig,
+      });
+    } catch (emailErr) {
+      console.error("[handleOrderCompleted] Confirmation email error:", emailErr);
+    }
+  }
+
+  async function handleOrderCompleted(orderId: string): Promise<void> {
+    await fulfillBusanOrder(orderId);
+    await sendOrderConfirmationEmail(orderId);
   }
 
   // Verify payment (used by modal gateways like Razorpay and for polling)
@@ -2060,7 +2093,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           if (expected === razorpay_signature) {
             if (internalOrderId) {
               await storage.updateOrderStatus(internalOrderId, "completed").catch(() => {});
-              fulfillBusanOrder(internalOrderId).catch(() => {});
+              handleOrderCompleted(internalOrderId).catch(() => {});
             }
             return res.json({ success: true });
           }
@@ -2074,10 +2107,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       const result = await handler.verifyPayment(params, method);
 
-      // After successful verification, mark order complete and trigger Busan fulfillment
+      // After successful verification, mark order complete and trigger fulfillment + email
       if (result.success && internalOrderId) {
         await storage.updateOrderStatus(internalOrderId, "completed").catch(() => {});
-        fulfillBusanOrder(internalOrderId).catch(() => {});
+        handleOrderCompleted(internalOrderId).catch(() => {});
       }
 
       res.json(result);
@@ -2114,7 +2147,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
         if (callbackOrderId) {
           await storage.updateOrderStatus(callbackOrderId, "completed").catch(() => {});
-          fulfillBusanOrder(callbackOrderId).catch(() => {});
+          handleOrderCompleted(callbackOrderId).catch(() => {});
         }
       }
 
@@ -2158,42 +2191,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         const data = await response.json();
         
         if (data.result?.txnStatus === "COMPLETED") {
-          // Update order status to completed
           await storage.updateOrderStatus(order_id, "completed");
           console.log(`XYZPay payment confirmed for order: ${order_id}`);
-
-          // Trigger Busan top-up if mapping exists
-          try {
-            const busanConfig = await storage.getBusanConfig();
-            if (busanConfig?.apiToken && busanConfig.isActive) {
-              // Parse cart items from order notes
-              let cartItems: any[] = [];
-              if (order.notes) {
-                try { cartItems = JSON.parse(order.notes); } catch { cartItems = []; }
-              }
-              // Also check order items in DB
-              if (!Array.isArray(cartItems) || cartItems.length === 0) {
-                const dbItems = await storage.getOrderItemsByOrder(order_id);
-                cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
-              }
-              for (const item of cartItems) {
-                if (!item.packageId && !item.productId) continue;
-                // Mapping is keyed by service/package ID (set in admin), fall back to productId
-                const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
-                if (!mapping) continue;
-                const orderResult = await createBusanOrder(busanConfig.apiToken!, busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1", {
-                  productId: mapping.busanProductId,
-                  playerId: item.playerId || item.userId || "",
-                  zoneId: item.zoneId || undefined,
-                  currency: busanConfig.currency ?? "INR",
-                });
-                console.log(`Busan order for product ${mapping.busanProductId}:`, orderResult);
-              }
-            }
-          } catch (busanErr) {
-            console.error("Busan top-up error:", busanErr);
-          }
-
+          handleOrderCompleted(order_id).catch((err) =>
+            console.error("[XYZPay] handleOrderCompleted error:", err)
+          );
           return res.json({ success: true, message: "Payment verified and order updated" });
         }
       }
@@ -2746,8 +2748,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // Start UPI email payment poller
-  startEmailPaymentPoller();
+  // Start UPI email payment poller — pass handleOrderCompleted so auto-matched
+  // payments also trigger Busan fulfillment + confirmation email.
+  startEmailPaymentPoller((orderId) => handleOrderCompleted(orderId));
 
   return httpServer;
 }
