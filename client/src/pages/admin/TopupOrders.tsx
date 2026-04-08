@@ -59,6 +59,8 @@ function DeliveryBadge({ status, note }: { status: string | null | undefined; no
   return <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>{status}</span>;
 }
 
+type AnyOrder = Order & { deliveryStatus?: string | null; deliveryNote?: string | null; utr?: string | null };
+
 export default function TopupOrders() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -66,7 +68,7 @@ export default function TopupOrders() {
   const [deliveryFilter, setDeliveryFilter] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  const { data: orders = [], isLoading } = useQuery<(Order & { deliveryStatus?: string; deliveryNote?: string })[]>({
+  const { data: orders = [], isLoading } = useQuery<AnyOrder[]>({
     queryKey: ["/api/admin/orders"],
     queryFn: () => adminApi.get("/orders?limit=200"),
     refetchInterval: 5000,
@@ -78,18 +80,24 @@ export default function TopupOrders() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
   });
 
+  const deliveryMut = useMutation({
+    mutationFn: ({ id, deliveryStatus }: { id: string; deliveryStatus: string }) =>
+      adminApi.patch(`/orders/${id}/delivery`, { deliveryStatus }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
+  });
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return orders.filter((o) => {
-      const items = parseNotesItems((o as any).notes);
+      const items = parseNotesItems(o.notes);
       const productStr = items.map(i => `${i.productTitle ?? ""} ${i.packageName ?? ""}`).join(" ").toLowerCase();
       const matchSearch = !q
         || (o.orderNumber ?? "").toLowerCase().includes(q)
         || (o.userId ?? "").toLowerCase().includes(q)
         || productStr.includes(q)
-        || ((o as any).utr ?? "").toLowerCase().includes(q);
+        || (o.utr ?? "").toLowerCase().includes(q);
       const matchStatus = !statusFilter || o.status === statusFilter;
-      const ds = (o as any).deliveryStatus ?? "pending";
+      const ds = o.deliveryStatus ?? "pending";
       const matchDelivery = !deliveryFilter || ds === deliveryFilter;
       return matchSearch && matchStatus && matchDelivery;
     });
@@ -116,25 +124,25 @@ export default function TopupOrders() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
-                  {["Order #", "Product", "Player Info", "Amount", "Payment", "Delivery", "Date", "Actions"].map((h) => (
+                  {["Order #", "Product", "Player Info", "Payment", "Delivery", "Date", "Actions"].map((h) => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((o) => {
-                  const anyO = o as any;
-                  const items = parseNotesItems(anyO.notes);
+                  const items = parseNotesItems(o.notes);
                   const firstItem = items[0];
                   const isExpanded = expandedOrder === o.id;
+                  const deliveryPending = !o.deliveryStatus || o.deliveryStatus === "pending" || o.deliveryStatus === "failed";
 
                   return (
                     <Fragment key={o.id}>
                       <tr style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
                         <td style={tdStyle}>
                           <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258, 90%, 70%)" }}>{o.orderNumber}</div>
-                          {anyO.utr && (
-                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(220,10%,38%)", marginTop: "2px" }}>UTR: {anyO.utr}</div>
+                          {o.utr && (
+                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(220,10%,38%)", marginTop: "2px" }}>UTR: {o.utr}</div>
                           )}
                         </td>
                         <td style={tdStyle}>
@@ -163,24 +171,45 @@ export default function TopupOrders() {
                             <span style={{ color: "hsl(220,10%,38%)", fontSize: "12px" }}>{o.userId ? o.userId.slice(0, 12) + "…" : "Guest"}</span>
                           )}
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(210,40%,95%)" }}>
-                          {o.currency === "INR" ? "₹" : "$"}{Number(o.totalAmount).toFixed(2)}
-                        </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
                         <td style={tdStyle}>
-                          <DeliveryBadge status={anyO.deliveryStatus} note={anyO.deliveryNote} />
+                          <DeliveryBadge status={o.deliveryStatus} note={o.deliveryNote} />
                         </td>
                         <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220, 10%, 46%)", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                             {o.status === "pending" && (
                               <>
-                                <button style={btnSuccess} onClick={() => statusMut.mutate({ id: o.id, status: "completed" })} disabled={statusMut.isPending}>Approve</button>
-                                <button style={btnDanger} onClick={() => statusMut.mutate({ id: o.id, status: "failed" })} disabled={statusMut.isPending}>Reject</button>
+                                <button
+                                  style={btnSuccess}
+                                  onClick={() => statusMut.mutate({ id: o.id, status: "completed" })}
+                                  disabled={statusMut.isPending}
+                                  data-testid={`button-confirm-payment-${o.id}`}
+                                >
+                                  Confirm Payment
+                                </button>
+                                <button
+                                  style={btnDanger}
+                                  onClick={() => statusMut.mutate({ id: o.id, status: "failed" })}
+                                  disabled={statusMut.isPending}
+                                  data-testid={`button-reject-order-${o.id}`}
+                                >
+                                  Reject
+                                </button>
                               </>
                             )}
-                            {o.status === "completed" && (
-                              <button style={btnNeutral} onClick={() => statusMut.mutate({ id: o.id, status: "refunded" })} disabled={statusMut.isPending}>Refund</button>
+                            {o.status === "completed" && deliveryPending && (
+                              <button
+                                style={btnNeutral}
+                                onClick={() => deliveryMut.mutate({ id: o.id, deliveryStatus: "delivered" })}
+                                disabled={deliveryMut.isPending}
+                                data-testid={`button-confirm-delivery-${o.id}`}
+                              >
+                                Confirm Delivery
+                              </button>
+                            )}
+                            {o.status === "completed" && !deliveryPending && (
+                              <span style={{ fontSize: "11px", color: "hsl(142,71%,45%)" }}>Delivered</span>
                             )}
                             {(o.status === "failed" || o.status === "refunded") && (
                               <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>
@@ -201,7 +230,7 @@ export default function TopupOrders() {
                             {item.userId && <div style={{ fontFamily: "monospace", color: "hsl(210,40%,65%)" }}>ID: {item.userId}</div>}
                             {item.zoneId && <div style={{ fontFamily: "monospace", color: "hsl(220,10%,45%)" }}>Zone: {item.zoneId}</div>}
                           </td>
-                          <td colSpan={5} style={tdStyle} />
+                          <td colSpan={4} style={tdStyle} />
                         </tr>
                       ))}
                     </Fragment>

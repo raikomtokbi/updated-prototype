@@ -1037,6 +1037,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(o);
   });
 
+  app.patch("/api/admin/orders/:id/delivery", requireAdmin, async (req, res) => {
+    const { deliveryStatus, deliveryNote } = req.body;
+    await storage.updateOrderDelivery(req.params.id, deliveryStatus, deliveryNote);
+    res.json({ ok: true });
+  });
+
   // ── Transactions ───────────────────────────────────────────────────────────
   app.get("/api/admin/transactions", requireAdmin, async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 50;

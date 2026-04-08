@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle, Link, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
-  card, thStyle, tdStyle, btnPrimary,
+  card, thStyle, tdStyle, btnPrimary, btnNeutral,
   SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
 } from "@/components/admin/shared";
 
@@ -86,6 +86,11 @@ export default function Payments() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/unmatched-payments"] });
       setExpandedAssign(null);
     },
+  });
+
+  const refundMutation = useMutation({
+    mutationFn: (id: string) => adminApi.patch(`/orders/${id}/status`, { status: "refunded" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
   });
 
   const rows: Row[] = useMemo(() => {
@@ -183,13 +188,25 @@ export default function Payments() {
                           {formatDate(o.createdAt)}
                         </td>
                         <td style={tdStyle}>
-                          <a
-                            href={`/admin/orders`}
-                            style={{ color: "hsl(258,90%,70%)", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "2px", textDecoration: "none" }}
-                            data-testid={`link-view-order-${o.id}`}
-                          >
-                            <ExternalLink size={11} /> View
-                          </a>
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                            {o.status === "completed" && (
+                              <button
+                                style={btnNeutral}
+                                onClick={() => refundMutation.mutate(o.id)}
+                                disabled={refundMutation.isPending}
+                                data-testid={`button-refund-${o.id}`}
+                              >
+                                Refund
+                              </button>
+                            )}
+                            <a
+                              href={`/admin/orders`}
+                              style={{ color: "hsl(258,90%,70%)", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "2px", textDecoration: "none" }}
+                              data-testid={`link-view-order-${o.id}`}
+                            >
+                              <ExternalLink size={11} /> View
+                            </a>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -198,8 +215,8 @@ export default function Payments() {
                     const isExpanded = expandedAssign === p.id;
                     const isAssigned = !!p.assignedToOrderId;
                     return (
-                      <>
-                        <tr key={`upi-${p.id}`} style={{ borderBottom: "1px solid hsl(220,15%,11%)", background: isAssigned ? "transparent" : "hsl(38,90%,50%,0.04)" }}>
+                      <Fragment key={`upi-${p.id}`}>
+                        <tr style={{ borderBottom: "1px solid hsl(220,15%,11%)", background: isAssigned ? "transparent" : "hsl(38,90%,50%,0.04)" }}>
                           <td style={tdStyle}>
                             <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(220,10%,40%)" }}>
                               {p.id.slice(0, 12)}…
@@ -277,7 +294,7 @@ export default function Payments() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   }
                 })}
