@@ -1032,9 +1032,64 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.patch("/api/admin/orders/:id/status", requireAdmin, async (req, res) => {
-    const o = await storage.updateOrderStatus(req.params.id, req.body.status);
+    const newStatus: string = req.body.status;
+    const o = await storage.updateOrderStatus(req.params.id, newStatus);
     if (!o) return res.status(404).json({ message: "Not found" });
     res.json(o);
+
+    // Send order confirmation email when payment is confirmed
+    if (newStatus === "completed" && o.userId) {
+      (async () => {
+        try {
+          const [user, smtpConfig, template, settings] = await Promise.all([
+            storage.getUser(o.userId!),
+            getSmtpConfig(),
+            getEmailTemplateWithDefault("order_confirmation"),
+            storage.getAllSiteSettings(),
+          ]);
+          if (!user?.email || !smtpConfig || !template) return;
+          const siteObj: Record<string, string> = {};
+          settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+          const siteName = siteObj.site_name || "Nexcoin";
+          let cartItems: any[] = [];
+          try {
+            const parsed = o.notes ? JSON.parse(o.notes) : null;
+            cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
+          } catch {}
+          const firstItem = cartItems[0];
+          const now = new Date();
+          await sendTemplatedEmail({
+            to: user.email,
+            template: template as any,
+            cc: (template as any).copyEmail ?? undefined,
+            vars: {
+              user_name: user.fullName || user.username,
+              user_email: user.email,
+              user_id: user.id,
+              order_id: o.orderNumber,
+              order_amount: `${o.currency === "INR" ? "₹" : "$"}${Number(o.totalAmount).toFixed(2)}`,
+              order_currency: o.currency,
+              order_date: now.toLocaleDateString(),
+              order_time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              order_status: "Confirmed",
+              payment_method: o.paymentMethod ?? "Manual",
+              game_name: firstItem?.productTitle ?? "",
+              product_name: firstItem?.packageName ?? firstItem?.productTitle ?? "",
+              product_quantity: String(firstItem?.quantity ?? 1),
+              player_id: firstItem?.userId ?? "",
+              zone_id: firstItem?.zoneId ?? "",
+              site_name: siteName,
+              site_url: siteObj.site_url || "",
+              support_email: siteObj.contact_email || "",
+            },
+            siteName,
+            smtpConfig,
+          });
+        } catch (emailErr) {
+          console.error("[admin/orders/status] order confirmation email error:", emailErr);
+        }
+      })();
+    }
   });
 
   app.patch("/api/admin/orders/:id/delivery", requireAdmin, async (req, res) => {

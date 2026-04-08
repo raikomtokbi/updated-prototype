@@ -272,6 +272,7 @@ function GameDetailView({ game }: { game: Game }) {
       packageId: selectedService!.id,
       packageName: selectedService!.name,
       price: parseFloat(String(selectedService!.finalPrice)),
+      productCategory: game.category ?? "game_currency",
       userId: needsUserId ? userId.trim() : (needsEmail ? email.trim() : "-"),
       zoneId: needsZoneId ? zoneId.trim() : undefined,
       email: needsEmail ? email.trim() : undefined,
@@ -815,6 +816,7 @@ function ProductDetailView({ product }: { product: Product }) {
       packageId: selectedPackage.id,
       packageName: selectedPackage.label,
       price: parseFloat(String(selectedPackage.price)),
+      productCategory: product.category,
       userId: userId.trim(),
       quantity,
     });
@@ -831,6 +833,7 @@ function ProductDetailView({ product }: { product: Product }) {
       packageId: selectedPackage.id,
       packageName: selectedPackage.label,
       price: parseFloat(String(selectedPackage.price)),
+      productCategory: product.category,
       userId: userId.trim(),
       quantity,
     });

@@ -428,6 +428,7 @@ export default function Checkout() {
         packageName: i.packageName,
         price: i.price,
         quantity: i.quantity,
+        productCategory: i.productCategory,
         userId: i.userId,
         zoneId: i.zoneId,
         playerId: i.playerId,

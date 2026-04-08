@@ -90,6 +90,11 @@ export default function TopupOrders() {
     const q = search.toLowerCase();
     return orders.filter((o) => {
       const items = parseNotesItems(o.notes);
+      // Only show game top-up orders (game_currency category, or unknown category as legacy fallback)
+      const firstCat = (items[0] as any)?.productCategory;
+      const isTopup = !firstCat || firstCat === "game_currency";
+      if (!isTopup) return false;
+
       const productStr = items.map(i => `${i.productTitle ?? ""} ${i.packageName ?? ""}`).join(" ").toLowerCase();
       const matchSearch = !q
         || (o.orderNumber ?? "").toLowerCase().includes(q)

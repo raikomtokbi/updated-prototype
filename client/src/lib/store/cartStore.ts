@@ -9,6 +9,7 @@ export interface CartItem {
   packageId: string;
   packageName: string;
   price: number;
+  productCategory?: string;
   userId: string;
   zoneId?: string;
   playerId?: string;
