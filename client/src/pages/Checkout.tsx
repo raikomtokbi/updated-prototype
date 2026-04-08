@@ -151,23 +151,65 @@ function UpiPaymentOverlay({
           </div>
         </div>
 
+        {/* UPI App Deep Link Buttons */}
+        {data.upiId && (() => {
+          const upiParams = `pa=${encodeURIComponent(data.upiId)}&pn=${encodeURIComponent("Nexcoin")}&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&tn=${encodeURIComponent("Order " + (data.orderNumber || data.orderId.slice(0, 8)))}`;
+          const upiApps = [
+            { name: "GPay", link: `tez://upi/pay?${upiParams}`, color: "#4285F4", bg: "rgba(66,133,244,0.12)", border: "rgba(66,133,244,0.3)", icon: "G" },
+            { name: "PhonePe", link: `phonepe://pay?${upiParams}`, color: "#7B3FE4", bg: "rgba(123,63,228,0.12)", border: "rgba(123,63,228,0.3)", icon: "P" },
+            { name: "Paytm", link: `paytm://pay?${upiParams}`, color: "#00B9F1", bg: "rgba(0,185,241,0.12)", border: "rgba(0,185,241,0.3)", icon: "P" },
+            { name: "FamApp", link: `fampay://upi/pay?${upiParams}`, color: "#FFCE00", bg: "rgba(255,206,0,0.10)", border: "rgba(255,206,0,0.3)", icon: "F" },
+          ];
+          return (
+            <div style={{ marginBottom: "0.875rem" }}>
+              <p style={{ margin: "0 0 8px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pay instantly with</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {upiApps.map(app => (
+                  <a
+                    key={app.name}
+                    href={app.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`button-open-${app.name.toLowerCase()}`}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "10px",
+                      padding: "10px 14px", borderRadius: "8px",
+                      background: app.bg, border: `1px solid ${app.border}`,
+                      textDecoration: "none", cursor: "pointer",
+                    }}
+                  >
+                    <span style={{
+                      width: "28px", height: "28px", borderRadius: "6px",
+                      background: app.color, display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#fff", fontWeight: 800, fontSize: "12px", flexShrink: 0,
+                    }}>{app.icon}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>
+                      Open {app.name}
+                    </span>
+                  </a>
+                ))}
+              </div>
+              <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(220,10%,38%)", textAlign: "center" }}>
+                Amount and UPI ID are pre-filled — just confirm and pay
+              </p>
+            </div>
+          );
+        })()}
+
         {/* QR Code — auto-generated from UPI ID + amount */}
         {data.upiId && (
           <div style={{ ...card, padding: "1rem", marginBottom: "0.875rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-            <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Scan QR to pay</p>
+            <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Or scan QR to pay</p>
             <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px" }}>
               <QRCodeSVG
                 value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=Nexcoin&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&tn=Order+Payment`}
-                size={180}
+                size={160}
                 bgColor="#ffffff"
                 fgColor="#000000"
                 level="M"
                 data-testid="img-upi-qr"
               />
             </div>
-            <p style={{ margin: 0, fontSize: "11px", color: "hsl(220,10%,40%)" }}>
-              Opens GPay, PhonePe, Paytm, or BHIM with amount pre-filled
-            </p>
           </div>
         )}
 

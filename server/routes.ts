@@ -1923,19 +1923,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const order = await storage.getOrderById(orderId);
       if (!order) return;
 
+      // Parse notes — stored as { payerName, items: [...] } since the UPI initiate refactor
       let cartItems: any[] = [];
       if (order.notes) {
-        try { cartItems = JSON.parse(order.notes); } catch { cartItems = []; }
+        try {
+          const parsed = JSON.parse(order.notes);
+          // Handle both legacy array format and new { payerName, items } object format
+          cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
+        } catch { cartItems = []; }
       }
-      if (!Array.isArray(cartItems) || cartItems.length === 0) {
-        const dbItems = await storage.getOrderItemsByOrder(orderId);
-        cartItems = dbItems.map(i => ({ productId: i.productId, packageId: i.packageId }));
-      }
+
+      let anySuccess = false;
+      let lastError = "";
 
       for (const item of cartItems) {
         if (!item.packageId && !item.productId) continue;
         const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
         if (!mapping) continue;
+
         const orderResult = await createBusanOrder(
           busanConfig.apiToken!,
           busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
@@ -1946,10 +1951,25 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             currency: busanConfig.currency ?? "INR",
           }
         );
-        console.log(`[Busan] Fulfilled order item for product ${mapping.busanProductId}:`, orderResult);
+        console.log(`[Busan] Top-up for order ${orderId}, product ${mapping.busanProductId}:`, orderResult);
+        if (orderResult.success) {
+          anySuccess = true;
+        } else {
+          lastError = orderResult.message ?? "Top-up failed";
+        }
+      }
+
+      // Save delivery status on the order
+      if (cartItems.length === 0) {
+        await storage.updateOrderDelivery(orderId, "not_applicable");
+      } else if (anySuccess) {
+        await storage.updateOrderDelivery(orderId, "delivered");
+      } else {
+        await storage.updateOrderDelivery(orderId, "failed", lastError || "No mapping or top-up failed");
       }
     } catch (err) {
       console.error("[Busan] fulfillBusanOrder error:", err);
+      await storage.updateOrderDelivery(orderId, "failed", String(err));
     }
   }
 

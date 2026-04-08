@@ -106,6 +106,8 @@ export const orders = pgTable("orders", {
   paymentMethod: varchar("payment_method", { length: 100 }),
   utr: varchar("utr", { length: 100 }),
   paymentVerifiedAt: timestamp("payment_verified_at"),
+  deliveryStatus: varchar("delivery_status", { length: 50 }),
+  deliveryNote: text("delivery_note"),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
