@@ -2529,7 +2529,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Initiate UPI manual payment — create order + return UPI payment details
   app.post("/api/upi/initiate", async (req, res) => {
     try {
-      const { amount, currency = "INR", email, name, phone, productInfo, cartItems, payerName } = req.body;
+      const { amount, currency = "INR", email, name, phone, productInfo, cartItems, payerName, userId } = req.body;
       if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
 
       const settings = await storage.getUpiSettings();
@@ -2546,6 +2546,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       await storage.createOrder({
         id: orderId,
         orderNumber,
+        userId: userId || null,
         totalAmount: String(amount),
         currency,
         notes: JSON.stringify(notesPayload),

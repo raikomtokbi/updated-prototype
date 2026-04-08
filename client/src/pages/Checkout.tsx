@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, AlertCircle, CheckCircle, Tag, X, Copy, Clock, L
 import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect, useRef } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useAuthStore } from "@/lib/store/authstore";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrencySymbol } from "@/lib/currency";
 
@@ -256,6 +257,7 @@ export default function Checkout() {
   const [, navigate] = useLocation();
   const searchStr = useSearch();
   const { items, getCartTotal, clearCart } = useCartStore();
+  const { user } = useAuthStore();
 
   // Parse back-navigation context from query params
   const searchParams = new URLSearchParams(searchStr);
@@ -405,6 +407,7 @@ export default function Checkout() {
             productInfo,
             cartItems: cartItemsPayload,
             payerName: payerName.trim(),
+            userId: user?.id ?? null,
           }),
         });
         if (upiRes.ok) {
