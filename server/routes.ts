@@ -1276,6 +1276,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           emailPassword: cfg.emailPassword || undefined,
           imapHost: cfg.imapHost || "imap.gmail.com",
           imapPort: cfg.imapPort ? parseInt(cfg.imapPort) : 993,
+          imapLabel: cfg.imapLabel || "INBOX",
           isActive: req.body.isActive !== false,
         });
       } catch {}
@@ -1297,6 +1298,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           emailPassword: (cfg as any).emailPassword || undefined,
           imapHost: (cfg as any).imapHost || "imap.gmail.com",
           imapPort: (cfg as any).imapPort ? parseInt((cfg as any).imapPort) : 993,
+          imapLabel: (cfg as any).imapLabel || "INBOX",
           isActive: p.isActive,
         });
       } catch {}
@@ -1318,6 +1320,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           emailPassword: (cfg as any).emailPassword || undefined,
           imapHost: (cfg as any).imapHost || "imap.gmail.com",
           imapPort: (cfg as any).imapPort ? parseInt((cfg as any).imapPort) : 993,
+          imapLabel: (cfg as any).imapLabel || "INBOX",
           isActive: p.isActive,
         });
       } catch {}

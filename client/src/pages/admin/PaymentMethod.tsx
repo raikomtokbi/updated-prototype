@@ -196,8 +196,9 @@ const GATEWAY_CONFIGS: Record<string, {
       { key: "config.emailPassword", label: "App Password (IMAP)", placeholder: "Gmail App Password (16 chars)", isSecret: true, isConfig: true },
       { key: "config.imapHost", label: "IMAP Host", placeholder: "imap.gmail.com", isConfig: true },
       { key: "config.imapPort", label: "IMAP Port", placeholder: "993", isConfig: true },
+      { key: "config.imapLabel", label: "Mailbox / Label", placeholder: "INBOX", isConfig: true },
     ],
-    notes: "Customers pay via UPI and the server auto-verifies payment by polling the configured email inbox (IMAP). For Gmail, generate an App Password (not your main password) at myaccount.google.com/apppasswords and use host imap.gmail.com port 993.",
+    notes: "Customers pay via UPI and the server auto-verifies payment by polling the configured email inbox (IMAP). For Gmail, generate an App Password (not your main password) at myaccount.google.com/apppasswords and use host imap.gmail.com port 993. Set Mailbox / Label to read a specific Gmail label instead of the full inbox (e.g. Payments, or Parent/Child for nested labels).",
   },
 };
 
