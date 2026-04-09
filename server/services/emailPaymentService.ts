@@ -119,7 +119,8 @@ async function processEmails(onOrderCompleted?: OrderCompletedCallback): Promise
   let connection: imapSimple.ImapSimple | null = null;
   try {
     connection = await imapSimple.connect(config);
-    await connection.openBox("INBOX");
+    const mailbox = settings.imapLabel?.trim() || "INBOX";
+    await connection.openBox(mailbox);
 
     // Search for unseen emails in last 2 hours
     const since = new Date(Date.now() - 2 * 60 * 60 * 1000);

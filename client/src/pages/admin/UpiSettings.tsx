@@ -13,6 +13,7 @@ interface UpiSettingsData {
   emailPassword?: string;
   imapHost?: string;
   imapPort?: number;
+  imapLabel?: string;
   isActive?: boolean;
 }
 
@@ -56,6 +57,7 @@ export default function UpiSettings() {
     emailPassword: "",
     imapHost: "imap.gmail.com",
     imapPort: 993,
+    imapLabel: "INBOX",
     isActive: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -73,6 +75,7 @@ export default function UpiSettings() {
         emailPassword: loadedSettings.emailPassword || "",
         imapHost: loadedSettings.imapHost || "imap.gmail.com",
         imapPort: loadedSettings.imapPort ?? 993,
+        imapLabel: loadedSettings.imapLabel || "INBOX",
         isActive: loadedSettings.isActive ?? false,
       });
     }
@@ -283,6 +286,21 @@ export default function UpiSettings() {
                   placeholder="993"
                   data-testid="input-imap-port"
                 />
+              </div>
+            </div>
+
+            <div style={{ marginTop: "0.85rem" }}>
+              <label style={label}>Mailbox / Label</label>
+              <input
+                type="text"
+                style={inp}
+                value={form.imapLabel || "INBOX"}
+                onChange={e => set("imapLabel", e.target.value)}
+                placeholder="INBOX"
+                data-testid="input-imap-label"
+              />
+              <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "3px" }}>
+                The mailbox or Gmail label to read payment emails from. Use <code style={{ color: "hsl(258,90%,72%)" }}>INBOX</code> for the default inbox, or a label name like <code style={{ color: "hsl(258,90%,72%)" }}>Payments</code>. For nested Gmail labels use <code style={{ color: "hsl(258,90%,72%)" }}>Parent/Child</code>.
               </div>
             </div>
           </div>

@@ -501,6 +501,7 @@ export const upiPaymentSettings = pgTable("upi_payment_settings", {
   emailPassword: text("email_password"),
   imapHost: varchar("imap_host", { length: 191 }).notNull().default("imap.gmail.com"),
   imapPort: integer("imap_port").notNull().default(993),
+  imapLabel: varchar("imap_label", { length: 255 }).notNull().default("INBOX"),
   isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),

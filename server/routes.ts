@@ -2721,7 +2721,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Admin: Save UPI settings
   app.post("/api/admin/upi-settings", requireAdmin, async (req, res) => {
     try {
-      const { upiId, qrCodeUrl, emailAddress, emailPassword, imapHost, imapPort, isActive } = req.body;
+      const { upiId, qrCodeUrl, emailAddress, emailPassword, imapHost, imapPort, imapLabel, isActive } = req.body;
       const updated = await storage.upsertUpiSettings({
         upiId: upiId || undefined,
         qrCodeUrl: qrCodeUrl || undefined,
@@ -2729,6 +2729,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         emailPassword: emailPassword || undefined,
         imapHost: imapHost || "imap.gmail.com",
         imapPort: imapPort ? parseInt(imapPort) : 993,
+        imapLabel: imapLabel || "INBOX",
         isActive: isActive !== false,
       });
       return res.json({ success: true, settings: updated });
