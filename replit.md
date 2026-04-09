@@ -6,7 +6,7 @@ A full-stack web CMS and e-commerce platform for selling digital products (game 
 
 - **Frontend**: React 19, Tailwind CSS 4, TanStack Query, Wouter (routing), Zustand (state), Radix UI / shadcn
 - **Backend**: Node.js + Express 5
-- **Database**: MySQL via `mysql2` + Drizzle ORM (mysql-core) — cPanel-hosted MySQL
+- **Database**: PostgreSQL via `pg` + Drizzle ORM (pg-core) — Replit built-in PostgreSQL
 - **Build**: Vite (frontend), tsx (dev server), esbuild (production build)
 
 ## Project Structure
@@ -21,7 +21,7 @@ server/         Express backend
   index.ts      Entry point, middleware setup
   routes.ts     All API endpoints
   storage.ts    Data access layer (DatabaseStorage)
-  db.ts         MySQL connection via mysql2 pool
+  db.ts         PostgreSQL connection via pg pool
   lib/
     paymentGateways/   Multi-gateway payment system
       index.ts         Gateway factory + registry
