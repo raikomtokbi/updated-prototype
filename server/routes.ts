@@ -2077,8 +2077,37 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   }
 
+  async function decrementOrderStock(orderId: string): Promise<void> {
+    try {
+      const order = await storage.getOrderById(orderId);
+      if (!order) return;
+
+      let cartItems: any[] = [];
+      if (order.notes) {
+        try {
+          const parsed = JSON.parse(order.notes);
+          cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
+        } catch { cartItems = []; }
+      }
+
+      for (const item of cartItems) {
+        const qty = item.quantity || 1;
+        try {
+          if (item.serviceId) {
+            await storage.decrementServiceStock(item.serviceId, qty);
+          } else if (item.packageId) {
+            await storage.decrementPackageStock(item.packageId, qty);
+          }
+        } catch (_e) { /* non-fatal per item */ }
+      }
+    } catch (err) {
+      console.error("[handleOrderCompleted] Stock decrement error:", err);
+    }
+  }
+
   async function handleOrderCompleted(orderId: string): Promise<void> {
     await fulfillBusanOrder(orderId);
+    await decrementOrderStock(orderId);
     await sendOrderConfirmationEmail(orderId);
   }
 
@@ -2668,11 +2697,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           } catch (_itemErr) {
             // productId may reference a game/service row — ignore FK errors; cart data is in order.notes
           }
-          // Decrement stock
-          try {
-            if (item.serviceId) await storage.decrementServiceStock(item.serviceId, item.quantity || 1);
-            else if (item.packageId) await storage.decrementPackageStock(item.packageId, item.quantity || 1);
-          } catch (_stockErr) { /* non-fatal */ }
         }
       }
 
