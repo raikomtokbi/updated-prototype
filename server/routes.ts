@@ -316,8 +316,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     {
       const smileConfig = await storage.getSmileOneConfig();
       const credentials: { uid: string; key: string; email: string; defaultRegion: string } | undefined =
-        (smileConfig?.uid && smileConfig?.key && smileConfig?.isActive)
-          ? { uid: smileConfig.uid, key: smileConfig.key, email: smileConfig.email ?? "", defaultRegion: smileConfig.region ?? "ph" }
+        (smileConfig?.uid && smileConfig?.apiKey && smileConfig?.isActive)
+          ? { uid: smileConfig.uid, key: smileConfig.apiKey, email: smileConfig.email ?? "", defaultRegion: smileConfig.region ?? "ph" }
           : undefined; // will fall back to env vars inside the function
 
       const result = await smileValidatePlayer(

@@ -825,17 +825,17 @@ export class DatabaseStorage implements IStorage {
   async upsertSmileOneConfig(data: Partial<SmileOneConfig>): Promise<SmileOneConfig> {
     const existing = await this.getSmileOneConfig();
     if (existing) {
-      const [updated] = await db
+      await db
         .update(smileOneConfigs)
         .set({ ...data, updatedAt: new Date() })
-        .where(eq(smileOneConfigs.id, existing.id))
-        .returning();
-      return updated;
+        .where(eq(smileOneConfigs.id, existing.id));
+      return (await this.getSmileOneConfig())!;
     }
-    const [created] = await db
+    const id = randomUUID();
+    await db
       .insert(smileOneConfigs)
-      .values({ id: randomUUID(), ...data, updatedAt: new Date() } as SmileOneConfig)
-      .returning();
+      .values({ id, ...data, updatedAt: new Date() } as SmileOneConfig);
+    const [created] = await db.select().from(smileOneConfigs).where(eq(smileOneConfigs.id, id));
     return created;
   }
 
@@ -849,19 +849,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping> {
-    const [created] = await db
-      .insert(smileOneMappings)
-      .values({ id: randomUUID(), ...data })
-      .returning();
+    const id = randomUUID();
+    await db.insert(smileOneMappings).values({ id, ...data });
+    const [created] = await db.select().from(smileOneMappings).where(eq(smileOneMappings.id, id));
     return created;
   }
 
   async updateSmileOneMapping(id: string, data: Partial<SmileOneMapping>): Promise<SmileOneMapping | undefined> {
-    const [updated] = await db
+    await db
       .update(smileOneMappings)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(smileOneMappings.id, id))
-      .returning();
+      .where(eq(smileOneMappings.id, id));
+    const [updated] = await db.select().from(smileOneMappings).where(eq(smileOneMappings.id, id));
     return updated;
   }
 
@@ -878,17 +877,17 @@ export class DatabaseStorage implements IStorage {
   async upsertBusanConfig(data: Partial<BusanConfig>): Promise<BusanConfig> {
     const existing = await this.getBusanConfig();
     if (existing) {
-      const [updated] = await db
+      await db
         .update(busanConfigs)
         .set({ ...data, updatedAt: new Date() })
-        .where(eq(busanConfigs.id, existing.id))
-        .returning();
-      return updated;
+        .where(eq(busanConfigs.id, existing.id));
+      return (await this.getBusanConfig())!;
     }
-    const [created] = await db
+    const id = randomUUID();
+    await db
       .insert(busanConfigs)
-      .values({ id: randomUUID(), ...data, updatedAt: new Date() } as BusanConfig)
-      .returning();
+      .values({ id, ...data, updatedAt: new Date() } as BusanConfig);
+    const [created] = await db.select().from(busanConfigs).where(eq(busanConfigs.id, id));
     return created;
   }
 
@@ -903,10 +902,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBusanMapping(data: InsertBusanMapping): Promise<BusanMapping> {
-    const [created] = await db
-      .insert(busanMappings)
-      .values({ id: randomUUID(), ...data })
-      .returning();
+    const id = randomUUID();
+    await db.insert(busanMappings).values({ id, ...data });
+    const [created] = await db.select().from(busanMappings).where(eq(busanMappings.id, id));
     return created;
   }
 
@@ -916,7 +914,7 @@ export class DatabaseStorage implements IStorage {
 
   // ── Orders (create) ──────────────────────────────────────────────────────────
   async createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string; paymentMethod?: string }): Promise<Order> {
-    const [created] = await db
+    await db
       .insert(orders)
       .values({
         id: data.id,
@@ -927,8 +925,8 @@ export class DatabaseStorage implements IStorage {
         notes: data.notes,
         status: (data.status as any) ?? "pending",
         paymentMethod: data.paymentMethod,
-      })
-      .returning();
+      });
+    const [created] = await db.select().from(orders).where(eq(orders.id, data.id));
     return created;
   }
 
