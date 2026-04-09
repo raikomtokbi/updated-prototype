@@ -45,16 +45,22 @@ function cleanBase(url: string): string {
 
 function parsePriceString(raw: string | number | undefined): number {
   if (raw === undefined || raw === null) return 0;
-  if (typeof raw === "number") return raw;
-  const cleaned = String(raw).replace(/[₹$,\s]/g, "").replace(/[^0-9.]/g, "");
-  return parseFloat(cleaned) || 0;
+  if (typeof raw === "number") return isNaN(raw) ? 0 : raw;
+  const str = String(raw).trim();
+  if (!str || str === "null" || str === "undefined") return 0;
+  // Remove currency symbols, commas, and whitespace, then keep only digits and dots
+  const cleaned = str.replace(/[₹$,\s]/g, "").replace(/[^0-9.]/g, "");
+  if (!cleaned) return 0;
+  // Handle multiple dots (e.g. ".9.00") — take the first valid float segment
+  const match = cleaned.match(/\d+\.?\d*/);
+  return match ? parseFloat(match[0]) : 0;
 }
 
-function parseBalanceString(raw: string | undefined): { balance: number; currency: string } {
-  if (!raw) return { balance: 0, currency: "INR" };
+function parseBalanceString(raw: string | number | undefined): { balance: number; currency: string } {
+  if (raw === undefined || raw === null) return { balance: 0, currency: "INR" };
   const str = String(raw).trim();
-  const num = parsePriceString(str);
   const currency = str.includes("USD") ? "USD" : "INR";
+  const num = parsePriceString(str);
   return { balance: num, currency };
 }
 
@@ -84,7 +90,13 @@ export async function getBusanBalance(apiKey: string, apiBaseUrl: string, curren
     throw new Error(data.error ?? data.message ?? `Balance check failed (HTTP ${res.status})`);
   }
 
-  const balanceRaw = String(data.data?.balance ?? "0");
+  // Try multiple possible paths for the balance value
+  const rawValue =
+    data.data?.balance ??
+    data.balance ??
+    (typeof data.data === "string" ? data.data : undefined);
+
+  const balanceRaw = rawValue !== undefined && rawValue !== null ? String(rawValue) : "0";
   const parsed = parseBalanceString(balanceRaw);
 
   return {
