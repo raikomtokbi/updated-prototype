@@ -667,8 +667,7 @@ function SmileOneConfigTab() {
   }
 
   function formatUrl(path: string) {
-    const url = `${origin}${path}`;
-    return url.length > 34 ? `${url.slice(0, 34)}...` : url;
+    return `https://domain.com${path}`;
   }
 
   return (
@@ -735,7 +734,7 @@ function SmileOneConfigTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Merchant Callback URLs</p>
         <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
-          Register these URLs in your Smile.one Merchant Dashboard. Keep the same domain after build or update the URLs to match your production domain.
+          Register these URLs in your Smile.one Merchant Dashboard. Replace domain.com with your own production domain before saving them.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {webhooks.map((wh) => (
