@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Zap, Eye, EyeOff, LogIn, KeyRound } from "lucide-react";
-import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
+import { SiFacebook, SiDiscord } from "react-icons/si";
+import GoogleIcon from "@/components/icons/GoogleIcon";
 import { useAuthStore } from "@/lib/store/authstore";
 
 interface SocialProviders {
@@ -265,7 +266,7 @@ export default function Login() {
                   data-testid="button-social-google"
                 >
                   <div style={socialBtnStyle}>
-                    <SiGoogle size={16} style={{ color: "#EA4335" }} />
+                    <GoogleIcon size={18} />
                     Continue with Google
                   </div>
                 </a>

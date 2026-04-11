@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Zap, Eye, EyeOff, UserPlus } from "lucide-react";
-import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
+import { SiFacebook, SiDiscord } from "react-icons/si";
+import GoogleIcon from "@/components/icons/GoogleIcon";
 import { useAuthStore } from "@/lib/store/authstore";
 
 interface SocialProviders {
@@ -365,7 +366,7 @@ export default function Register() {
               {socialProviders.google && (
                 <a href="/api/auth/oauth/google" style={{ textDecoration: "none" }} data-testid="button-social-google">
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)", color: "hsl(210,40%,80%)", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
-                    <SiGoogle size={16} style={{ color: "#EA4335" }} />
+                    <GoogleIcon size={18} />
                     Continue with Google
                   </div>
                 </a>
