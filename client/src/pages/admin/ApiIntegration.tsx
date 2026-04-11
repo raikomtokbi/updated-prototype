@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plug, CheckCircle, XCircle, Settings, Zap,
   RefreshCw, Trash2, Plus, Package, Save, Smile,
-  Wifi, Loader2, Link2, ArrowRight, ShieldCheck,
+  Wifi, Loader2, Link2, ArrowRight, ShieldCheck, Copy, Check,
 } from "lucide-react";
 import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
@@ -79,6 +79,34 @@ const SERVICES: ServiceDef[] = [
     ],
   },
 ];
+
+// ─── Toggle Switch ────────────────────────────────────────────────────────────
+function ToggleSwitch({ checked, onChange, disabled, testId }: {
+  checked: boolean; onChange: () => void; disabled?: boolean; testId?: string;
+}) {
+  return (
+    <button
+      data-testid={testId}
+      onClick={(e) => { e.stopPropagation(); onChange(); }}
+      disabled={disabled}
+      title={checked ? "Enabled — click to disable" : "Disabled — click to enable"}
+      style={{
+        position: "relative", width: "34px", height: "19px", borderRadius: "10px",
+        border: "none", cursor: disabled ? "not-allowed" : "pointer", flexShrink: 0,
+        background: checked ? "hsl(258,90%,58%)" : "hsl(220,15%,22%)",
+        transition: "background 0.2s", opacity: disabled ? 0.45 : 1, padding: 0,
+      }}
+    >
+      <span style={{
+        position: "absolute", top: "2.5px",
+        left: checked ? "17px" : "2.5px",
+        width: "14px", height: "14px",
+        borderRadius: "50%", background: "white",
+        transition: "left 0.18s", display: "block",
+      }} />
+    </button>
+  );
+}
 
 // ─── Configure Modal (for standard services) ──────────────────────────────────
 function ConfigureModal({
@@ -574,9 +602,10 @@ function SmileOneConfigTab() {
     queryFn: () => adminApi.get("/smileone/config"),
   });
 
-  const [form, setForm] = useState({ uid: "", apiKey: "", licenseKey: "", region: "global", email: "", isActive: true });
+  const [form, setForm] = useState({ uid: "", apiKey: "", licenseKey: "", region: "global", email: "" });
   const [testStatus, setTestStatus] = useState<null | { ok: boolean; message: string; balance?: unknown }>(null);
   const [testing, setTesting] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (config) {
@@ -586,7 +615,6 @@ function SmileOneConfigTab() {
         licenseKey: config.licenseKey ?? "",
         region: config.region ?? "global",
         email: config.email ?? "",
-        isActive: config.isActive ?? true,
       });
     }
   }, [config]);
@@ -598,8 +626,7 @@ function SmileOneConfigTab() {
       form.apiKey !== (config.apiKey ?? "") ||
       form.licenseKey !== (config.licenseKey ?? "") ||
       form.region !== (config.region ?? "global") ||
-      form.email !== (config.email ?? "") ||
-      form.isActive !== (config.isActive ?? true)
+      form.email !== (config.email ?? "")
     );
   }, [form, config]);
 
@@ -624,6 +651,20 @@ function SmileOneConfigTab() {
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const webhooks = [
+    { label: "Product List",   path: "/api/smileone/callback/products", desc: "Returns available products to Smile.one" },
+    { label: "Role Check",     path: "/api/smileone/callback/role",     desc: "Verifies player UID/SID before purchase" },
+    { label: "Game Order",     path: "/api/smileone/callback/order",    desc: "Creates an order when user confirms" },
+    { label: "Payment Notify", path: "/api/smileone/callback/notify",   desc: "Called by Smile.one after payment success" },
+  ];
+
+  function copyUrl(path: string) {
+    navigator.clipboard.writeText(`${origin}${path}`);
+    setCopiedKey(path);
+    setTimeout(() => setCopiedKey(null), 2000);
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -652,12 +693,6 @@ function SmileOneConfigTab() {
               {REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
-          <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12px", color: "hsl(210,40%,80%)" }}>
-            <input data-testid="toggle-smileone-active" type="checkbox" checked={form.isActive}
-              onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
-              style={{ cursor: "pointer", width: "14px", height: "14px", accentColor: "hsl(258,90%,66%)" }} />
-            Enable Smile.one
-          </label>
           {testStatus && (
             <div style={{
               padding: "10px 14px", borderRadius: "6px", fontSize: "12px",
@@ -688,6 +723,40 @@ function SmileOneConfigTab() {
               <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)" }}>No unsaved changes</span>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Merchant Callback URLs ── */}
+      <div style={innerCard}>
+        <p style={sectionTitle}>Merchant Callback URLs</p>
+        <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
+          Register these URLs in your Smile.one Merchant Dashboard so Smile.one can call back to your store.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {webhooks.map((wh) => (
+            <div key={wh.path} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,80%)" }}>{wh.label}</span>
+                <span style={{ fontSize: "10px", color: "hsl(220,10%,45%)" }}>{wh.desc}</span>
+              </div>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)",
+                borderRadius: "6px", padding: "6px 10px",
+              }}>
+                <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {origin}{wh.path}
+                </code>
+                <button
+                  data-testid={`button-copy-${wh.label.replace(/\s+/g, "-").toLowerCase()}`}
+                  onClick={() => copyUrl(wh.path)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: copiedKey === wh.path ? "#4ade80" : "hsl(220,10%,55%)", display: "flex", alignItems: "center", flexShrink: 0 }}
+                >
+                  {copiedKey === wh.path ? <Check size={13} /> : <Copy size={13} />}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -956,22 +1025,33 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
   const [values, setValues] = useState<Record<string, string>>(initValues);
   const [savedValues, setSavedValues] = useState<Record<string, string>>(initValues);
   const [saved, setSaved] = useState(false);
+  const [enabled, setEnabled] = useState<boolean>(() => parseConfig(plugin).ENABLED !== "false");
 
   useEffect(() => {
+    const cfg = parseConfig(plugin);
     const v = initValues();
     setValues(v);
     setSavedValues(v);
+    setEnabled(cfg.ENABLED !== "false");
   }, [plugin]);
 
   const isDirty = JSON.stringify(values) !== JSON.stringify(savedValues);
 
   const saveMut = useMutation({
-    mutationFn: () => adminApi.put(`/plugins/${slug}`, { name: label, config: JSON.stringify(values) }),
+    mutationFn: () => adminApi.put(`/plugins/${slug}`, { name: label, config: JSON.stringify({ ...values, ENABLED: enabled ? "true" : "false" }) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/plugins"] });
       setSavedValues({ ...values });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+    },
+  });
+
+  const toggleEnabledMut = useMutation({
+    mutationFn: (val: boolean) => adminApi.put(`/plugins/${slug}`, { name: label, config: JSON.stringify({ ...parseConfig(plugin), ...values, ENABLED: val ? "true" : "false" }) }),
+    onSuccess: (_, val) => {
+      setEnabled(val);
+      qc.invalidateQueries({ queryKey: ["/api/admin/plugins"] });
     },
   });
 
@@ -1001,6 +1081,17 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
               : <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>Not configured</div>
             }
           </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "11px", color: enabled && isConfigured ? "hsl(142,71%,48%)" : "hsl(220,10%,40%)" }}>
+            {enabled && isConfigured ? "Enabled" : "Disabled"}
+          </span>
+          <ToggleSwitch
+            checked={enabled && isConfigured}
+            onChange={() => toggleEnabledMut.mutate(!enabled)}
+            disabled={toggleEnabledMut.isPending || !isConfigured}
+            testId={`toggle-provider-${slug}`}
+          />
         </div>
       </div>
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px", background: "hsl(220,20%,7%)" }}>
@@ -1123,6 +1214,26 @@ export default function ApiIntegration() {
     tryScroll();
   }, []);
 
+  const qcMain = useQueryClient();
+
+  const togglePluginMut = useMutation({
+    mutationFn: ({ slug, name, config, isEnabled }: { slug: string; name: string; config: string | null; isEnabled: boolean }) =>
+      adminApi.put(`/plugins/${slug}`, { name, config, isEnabled }),
+    onSuccess: () => qcMain.invalidateQueries({ queryKey: ["/api/admin/plugins"] }),
+  });
+
+  const toggleBusanMut = useMutation({
+    mutationFn: (isActive: boolean) =>
+      adminApi.post("/busan/config", { ...busanConfig, isActive }),
+    onSuccess: () => qcMain.invalidateQueries({ queryKey: ["/api/admin/busan/config"] }),
+  });
+
+  const toggleSmileMut = useMutation({
+    mutationFn: (isActive: boolean) =>
+      adminApi.post("/smileone/config", { ...smileOneConfig, isActive }),
+    onSuccess: () => qcMain.invalidateQueries({ queryKey: ["/api/admin/smileone/config"] }),
+  });
+
   const pluginMap = Object.fromEntries(plugins.map((p) => [p.slug, p]));
 
   function isConfigured(service: ServiceDef) {
@@ -1156,6 +1267,7 @@ export default function ApiIntegration() {
     onConfigure: () => void,
     testId: string,
     isLast: boolean,
+    toggleProps?: { enabled: boolean; onToggle: () => void; loading?: boolean; toggleTestId?: string },
   ) => (
     <div
       style={{
@@ -1175,13 +1287,21 @@ export default function ApiIntegration() {
         <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
         <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{note}</div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, marginLeft: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           {configured
             ? <><CheckCircle size={12} color="hsl(142,71%,48%)" /><span style={{ fontSize: "11px", color: "hsl(142,71%,48%)" }}>Configured</span></>
             : <><XCircle size={12} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>Not set</span></>
           }
         </div>
+        {toggleProps && (
+          <ToggleSwitch
+            checked={toggleProps.enabled}
+            onChange={toggleProps.onToggle}
+            disabled={toggleProps.loading || !configured}
+            testId={toggleProps.toggleTestId}
+          />
+        )}
         <button onClick={onConfigure}
           style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa", whiteSpace: "nowrap", flexShrink: 0 }}
           data-testid={testId}>
@@ -1211,21 +1331,33 @@ export default function ApiIntegration() {
           </div>
           <div style={{ padding: "0 20px" }}>
             {/* Standard services */}
-            {SERVICES.map((svc) => (
-              <div key={svc.slug} id={svc.slug}>
-                {renderRow(
-                  <Plug size={14} />,
-                  svc.name,
-                  svc.note,
-                  isConfigured(svc),
-                  () => setConfiguring(svc),
-                  `button-configure-${svc.slug}`,
-                  false,
-                )}
-              </div>
-            ))}
+            {SERVICES.map((svc) => {
+              const plug = pluginMap[svc.slug];
+              return (
+                <div key={svc.slug} id={svc.slug}>
+                  {renderRow(
+                    <Plug size={14} />,
+                    svc.name,
+                    svc.note,
+                    isConfigured(svc),
+                    () => setConfiguring(svc),
+                    `button-configure-${svc.slug}`,
+                    false,
+                    {
+                      enabled: plug?.isEnabled !== false,
+                      onToggle: () => togglePluginMut.mutate({
+                        slug: svc.slug, name: svc.name, config: plug?.config ?? null,
+                        isEnabled: !(plug?.isEnabled !== false),
+                      }),
+                      loading: togglePluginMut.isPending,
+                      toggleTestId: `toggle-${svc.slug}`,
+                    },
+                  )}
+                </div>
+              );
+            })}
 
-            {/* Social Login row */}
+            {/* Social Login row — toggles live inside the modal per-provider */}
             <div id="social-auth-google">
               {renderRow(
                 <ShieldCheck size={14} />,
@@ -1247,6 +1379,12 @@ export default function ApiIntegration() {
               () => setBusanOpen(true),
               "button-configure-busan",
               false,
+              {
+                enabled: busanConfig?.isActive !== false,
+                onToggle: () => toggleBusanMut.mutate(!(busanConfig?.isActive !== false)),
+                loading: toggleBusanMut.isPending,
+                toggleTestId: "toggle-busan",
+              },
             )}
 
             {/* Smile.one Integration row */}
@@ -1258,6 +1396,12 @@ export default function ApiIntegration() {
               () => setSmileOneOpen(true),
               "button-configure-smileone",
               true,
+              {
+                enabled: smileOneConfig?.isActive !== false,
+                onToggle: () => toggleSmileMut.mutate(!(smileOneConfig?.isActive !== false)),
+                loading: toggleSmileMut.isPending,
+                toggleTestId: "toggle-smileone",
+              },
             )}
           </div>
         </div>

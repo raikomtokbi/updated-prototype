@@ -55,7 +55,7 @@ function ConfigTab() {
     queryFn: () => adminApi.get("/smileone/config"),
   });
 
-  const [form, setForm] = useState({ uid: "", apiKey: "", licenseKey: "", region: "global", email: "", isActive: true });
+  const [form, setForm] = useState({ uid: "", apiKey: "", licenseKey: "", region: "global", email: "" });
   const [testStatus, setTestStatus] = useState<null | { ok: boolean; message: string; balance?: unknown }>(null);
   const [testing, setTesting] = useState(false);
 
@@ -67,7 +67,6 @@ function ConfigTab() {
         licenseKey: config.licenseKey ?? "",
         region: config.region ?? "global",
         email: config.email ?? "",
-        isActive: config.isActive ?? true,
       });
     }
   }, [config]);
@@ -127,17 +126,6 @@ function ConfigTab() {
           <select data-testid="select-smileone-region" style={{ ...selectStyle, width: "100%" }} value={form.region} onChange={set("region")}>
             {REGIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 0" }}>
-          <input
-            data-testid="toggle-smileone-active"
-            type="checkbox"
-            checked={form.isActive}
-            onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
-            style={{ cursor: "pointer", width: "16px", height: "16px" }}
-          />
-          <label style={{ ...labelStyle, cursor: "pointer", margin: 0 }}>Enable Smile.one</label>
         </div>
 
         {testStatus && (

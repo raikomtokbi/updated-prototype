@@ -529,9 +529,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       ]);
       return res.json({
         enabled,
-        google: enabled && Boolean(g.GOOGLE_CLIENT_ID),
-        facebook: enabled && Boolean(fb.FACEBOOK_APP_ID),
-        discord: enabled && Boolean(dc.DISCORD_CLIENT_ID),
+        google: enabled && Boolean(g.GOOGLE_CLIENT_ID) && g.ENABLED !== "false",
+        facebook: enabled && Boolean(fb.FACEBOOK_APP_ID) && fb.ENABLED !== "false",
+        discord: enabled && Boolean(dc.DISCORD_CLIENT_ID) && dc.ENABLED !== "false",
       });
     } catch {
       return res.json({ enabled: false, google: false, facebook: false, discord: false });
