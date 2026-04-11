@@ -986,27 +986,32 @@ interface ProviderSectionProps {
 function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: ProviderSectionProps) {
   const qc = useQueryClient();
   const plugin = plugins.find((p) => p.slug === slug);
-  const existingConfig = (() => { try { return JSON.parse(plugin?.config ?? "{}"); } catch { return {}; } })();
-  const [values, setValues] = useState<Record<string, string>>(() => {
+  const parseConfig = (p: typeof plugin) => {
+    try { return JSON.parse(p?.config ?? "{}"); } catch { return {}; }
+  };
+  const initValues = () => {
+    const cfg = parseConfig(plugin);
     const init: Record<string, string> = {};
-    fields.forEach((f) => { init[f.key] = existingConfig[f.key] ?? ""; });
+    fields.forEach((f) => { init[f.key] = cfg[f.key] ?? ""; });
     return init;
-  });
+  };
+  const [values, setValues] = useState<Record<string, string>>(initValues);
+  const [savedValues, setSavedValues] = useState<Record<string, string>>(initValues);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const cfg = (() => { try { return JSON.parse(plugin?.config ?? "{}"); } catch { return {}; } })();
-    setValues(() => {
-      const init: Record<string, string> = {};
-      fields.forEach((f) => { init[f.key] = cfg[f.key] ?? ""; });
-      return init;
-    });
+    const v = initValues();
+    setValues(v);
+    setSavedValues(v);
   }, [plugin]);
+
+  const isDirty = JSON.stringify(values) !== JSON.stringify(savedValues);
 
   const saveMut = useMutation({
     mutationFn: () => adminApi.put(`/plugins/${slug}`, { name: label, config: JSON.stringify(values) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/plugins"] });
+      setSavedValues({ ...values });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
@@ -1055,17 +1060,21 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
             />
           </div>
         ))}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}>
-          {saved && <span style={{ fontSize: "11px", color: "hsl(142,71%,48%)", alignSelf: "center", marginRight: "8px" }}>Saved</span>}
-          <button
-            onClick={() => saveMut.mutate()}
-            disabled={saveMut.isPending}
-            style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }}
-            data-testid={`button-save-${slug}`}
-          >
-            {saveMut.isPending ? "Saving..." : "Save"}
-          </button>
-        </div>
+        {(isDirty || saveMut.isPending || saved) && (
+          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: "4px", gap: "8px" }}>
+            {saved && <span style={{ fontSize: "11px", color: "hsl(142,71%,48%)" }}>Saved</span>}
+            {(isDirty || saveMut.isPending) && (
+              <button
+                onClick={() => saveMut.mutate()}
+                disabled={saveMut.isPending}
+                style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }}
+                data-testid={`button-save-${slug}`}
+              >
+                {saveMut.isPending ? "Saving..." : "Save"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
