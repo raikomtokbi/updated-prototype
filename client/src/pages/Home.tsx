@@ -125,14 +125,6 @@ function HeroSlider() {
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
             />
           )}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(90deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0.04) 100%), linear-gradient(0deg, rgba(0,0,0,0.35) 0%, transparent 45%)",
-            }}
-          />
         </div>
       ))}
 
