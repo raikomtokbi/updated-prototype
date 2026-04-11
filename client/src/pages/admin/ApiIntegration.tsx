@@ -666,6 +666,11 @@ function SmileOneConfigTab() {
     setTimeout(() => setCopiedKey(null), 2000);
   }
 
+  function formatUrl(path: string) {
+    const url = `${origin}${path}`;
+    return url.length > 34 ? `${url.slice(0, 34)}...` : url;
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={innerCard}>
@@ -730,7 +735,7 @@ function SmileOneConfigTab() {
       <div style={innerCard}>
         <p style={sectionTitle}>Merchant Callback URLs</p>
         <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
-          Register these URLs in your Smile.one Merchant Dashboard so Smile.one can call back to your store.
+          Register these URLs in your Smile.one Merchant Dashboard. Keep the same domain after build or update the URLs to match your production domain.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {webhooks.map((wh) => (
@@ -745,7 +750,7 @@ function SmileOneConfigTab() {
                 borderRadius: "6px", padding: "6px 10px",
               }}>
                 <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {origin}{wh.path}
+                  {formatUrl(wh.path)}
                 </code>
                 <button
                   data-testid={`button-copy-${wh.label.replace(/\s+/g, "-").toLowerCase()}`}
