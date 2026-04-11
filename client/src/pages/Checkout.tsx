@@ -69,6 +69,10 @@ function UpiPaymentOverlay({
   });
   const [copied, setCopied] = useState<string | null>(null);
   const [utr, setUtr] = useState<string | undefined>(undefined);
+  const [utrInput, setUtrInput] = useState("");
+  const [utrSubmitting, setUtrSubmitting] = useState(false);
+  const [utrSubmitted, setUtrSubmitted] = useState(false);
+  const [utrError, setUtrError] = useState<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isExpiredRef = useRef(false);
@@ -93,8 +97,40 @@ function UpiPaymentOverlay({
         stopAll();
         setUtr(d.utr);
         onSuccess(d.utr);
+      } else if (d.status === "payment_review" && !utrSubmitted) {
+        setUtrSubmitted(true);
+        if (d.utr) setUtrInput(d.utr);
       }
     } catch {}
+  }
+
+  async function handleUtrSubmit() {
+    const trimmed = utrInput.trim();
+    if (!trimmed || trimmed.length < 6) {
+      setUtrError("Enter a valid UTR / transaction reference (min 6 characters)");
+      return;
+    }
+    setUtrError(null);
+    setUtrSubmitting(true);
+    try {
+      const res = await fetch("/api/upi/submit-utr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.orderId, utr: trimmed }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Failed to submit UTR");
+      if (d.status === "completed") {
+        stopAll();
+        onSuccess(trimmed);
+      } else {
+        setUtrSubmitted(true);
+      }
+    } catch (err: any) {
+      setUtrError(err.message || "Failed to submit UTR");
+    } finally {
+      setUtrSubmitting(false);
+    }
   }
 
   useEffect(() => {
@@ -238,18 +274,59 @@ function UpiPaymentOverlay({
             <li>Tap "Open Google Pay" above — amount &amp; UPI ID are pre-filled</li>
             <li>Or scan the QR code / enter the UPI ID manually</li>
             <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> if asked</li>
-            <li>Complete the payment and wait for confirmation</li>
+            <li>After paying, enter your <strong style={{ color: "hsl(210,40%,85%)" }}>UTR / transaction ID</strong> below</li>
           </ol>
-          <p style={{ margin: "0.5rem 0 0", fontSize: "11px", color: "hsl(258,80%,68%)" }}>
-            Payment is verified automatically — this page updates in real time.
-          </p>
         </div>
 
-        {/* Polling indicator */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", color: "hsl(220,10%,45%)", fontSize: "12px" }}>
-          <Loader2 size={13} style={{ animation: "spin 1.5s linear infinite" }} />
-          <span>Checking payment status automatically...</span>
-        </div>
+        {/* UTR Submission */}
+        {utrSubmitted ? (
+          <div style={{ background: "hsla(142,70%,50%,0.08)", border: "1px solid hsla(142,70%,50%,0.25)", borderRadius: "0.5rem", padding: "1rem", textAlign: "center" }}>
+            <CheckCircle size={20} style={{ color: "hsl(142,70%,55%)", marginBottom: "6px" }} />
+            <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>UTR Submitted!</p>
+            <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,52%)" }}>Your payment is under review. You'll be notified once verified.</p>
+            <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(258,80%,68%)", fontFamily: "monospace" }}>{utrInput}</p>
+          </div>
+        ) : (
+          <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(258,50%,30%)", borderRadius: "0.5rem", padding: "0.875rem" }}>
+            <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 600, color: "hsl(258,80%,72%)" }}>After paying — enter your UTR</p>
+            <p style={{ margin: "0 0 10px", fontSize: "11px", color: "hsl(220,10%,48%)" }}>
+              Find the 12-digit UTR in your UPI app under transaction details.
+            </p>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                data-testid="input-utr"
+                value={utrInput}
+                onChange={(e) => { setUtrInput(e.target.value); setUtrError(null); }}
+                placeholder="e.g. 123456789012"
+                maxLength={50}
+                style={{
+                  flex: 1, padding: "0.55rem 0.75rem", borderRadius: "6px",
+                  background: "hsl(220,20%,8%)", border: `1px solid ${utrError ? "#ef4444" : "hsl(220,15%,22%)"}`,
+                  color: "hsl(210,40%,90%)", fontSize: "13px", outline: "none",
+                }}
+              />
+              <button
+                data-testid="button-submit-utr"
+                onClick={handleUtrSubmit}
+                disabled={utrSubmitting || !utrInput.trim()}
+                style={{
+                  padding: "0.55rem 1rem", borderRadius: "6px", border: "none",
+                  background: utrSubmitting ? "hsl(258,50%,30%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  color: "#fff", fontSize: "13px", fontWeight: 600, cursor: utrSubmitting ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap",
+                }}
+              >
+                {utrSubmitting ? <Loader2 size={13} style={{ animation: "spin 1.5s linear infinite" }} /> : <CheckCircle size={13} />}
+                {utrSubmitting ? "Submitting…" : "Submit"}
+              </button>
+            </div>
+            {utrError && <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>{utrError}</p>}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", color: "hsl(220,10%,40%)", fontSize: "11px" }}>
+              <Loader2 size={11} style={{ animation: "spin 1.5s linear infinite" }} />
+              <span>Also checking for automatic verification every 5s…</span>
+            </div>
+          </div>
+        )}
 
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>

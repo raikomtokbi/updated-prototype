@@ -210,6 +210,7 @@ export interface IStorage {
   // UPI Order Matching
   getPendingUpiOrders(amount: string): Promise<Order[]>;
   updateOrderPaymentVerified(orderId: string, utr: string): Promise<void>;
+  updateOrderUtrSubmitted(orderId: string, utr: string): Promise<void>;
 
   // Password Reset Tokens
   createPasswordResetToken(userId: string, otpHash: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -1001,6 +1002,16 @@ export class DatabaseStorage implements IStorage {
         status: "completed",
         utr,
         paymentVerifiedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId));
+  }
+
+  async updateOrderUtrSubmitted(orderId: string, utr: string): Promise<void> {
+    await db.update(orders)
+      .set({
+        utr,
+        status: "payment_review",
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));

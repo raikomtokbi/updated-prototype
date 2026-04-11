@@ -2995,6 +2995,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // Customer submits UTR after paying — sets order to payment_review for admin verification
+  app.post("/api/upi/submit-utr", async (req, res) => {
+    try {
+      const { orderId, utr } = req.body;
+      if (!orderId) return res.status(400).json({ error: "orderId required" });
+      if (!utr || typeof utr !== "string" || utr.trim().length < 6) {
+        return res.status(400).json({ error: "Valid UTR reference required" });
+      }
+      const order = await storage.getOrderById(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      if (order.status === "completed") {
+        return res.json({ success: true, status: "completed", message: "Order already completed" });
+      }
+      await storage.updateOrderUtrSubmitted(orderId, utr.trim());
+      return res.json({ success: true, status: "payment_review", message: "UTR submitted. Admin will verify shortly." });
+    } catch (err: any) {
+      console.error("UTR submit error:", err);
+      res.status(500).json({ error: err.message || "Failed to submit UTR" });
+    }
+  });
+
   // Poll order payment status
   app.get("/api/orders/:id/status", async (req, res) => {
     try {
