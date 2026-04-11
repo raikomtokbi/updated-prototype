@@ -71,9 +71,9 @@ export default function Login() {
     width: "100%",
     padding: "0.6rem 1rem",
     borderRadius: "0.5rem",
-    background: "hsl(220,15%,13%)",
-    border: "1px solid hsl(220,15%,20%)",
-    color: "hsl(210,40%,80%)",
+    background: "hsl(var(--border))",
+    border: "1px solid hsl(var(--border))",
+    color: "hsl(var(--foreground))",
     fontSize: "0.85rem",
     fontWeight: 500,
     cursor: "pointer",
@@ -106,8 +106,8 @@ export default function Login() {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
           padding: "2.5rem",
           position: "relative",
@@ -128,22 +128,22 @@ export default function Login() {
               margin: "0 auto 1rem",
             }}
           >
-            <Zap size={24} style={{ color: "hsl(258,90%,70%)" }} />
+            <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h1
             className="font-orbitron"
-            style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.4rem" }}
+            style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.4rem" }}
           >
             Welcome Back
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)" }}>Sign in to your Nexcoin account</p>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>Sign in to your Nexcoin account</p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div>
             <label
               htmlFor="username"
-              style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}
+              style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}
             >
               Username / Email / User ID
             </label>
@@ -163,7 +163,7 @@ export default function Login() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
               <label
                 htmlFor="password"
-                style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)" }}
+                style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}
               >
                 Password
               </label>
@@ -171,7 +171,7 @@ export default function Login() {
                 href="/auth/forgot-password"
                 style={{
                   fontSize: "0.75rem",
-                  color: "hsl(258,90%,70%)",
+                  color: "hsl(var(--primary))",
                   textDecoration: "none",
                   display: "inline-flex",
                   alignItems: "center",
@@ -205,7 +205,7 @@ export default function Login() {
                   transform: "translateY(-50%)",
                   background: "none",
                   border: "none",
-                  color: "hsl(220,10%,45%)",
+                  color: "hsl(var(--muted-foreground))",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -254,9 +254,9 @@ export default function Login() {
         {hasSocial && (
           <div style={{ marginTop: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
-              <span style={{ fontSize: "0.75rem", color: "hsl(220,10%,40%)", whiteSpace: "nowrap" }}>or continue with</span>
-              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
+              <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or continue with</span>
+              <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {socialProviders.google && (
@@ -300,11 +300,11 @@ export default function Login() {
         )}
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
             Don't have an account?{" "}
             <Link
               href="/register"
-              style={{ color: "hsl(258,90%,70%)", textDecoration: "none", fontWeight: 600 }}
+              style={{ color: "hsl(var(--primary))", textDecoration: "none", fontWeight: 600 }}
             >
               Register
             </Link>

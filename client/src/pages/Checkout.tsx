@@ -173,7 +173,7 @@ function UpiPaymentOverlay({
         <div style={{ ...card, padding: "1rem", marginBottom: "0.875rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
             <p style={{ margin: "0 0 2px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Amount to Pay</p>
-            <p style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "hsl(258,90%,72%)" }}>{currencySymbol}{parseFloat(data.amount).toFixed(2)}</p>
+            <p style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "hsl(var(--primary))" }}>{currencySymbol}{parseFloat(data.amount).toFixed(2)}</p>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end", marginBottom: "2px" }}>
@@ -464,7 +464,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
           style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
-            background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))",
+            background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
             color: "hsl(var(--foreground))", fontSize: "0.875rem", cursor: "pointer",
           }}
         >
@@ -869,7 +869,7 @@ export default function Checkout() {
               )}
               <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Total</span>
-                <span className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(258,90%,72%)" }} data-testid="text-checkout-total">
+                <span className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(var(--primary))" }} data-testid="text-checkout-total">
                   {currencySymbol}{total.toFixed(2)}
                 </span>
               </div>

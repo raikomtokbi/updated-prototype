@@ -1191,7 +1191,7 @@ function MaintenancePage() {
           style={{
             fontSize: "2rem",
             fontWeight: 800,
-            color: "hsl(210, 40%, 95%)",
+            color: "hsl(var(--foreground))",
             marginBottom: "0.75rem",
             letterSpacing: "-0.01em",
           }}

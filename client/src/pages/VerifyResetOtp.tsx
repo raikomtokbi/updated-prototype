@@ -27,7 +27,7 @@ export default function VerifyResetOtp() {
           <p style={{ color: "hsl(0,72%,65%)", marginBottom: "1rem" }}>
             Invalid or missing reset session.
           </p>
-          <Link href="/auth/forgot-password" style={{ color: "hsl(258,90%,70%)" }}>
+          <Link href="/auth/forgot-password" style={{ color: "hsl(var(--primary))" }}>
             Request a new OTP
           </Link>
         </div>
@@ -88,8 +88,8 @@ export default function VerifyResetOtp() {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
           padding: "2.5rem",
           position: "relative",
@@ -102,7 +102,7 @@ export default function VerifyResetOtp() {
             alignItems: "center",
             gap: "0.35rem",
             fontSize: "0.8rem",
-            color: "hsl(220,10%,50%)",
+            color: "hsl(var(--muted-foreground))",
             textDecoration: "none",
             marginBottom: "1.75rem",
           }}
@@ -126,20 +126,20 @@ export default function VerifyResetOtp() {
               margin: "0 auto 1rem",
             }}
           >
-            <ShieldCheck size={24} style={{ color: "hsl(258,90%,70%)" }} />
+            <ShieldCheck size={24} style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h1
             className="font-orbitron"
             style={{
               fontSize: "1.4rem",
               fontWeight: 800,
-              color: "hsl(210,40%,95%)",
+              color: "hsl(var(--foreground))",
               marginBottom: "0.4rem",
             }}
           >
             Enter OTP
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)" }}>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
             Enter the 6-digit code sent to your registered email. It expires in 10 minutes.
           </p>
         </div>
@@ -213,12 +213,12 @@ export default function VerifyResetOtp() {
         </form>
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
             Didn't receive it?{" "}
             <Link
               href="/auth/forgot-password"
               style={{
-                color: "hsl(258,90%,70%)",
+                color: "hsl(var(--primary))",
                 textDecoration: "none",
                 fontWeight: 600,
               }}

@@ -66,8 +66,8 @@ export default function ForgotPassword() {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
           padding: "2.5rem",
           position: "relative",
@@ -80,7 +80,7 @@ export default function ForgotPassword() {
             alignItems: "center",
             gap: "0.35rem",
             fontSize: "0.8rem",
-            color: "hsl(220,10%,50%)",
+            color: "hsl(var(--muted-foreground))",
             textDecoration: "none",
             marginBottom: "1.75rem",
           }}
@@ -104,20 +104,20 @@ export default function ForgotPassword() {
               margin: "0 auto 1rem",
             }}
           >
-            <KeyRound size={24} style={{ color: "hsl(258,90%,70%)" }} />
+            <KeyRound size={24} style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h1
             className="font-orbitron"
             style={{
               fontSize: "1.4rem",
               fontWeight: 800,
-              color: "hsl(210,40%,95%)",
+              color: "hsl(var(--foreground))",
               marginBottom: "0.4rem",
             }}
           >
             Forgot Password
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)" }}>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
             Enter your email, username, or user ID to receive a reset OTP.
           </p>
         </div>
@@ -203,12 +203,12 @@ export default function ForgotPassword() {
         </form>
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
             Remember your password?{" "}
             <Link
               href="/login"
               style={{
-                color: "hsl(258,90%,70%)",
+                color: "hsl(var(--primary))",
                 textDecoration: "none",
                 fontWeight: 600,
               }}

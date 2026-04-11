@@ -123,7 +123,7 @@ export default function About() {
           >
             <p
               className="font-orbitron"
-              style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(258,90%,72%)", marginBottom: "0.3rem" }}
+              style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(var(--primary))", marginBottom: "0.3rem" }}
             >
               {stat.value}
             </p>

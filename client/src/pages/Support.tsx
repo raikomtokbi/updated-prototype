@@ -60,11 +60,11 @@ export default function Support() {
       <div style={{ marginBottom: "2.5rem" }}>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
+          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}
         >
           Support Center
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)" }}>
+        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
           Find answers to common questions or reach out to our team.
         </p>
       </div>
@@ -75,7 +75,7 @@ export default function Support() {
           style={{
             fontSize: "1rem",
             fontWeight: 700,
-            color: "hsl(210,40%,85%)",
+            color: "hsl(var(--foreground))",
             marginBottom: "1rem",
             textTransform: "uppercase",
             letterSpacing: "0.05em",
@@ -84,7 +84,7 @@ export default function Support() {
           Frequently Asked Questions
         </h2>
         {faqs.length === 0 ? (
-          <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "13px", background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "0.75rem" }}>
+          <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem" }}>
             No FAQ items available yet.
           </div>
         ) : (
@@ -93,8 +93,8 @@ export default function Support() {
               <div
                 key={idx}
                 style={{
-                  background: "hsl(220,20%,9%)",
-                  border: "1px solid hsl(220,15%,18%)",
+                  background: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
                   borderRadius: "0.75rem",
                   overflow: "hidden",
                 }}
@@ -110,7 +110,7 @@ export default function Support() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "hsl(210,40%,88%)",
+                    color: "hsl(var(--foreground))",
                     fontWeight: 600,
                     fontSize: "0.875rem",
                     textAlign: "left",
@@ -125,7 +125,7 @@ export default function Support() {
                     style={{
                       padding: "0 1.25rem 1rem",
                       fontSize: "0.85rem",
-                      color: "hsl(220,10%,55%)",
+                      color: "hsl(var(--muted-foreground))",
                       lineHeight: 1.65,
                     }}
                   >
@@ -144,7 +144,7 @@ export default function Support() {
           style={{
             fontSize: "1rem",
             fontWeight: 700,
-            color: "hsl(210,40%,85%)",
+            color: "hsl(var(--foreground))",
             marginBottom: "1rem",
             textTransform: "uppercase",
             letterSpacing: "0.05em",
@@ -154,8 +154,8 @@ export default function Support() {
         </h2>
         <div
           style={{
-            background: "hsl(220,20%,9%)",
-            border: "1px solid hsl(220,15%,18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "1rem",
             padding: "1.75rem",
           }}
@@ -180,13 +180,13 @@ export default function Support() {
                 justifyContent: "center",
               }}
             >
-              <Headphones size={18} style={{ color: "hsl(258,90%,70%)" }} />
+              <Headphones size={18} style={{ color: "hsl(var(--primary))" }} />
             </div>
             <div>
-              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>
+              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                 Our support team
               </p>
-              <p style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)" }}>
+              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
                 Typically responds within 24 hours
               </p>
             </div>

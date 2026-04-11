@@ -32,19 +32,19 @@ function GameCard({ game }: { game: Game }) {
         display: "block",
         borderRadius: "0.75rem",
         overflow: "hidden",
-        border: "1px solid rgba(124,58,237,0.15)",
-        background: "hsl(220,20%,9%)",
+        border: "1px solid hsl(var(--primary) / 0.15)",
+        background: "hsl(var(--card))",
         textDecoration: "none",
         transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
         cursor: "pointer",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.5)";
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.5)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.15)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
         (e.currentTarget as HTMLElement).style.boxShadow = "none";
       }}
@@ -63,13 +63,13 @@ function GameCard({ game }: { game: Game }) {
           </div>
         )}
         {game.isTrending && (
-          <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
+          <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "hsl(var(--primary))", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
             HOT
           </span>
         )}
         {/* Game name hanging below */}
         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.4rem", paddingX: "0" }}>
-          <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(210,40%,92%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
+          <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
             {game.name}
           </h3>
         </div>
@@ -87,19 +87,19 @@ function ProductCard({ product }: { product: Product }) {
         display: "block",
         borderRadius: "0.75rem",
         overflow: "hidden",
-        border: "1px solid rgba(124,58,237,0.15)",
-        background: "hsl(220,20%,9%)",
+        border: "1px solid hsl(var(--primary) / 0.15)",
+        background: "hsl(var(--card))",
         textDecoration: "none",
         transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
         cursor: "pointer",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.5)";
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.5)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.15)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
         (e.currentTarget as HTMLElement).style.boxShadow = "none";
       }}
@@ -122,7 +122,7 @@ function ProductCard({ product }: { product: Product }) {
       </div>
       <div style={{ padding: "1rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
-          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)", flex: 1 }}>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", flex: 1 }}>
             {product.title}
           </h3>
           <span className="badge badge-purple" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>
@@ -130,7 +130,7 @@ function ProductCard({ product }: { product: Product }) {
           </span>
         </div>
         {product.description && (
-          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,50%)", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
             {product.description.length > 70 ? product.description.slice(0, 70) + "…" : product.description}
           </p>
         )}
@@ -142,7 +142,7 @@ function ProductCard({ product }: { product: Product }) {
             gap: "0.35rem",
             fontSize: "0.78rem",
             fontWeight: 600,
-            color: "hsl(258,90%,72%)",
+            color: "hsl(var(--primary))",
           }}
         >
           View Packages <Zap size={12} />
@@ -196,11 +196,11 @@ export default function Products() {
       <div style={{ marginBottom: "2rem" }}>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
+          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}
         >
           All Products
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)" }}>
+        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
           Game top-ups, gift cards, vouchers, and subscription plans — all in one place.
         </p>
       </div>
@@ -208,7 +208,7 @@ export default function Products() {
       {/* Filters */}
       <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-          <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "hsl(220,10%,45%)", pointerEvents: "none" }} />
+          <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "hsl(var(--muted-foreground))", pointerEvents: "none" }} />
           <input
             className="input-field"
             placeholder="Search games, gift cards..."
@@ -233,9 +233,9 @@ export default function Products() {
                   gap: "0.3rem",
                   padding: "0.45rem 0.9rem",
                   borderRadius: "0.5rem",
-                  border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(220,15%,20%)"}`,
+                  border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(var(--border))"}`,
                   background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
-                  color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(220,10%,55%)",
+                  color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(var(--muted-foreground))",
                   fontSize: "0.8rem",
                   fontWeight: 500,
                   cursor: "pointer",
@@ -253,7 +253,7 @@ export default function Products() {
 
       {/* Count */}
       {!isLoading && (
-        <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,40%)", marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
           {filtered.length} {filtered.length === 1 ? "item" : "items"} found
         </p>
       )}
@@ -266,8 +266,8 @@ export default function Products() {
               key={i}
               style={{
                 aspectRatio: "4/3",
-                background: "hsl(220,20%,9%)",
-                border: "1px solid hsl(220,15%,14%)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "0.75rem",
                 animation: "pulse 1.5s infinite",
               }}
@@ -275,7 +275,7 @@ export default function Products() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 1rem", color: "hsl(220,10%,45%)" }}>
+        <div style={{ textAlign: "center", padding: "5rem 1rem", color: "hsl(var(--muted-foreground))" }}>
           <Zap size={48} style={{ marginBottom: "1rem", opacity: 0.3 }} />
           <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>No products found.</p>
           {search && (

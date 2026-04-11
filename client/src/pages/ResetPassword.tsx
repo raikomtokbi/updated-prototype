@@ -31,7 +31,7 @@ export default function ResetPassword() {
           <p style={{ color: "hsl(0,72%,65%)", marginBottom: "1rem" }}>
             Invalid or missing reset session.
           </p>
-          <Link href="/auth/forgot-password" style={{ color: "hsl(258,90%,70%)" }}>
+          <Link href="/auth/forgot-password" style={{ color: "hsl(var(--primary))" }}>
             Request a new OTP
           </Link>
         </div>
@@ -97,8 +97,8 @@ export default function ResetPassword() {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
           padding: "2.5rem",
           position: "relative",
@@ -112,7 +112,7 @@ export default function ResetPassword() {
               alignItems: "center",
               gap: "0.35rem",
               fontSize: "0.8rem",
-              color: "hsl(220,10%,50%)",
+              color: "hsl(var(--muted-foreground))",
               textDecoration: "none",
               marginBottom: "1.75rem",
             }}
@@ -140,7 +140,7 @@ export default function ResetPassword() {
             {success ? (
               <CheckCircle2 size={24} style={{ color: "hsl(142,72%,60%)" }} />
             ) : (
-              <Lock size={24} style={{ color: "hsl(258,90%,70%)" }} />
+              <Lock size={24} style={{ color: "hsl(var(--primary))" }} />
             )}
           </div>
           <h1
@@ -148,13 +148,13 @@ export default function ResetPassword() {
             style={{
               fontSize: "1.4rem",
               fontWeight: 800,
-              color: "hsl(210,40%,95%)",
+              color: "hsl(var(--foreground))",
               marginBottom: "0.4rem",
             }}
           >
             {success ? "Password Updated" : "Set New Password"}
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)" }}>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
             {success
               ? "Your password has been changed. Redirecting to login..."
               : "Choose a strong password of at least 8 characters."}
@@ -218,7 +218,7 @@ export default function ResetPassword() {
                     transform: "translateY(-50%)",
                     background: "none",
                     border: "none",
-                    color: "hsl(220,10%,45%)",
+                    color: "hsl(var(--muted-foreground))",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -266,7 +266,7 @@ export default function ResetPassword() {
                     transform: "translateY(-50%)",
                     background: "none",
                     border: "none",
-                    color: "hsl(220,10%,45%)",
+                    color: "hsl(var(--muted-foreground))",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -294,7 +294,7 @@ export default function ResetPassword() {
                       alignItems: "center",
                       gap: "0.4rem",
                       fontSize: "0.75rem",
-                      color: ok ? "hsl(142,72%,60%)" : "hsl(220,10%,45%)",
+                      color: ok ? "hsl(142,72%,60%)" : "hsl(var(--muted-foreground))",
                     }}
                   >
                     <div

@@ -54,11 +54,11 @@ export default function Privacy() {
       <div style={{ marginBottom: "2.5rem" }}>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
+          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}
         >
           Privacy Policy
         </h1>
-        <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
+        <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
           Last updated: {LAST_UPDATED}
         </p>
       </div>
@@ -66,12 +66,12 @@ export default function Privacy() {
       {customContent ? (
         <div
           style={{
-            background: "hsl(220,20%,9%)",
-            border: "1px solid hsl(220,15%,18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "0.75rem",
             padding: "1.5rem",
             fontSize: "0.85rem",
-            color: "hsl(220,10%,60%)",
+            color: "hsl(var(--muted-foreground))",
             lineHeight: 1.75,
             whiteSpace: "pre-wrap",
           }}
@@ -84,8 +84,8 @@ export default function Privacy() {
             <div
               key={section.title}
               style={{
-                background: "hsl(220,20%,9%)",
-                border: "1px solid hsl(220,15%,18%)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "0.75rem",
                 padding: "1.5rem",
               }}
@@ -94,7 +94,7 @@ export default function Privacy() {
                 style={{
                   fontSize: "0.95rem",
                   fontWeight: 700,
-                  color: "hsl(210,40%,90%)",
+                  color: "hsl(var(--foreground))",
                   marginBottom: "0.7rem",
                 }}
               >
@@ -103,7 +103,7 @@ export default function Privacy() {
               <p
                 style={{
                   fontSize: "0.85rem",
-                  color: "hsl(220,10%,55%)",
+                  color: "hsl(var(--muted-foreground))",
                   lineHeight: 1.7,
                 }}
               >

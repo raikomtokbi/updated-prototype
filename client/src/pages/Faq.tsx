@@ -10,8 +10,8 @@ function FaqRow({ item, index }: { item: FaqItem; index: number }) {
   return (
     <div
       style={{
-        background: "hsl(220,20%,9%)",
-        border: "1px solid hsl(220,15%,18%)",
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border))",
         borderRadius: "0.75rem",
         overflow: "hidden",
         transition: "border-color 0.2s",
@@ -46,18 +46,18 @@ function FaqRow({ item, index }: { item: FaqItem; index: number }) {
               justifyContent: "center",
               fontSize: "10px",
               fontWeight: 700,
-              color: "hsl(258,90%,70%)",
+              color: "hsl(var(--primary))",
             }}
           >
             {index + 1}
           </span>
-          <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "hsl(210,40%,90%)", lineHeight: 1.4 }}>
+          <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "hsl(var(--foreground))", lineHeight: 1.4 }}>
             {item.q}
           </span>
         </div>
         {open
-          ? <ChevronUp size={16} style={{ color: "hsl(258,90%,66%)", flexShrink: 0 }} />
-          : <ChevronDown size={16} style={{ color: "hsl(220,10%,40%)", flexShrink: 0 }} />
+          ? <ChevronUp size={16} style={{ color: "hsl(var(--primary))", flexShrink: 0 }} />
+          : <ChevronDown size={16} style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
         }
       </button>
       {open && (
@@ -65,9 +65,9 @@ function FaqRow({ item, index }: { item: FaqItem; index: number }) {
           style={{
             padding: "0 1.4rem 1.2rem 3.6rem",
             fontSize: "0.875rem",
-            color: "hsl(220,10%,55%)",
+            color: "hsl(var(--muted-foreground))",
             lineHeight: 1.7,
-            borderTop: "1px solid hsl(220,15%,14%)",
+            borderTop: "1px solid hsl(var(--border))",
             paddingTop: "1rem",
           }}
         >
@@ -104,8 +104,8 @@ export default function Faq() {
           textAlign: "center",
           padding: "2.5rem 1rem",
           marginBottom: "2.5rem",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1.25rem",
           position: "relative",
           overflow: "hidden",
@@ -128,17 +128,17 @@ export default function Faq() {
             margin: "0 auto 1.1rem", position: "relative",
           }}
         >
-          <MessageCircleQuestion size={24} style={{ color: "hsl(258,90%,70%)" }} />
+          <MessageCircleQuestion size={24} style={{ color: "hsl(var(--primary))" }} />
         </div>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.85rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.6rem", position: "relative" }}
+          style={{ fontSize: "1.85rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.6rem", position: "relative" }}
         >
           Frequently Asked Questions
         </h1>
-        <p style={{ fontSize: "0.9rem", color: "hsl(220,10%,50%)", maxWidth: "480px", margin: "0 auto", position: "relative" }}>
+        <p style={{ fontSize: "0.9rem", color: "hsl(var(--muted-foreground))", maxWidth: "480px", margin: "0 auto", position: "relative" }}>
           Everything you need to know about {siteName}. Can't find an answer?{" "}
-          <Link href="/support" style={{ color: "hsl(258,90%,70%)", textDecoration: "underline" }}>
+          <Link href="/support" style={{ color: "hsl(var(--primary))", textDecoration: "underline" }}>
             Contact support
           </Link>.
         </p>
@@ -146,7 +146,7 @@ export default function Faq() {
 
       {/* FAQ list */}
       {faqs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)", fontSize: "13px" }}>
+        <div style={{ textAlign: "center", padding: "3rem", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>
           No FAQ items yet.
         </div>
       ) : (
@@ -162,13 +162,13 @@ export default function Faq() {
         style={{
           marginTop: "2.5rem",
           padding: "1.5rem",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "0.75rem",
           textAlign: "center",
         }}
       >
-        <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)", marginBottom: "0.75rem" }}>
+        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.75rem" }}>
           Still have questions? Our support team is available 24/7.
         </p>
         <Link href="/support">

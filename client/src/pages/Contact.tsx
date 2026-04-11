@@ -48,11 +48,11 @@ export default function Contact() {
       <div style={{ marginBottom: "2.5rem" }}>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "0.5rem" }}
+          style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}
         >
           Contact Us
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)" }}>
+        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
           Have a question or want to work with us? Drop us a message.
         </p>
       </div>
@@ -87,8 +87,8 @@ export default function Contact() {
                     alignItems: "center",
                     gap: "0.9rem",
                     padding: "1.1rem",
-                    background: "hsl(220,20%,9%)",
-                    border: "1px solid hsl(220,15%,18%)",
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
                     borderRadius: "0.75rem",
                     transition: "border-color 0.15s",
                   }}
@@ -96,7 +96,7 @@ export default function Contact() {
                     ((e.currentTarget as HTMLElement).style.borderColor = "hsla(258,90%,66%,0.4)")
                   }
                   onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.borderColor = "hsl(220,15%,18%)")
+                    ((e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))")
                   }
                 >
                   <div
@@ -112,13 +112,13 @@ export default function Contact() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={16} style={{ color: "hsl(258,90%,70%)" }} />
+                    <Icon size={16} style={{ color: "hsl(var(--primary))" }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)", marginBottom: "0.1rem" }}>
+                    <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.1rem" }}>
                       {item.label}
                     </p>
-                    <p style={{ fontSize: "0.82rem", color: "hsl(210,40%,85%)", fontWeight: 500 }}>
+                    <p style={{ fontSize: "0.82rem", color: "hsl(var(--foreground))", fontWeight: 500 }}>
                       {item.value}
                     </p>
                   </div>
@@ -130,18 +130,18 @@ export default function Contact() {
           <div
             style={{
               padding: "1.1rem",
-              background: "hsl(220,20%,9%)",
-              border: "1px solid hsl(220,15%,18%)",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: "0.75rem",
             }}
           >
-            <p style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)", marginBottom: "0.4rem" }}>
+            <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Response time
             </p>
-            <p style={{ fontSize: "0.82rem", color: "hsl(210,40%,85%)", fontWeight: 500 }}>
+            <p style={{ fontSize: "0.82rem", color: "hsl(var(--foreground))", fontWeight: 500 }}>
               Within 24 hours
             </p>
-            <p style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)", marginTop: "0.3rem" }}>
+            <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.3rem" }}>
               Mon – Sun, including public holidays
             </p>
           </div>
@@ -150,8 +150,8 @@ export default function Contact() {
         {/* Form */}
         <div
           style={{
-            background: "hsl(220,20%,9%)",
-            border: "1px solid hsl(220,15%,18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "1rem",
             padding: "1.75rem",
           }}

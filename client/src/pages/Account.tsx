@@ -979,7 +979,7 @@ function TicketsTab({ user }: { user: any }) {
                       onClick={() => fileRef.current?.click()}
                       style={{
                         display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                        background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))",
+                        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem", padding: "0.45rem 0.85rem",
                         fontSize: "0.78rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                       }}

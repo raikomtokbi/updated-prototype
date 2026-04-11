@@ -99,8 +99,8 @@ export default function Register() {
         style={{
           width: "100%",
           maxWidth: "420px",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
           padding: "2.5rem",
           position: "relative",
@@ -120,20 +120,20 @@ export default function Register() {
               margin: "0 auto 1rem",
             }}
           >
-            <Zap size={24} style={{ color: "hsl(258,90%,70%)" }} />
+            <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h1
             className="font-orbitron"
             style={{
               fontSize: "1.5rem",
               fontWeight: 800,
-              color: "hsl(210,40%,95%)",
+              color: "hsl(var(--foreground))",
               marginBottom: "0.4rem",
             }}
           >
             Create Account
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)" }}>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
             Join Nexcoin and start topping up instantly
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function Register() {
                   display: "block",
                   fontSize: "0.8rem",
                   fontWeight: 600,
-                  color: "hsl(220,10%,65%)",
+                  color: "hsl(var(--muted-foreground))",
                   marginBottom: "0.4rem",
                 }}
               >
@@ -173,7 +173,7 @@ export default function Register() {
                   display: "block",
                   fontSize: "0.8rem",
                   fontWeight: 600,
-                  color: "hsl(220,10%,65%)",
+                  color: "hsl(var(--muted-foreground))",
                   marginBottom: "0.4rem",
                 }}
               >
@@ -197,7 +197,7 @@ export default function Register() {
                 display: "block",
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: "hsl(220,10%,65%)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
               }}
             >
@@ -221,7 +221,7 @@ export default function Register() {
                 display: "block",
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: "hsl(220,10%,65%)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
               }}
             >
@@ -246,7 +246,7 @@ export default function Register() {
                 display: "block",
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: "hsl(220,10%,65%)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
               }}
             >
@@ -273,7 +273,7 @@ export default function Register() {
                   transform: "translateY(-50%)",
                   background: "none",
                   border: "none",
-                  color: "hsl(220,10%,45%)",
+                  color: "hsl(var(--muted-foreground))",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -291,7 +291,7 @@ export default function Register() {
                 display: "block",
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: "hsl(220,10%,65%)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
               }}
             >
@@ -358,14 +358,14 @@ export default function Register() {
         {socialProviders.enabled && (socialProviders.google || socialProviders.facebook || socialProviders.discord) && (
           <div style={{ marginTop: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
-              <span style={{ fontSize: "0.75rem", color: "hsl(220,10%,40%)", whiteSpace: "nowrap" }}>or sign up with</span>
-              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
+              <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
+              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or sign up with</span>
+              <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {socialProviders.google && (
                 <a href="/api/auth/oauth/google" style={{ textDecoration: "none" }} data-testid="button-social-google">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)", color: "hsl(210,40%,80%)", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
                     <GoogleIcon size={18} />
                     Continue with Google
                   </div>
@@ -373,7 +373,7 @@ export default function Register() {
               )}
               {socialProviders.facebook && (
                 <a href="/api/auth/oauth/facebook" style={{ textDecoration: "none" }} data-testid="button-social-facebook">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)", color: "hsl(210,40%,80%)", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiFacebook size={16} style={{ color: "#1877F2" }} />
                     Continue with Facebook
                   </div>
@@ -381,7 +381,7 @@ export default function Register() {
               )}
               {socialProviders.discord && (
                 <a href="/api/auth/oauth/discord" style={{ textDecoration: "none" }} data-testid="button-social-discord">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)", color: "hsl(210,40%,80%)", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiDiscord size={16} style={{ color: "#5865F2" }} />
                     Continue with Discord
                   </div>
@@ -392,12 +392,12 @@ export default function Register() {
         )}
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
             Already have an account?{" "}
             <Link
               href="/login"
               style={{
-                color: "hsl(258,90%,70%)",
+                color: "hsl(var(--primary))",
                 textDecoration: "none",
                 fontWeight: 600,
               }}

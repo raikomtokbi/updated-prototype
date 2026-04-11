@@ -59,7 +59,7 @@ export default function AuthCallback() {
           >
             {error}
           </div>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>Redirecting you back to login…</p>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>Redirecting you back to login…</p>
         </>
       ) : (
         <>
@@ -75,13 +75,13 @@ export default function AuthCallback() {
               justifyContent: "center",
             }}
           >
-            <Zap size={24} style={{ color: "hsl(258,90%,70%)" }} />
+            <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
           </div>
           <div>
-            <p style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "0.4rem" }}>
+            <p style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.4rem" }}>
               Completing sign-in…
             </p>
-            <p style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)" }}>Please wait while we log you in.</p>
+            <p style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>Please wait while we log you in.</p>
           </div>
         </>
       )}

@@ -14,7 +14,7 @@ function formatExpiry(c: Campaign) {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  banner: "hsl(258,90%,66%)",
+  banner: "hsl(var(--primary))",
   email: "hsl(200,80%,55%)",
   discount: "hsl(38,92%,50%)",
   referral: "hsl(142,71%,45%)",
@@ -50,8 +50,8 @@ export default function Offers() {
             marginBottom: "1rem",
           }}
         >
-          <Tag size={13} style={{ color: "#a78bfa" }} />
-          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+          <Tag size={13} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
             EXCLUSIVE DEALS
           </span>
         </div>
@@ -60,7 +60,7 @@ export default function Offers() {
           style={{
             fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
             fontWeight: 900,
-            color: "hsl(210,40%,95%)",
+            color: "hsl(var(--foreground))",
             marginBottom: "0.75rem",
             lineHeight: 1.1,
           }}
@@ -77,7 +77,7 @@ export default function Offers() {
             Offers
           </span>
         </h1>
-        <p style={{ fontSize: "0.9rem", color: "hsl(220,10%,50%)", maxWidth: "520px", margin: "0 auto" }}>
+        <p style={{ fontSize: "0.9rem", color: "hsl(var(--muted-foreground))", maxWidth: "520px", margin: "0 auto" }}>
           Limited-time promotions, bonuses, and deals — updated regularly.
         </p>
       </div>
@@ -91,7 +91,7 @@ export default function Offers() {
             justifyContent: "center",
             gap: "10px",
             padding: "4rem",
-            color: "hsl(220,10%,42%)",
+            color: "hsl(var(--muted-foreground))",
           }}
         >
           <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
@@ -106,15 +106,15 @@ export default function Offers() {
             textAlign: "center",
             padding: "5rem 2rem",
             background: "rgba(124,58,237,0.04)",
-            border: "1px dashed rgba(124,58,237,0.2)",
+            border: "1px dashed hsl(var(--primary) / 0.2)",
             borderRadius: "12px",
           }}
         >
-          <Megaphone size={40} style={{ color: "hsl(258,90%,66%)", opacity: 0.4, marginBottom: "1rem" }} />
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(210,40%,75%)", marginBottom: "0.5rem" }}>
+          <Megaphone size={40} style={{ color: "hsl(var(--primary))", opacity: 0.4, marginBottom: "1rem" }} />
+          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "0.5rem" }}>
             No Active Offers Right Now
           </h3>
-          <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,42%)" }}>
+          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
             Check back soon — new deals are added regularly.
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function Offers() {
           }}
         >
           {campaigns.map((campaign) => {
-            const color = TYPE_COLORS[campaign.type] ?? "hsl(258,90%,66%)";
+            const color = TYPE_COLORS[campaign.type] ?? "hsl(var(--primary))";
             const badge = TYPE_LABELS[campaign.type] ?? "PROMOTION";
             const expiry = formatExpiry(campaign);
             const expired = expiry === "Expired";
@@ -140,8 +140,8 @@ export default function Offers() {
                 key={campaign.id}
                 data-testid={`card-offer-${campaign.id}`}
                 style={{
-                  background: "hsl(220,20%,9%)",
-                  border: "1px solid hsl(220,15%,14%)",
+                  background: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
                   borderRadius: "12px",
                   overflow: "hidden",
                   display: "flex",
@@ -204,7 +204,7 @@ export default function Offers() {
                         alignItems: "center",
                         gap: "0.25rem",
                         fontSize: "0.7rem",
-                        color: expired ? "hsl(0,72%,55%)" : "hsl(220,10%,45%)",
+                        color: expired ? "hsl(0,72%,55%)" : "hsl(var(--muted-foreground))",
                       }}
                     >
                       <Clock size={10} />
@@ -217,7 +217,7 @@ export default function Offers() {
                     style={{
                       fontSize: "0.95rem",
                       fontWeight: 700,
-                      color: "hsl(210,40%,92%)",
+                      color: "hsl(var(--foreground))",
                       marginBottom: "0.5rem",
                       lineHeight: 1.3,
                     }}
@@ -230,7 +230,7 @@ export default function Offers() {
                     <p
                       style={{
                         fontSize: "0.82rem",
-                        color: "hsl(220,10%,50%)",
+                        color: "hsl(var(--muted-foreground))",
                         lineHeight: 1.6,
                         marginBottom: "1rem",
                         flex: 1,
@@ -273,16 +273,16 @@ export default function Offers() {
         style={{
           marginTop: "3rem",
           padding: "2rem",
-          background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(124,58,237,0.04))",
-          border: "1px solid rgba(124,58,237,0.25)",
+          background: "linear-gradient(135deg, hsl(var(--primary) / 0.12), rgba(124,58,237,0.04))",
+          border: "1px solid hsl(var(--primary) / 0.25)",
           borderRadius: "1rem",
           textAlign: "center",
         }}
       >
-        <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.5rem" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
           Can't find what you're looking for?
         </h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,50%)", marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
           Browse our full catalog of games, gift cards, and subscriptions.
         </p>
         <Link
