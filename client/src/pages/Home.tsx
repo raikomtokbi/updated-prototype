@@ -303,9 +303,11 @@ function FeaturesStrip() {
     <section
       style={{
         background: "hsl(var(--card))",
-        borderTop: "1px solid hsl(var(--primary) / 0.12)",
-        borderBottom: "1px solid hsl(var(--primary) / 0.12)",
+        border: "1px solid hsl(var(--border))",
+        borderRadius: "16px",
+        margin: "12px 10px 0",
         padding: "1.25rem 1.5rem",
+        overflow: "hidden",
       }}
     >
       <div
