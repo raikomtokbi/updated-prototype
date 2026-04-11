@@ -130,7 +130,7 @@ function HeroSlider() {
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.15) 100%), linear-gradient(0deg, rgba(0,0,0,0.70) 0%, transparent 45%)",
+                "linear-gradient(90deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0.04) 100%), linear-gradient(0deg, rgba(0,0,0,0.35) 0%, transparent 45%)",
             }}
           />
         </div>
