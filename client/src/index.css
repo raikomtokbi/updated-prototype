@@ -316,6 +316,8 @@ textarea {
   background: hsl(var(--background));
   overflow: hidden;
   aspect-ratio: 3 / 2;
+  border-radius: 16px;
+  margin: 8px 10px 0;
 }
 
 @media (min-width: 768px) {
