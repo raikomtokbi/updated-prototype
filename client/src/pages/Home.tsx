@@ -44,6 +44,7 @@ function HeroSlider() {
     cta1: { label: "Browse Games", href: "/products" },
     cta2: { label: "View Offers", href: "/offers" },
     showButton: true,
+    showText: true,
   };
 
   const apiMapped = apiSliders.map((s: any) => ({
@@ -56,6 +57,7 @@ function HeroSlider() {
     cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
     cta2: { label: "View Offers", href: "/offers" },
     showButton: s.showButton !== false,
+    showText: s.showText !== false,
   }));
 
   // Always keep the default slide in rotation so it shows even after uploading banners
@@ -153,7 +155,8 @@ function HeroSlider() {
         }}
       />
 
-      {/* Content — always overlaid */}
+      {/* Content — conditionally overlaid based on showText */}
+      {slide.showText && (
       <div
         style={{
           position: "relative",
@@ -284,6 +287,7 @@ function HeroSlider() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Dot indicators */}
       <div

@@ -211,6 +211,7 @@ export const heroSliders = pgTable("hero_sliders", {
   startsAt: timestamp("starts_at"),
   endsAt: timestamp("ends_at"),
   showButton: boolean("show_button").notNull().default(true),
+  showText: boolean("show_text").notNull().default(true),
   isActive: boolean("is_active").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
