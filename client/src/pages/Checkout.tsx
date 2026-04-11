@@ -397,6 +397,7 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponSuccessMsg, setCouponSuccessMsg] = useState("");
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
@@ -447,6 +448,7 @@ export default function Checkout() {
     if (!couponCode.trim()) return;
     setCouponLoading(true);
     setCouponError("");
+    setCouponSuccessMsg("");
     try {
       const res = await fetch("/api/coupons/validate", {
         method: "POST",
@@ -456,9 +458,12 @@ export default function Checkout() {
       const data = await res.json();
       if (!res.ok || !data.valid) {
         setCouponError(data.message || "Invalid or expired coupon");
+        setCouponApplied(false);
+        setCouponDiscount(0);
       } else {
         setCouponApplied(true);
         setCouponDiscount(data.discountAmount ?? 0);
+        setCouponSuccessMsg(data.message || "Coupon applied successfully");
       }
     } catch {
       setCouponError("Could not apply coupon. Try again.");
@@ -472,6 +477,7 @@ export default function Checkout() {
     setCouponDiscount(0);
     setCouponCode("");
     setCouponError("");
+    setCouponSuccessMsg("");
   }
 
   function submitRedirectForm(formUrl: string, method: string, fields: Record<string, string>) {
@@ -810,6 +816,7 @@ export default function Checkout() {
               </div>
             )}
             {couponError && <p style={{ fontSize: "0.75rem", color: "hsl(0,72%,60%)", marginTop: "0.4rem" }}>{couponError}</p>}
+            {couponSuccessMsg && !couponError && <p style={{ fontSize: "0.75rem", color: "hsl(142,70%,50%)", marginTop: "0.4rem" }}>{couponSuccessMsg}</p>}
           </div>
 
           {/* ── Payment Method Type Selection ── */}

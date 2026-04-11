@@ -1280,6 +1280,71 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  // ── Coupon Validation (public) ─────────────────────────────────────────────
+  app.post("/api/coupons/validate", async (req, res) => {
+    try {
+      const { code, amount } = req.body;
+      if (!code || typeof code !== "string") {
+        return res.status(400).json({ valid: false, message: "Coupon code is required" });
+      }
+
+      const coupon = await storage.getCouponByCode(code.trim());
+
+      if (!coupon) {
+        return res.status(404).json({ valid: false, message: "Coupon code not found" });
+      }
+
+      if (!coupon.isActive) {
+        return res.status(400).json({ valid: false, message: "This coupon is no longer active" });
+      }
+
+      // Expiry check
+      if (coupon.expiresAt && new Date() > new Date(coupon.expiresAt)) {
+        return res.status(400).json({ valid: false, message: "This coupon has expired" });
+      }
+
+      // Usage limit check
+      if (coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.usedCount >= coupon.maxUses) {
+        return res.status(400).json({ valid: false, message: `Usage limit reached — this coupon has been used ${coupon.usedCount} time(s) and is no longer available` });
+      }
+
+      // Minimum order amount check
+      const orderAmount = parseFloat(String(amount || 0));
+      const minAmount = coupon.minOrderAmount ? parseFloat(String(coupon.minOrderAmount)) : 0;
+      if (minAmount > 0 && orderAmount < minAmount) {
+        return res.status(400).json({
+          valid: false,
+          message: `Minimum order amount of ₹${minAmount.toFixed(2)} required to use this coupon (your cart: ₹${orderAmount.toFixed(2)})`,
+        });
+      }
+
+      // Calculate discount
+      const discountValue = parseFloat(String(coupon.discountValue));
+      let discountAmount = 0;
+      if (coupon.discountType === "percentage") {
+        discountAmount = Math.min(orderAmount, (orderAmount * discountValue) / 100);
+      } else {
+        discountAmount = Math.min(orderAmount, discountValue);
+      }
+      discountAmount = Math.round(discountAmount * 100) / 100;
+
+      return res.json({
+        valid: true,
+        couponId: coupon.id,
+        discountType: coupon.discountType,
+        discountValue,
+        discountAmount,
+        description: coupon.description || null,
+        message: coupon.discountType === "percentage"
+          ? `${discountValue}% off applied`
+          : `₹${discountAmount.toFixed(2)} off applied`,
+      });
+    } catch (err: any) {
+      console.error("Coupon validate error:", err);
+      res.status(500).json({ valid: false, message: "Could not validate coupon. Try again." });
+    }
+  });
+
   // ── Tickets ────────────────────────────────────────────────────────────────
   app.get("/api/admin/tickets", requireAdmin, async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 50;
@@ -2050,6 +2115,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
               unitPrice: String(item.price || 0),
               totalPrice: String((item.price || 0) * (item.quantity || 1)),
             });
+          }
+        }
+        // Increment coupon usage count if a valid coupon was applied
+        if (couponCode) {
+          const coupon = await storage.getCouponByCode(couponCode).catch(() => null);
+          if (coupon) {
+            await storage.incrementCouponUsage(coupon.id).catch(() => {});
           }
         }
       } catch (dbErr) {

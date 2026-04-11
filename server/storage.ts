@@ -98,9 +98,11 @@ export interface IStorage {
 
   // Coupons
   getAllCoupons(): Promise<Coupon[]>;
+  getCouponByCode(code: string): Promise<Coupon | undefined>;
   createCoupon(data: InsertCoupon): Promise<Coupon>;
   updateCoupon(id: string, data: Partial<Coupon>): Promise<Coupon | undefined>;
   deleteCoupon(id: string): Promise<void>;
+  incrementCouponUsage(id: string): Promise<void>;
 
   // Tickets
   getAllTickets(limit?: number, offset?: number): Promise<Ticket[]>;
@@ -450,8 +452,20 @@ export class DatabaseStorage implements IStorage {
     await db.update(coupons).set(data).where(eq(coupons.id, id));
     return fetchAfter<Coupon>(coupons, id, coupons.id);
   }
+  async getCouponByCode(code: string) {
+    const upper = code.trim().toUpperCase();
+    const [row] = await db.select().from(coupons)
+      .where(eq(sql`UPPER(${coupons.code})`, upper))
+      .limit(1);
+    return row;
+  }
+
   async deleteCoupon(id: string) {
     await db.delete(coupons).where(eq(coupons.id, id));
+  }
+
+  async incrementCouponUsage(id: string) {
+    await db.update(coupons).set({ usedCount: sql`${coupons.usedCount} + 1` }).where(eq(coupons.id, id));
   }
 
   // ── Tickets ────────────────────────────────────────────────────────────────
