@@ -376,6 +376,12 @@ textarea {
   100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
 }
 
+/* Hero slider — slight zoom + shift for all screens */
+.hero-slide-img {
+  transform: scale(1.08) translateY(-3%);
+  transform-origin: center center;
+}
+
 /* Hero slider — zoom in on mobile */
 @media (max-width: 768px) {
   .hero-slide-img {
