@@ -53,17 +53,13 @@ textarea {
   font-family: 'Rajdhani', sans-serif;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Hide scrollbar across all browsers while keeping scroll functional */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary));
-  border-radius: 3px;
+*::-webkit-scrollbar {
+  display: none;
 }
 
 /* Glow utilities */
