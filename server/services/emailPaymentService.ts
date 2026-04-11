@@ -119,8 +119,31 @@ async function processEmails(onOrderCompleted?: OrderCompletedCallback): Promise
   let connection: imapSimple.ImapSimple | null = null;
   try {
     connection = await imapSimple.connect(config);
-    const mailbox = settings.imapLabel?.trim() || "INBOX";
-    await connection.openBox(mailbox);
+
+    // Determine which mailbox to open — try the configured label, fall back to INBOX
+    const configuredLabel = settings.imapLabel?.trim() || "INBOX";
+    let mailbox = configuredLabel;
+
+    if (configuredLabel !== "INBOX") {
+      try {
+        await connection.openBox(configuredLabel);
+        console.log(`[UPI] Opened mailbox: "${configuredLabel}"`);
+      } catch (labelErr: any) {
+        if (labelErr?.message?.includes("Unknown Mailbox") || labelErr?.message?.includes("NO")) {
+          console.warn(
+            `[UPI] Mailbox "${configuredLabel}" not found. Falling back to INBOX. ` +
+            `Tip: In Gmail, IMAP folder names are case-sensitive (e.g. "Payments" not "PAYMENTS"). ` +
+            `Update the IMAP Label setting in Admin → API Integration → Manual UPI.`
+          );
+          mailbox = "INBOX";
+          await connection.openBox("INBOX");
+        } else {
+          throw labelErr;
+        }
+      }
+    } else {
+      await connection.openBox("INBOX");
+    }
 
     // Search for unseen emails in last 2 hours
     const since = new Date(Date.now() - 2 * 60 * 60 * 1000);
