@@ -638,6 +638,7 @@ export default function Checkout() {
             cartItems: cartItemsPayload,
             payerName: payerName.trim(),
             userId: user?.id ?? null,
+            couponCode: couponApplied ? couponCode : undefined,
           }),
         });
         if (upiRes.ok) {
