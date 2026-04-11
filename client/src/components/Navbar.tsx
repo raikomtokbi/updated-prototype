@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
+import { useIsLight } from "@/hooks/useIsLight";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -173,6 +174,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user, logout } = useAuthStore();
+  const isLight = useIsLight();
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -272,8 +274,8 @@ export default function Navbar() {
       )}
       <nav
         style={{
-          background: "rgba(7, 11, 20, 0.95)",
-          borderBottom: "1px solid rgba(124, 58, 237, 0.18)",
+          background: isLight ? "rgba(255,255,255,0.93)" : "rgba(7, 11, 20, 0.95)",
+          borderBottom: isLight ? "1px solid hsl(var(--border))" : "1px solid rgba(124, 58, 237, 0.18)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           position: "fixed",
@@ -352,7 +354,7 @@ export default function Navbar() {
                 left: "0.8rem",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "rgba(148, 163, 184, 0.5)",
+                color: isLight ? "hsl(var(--muted-foreground))" : "rgba(148, 163, 184, 0.5)",
                 pointerEvents: "none",
                 zIndex: 1,
               }}
@@ -370,10 +372,10 @@ export default function Navbar() {
               style={{
                 width: "100%",
                 padding: "0.42rem 1rem 0.42rem 2.1rem",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(124, 58, 237, 0.2)",
+                background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.2)"}`,
                 borderRadius: "8px",
-                color: "#e5e7eb",
+                color: isLight ? "hsl(var(--foreground))" : "#e5e7eb",
                 fontSize: "0.78rem",
                 outline: "none",
               }}
@@ -402,11 +404,11 @@ export default function Navbar() {
                   textDecoration: "none",
                   fontSize: "0.78rem",
                   fontWeight: 500,
-                  color: location === link.href ? "#a78bfa" : "rgba(148, 163, 184, 0.85)",
+                  color: location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "rgba(148, 163, 184, 0.85)"),
                   whiteSpace: "nowrap",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = location === link.href ? "#a78bfa" : "rgba(148, 163, 184, 0.85)"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "rgba(148, 163, 184, 0.85)"); }}
               >
                 {link.label}
               </Link>
@@ -608,7 +610,7 @@ export default function Navbar() {
                 left: "1.75rem",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "rgba(148, 163, 184, 0.45)",
+                color: isLight ? "hsl(var(--muted-foreground))" : "rgba(148, 163, 184, 0.45)",
                 pointerEvents: "none",
               }}
             />
@@ -624,10 +626,10 @@ export default function Navbar() {
               style={{
                 width: "100%",
                 padding: "0.55rem 1rem 0.55rem 2.1rem",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(124, 58, 237, 0.3)",
+                background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.3)"}`,
                 borderRadius: "8px",
-                color: "#e5e7eb",
+                color: isLight ? "hsl(var(--foreground))" : "#e5e7eb",
                 fontSize: "0.85rem",
                 outline: "none",
                 boxSizing: "border-box",
