@@ -172,7 +172,7 @@ export default function ChooseTheme() {
             <Palette size={14} style={{ color: "hsl(258,90%,66%)" }} />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Preset Themes</span>
           </div>
-          <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px" }}>
+          <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
             {PRESET_THEMES.map((theme) => {
               const isActive = activeTheme === theme.id;
               return (

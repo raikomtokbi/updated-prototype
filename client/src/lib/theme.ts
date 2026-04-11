@@ -29,15 +29,10 @@ const DARK_BASE = {
 };
 
 export const PRESET_THEMES: ThemePreset[] = [
-  { id: "dark-purple", name: "Dark Purple", primary: "258 90% 66%", accent: "196 100% 50%", bg: "220 20% 6%" },
-  { id: "dark-blue",   name: "Dark Blue",   primary: "217 91% 60%", accent: "180 100% 50%", bg: "220 30% 6%" },
-  { id: "dark-green",  name: "Dark Green",  primary: "142 71% 45%", accent: "160 84% 39%",  bg: "160 20% 6%" },
-  { id: "dark-red",    name: "Dark Red",    primary: "0 72% 51%",   accent: "25 95% 53%",   bg: "0 20% 6%"   },
-  { id: "dark-gold",   name: "Dark Gold",   primary: "38 92% 50%",  accent: "48 96% 53%",   bg: "40 20% 6%"  },
-  { id: "midnight",    name: "Midnight",    primary: "270 50% 60%", accent: "210 80% 60%",  bg: "240 25% 5%" },
+  { id: "dark-purple", name: "Dark", primary: "258 90% 66%", accent: "196 100% 50%", bg: "220 20% 6%" },
   {
     id: "light-blue",
-    name: "Light Blue",
+    name: "Light",
     primary: "217 91% 50%",
     accent: "142 71% 40%",
     bg: "0 0% 100%",
