@@ -26,8 +26,8 @@ export function UnsavedChangesDialog({ open, saving, onStay, onDiscard, onSave }
     >
       <div
         style={{
-          backgroundColor: "hsl(220, 20%, 10%)",
-          border: "1px solid hsl(220, 15%, 18%)",
+          backgroundColor: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "10px",
           padding: "28px 24px 22px",
           maxWidth: "420px",
@@ -48,7 +48,7 @@ export function UnsavedChangesDialog({ open, saving, onStay, onDiscard, onSave }
             <h3 style={{ margin: "0 0 5px 0", fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,96%)" }}>
               Unsaved Changes
             </h3>
-            <p style={{ margin: 0, fontSize: "13px", color: "hsl(220, 10%, 50%)", lineHeight: "1.5" }}>
+            <p style={{ margin: 0, fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: "1.5" }}>
               You have unsaved changes. What would you like to do before leaving?
             </p>
           </div>
@@ -60,7 +60,7 @@ export function UnsavedChangesDialog({ open, saving, onStay, onDiscard, onSave }
             onClick={onStay}
             style={{
               padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500,
-              backgroundColor: "hsl(220, 15%, 16%)", color: "hsl(220, 10%, 55%)",
+              backgroundColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))",
               border: "1px solid hsl(220, 15%, 22%)", cursor: "pointer",
             }}
           >

@@ -14,8 +14,8 @@ import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMappi
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "7px 10px", background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210,40%,92%)",
+  width: "100%", padding: "7px 10px", background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,92%)",
   fontSize: "13px", outline: "none", boxSizing: "border-box",
 };
 const selectStyle: React.CSSProperties = {
@@ -38,7 +38,7 @@ const tabBtn = (active: boolean): React.CSSProperties => ({
   color: active ? "white" : "hsl(220,10%,60%)",
 });
 const innerCard: React.CSSProperties = {
-  background: "hsl(220, 20%, 7%)",
+  background: "hsl(var(--background))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   padding: "16px",
@@ -145,7 +145,7 @@ function ConfigureModal({
         ))}
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
           <button onClick={onClose}
-            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(220,15%,14%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,55%)", fontSize: "12px", cursor: "pointer" }}>
+            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(220,15%,14%)", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,55%)", fontSize: "12px", cursor: "pointer" }}>
             Cancel
           </button>
           <button onClick={() => saveMut.mutate()} style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }} disabled={saveMut.isPending}>
@@ -402,7 +402,7 @@ function BusanMappingTab() {
 
           {/* ── LEFT: CMS Side ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,72%)", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,72%)", paddingBottom: "8px", borderBottom: "1px solid hsl(var(--border))", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               CMS Product
             </div>
             <div>
@@ -436,7 +436,7 @@ function BusanMappingTab() {
 
           {/* ── RIGHT: Busan Side ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(220,15%,16%)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", paddingBottom: "8px", borderBottom: "1px solid hsl(var(--border))" }}>
               <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,72%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Busan Product</span>
               {fetchingProducts && (
                 <span style={{ fontSize: "11px", color: "hsl(258,80%,70%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
@@ -487,7 +487,7 @@ function BusanMappingTab() {
         </div>
 
         {/* Add button */}
-        <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid hsl(220,15%,16%)", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
+        <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
           <button onClick={() => addMappingMut.mutate()}
             disabled={!selectedCmsProduct || !effectiveBusanId || addMappingMut.isPending}
             style={{
@@ -561,7 +561,7 @@ function BusanModal({ onClose }: { onClose: () => void }) {
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {/* Tab bar */}
-        <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
           <button data-testid="tab-busan-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>
             Configuration
           </button>
@@ -745,7 +745,7 @@ function SmileOneConfigTab() {
               </div>
               <div style={{
                 display: "flex", alignItems: "center", gap: "6px",
-                background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)",
+                background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                 borderRadius: "6px", padding: "6px 10px",
               }}>
                 <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -841,7 +841,7 @@ function SmileOneMappingTab() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "start" }}>
           {/* Left – CMS */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(220,15%,16%)", display: "block" }}>CMS Product</span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>CMS Product</span>
             <div>
               <label style={labelStyle}>Select Game</label>
               <select data-testid="select-smileone-cms-game" style={selectStyle} value={leftGame}
@@ -861,8 +861,8 @@ function SmileOneMappingTab() {
                     onClick={() => setSelectedService({ id: svc.id, name: svc.name, price: String(svc.finalPrice) })}
                     style={{
                       padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                      background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
-                      border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                      background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                      border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                       color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
                     }}>
                     <span>{svc.name}</span>
@@ -887,7 +887,7 @@ function SmileOneMappingTab() {
 
           {/* Right – Smile.one */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(220,15%,16%)", display: "block" }}>Smile.one Products</span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>Smile.one Products</span>
             <div>
               <label style={labelStyle}>Game Slug</label>
               <input data-testid="input-smileone-game-slug" style={inputStyle} value={rightGame}
@@ -901,7 +901,7 @@ function SmileOneMappingTab() {
               </select>
             </div>
             <button data-testid="button-fetch-smileone-products"
-              style={{ ...btnPrimary, background: "hsl(220,20%,14%)", border: "1px solid hsl(220,15%,20%)" }}
+              style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)" }}
               onClick={fetchSmileProducts} disabled={!rightGame || fetchingSmile}>
               {fetchingSmile ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={12} />}
               Fetch Products
@@ -915,8 +915,8 @@ function SmileOneMappingTab() {
                   onClick={() => setSelectedSmile(p)}
                   style={{
                     padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                    background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
-                    border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                    background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                    border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                     color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
                   }}>
                   <span>{p.name}</span>
@@ -993,7 +993,7 @@ function SmileOneModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Smile.one Integration" onClose={onClose} wide>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
           <button data-testid="tab-smileone-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
           <button data-testid="tab-smileone-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
         </div>
@@ -1065,7 +1065,7 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
     <div style={{ border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", overflow: "hidden" }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "12px 16px", background: "hsl(220,20%,8%)", gap: "10px",
+        padding: "12px 16px", background: "hsl(var(--background))", gap: "10px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div style={{
@@ -1209,7 +1209,7 @@ export default function ApiIntegration() {
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         el.style.transition = "box-shadow 0.3s";
-        el.style.boxShadow = "0 0 0 2px hsl(258,90%,66%)";
+        el.style.boxShadow = "0 0 0 2px hsl(var(--primary))";
         setTimeout(() => { el.style.boxShadow = ""; }, 2000);
       } else if (attempts < 10) {
         setTimeout(() => tryScroll(attempts + 1), 150);
@@ -1276,26 +1276,26 @@ export default function ApiIntegration() {
     <div
       style={{
         display: "flex", alignItems: "center",
-        padding: "14px 0", borderBottom: isLast ? "none" : "1px solid hsl(220, 15%, 12%)",
+        padding: "14px 0", borderBottom: isLast ? "none" : "1px solid hsl(var(--input))",
         gap: "12px", minWidth: 0,
       }}>
       <div style={{
         width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
         background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
-        color: configured ? "hsl(142,71%,48%)" : "hsl(220, 10%, 40%)",
+        color: configured ? "hsl(142,71%,48%)" : "hsl(var(--muted-foreground))",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         {icon}
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 85%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
-        <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)", marginTop: "2px" }}>{note}</div>
+        <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
+        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>{note}</div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           {configured
             ? <><CheckCircle size={12} color="hsl(142,71%,48%)" /><span style={{ fontSize: "11px", color: "hsl(142,71%,48%)" }}>Configured</span></>
-            : <><XCircle size={12} color="hsl(220, 10%, 35%)" /><span style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>Not set</span></>
+            : <><XCircle size={12} color="hsl(var(--muted-foreground))" /><span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Not set</span></>
           }
         </div>
         {toggleProps && (
@@ -1322,13 +1322,13 @@ export default function ApiIntegration() {
         <div style={{ fontSize: "13px", color: "hsl(220,10%,45%)", lineHeight: 1.6 }}>
           Configure third-party integrations. Credentials are stored securely in the database.
           Payment gateway settings are managed in the{" "}
-          <a href="/admin/payment-method" style={{ color: "hsl(258,90%,66%)", textDecoration: "none" }}>Payment Method</a> page.
+          <a href="/admin/payment-method" style={{ color: "hsl(var(--primary))", textDecoration: "none" }}>Payment Method</a> page.
         </div>
 
         {/* ── All Integrations ── */}
         <div style={{ ...card, padding: "0" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Service Integrations</span>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Service Integrations</span>
             <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: "4px 0 0" }}>
               Click Configure to add your API keys for each service
             </p>

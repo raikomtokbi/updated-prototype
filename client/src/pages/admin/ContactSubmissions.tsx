@@ -33,10 +33,10 @@ function formatDate(d: string | Date | null | undefined) {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 90%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   resize: "none",
@@ -110,24 +110,24 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
   return (
     <Modal title={`Contact Submission #${ticket?.ticketNumber ?? "—"}`} onClose={onClose}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div style={{ padding: "1rem", background: "hsl(220, 20%, 10%)", borderRadius: "6px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "0.4rem" }}>Subject</p>
-          <p style={{ fontSize: "13px", color: "hsl(210, 40%, 90%)", fontWeight: 500 }}>{ticket?.subject ?? "—"}</p>
+        <div style={{ padding: "1rem", background: "hsl(var(--card))", borderRadius: "6px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>Subject</p>
+          <p style={{ fontSize: "13px", color: "hsl(var(--foreground))", fontWeight: 500 }}>{ticket?.subject ?? "—"}</p>
         </div>
 
-        <div style={{ padding: "1rem", background: "hsl(220, 20%, 10%)", borderRadius: "6px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "0.4rem" }}>From</p>
-          <p style={{ fontSize: "13px", color: "hsl(210, 40%, 90%)", fontWeight: 500 }}>{ticket?.email || ticket?.userId || "Guest"}</p>
+        <div style={{ padding: "1rem", background: "hsl(var(--card))", borderRadius: "6px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>From</p>
+          <p style={{ fontSize: "13px", color: "hsl(var(--foreground))", fontWeight: 500 }}>{ticket?.email || ticket?.userId || "Guest"}</p>
         </div>
 
-        <div style={{ padding: "1rem", background: "hsl(220, 20%, 10%)", borderRadius: "6px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "0.4rem" }}>Message</p>
-          <p style={{ fontSize: "13px", color: "hsl(220, 10%, 60%)", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{ticket?.message ?? "—"}</p>
+        <div style={{ padding: "1rem", background: "hsl(var(--card))", borderRadius: "6px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>Message</p>
+          <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{ticket?.message ?? "—"}</p>
         </div>
 
         <div style={{ display: "flex", gap: "1rem" }}>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "0.4rem" }}>Status</p>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>Status</p>
             <select style={inputStyle} value={status || ticket?.status || ""} onChange={(e) => setStatus(e.target.value)}>
               <option value="open">Open</option>
               <option value="in_progress">In Progress</option>
@@ -157,7 +157,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
         </div>
 
         <div style={{ borderTop: "1px solid hsl(220, 15%, 13%)", paddingTop: "1rem" }}>
-          <h4 style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 90%)", marginBottom: "0.8rem" }}>Reply</h4>
+          <h4 style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.8rem" }}>Reply</h4>
           <textarea
             style={inputStyle}
             placeholder="Type your reply…"
@@ -176,9 +176,9 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
               style={{
                 padding: "0.5rem 0.8rem",
                 background: "hsl(220, 20%, 15%)",
-                border: "1px solid hsl(220, 15%, 18%)",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "5px",
-                color: "hsl(220, 10%, 60%)",
+                color: "hsl(var(--muted-foreground))",
                 cursor: "pointer",
                 fontSize: "12px",
                 display: "flex",
@@ -189,7 +189,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
               <Paperclip size={13} /> Attach
             </button>
             {attachment && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: "hsl(220, 10%, 60%)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
                 {attachment.name}
                 <button
                   onClick={() => setAttachment(null)}
@@ -232,17 +232,17 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
 
         {ticket?.replies && ticket.replies.length > 0 && (
           <div style={{ borderTop: "1px solid hsl(220, 15%, 13%)", paddingTop: "1rem" }}>
-            <h4 style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 90%)", marginBottom: "0.8rem" }}>Conversation</h4>
+            <h4 style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.8rem" }}>Conversation</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
               {ticket.replies.map((r: any) => (
-                <div key={r.id} style={{ padding: "0.8rem", background: "hsl(220, 20%, 10%)", borderRadius: "5px", fontSize: "13px" }}>
+                <div key={r.id} style={{ padding: "0.8rem", background: "hsl(var(--card))", borderRadius: "5px", fontSize: "13px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-                    <span style={{ color: r.isStaff ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 60%)", fontWeight: 500 }}>
+                    <span style={{ color: r.isStaff ? "hsl(258, 90%, 70%)" : "hsl(var(--muted-foreground))", fontWeight: 500 }}>
                       {r.isStaff ? "Staff" : "Customer"}
                     </span>
-                    <span style={{ color: "hsl(220, 10%, 50%)", fontSize: "11px" }}>{formatDate(r.createdAt)}</span>
+                    <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{formatDate(r.createdAt)}</span>
                   </div>
-                  <p style={{ color: "hsl(220, 10%, 60%)", whiteSpace: "pre-wrap", lineHeight: 1.4, margin: 0 }}>{r.message}</p>
+                  <p style={{ color: "hsl(var(--muted-foreground))", whiteSpace: "pre-wrap", lineHeight: 1.4, margin: 0 }}>{r.message}</p>
                 </div>
               ))}
             </div>
@@ -287,7 +287,7 @@ export default function ContactSubmissions() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search subject, email or ID…" />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} submission{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -319,7 +319,7 @@ export default function ContactSubmissions() {
                         {(t as any).email || "—"}
                       </span>
                     </td>
-                    <td style={{ ...tdStyle, color: "hsl(210, 40%, 90%)", maxWidth: "200px" }}>
+                    <td style={{ ...tdStyle, color: "hsl(var(--foreground))", maxWidth: "200px" }}>
                       <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.subject}</span>
                     </td>
                     <td style={tdStyle}><StatusBadge value={t.status} /></td>

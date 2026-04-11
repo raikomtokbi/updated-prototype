@@ -10,7 +10,7 @@ import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import type { HeroSlider } from "@shared/schema";
 
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   marginBottom: "16px",
@@ -27,8 +27,8 @@ const sectionHeader: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210, 40%, 92%)",
   fontSize: "13px",
@@ -39,8 +39,8 @@ const inputStyle: React.CSSProperties = {
 const textareaStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210, 40%, 92%)",
   fontSize: "13px",
@@ -55,7 +55,7 @@ const textareaStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220, 10%, 50%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "5px",
   display: "block",
   textTransform: "uppercase",
@@ -327,8 +327,8 @@ function SliderItem({
         flexDirection: "column",
         gap: "8px",
         padding: "10px 12px",
-        background: "hsl(220,20%,11%)",
-        border: "1px solid hsl(220,15%,16%)",
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border))",
         borderRadius: "6px",
       }}
     >
@@ -346,7 +346,7 @@ function SliderItem({
               width: "72px",
               height: "36px",
               borderRadius: "4px",
-              background: "hsl(220,20%,14%)",
+              background: "hsl(var(--card))",
               border: "1px dashed hsl(220,15%,22%)",
               display: "flex",
               alignItems: "center",
@@ -395,7 +395,7 @@ function SliderItem({
             justifyContent: "center",
             padding: "4px 8px",
             borderRadius: "4px",
-            background: "hsl(220,20%,14%)",
+            background: "hsl(var(--card))",
             border: "1px solid hsl(220,15%,20%)",
             color: isFirst ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
             cursor: isFirst ? "not-allowed" : "pointer",
@@ -413,7 +413,7 @@ function SliderItem({
             justifyContent: "center",
             padding: "4px 8px",
             borderRadius: "4px",
-            background: "hsl(220,20%,14%)",
+            background: "hsl(var(--card))",
             border: "1px solid hsl(220,15%,20%)",
             color: isLast ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
             cursor: isLast ? "not-allowed" : "pointer",
@@ -601,7 +601,7 @@ export default function EditContent() {
   if (isLoading) {
     return (
       <AdminLayout title="Content">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px", gap: "10px", color: "hsl(220, 10%, 45%)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px", gap: "10px", color: "hsl(var(--muted-foreground))" }}>
           <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
           <span style={{ fontSize: "13px" }}>Loading content…</span>
         </div>
@@ -637,7 +637,7 @@ export default function EditContent() {
       </button>
     ) : undefined}>
       <div style={{ marginBottom: "20px" }}>
-        <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
           Manage homepage content, hero sliders, and media assets
         </p>
       </div>
@@ -645,7 +645,7 @@ export default function EditContent() {
       {/* ── Homepage Content & Media Assets ──────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content & Media Assets</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -667,7 +667,7 @@ export default function EditContent() {
               onChange={(e) => set("hero_subtitle", e.target.value)}
             />
           </div>
-          <div style={{ paddingTop: "8px", borderTop: "1px solid hsl(220,15%,18%)" }}>
+          <div style={{ paddingTop: "8px", borderTop: "1px solid hsl(var(--border))" }}>
             <label style={labelStyle}>Media Assets</label>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "16px", marginTop: "12px" }}>
               {[
@@ -693,11 +693,11 @@ export default function EditContent() {
       {/* ── Features Strip ───────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Zap size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Zap size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Features Strip</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Edit the three features displayed below the hero section including titles, descriptions, and icons
           </p>
           {[
@@ -708,7 +708,7 @@ export default function EditContent() {
             const currentIcon = local[`${feat.key}_icon`] ?? feat.defaultIcon;
             const IconComponent = ICON_MAP[currentIcon] || ICON_MAP["Zap"];
             return (
-              <div key={feat.key} style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px" }}>
+              <div key={feat.key} style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
                   <div>
                     <label style={labelStyle}>Title</label>
@@ -718,8 +718,8 @@ export default function EditContent() {
                       style={{
                         width: "100%",
                         padding: "8px 12px",
-                        background: "hsl(220, 20%, 11%)",
-                        border: "1px solid hsl(220, 15%, 18%)",
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
                         borderRadius: "6px",
                         color: "hsl(210, 40%, 92%)",
                         fontSize: "13px",
@@ -742,8 +742,8 @@ export default function EditContent() {
                         gap: "8px",
                         padding: "8px 12px",
                         borderRadius: "6px",
-                        border: "1px solid hsl(220,15%,18%)",
-                        background: "hsl(220,20%,11%)",
+                        border: "1px solid hsl(var(--border))",
+                        background: "hsl(var(--card))",
                         color: "hsl(210,40%,92%)",
                         fontSize: "13px",
                         cursor: "pointer",
@@ -763,7 +763,7 @@ export default function EditContent() {
                   onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
                 />
                 {local[`${feat.key}_picker_open`] && (
-                  <div style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "12px", marginTop: "12px" }}>
+                  <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px", marginTop: "12px" }}>
                     <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,45%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
                       {ICON_LIST.map((iconName) => {
@@ -779,7 +779,7 @@ export default function EditContent() {
                             style={{
                               padding: "8px",
                               borderRadius: "6px",
-                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(220,15%,18%)",
+                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
                               background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
                               cursor: "pointer",
                               display: "flex",
@@ -806,7 +806,7 @@ export default function EditContent() {
       <div style={card}>
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Image size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+            <Image size={15} style={{ color: "hsl(var(--primary))" }} />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Hero Sliders</span>
             <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>({sliders.length} slides)</span>
           </div>
@@ -837,8 +837,8 @@ export default function EditContent() {
           {showAddSlider && !editSlider && (
             <div
               style={{
-                background: "hsl(220,20%,8%)",
-                border: "1px solid hsl(220,15%,16%)",
+                background: "hsl(var(--background))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "8px",
                 padding: "16px",
                 marginBottom: "8px",
@@ -870,7 +870,7 @@ export default function EditContent() {
                 padding: "32px",
                 color: "hsl(220,10%,38%)",
                 fontSize: "13px",
-                border: "1px dashed hsl(220,15%,18%)",
+                border: "1px dashed hsl(var(--border))",
                 borderRadius: "6px",
               }}
             >
@@ -882,7 +882,7 @@ export default function EditContent() {
                 <div
                   key={s.id}
                   style={{
-                    background: "hsl(220,20%,8%)",
+                    background: "hsl(var(--background))",
                     border: "1px solid rgba(124,58,237,0.3)",
                     borderRadius: "8px",
                     padding: "16px",
@@ -922,7 +922,7 @@ export default function EditContent() {
       <div style={{ ...card, marginBottom: 0 }}>
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+            <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>FAQ</span>
             <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
               ({(() => { try { return JSON.parse(local.faq_items || "[]").length; } catch { return 0; } })()} items)
@@ -948,7 +948,7 @@ export default function EditContent() {
           </button>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", marginBottom: "2px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>
             Add frequently asked questions that appear on the public FAQ page.
           </p>
           {(() => {
@@ -962,9 +962,9 @@ export default function EditContent() {
               );
             }
             return items.map((item, idx) => (
-              <div key={idx} style={{ background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "8px", padding: "14px" }}>
+              <div key={idx} style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "8px", padding: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(258,90%,66%)" }}>Q{idx + 1}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--primary))" }}>Q{idx + 1}</span>
                   <button
                     onClick={() => {
                       const updated = items.filter((_, i) => i !== idx);

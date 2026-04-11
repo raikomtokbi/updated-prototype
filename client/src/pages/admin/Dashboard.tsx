@@ -13,7 +13,7 @@ import "react-day-picker/style.css";
 import { adminApi } from "@/lib/store/useAdmin";
 import { getCurrencySymbol } from "@/lib/currency";
 
-const COLORS = ["hsl(258, 90%, 66%)", "hsl(196, 100%, 50%)", "hsl(0, 72%, 51%)", "hsl(38, 92%, 55%)", "hsl(142, 71%, 45%)"];
+const COLORS = ["hsl(var(--primary))", "hsl(196, 100%, 50%)", "hsl(0, 72%, 51%)", "hsl(38, 92%, 55%)", "hsl(142, 71%, 45%)"];
 
 const rangeOptions = [
   { key: "today", label: "Today" },
@@ -25,7 +25,7 @@ const rangeOptions = [
 ];
 
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   padding: "20px",
@@ -57,27 +57,27 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={() => { setOpen(!open); setShowCal(false); }} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "hsl(220, 20%, 12%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", cursor: "pointer", color: "hsl(210, 40%, 88%)", fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap" }}>
-        <Calendar size={12} style={{ color: "hsl(258, 90%, 66%)" }} />
+      <button onClick={() => { setOpen(!open); setShowCal(false); }} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", cursor: "pointer", color: "hsl(var(--foreground))", fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap" }}>
+        <Calendar size={12} style={{ color: "hsl(var(--primary))" }} />
         {label}
         <ChevronDown size={11} style={{ opacity: 0.5 }} />
       </button>
       {open && !showCal && (
-        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: "160px", background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "8px", overflow: "hidden", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: "160px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", overflow: "hidden", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
           {rangeOptions.map((opt) => (
             <button key={opt.key} onClick={() => { opt.key === "custom" ? setShowCal(true) : (onSelect(opt.key), setOpen(false)); }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: selected === opt.key ? "rgba(139,92,246,0.1)" : "transparent", border: "none", cursor: "pointer", color: selected === opt.key ? "hsl(258,90%,75%)" : "hsl(220,10%,65%)", fontSize: "12px", textAlign: "left" }}>
               {opt.label}
-              {selected === opt.key && <span style={{ fontSize: "10px", color: "hsl(258,90%,66%)" }}>✓</span>}
+              {selected === opt.key && <span style={{ fontSize: "10px", color: "hsl(var(--primary))" }}>✓</span>}
             </button>
           ))}
         </div>
       )}
       {open && showCal && (
-        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "8px", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", padding: "8px" }}>
-          <style>{`.rdp{--rdp-accent-color:hsl(258,90%,66%);--rdp-background-color:hsl(258,90%,20%);color:hsl(210,40%,85%);font-size:12px}.rdp-day_button:hover{background:hsl(220,20%,16%)!important}.rdp-month_caption{color:hsl(210,40%,85%)}.rdp-weekday{color:hsl(220,10%,42%)}.rdp-nav button{color:hsl(220,10%,52%)}`}</style>
+        <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", padding: "8px" }}>
+          <style>{`.rdp{--rdp-accent-color:hsl(var(--primary));--rdp-background-color:hsl(258,90%,20%);color:hsl(210,40%,85%);font-size:12px}.rdp-day_button:hover{background:hsl(220,20%,16%)!important}.rdp-month_caption{color:hsl(210,40%,85%)}.rdp-weekday{color:hsl(220,10%,42%)}.rdp-nav button{color:hsl(220,10%,52%)}`}</style>
           <DayPicker mode="range" selected={customRange} onSelect={(r) => { onCustomRange(r); if (r?.from && r?.to) { onSelect("custom"); setOpen(false); setShowCal(false); } }} />
           <div style={{ display: "flex", gap: "8px", padding: "0 8px 4px" }}>
-            <button onClick={() => { setShowCal(false); setOpen(false); }} style={{ flex: 1, padding: "6px", background: "hsl(220,20%,14%)", border: "1px solid hsl(220,15%,20%)", borderRadius: "5px", color: "hsl(220,10%,55%)", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
+            <button onClick={() => { setShowCal(false); setOpen(false); }} style={{ flex: 1, padding: "6px", background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)", borderRadius: "5px", color: "hsl(220,10%,55%)", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
             {customRange?.from && <button onClick={() => { onSelect("custom"); setOpen(false); setShowCal(false); }} style={{ flex: 1, padding: "6px", background: "hsl(258,90%,30%)", border: "1px solid hsl(258,90%,40%)", borderRadius: "5px", color: "hsl(258,90%,85%)", fontSize: "11px", cursor: "pointer" }}>Apply</button>}
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function Dashboard() {
       label: "Sales",
       value: stats ? `${getCurrencySymbol(currency)} ${Number(stats.totalRevenue).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—",
       icon: <DollarSign size={18} />,
-      color: "hsl(258, 90%, 66%)",
+      color: "hsl(var(--primary))",
       sub: statsLabel,
       testId: "stat-total-sales",
     },
@@ -225,10 +225,10 @@ export default function Dashboard() {
         {/* ── Greeting ──────────────────────────────────────────────── */}
         {!isMobile && (
           <div style={{ paddingBottom: "4px" }}>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0, lineHeight: 1.3 }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, lineHeight: 1.3 }}>
               {greeting}, {displayName}
             </h2>
-            <p style={{ fontSize: "13px", color: "hsl(220, 10%, 45%)", marginTop: "4px" }}>
+            <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
               Here's what's happening with your store today.
             </p>
           </div>
@@ -255,13 +255,13 @@ export default function Dashboard() {
           {statCards.map((sc) => (
             <div key={sc.label} data-testid={sc.testId} style={{ ...card, padding: isMobile ? "14px" : "20px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 48%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
                 <div style={{ width: "32px", height: "32px", borderRadius: "7px", background: `${sc.color}18`, color: sc.color, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${sc.color}28` }}>
                   {sc.icon}
                 </div>
               </div>
-              <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: 700, color: "hsl(210, 40%, 95%)", marginBottom: "4px", lineHeight: 1.1 }}>{sc.value}</div>
-              <div style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>{sc.sub}</div>
+              <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "4px", lineHeight: 1.1 }}>{sc.value}</div>
+              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{sc.sub}</div>
             </div>
           ))}
         </div>
@@ -277,7 +277,7 @@ export default function Dashboard() {
           {/* Sales Trend */}
           <div style={{ ...card, padding: "20px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "8px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Sales Trend</span>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Sales Trend</span>
               <DateRangeFilter
                 selected={salesRangeKey}
                 onSelect={setSalesRangeKey}
@@ -295,15 +295,15 @@ export default function Dashboard() {
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(258, 90%, 66%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(258, 90%, 66%)" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 13%)" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(220, 10%, 42%)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "hsl(220, 10%, 42%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${getCurrencySymbol(currency)}${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
-                  <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toLocaleString()}`, "Revenue"]} />
-                  <Area type="monotone" dataKey="sales" stroke="hsl(258, 90%, 66%)" strokeWidth={2} fill="url(#salesGrad)" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${getCurrencySymbol(currency)}${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }} formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toLocaleString()}`, "Revenue"]} />
+                  <Area type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#salesGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -312,7 +312,7 @@ export default function Dashboard() {
           {/* Order Status */}
           <div style={{ ...card, padding: "20px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "8px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)" }}>Order Status</span>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Order Status</span>
               <DateRangeFilter
                 selected={orderRangeKey}
                 onSelect={setOrderRangeKey}
@@ -332,8 +332,8 @@ export default function Dashboard() {
                     <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
                       {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(220, 20%, 10%)", border: "1px solid hsl(220, 15%, 18%)", borderRadius: "6px", color: "hsl(210, 40%, 95%)", fontSize: "12px" }} formatter={(value: number) => [`${value}%`, ""]} />
-                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(220, 10%, 52%)" }}>{value}</span>} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }} formatter={(value: number) => [`${value}%`, ""]} />
+                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "7px" }}>
@@ -341,9 +341,9 @@ export default function Dashboard() {
                     <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
-                        <span style={{ fontSize: "12px", color: "hsl(220, 10%, 52%)" }}>{item.name}</span>
+                        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{item.name}</span>
                       </div>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 90%)" }}>{item.value}%</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.value}%</span>
                     </div>
                   ))}
                 </div>

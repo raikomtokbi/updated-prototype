@@ -78,7 +78,7 @@ function PackageManager({ productId }: { productId: string }) {
         {packages.map((pkg) => {
           const stockVal = editingStock[pkg.id] !== undefined ? editingStock[pkg.id] : ((pkg as any).stock !== null && (pkg as any).stock !== undefined ? String((pkg as any).stock) : "");
           return (
-            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
+            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }}>
               <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
@@ -203,7 +203,7 @@ export default function Subscriptions() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search plan name..." />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} plan{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -225,8 +225,8 @@ export default function Subscriptions() {
               <tbody>
                 {filtered.map((p) => (
                   <tr key={p.id}>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{p.title}</td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 55%)", maxWidth: "220px" }}>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{p.title}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))", maxWidth: "220px" }}>
                       <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {p.description ?? "—"}
                       </span>

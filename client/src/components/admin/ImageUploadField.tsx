@@ -140,8 +140,8 @@ export function ImageUploadField({
               width: "100%",
               aspectRatio: aspect,
               borderRadius: "6px",
-              border: value ? "1px solid hsl(220,15%,16%)" : "1px dashed hsl(220,15%,22%)",
-              background: value ? "transparent" : "hsl(220,20%,8%)",
+              border: value ? "1px solid hsl(var(--border))" : "1px dashed hsl(220,15%,22%)",
+              background: value ? "transparent" : "hsl(var(--background))",
               overflow: "hidden",
               position: "relative",
               cursor: !value ? "pointer" : "default",
@@ -195,7 +195,7 @@ export function ImageUploadField({
               onClick={() => fileRef.current?.click()}
               style={{
                 ...btnBase,
-                background: "rgba(124,58,237,0.12)",
+                background: "hsl(var(--primary) / 0.12)",
                 borderColor: "rgba(124,58,237,0.3)",
                 color: "#a78bfa",
                 opacity: uploading || deleting ? 0.7 : 1,
@@ -242,8 +242,8 @@ export function ImageUploadField({
               aspectRatio: aspect,
               flexShrink: 0,
               borderRadius: "6px",
-              border: value ? "1px solid hsl(220,15%,16%)" : "1px dashed hsl(220,15%,22%)",
-              background: value ? "transparent" : "hsl(220,20%,8%)",
+              border: value ? "1px solid hsl(var(--border))" : "1px dashed hsl(220,15%,22%)",
+              background: value ? "transparent" : "hsl(var(--background))",
               overflow: "hidden",
               position: "relative",
             }}
@@ -297,7 +297,7 @@ export function ImageUploadField({
                 onClick={() => fileRef.current?.click()}
                 style={{
                   ...btnBase,
-                  background: "rgba(124,58,237,0.12)",
+                  background: "hsl(var(--primary) / 0.12)",
                   borderColor: "rgba(124,58,237,0.3)",
                   color: "#a78bfa",
                   opacity: uploading || deleting ? 0.7 : 1,

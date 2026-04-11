@@ -396,7 +396,7 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
         {/* Header */}
         <div style={{
           padding: "16px 18px",
-          borderBottom: "1px solid hsl(220,15%,12%)",
+          borderBottom: "1px solid hsl(var(--input))",
           display: "flex", alignItems: "flex-start", gap: 14,
         }}>
           {/* Icon */}
@@ -511,7 +511,7 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
         {/* Footer actions */}
         <div style={{
           padding: "10px 18px",
-          borderTop: "1px solid hsl(220,15%,12%)",
+          borderTop: "1px solid hsl(var(--input))",
           display: "flex", alignItems: "center", gap: 8,
         }}>
           <button
@@ -1021,7 +1021,7 @@ export default function Plugins() {
                   style={{
                     padding: "3px 10px", borderRadius: 20, fontSize: "10px", fontWeight: 600,
                     border: "1px solid",
-                    borderColor: typeFilter === f.value ? "#6366f1" : "hsl(220,15%,18%)",
+                    borderColor: typeFilter === f.value ? "#6366f1" : "hsl(var(--border))",
                     background: typeFilter === f.value ? "rgba(99,102,241,0.15)" : "transparent",
                     color: typeFilter === f.value ? "#818cf8" : "hsl(220,10%,40%)",
                     cursor: "pointer",

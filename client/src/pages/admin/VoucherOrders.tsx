@@ -88,7 +88,7 @@ export default function VoucherOrders() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search order #, user, product, UTR..." />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} order{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>

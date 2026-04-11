@@ -48,7 +48,7 @@ export default function Refunds() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search transaction or user..." />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} request{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -73,10 +73,10 @@ export default function Refunds() {
                     <td style={tdStyle}>
                       <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>{r.id.slice(0, 16)}…</span>
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>{r.userId ?? "—"}</td>
-                    <td style={{ ...tdStyle, color: "hsl(220, 10%, 60%)" }}>{r.paymentMethod}</td>
-                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(220, 10%, 50%)" }}>{r.gatewayRef ?? "—"}</td>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>${Number(r.amount).toFixed(2)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>{r.userId ?? "—"}</td>
+                    <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))" }}>{r.paymentMethod}</td>
+                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>{r.gatewayRef ?? "—"}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>${Number(r.amount).toFixed(2)}</td>
                     <td style={tdStyle}><StatusBadge value={r.status} /></td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(r.createdAt)}</td>
                   </tr>

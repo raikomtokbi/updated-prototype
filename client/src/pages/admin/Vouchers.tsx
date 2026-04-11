@@ -78,7 +78,7 @@ function PackageManager({ productId }: { productId: string }) {
         {packages.map((pkg) => {
           const stockVal = editingStock[pkg.id] !== undefined ? editingStock[pkg.id] : ((pkg as any).stock !== null && (pkg as any).stock !== undefined ? String((pkg as any).stock) : "");
           return (
-            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px" }}>
+            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }}>
               <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
@@ -278,10 +278,10 @@ export default function Vouchers() {
               <tr><td colSpan={5}><EmptyState message={vouchers.length === 0 ? "No vouchers yet. Click Add Voucher to create one." : "No vouchers match your filters."} /></td></tr>
             ) : (
               filtered.map((p) => (
-                <tr key={p.id} data-testid={`row-voucher-${p.id}`} style={{ borderBottom: "1px solid hsl(220,15%,12%)" }}>
+                <tr key={p.id} data-testid={`row-voucher-${p.id}`} style={{ borderBottom: "1px solid hsl(var(--input))" }}>
                   <td style={tdStyle}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", border: "1px solid hsl(220,15%,18%)" }} />}
+                      {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", border: "1px solid hsl(var(--border))" }} />}
                       <span style={{ fontWeight: 500, color: "hsl(210,40%,88%)", fontSize: "13px" }}>{p.title}</span>
                     </div>
                   </td>

@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 
 // ─── Common styles ─────────────────────────────────────────────────────────────
 export const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
 };
@@ -10,10 +10,10 @@ export const card: React.CSSProperties = {
 export const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "6px 10px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 90%)",
+  color: "hsl(var(--foreground))",
   fontSize: "12px",
   outline: "none",
   boxSizing: "border-box",
@@ -21,10 +21,10 @@ export const inputStyle: React.CSSProperties = {
 
 export const selectStyle: React.CSSProperties = {
   padding: "6px 10px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 90%)",
+  color: "hsl(var(--foreground))",
   fontSize: "12px",
   outline: "none",
   cursor: "pointer",
@@ -80,8 +80,8 @@ export const btnEdit: React.CSSProperties = {
   gap: "4px",
   padding: "4px 10px",
   borderRadius: "5px",
-  background: "rgba(124, 58, 237, 0.1)",
-  border: "1px solid rgba(124, 58, 237, 0.25)",
+  background: "hsl(var(--primary) / 0.1)",
+  border: "1px solid hsl(var(--primary) / 0.25)",
   color: "#a78bfa",
   fontSize: "11px",
   cursor: "pointer",
@@ -94,9 +94,9 @@ export const btnNeutral: React.CSSProperties = {
   gap: "4px",
   padding: "4px 10px",
   borderRadius: "5px",
-  background: "hsl(220, 20%, 14%)",
-  border: "1px solid hsl(220, 15%, 20%)",
-  color: "hsl(220, 10%, 60%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  color: "hsl(var(--muted-foreground))",
   fontSize: "11px",
   cursor: "pointer",
   whiteSpace: "nowrap",
@@ -113,23 +113,23 @@ const statusColors: Record<string, string> = {
   in_progress: "hsl(38, 92%, 50%)",
   "in-progress": "hsl(38, 92%, 50%)",
   failed: "hsl(0, 72%, 51%)",
-  refunded: "hsl(258, 90%, 66%)",
+  refunded: "hsl(var(--primary))",
   resolved: "hsl(142, 71%, 45%)",
-  closed: "hsl(220, 10%, 45%)",
+  closed: "hsl(var(--muted-foreground))",
   inactive: "hsl(0, 72%, 51%)",
   maintenance: "hsl(38, 92%, 50%)",
   high: "hsl(0, 72%, 51%)",
   medium: "hsl(38, 92%, 50%)",
   low: "hsl(142, 71%, 45%)",
   urgent: "hsl(0, 72%, 51%)",
-  super_admin: "hsl(258, 90%, 66%)",
+  super_admin: "hsl(var(--primary))",
   admin: "hsl(196, 100%, 50%)",
   staff: "hsl(38, 92%, 50%)",
-  user: "hsl(220, 10%, 55%)",
+  user: "hsl(var(--muted-foreground))",
 };
 
 export function StatusBadge({ value }: { value: string }) {
-  const color = statusColors[value] ?? "hsl(220, 10%, 50%)";
+  const color = statusColors[value] ?? "hsl(var(--muted-foreground))";
   return (
     <span
       style={{
@@ -160,7 +160,7 @@ export function SearchInput({
 }) {
   return (
     <div style={{ position: "relative", minWidth: "200px" }}>
-      <Search size={13} style={{ position: "absolute", left: "9px", top: "50%", transform: "translateY(-50%)", color: "hsl(220, 10%, 38%)", pointerEvents: "none" }} />
+      <Search size={13} style={{ position: "absolute", left: "9px", top: "50%", transform: "translateY(-50%)", color: "hsl(var(--muted-foreground))", pointerEvents: "none" }} />
       <input
         style={{ ...inputStyle, paddingLeft: "28px" }}
         value={value}
@@ -195,7 +195,7 @@ export function EmptyState({ message = "No data available yet." }: { message?: s
   return (
     <div style={{ padding: "3rem 2rem", textAlign: "center" }}>
       <div style={{ fontSize: "28px", marginBottom: "10px", opacity: 0.3 }}>📭</div>
-      <p style={{ color: "hsl(220, 10%, 40%)", fontSize: "13px" }}>{message}</p>
+      <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>{message}</p>
     </div>
   );
 }
@@ -207,7 +207,7 @@ export const thStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
   letterSpacing: "0.05em",
-  color: "hsl(220, 10%, 42%)",
+  color: "hsl(var(--muted-foreground))",
   borderBottom: "1px solid hsl(220, 15%, 13%)",
   whiteSpace: "nowrap",
 };
@@ -223,10 +223,10 @@ export function Modal({ title, onClose, children, wide }: { title: string; onClo
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: wide ? "820px" : "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(220, 22%, 8%)", border: "1px solid rgba(124, 58, 237, 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: wide ? "820px" : "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220, 10%, 50%)", cursor: "pointer", fontSize: "18px", lineHeight: 1 }}>✕</button>
+          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", fontSize: "18px", lineHeight: 1 }}>✕</button>
         </div>
         {children}
       </div>

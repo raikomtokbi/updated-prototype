@@ -43,8 +43,8 @@ const btnPrimary: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem 0.75rem",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210,40%,92%)",
   fontSize: "13px",
@@ -71,7 +71,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "440px", maxHeight: "85vh", overflowY: "auto", background: "hsl(220,22%,8%)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "440px", maxHeight: "85vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
@@ -191,7 +191,7 @@ function UserActionsMenu({ user, onUpdate, disabled }: {
     },
     ...["user", "staff", "admin"].filter((r) => r !== user.role).map((r) => ({
       label: `Set Role: ${r.replace("_", " ")}`,
-      color: "hsl(220, 10%, 60%)",
+      color: "hsl(var(--muted-foreground))",
       onClick: () => onUpdate({ role: r as User["role"] }),
     })),
   ].filter(Boolean) as { label: string; color: string; onClick: () => void }[];
@@ -207,8 +207,8 @@ function UserActionsMenu({ user, onUpdate, disabled }: {
           gap: "5px",
           padding: "5px 10px",
           borderRadius: "5px",
-          background: "hsl(220, 20%, 14%)",
-          border: "1px solid hsl(220, 15%, 20%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           color: isSelf ? "hsl(220,10%,35%)" : "hsl(220, 10%, 65%)",
           fontSize: "11px",
           cursor: isSelf ? "not-allowed" : "pointer",
@@ -225,8 +225,8 @@ function UserActionsMenu({ user, onUpdate, disabled }: {
           top: "calc(100% + 4px)",
           right: 0,
           minWidth: "180px",
-          background: "hsl(220, 20%, 10%)",
-          border: "1px solid hsl(220, 15%, 18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "8px",
           overflow: "hidden",
           zIndex: 100,
@@ -297,7 +297,7 @@ export default function Users() {
           <SearchInput value={search} onChange={setSearch} placeholder="Search username, email or name..." />
           <FilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} user{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -320,7 +320,7 @@ export default function Users() {
                 {filtered.map((u) => (
                   <tr key={u.id}>
                     <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(196,100%,55%)", letterSpacing: "0.05em" }}>{u.id}</td>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{u.username}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{u.username}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 70%)" }}>{u.fullName ?? "—"}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>
                     <td style={tdStyle}><StatusBadge value={u.role} /></td>

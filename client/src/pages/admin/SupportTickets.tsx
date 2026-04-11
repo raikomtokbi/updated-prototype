@@ -35,10 +35,10 @@ function formatDate(d: string | Date | null | undefined) {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 90%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   resize: "none",
@@ -151,7 +151,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
 
           {/* Conversation thread */}
           <div style={{
-            background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)",
+            background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
             borderRadius: "8px", overflow: "hidden",
           }}>
             <div style={{ padding: "8px 14px", borderBottom: "1px solid hsl(220,15%,14%)" }}>
@@ -325,7 +325,7 @@ export default function SupportTickets() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search subject, user or ticket ID…" />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} ticket{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -357,7 +357,7 @@ export default function SupportTickets() {
                         {t.userId ?? "Guest"}
                       </span>
                     </td>
-                    <td style={{ ...tdStyle, color: "hsl(210, 40%, 90%)", maxWidth: "200px" }}>
+                    <td style={{ ...tdStyle, color: "hsl(var(--foreground))", maxWidth: "200px" }}>
                       <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.subject}</span>
                     </td>
                     <td style={tdStyle}><StatusBadge value={t.priority} /></td>

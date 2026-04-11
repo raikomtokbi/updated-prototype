@@ -178,7 +178,7 @@ export default function Campaigns() {
 
       {/* ── Announcement Banner ────────────────────────────────────────── */}
       <div style={card}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220,15%,18%)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,50%)", marginBottom: "8px", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>Homepage Announcement Banner</label>
             <input
@@ -197,9 +197,9 @@ export default function Campaigns() {
                 fontSize: "11px",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                background: announcementEnabled || settings.announcement_enabled === "true" ? "rgba(139, 92, 246, 0.15)" : "hsl(220, 15%, 13%)",
-                color: announcementEnabled || settings.announcement_enabled === "true" ? "hsl(258, 90%, 70%)" : "hsl(220, 10%, 50%)",
-                border: "1px solid hsl(220, 15%, 20%)",
+                background: announcementEnabled || settings.announcement_enabled === "true" ? "hsl(var(--primary) / 0.15)" : "hsl(220, 15%, 13%)",
+                color: announcementEnabled || settings.announcement_enabled === "true" ? "hsl(258, 90%, 70%)" : "hsl(var(--muted-foreground))",
+                border: "1px solid hsl(var(--border))",
                 cursor: "pointer",
                 fontWeight: 600,
                 whiteSpace: "nowrap",
@@ -226,9 +226,9 @@ export default function Campaigns() {
       {/* ── Bonus Banner ──────────────────────────────────────────────── */}
       <div style={card}>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ borderBottom: "1px solid hsl(220,15%,18%)", paddingBottom: "12px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)" }}>Bonus Banner</label>
-            <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: "4px 0 0" }}>
+          <div style={{ borderBottom: "1px solid hsl(var(--border))", paddingBottom: "12px" }}>
+            <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Bonus Banner</label>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
               Edit the "Get X% Bonus Credits" banner displayed below Trending Now
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function Campaigns() {
           <SearchInput value={search} onChange={setSearch} placeholder="Search campaign name..." />
           <FilterSelect value={typeFilter} onChange={setTypeFilter} options={TYPE_OPTIONS} />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} campaign{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -324,7 +324,7 @@ export default function Campaigns() {
               <tbody>
                 {filtered.map((c) => (
                   <tr key={c.id}>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{c.name}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{c.name}</td>
                     <td style={tdStyle}><StatusBadge value={c.type} /></td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.startsAt)}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.endsAt)}</td>

@@ -7,15 +7,15 @@ import type { PaymentMethod } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
 };
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem 0.75rem",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210,40%,92%)",
   fontSize: "13px",
@@ -243,7 +243,7 @@ function getIcon(type: string) {
 
 function getGatewayBadgeColor(_type: string): string {
   // Use site theme color for all gateways for consistency
-  return "hsl(258, 90%, 66%)";
+  return "hsl(var(--primary))";
 }
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "580px", maxHeight: "90vh", overflowY: "auto", background: "hsl(220,22%,8%)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "580px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
@@ -326,8 +326,8 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
               style={{
                 padding: "6px 8px",
                 borderRadius: "5px",
-                border: `1px solid ${form.type === type ? getGatewayBadgeColor(type) : "hsl(220,15%,18%)"}`,
-                background: form.type === type ? `${getGatewayBadgeColor(type)}22` : "hsl(220,20%,10%)",
+                border: `1px solid ${form.type === type ? getGatewayBadgeColor(type) : "hsl(var(--border))"}`,
+                background: form.type === type ? `${getGatewayBadgeColor(type)}22` : "hsl(var(--card))",
                 color: form.type === type ? getGatewayBadgeColor(type) : "hsl(220,10%,55%)",
                 fontSize: "11px",
                 fontWeight: 600,
@@ -356,7 +356,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
           )}
         </div>
         {showNotes && gatewayCfg.notes && (
-          <div style={{ fontSize: "11px", color: "hsl(220,10%,55%)", background: "hsl(220,20%,9%)", borderRadius: "4px", padding: "8px", marginBottom: "0.6rem", lineHeight: 1.6 }}>
+          <div style={{ fontSize: "11px", color: "hsl(220,10%,55%)", background: "hsl(var(--card))", borderRadius: "4px", padding: "8px", marginBottom: "0.6rem", lineHeight: 1.6 }}>
             {gatewayCfg.notes}
           </div>
         )}
@@ -474,7 +474,7 @@ export default function PaymentMethodPage() {
     }>
 
       {/* Info banner */}
-      <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", lineHeight: 1.6, margin: 0 }}>
           Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual UPI, Manual</span>.
           Set a lower priority number to make a gateway take precedence over others when multiple gateways are active.

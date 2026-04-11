@@ -38,8 +38,8 @@ function HslPicker({
   const inp: React.CSSProperties = {
     width: "100%",
     padding: "3px 6px",
-    background: "hsl(220,20%,11%)",
-    border: "1px solid hsl(220,15%,18%)",
+    background: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
     borderRadius: "4px",
     color: "hsl(210,40%,85%)",
     fontSize: "11px",
@@ -50,7 +50,7 @@ function HslPicker({
     <div>
       <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,72%)", marginBottom: "6px" }}>{label}</div>
       <div style={{ display: "flex", gap: "6px", alignItems: "flex-end" }}>
-        <div style={{ width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0, background: `hsl(${value})`, border: "1px solid hsl(220,15%,18%)" }} />
+        <div style={{ width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0, background: `hsl(${value})`, border: "1px solid hsl(var(--border))" }} />
         <div style={{ flex: 1 }}>
           <div style={labelSt}>Hue (0–360)</div>
           <input style={inp} type="number" min={0} max={360} value={h} onChange={(e) => setH(Number(e.target.value))} />
@@ -130,7 +130,7 @@ export default function ChooseTheme() {
   }
 
   const card: React.CSSProperties = {
-    background: "hsl(220,20%,9%)",
+    background: "hsl(var(--card))",
     border: "1px solid hsl(220,15%,13%)",
     borderRadius: "8px",
   };
@@ -140,7 +140,7 @@ export default function ChooseTheme() {
     alignItems: "center",
     gap: "8px",
     padding: "12px 16px",
-    borderBottom: "1px solid hsl(220,15%,12%)",
+    borderBottom: "1px solid hsl(var(--input))",
   };
 
   const saveBtn = customDirty ? (
@@ -169,7 +169,7 @@ export default function ChooseTheme() {
         {/* Preset themes */}
         <div style={card}>
           <div style={sectionHeader}>
-            <Palette size={14} style={{ color: "hsl(258,90%,66%)" }} />
+            <Palette size={14} style={{ color: "hsl(var(--primary))" }} />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Preset Themes</span>
           </div>
           <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
@@ -182,8 +182,8 @@ export default function ChooseTheme() {
                   disabled={saveMut.isPending}
                   onClick={() => applyPreset(theme.id)}
                   style={{
-                    background: "hsl(220,20%,11%)",
-                    border: isActive ? `2px solid hsl(${theme.primary})` : "1px solid hsl(220,15%,16%)",
+                    background: "hsl(var(--card))",
+                    border: isActive ? `2px solid hsl(${theme.primary})` : "1px solid hsl(var(--border))",
                     borderRadius: "8px",
                     padding: "12px",
                     cursor: saveMut.isPending ? "not-allowed" : "pointer",

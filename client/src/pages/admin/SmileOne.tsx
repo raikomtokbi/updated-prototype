@@ -200,7 +200,7 @@ function WebhookUrlsPanel() {
             </div>
             <div style={{
               display: "flex", alignItems: "center", gap: "6px",
-              background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)",
+              background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
               borderRadius: "6px", padding: "6px 10px",
             }}>
               <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -335,8 +335,8 @@ function MappingTab() {
                   onClick={() => setSelectedService({ id: svc.id, name: svc.name, price: String(svc.finalPrice) })}
                   style={{
                     padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                    background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
-                    border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                    background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                    border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                     color: "hsl(210,40%,88%)",
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                   }}
@@ -399,7 +399,7 @@ function MappingTab() {
           </div>
           <button
             data-testid="button-fetch-smile-products"
-            style={{ ...btnPrimary, background: "hsl(220,20%,14%)", border: "1px solid hsl(220,15%,20%)" }}
+            style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)" }}
             onClick={fetchSmileProducts}
             disabled={!rightGame || fetchingSmile}
           >
@@ -417,8 +417,8 @@ function MappingTab() {
                 onClick={() => setSelectedSmile(p)}
                 style={{
                   padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                  background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(220,20%,11%)",
-                  border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(220,15%,18%)",
+                  background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                  border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                   color: "hsl(210,40%,88%)",
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}
@@ -517,7 +517,7 @@ export default function SmileOnePage() {
         </div>
 
         {/* Tab bar */}
-        <div style={{ display: "flex", gap: "4px", background: "hsl(220,20%,9%)", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
           <button data-testid="tab-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
           <button data-testid="tab-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
         </div>

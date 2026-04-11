@@ -142,8 +142,8 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
         top: 0,
         width: "236px",
         height: "100vh",
-        background: "hsl(220, 20%, 7%)",
-        borderRight: "1px solid hsl(220, 15%, 12%)",
+        background: "hsl(var(--background))",
+        borderRight: "1px solid hsl(var(--input))",
         display: "flex",
         flexDirection: "column",
         zIndex: 200,
@@ -167,7 +167,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
             width: "28px",
             height: "28px",
             borderRadius: "6px",
-            background: "hsl(258, 90%, 66%)",
+            background: "hsl(var(--primary))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -176,7 +176,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
         >
           <LayoutDashboard size={14} color="white" />
         </div>
-        <span style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210, 40%, 95%)", letterSpacing: "0.02em", flex: 1 }}>
+        <span style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))", letterSpacing: "0.02em", flex: 1 }}>
           Admin Panel
         </span>
         {onClose && (
@@ -191,7 +191,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "hsl(220, 10%, 50%)",
+              color: "hsl(var(--muted-foreground))",
               borderRadius: "4px",
               flexShrink: 0,
             }}
@@ -211,7 +211,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
                   fontSize: "9px",
                   fontWeight: 700,
                   letterSpacing: "0.1em",
-                  color: "hsl(220, 10%, 38%)",
+                  color: "hsl(var(--muted-foreground))",
                   textTransform: "uppercase",
                   userSelect: "none",
                 }}
@@ -239,13 +239,13 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
                     fontSize: "12px",
                     cursor: "pointer",
                     textDecoration: "none",
-                    color: isActive ? "hsl(210, 40%, 95%)" : "hsl(220, 10%, 52%)",
-                    background: isActive ? "rgba(139, 92, 246, 0.12)" : "transparent",
-                    borderLeft: isActive ? "2px solid hsl(258, 90%, 66%)" : "2px solid transparent",
+                    color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                    background: isActive ? "hsl(var(--primary) / 0.12)" : "transparent",
+                    borderLeft: isActive ? "2px solid hsl(var(--primary))" : "2px solid transparent",
                     transition: "background 0.15s, color 0.15s",
                   }}
                 >
-                  <span style={{ color: isActive ? "hsl(258, 90%, 66%)" : "hsl(220, 10%, 42%)", flexShrink: 0 }}>
+                  <span style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                     {item.icon}
                   </span>
                   {item.label}
@@ -257,7 +257,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
       </nav>
 
       <div style={{ padding: "8px 14px", borderTop: "1px solid hsl(220, 15%, 13%)", flexShrink: 0 }}>
-        <p style={{ fontSize: "10px", color: "hsl(220, 10%, 35%)" }}>Admin v1.0</p>
+        <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Admin v1.0</p>
       </div>
     </aside>
   );
@@ -286,7 +286,7 @@ function notifIcon(type: string) {
 
 function notifColor(type: string) {
   if (type === "order") return "hsl(142, 71%, 45%)";
-  if (type === "user") return "hsl(258, 90%, 66%)";
+  if (type === "user") return "hsl(var(--primary))";
   if (type === "alert" || type === "warning") return "hsl(38, 92%, 50%)";
   return "hsl(200, 80%, 55%)";
 }
@@ -356,11 +356,11 @@ function NotificationBell() {
           justifyContent: "center",
           width: "34px",
           height: "34px",
-          background: "hsl(220, 20%, 11%)",
-          border: "1px solid hsl(220, 15%, 18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "6px",
           cursor: "pointer",
-          color: "hsl(210, 40%, 75%)",
+          color: "hsl(var(--foreground))",
         }}
       >
         <Bell size={15} />
@@ -401,8 +401,8 @@ function NotificationBell() {
             maxWidth: "340px",
             marginLeft: "auto",
             marginRight: "0",
-            background: "hsl(220, 20%, 10%)",
-            border: "1px solid hsl(220, 15%, 18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "8px",
             overflow: "hidden",
             zIndex: 200,
@@ -419,8 +419,8 @@ function NotificationBell() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Bell size={14} style={{ color: "hsl(258, 90%, 66%)" }} />
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 90%)" }}>Notifications</span>
+              <Bell size={14} style={{ color: "hsl(var(--primary))" }} />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Notifications</span>
               {unread > 0 && (
                 <span
                   style={{
@@ -445,7 +445,7 @@ function NotificationBell() {
                   alignItems: "center",
                   gap: "4px",
                   fontSize: "11px",
-                  color: "hsl(258, 90%, 66%)",
+                  color: "hsl(var(--primary))",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -460,7 +460,7 @@ function NotificationBell() {
 
           <div style={{ maxHeight: "360px", overflowY: "auto" }}>
             {notifications.length === 0 ? (
-              <div style={{ padding: "32px 20px", textAlign: "center", color: "hsl(220, 10%, 38%)", fontSize: "12px" }}>
+              <div style={{ padding: "32px 20px", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
                 No notifications yet
               </div>
             ) : (
@@ -473,8 +473,8 @@ function NotificationBell() {
                     display: "flex",
                     gap: "10px",
                     padding: "12px 16px",
-                    borderBottom: "1px solid hsl(220, 15%, 12%)",
-                    background: n.isRead ? "transparent" : "rgba(139, 92, 246, 0.05)",
+                    borderBottom: "1px solid hsl(var(--input))",
+                    background: n.isRead ? "transparent" : "hsl(var(--primary) / 0.05)",
                     cursor: n.isRead ? "default" : "pointer",
                     transition: "background 0.15s",
                   }}
@@ -502,7 +502,7 @@ function NotificationBell() {
                         style={{
                           fontSize: "12px",
                           fontWeight: n.isRead ? 400 : 600,
-                          color: n.isRead ? "hsl(220, 10%, 60%)" : "hsl(210, 40%, 90%)",
+                          color: n.isRead ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
                           lineHeight: 1.3,
                         }}
                       >
@@ -514,17 +514,17 @@ function NotificationBell() {
                             width: "7px",
                             height: "7px",
                             borderRadius: "50%",
-                            background: "hsl(258, 90%, 66%)",
+                            background: "hsl(var(--primary))",
                             flexShrink: 0,
                             marginTop: "3px",
                           }}
                         />
                       )}
                     </div>
-                    <p style={{ fontSize: "11px", color: "hsl(220, 10%, 45%)", marginBottom: "4px", lineHeight: 1.4 }}>
+                    <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "4px", lineHeight: 1.4 }}>
                       {n.message}
                     </p>
-                    <span style={{ fontSize: "10px", color: "hsl(220, 10%, 35%)" }}>
+                    <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>
                       {timeAgo(n.createdAt)}
                     </span>
                   </div>
@@ -534,7 +534,7 @@ function NotificationBell() {
           </div>
 
           <div style={{ padding: "10px 16px", borderTop: "1px solid hsl(220, 15%, 14%)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-            <span style={{ fontSize: "11px", color: "hsl(220, 10%, 38%)" }}>
+            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
               {notifications.length === 0 ? "No notifications" : `Showing ${notifications.length} notifications`}
             </span>
             {notifications.length > 0 && (
@@ -589,11 +589,11 @@ function StatusButton({ compact = false }: { compact?: boolean }) {
           alignItems: "center",
           gap: compact ? "0" : "7px",
           padding: compact ? "6px" : "6px 12px",
-          background: "hsl(220, 20%, 11%)",
-          border: "1px solid hsl(220, 15%, 18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "6px",
           cursor: "pointer",
-          color: "hsl(210, 40%, 90%)",
+          color: "hsl(var(--foreground))",
           fontSize: "12px",
           fontWeight: 500,
           whiteSpace: "nowrap",
@@ -614,15 +614,15 @@ function StatusButton({ compact = false }: { compact?: boolean }) {
             top: "calc(100% + 6px)",
             right: 0,
             minWidth: "150px",
-            background: "hsl(220, 20%, 10%)",
-            border: "1px solid hsl(220, 15%, 18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "8px",
             overflow: "hidden",
             zIndex: 100,
             boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
           }}
         >
-          <div style={{ padding: "6px 12px", fontSize: "10px", color: "hsl(220, 10%, 38%)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid hsl(220, 15%, 15%)" }}>
+          <div style={{ padding: "6px 12px", fontSize: "10px", color: "hsl(var(--muted-foreground))", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid hsl(220, 15%, 15%)" }}>
             Site Status
           </div>
           {options.map((opt) => (
@@ -635,7 +635,7 @@ function StatusButton({ compact = false }: { compact?: boolean }) {
                 gap: "8px",
                 width: "100%",
                 padding: "9px 14px",
-                background: status === opt.value ? "rgba(139, 92, 246, 0.1)" : "transparent",
+                background: status === opt.value ? "hsl(var(--primary) / 0.1)" : "transparent",
                 border: "none",
                 cursor: "pointer",
                 color: status === opt.value ? "hsl(258, 90%, 75%)" : "hsl(220, 10%, 65%)",
@@ -646,7 +646,7 @@ function StatusButton({ compact = false }: { compact?: boolean }) {
             >
               <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: opt.color, flexShrink: 0 }} />
               {opt.label}
-              {status === opt.value && <span style={{ marginLeft: "auto", fontSize: "10px", color: "hsl(258, 90%, 66%)" }}>✓</span>}
+              {status === opt.value && <span style={{ marginLeft: "auto", fontSize: "10px", color: "hsl(var(--primary))" }}>✓</span>}
             </button>
           ))}
         </div>
@@ -680,11 +680,11 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
           alignItems: "center",
           gap: compact ? "0" : "8px",
           padding: compact ? "3px" : "5px 10px 5px 5px",
-          background: "hsl(220, 20%, 11%)",
-          border: "1px solid hsl(220, 15%, 18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "6px",
           cursor: "pointer",
-          color: "hsl(210, 40%, 90%)",
+          color: "hsl(var(--foreground))",
           height: "34px",
         }}
       >
@@ -694,7 +694,7 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
             height: "26px",
             borderRadius: "50%",
             background: "hsl(258, 90%, 30%)",
-            border: "1.5px solid hsl(258, 90%, 66%)",
+            border: "1.5px solid hsl(var(--primary))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -723,8 +723,8 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
             top: "calc(100% + 6px)",
             right: 0,
             minWidth: "170px",
-            background: "hsl(220, 20%, 10%)",
-            border: "1px solid hsl(220, 15%, 18%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "8px",
             overflow: "hidden",
             zIndex: 100,
@@ -732,8 +732,8 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
           }}
         >
           <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220, 15%, 15%)" }}>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 90%)" }}>{displayName}</div>
-            <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)", marginTop: "2px" }}>{user?.role?.replace("_", " ")}</div>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{displayName}</div>
+            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>{user?.role?.replace("_", " ")}</div>
           </div>
           {[
             { icon: <User size={13} />, label: "Profile", action: () => { navigate("/account"); setOpen(false); } },
@@ -756,7 +756,7 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
                 textAlign: "left",
               }}
             >
-              <span style={{ color: "hsl(220, 10%, 42%)" }}>{item.icon}</span>
+              <span style={{ color: "hsl(var(--muted-foreground))" }}>{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -811,7 +811,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: "hsl(220, 20%, 6%)" }}>
+    <div style={{ display: "flex", height: "100vh", background: "hsl(var(--background))" }}>
       {/* Desktop sidebar */}
       {!isMobile && <AdminSidebar />}
 
@@ -855,7 +855,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               alignItems: "center",
               justifyContent: "space-between",
               padding: "0 12px",
-              background: "hsl(220, 20%, 7%)",
+              background: "hsl(var(--background))",
               borderBottom: "1px solid hsl(220, 15%, 13%)",
               height: "46px",
               flexShrink: 0,
@@ -875,14 +875,14 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "hsl(258, 90%, 66%)",
+                  color: "hsl(var(--primary))",
                   flexShrink: 0,
                 }}
               >
                 <Menu size={20} />
               </button>
 
-              <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {title}
               </h1>
             </div>
@@ -904,14 +904,14 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               alignItems: "center",
               justifyContent: "space-between",
               padding: "0 20px",
-              background: "hsl(220, 20%, 7%)",
+              background: "hsl(var(--background))",
               borderBottom: "1px solid hsl(220, 15%, 13%)",
               minHeight: "46px",
               flexShrink: 0,
               gap: "10px",
             }}
           >
-            <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 95%)", flexShrink: 0 }}>
+            <h1 style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
               {title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "auto" }}>

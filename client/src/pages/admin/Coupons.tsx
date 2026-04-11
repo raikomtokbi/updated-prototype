@@ -164,7 +164,7 @@ export default function Coupons() {
           <SearchInput value={search} onChange={setSearch} placeholder="Search coupon code..." />
           <FilterSelect value={typeFilter} onChange={setTypeFilter} options={TYPE_OPTIONS} />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} coupon{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -193,10 +193,10 @@ export default function Coupons() {
                     <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(258, 90%, 70%)" }}>
                       {c.discountType === "percentage" ? `${c.discountValue}%` : `$${Number(c.discountValue).toFixed(2)}`}
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 55%)" }}>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
                       {c.minOrderAmount ? `$${Number(c.minOrderAmount).toFixed(2)}` : "—"}
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210, 40%, 80%)" }}>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>
                       {c.usedCount} / {c.maxUses ?? "∞"}
                     </td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.expiresAt)}</td>

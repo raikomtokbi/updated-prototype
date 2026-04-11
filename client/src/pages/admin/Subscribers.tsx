@@ -33,7 +33,7 @@ export default function Subscribers() {
       <div style={card}>
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search username or email..." />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} subscriber{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -55,7 +55,7 @@ export default function Subscribers() {
               <tbody>
                 {filtered.map((s) => (
                   <tr key={s.id}>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(210, 40%, 95%)" }}>{s.username}</td>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{s.username}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{s.email ?? "—"}</td>
                     <td style={tdStyle}><StatusBadge value={s.role} /></td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(s.createdAt)}</td>

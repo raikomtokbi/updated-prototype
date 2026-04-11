@@ -9,7 +9,7 @@ import { useNavGuard } from "@/hooks/useNavGuard";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   marginBottom: "16px",
@@ -26,8 +26,8 @@ const sectionHeader: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210, 40%, 92%)",
   fontSize: "13px",
@@ -39,8 +39,8 @@ const selectStyle: React.CSSProperties = {
   ...{
     width: "100%",
     padding: "8px 12px",
-    background: "hsl(220, 20%, 11%)",
-    border: "1px solid hsl(220, 15%, 18%)",
+    background: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
     borderRadius: "6px",
     color: "hsl(210, 40%, 92%)",
     fontSize: "13px",
@@ -52,8 +52,8 @@ const selectStyle: React.CSSProperties = {
 const textareaStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210, 40%, 92%)",
   fontSize: "13px",
@@ -67,7 +67,7 @@ const textareaStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220, 10%, 50%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "5px",
   display: "block",
   textTransform: "uppercase",
@@ -84,7 +84,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
         width: "40px",
         height: "22px",
         borderRadius: "11px",
-        background: checked ? "hsl(258, 90%, 60%)" : "hsl(220, 15%, 20%)",
+        background: checked ? "hsl(258, 90%, 60%)" : "hsl(var(--border))",
         border: "none",
         cursor: "pointer",
         flexShrink: 0,
@@ -111,9 +111,9 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 
 function InfoNote({ text }: { text: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginTop: "6px", padding: "6px 8px", background: "hsl(220, 20%, 11%)", borderRadius: "5px", border: "1px solid hsl(220, 15%, 18%)" }}>
-      <Info size={11} style={{ color: "hsl(220, 10%, 52%)", flexShrink: 0, marginTop: "1px" }} />
-      <span style={{ fontSize: "10px", color: "hsl(220, 10%, 48%)", lineHeight: 1.5 }}>{text}</span>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "6px", marginTop: "6px", padding: "6px 8px", background: "hsl(var(--card))", borderRadius: "5px", border: "1px solid hsl(var(--border))" }}>
+      <Info size={11} style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0, marginTop: "1px" }} />
+      <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{text}</span>
     </div>
   );
 }
@@ -170,13 +170,13 @@ function SettingRow({ label, description, children, note, apiSlug }: { label: st
     <div
       style={{
         padding: "14px 20px",
-        borderBottom: "1px solid hsl(220, 15%, 12%)",
+        borderBottom: "1px solid hsl(var(--input))",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210, 40%, 88%)", marginBottom: "2px" }}>{label}</div>
-          {description && <div style={{ fontSize: "11px", color: "hsl(220, 10%, 42%)" }}>{description}</div>}
+          <div style={{ fontSize: "13px", fontWeight: 500, color: "hsl(var(--foreground))", marginBottom: "2px" }}>{label}</div>
+          {description && <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{description}</div>}
         </div>
         {children}
       </div>
@@ -293,8 +293,8 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
   }
 
   const pickerBtnBase: React.CSSProperties = {
-    width: "32px", height: "32px", borderRadius: "6px", border: "1px solid hsl(220,15%,18%)",
-    background: "hsl(220,20%,11%)", cursor: "pointer", display: "flex", alignItems: "center",
+    width: "32px", height: "32px", borderRadius: "6px", border: "1px solid hsl(var(--border))",
+    background: "hsl(var(--card))", cursor: "pointer", display: "flex", alignItems: "center",
     justifyContent: "center", flexShrink: 0, color: "hsl(258,90%,70%)",
   };
 
@@ -307,7 +307,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
           <div
             key={idx}
             style={{
-              background: "hsl(220,20%,11%)", border: "1px solid hsl(220,15%,18%)",
+              background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
               borderRadius: "8px", padding: "12px", display: "flex",
               flexDirection: "column", gap: "8px",
             }}
@@ -317,13 +317,13 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                 type="button"
                 title="Choose icon"
                 onClick={() => setOpenPickerIdx(pickerOpen ? null : idx)}
-                style={{ ...pickerBtnBase, background: pickerOpen ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,11%)", border: pickerOpen ? "1px solid hsla(258,90%,66%,0.4)" : "1px solid hsl(220,15%,18%)" }}
+                style={{ ...pickerBtnBase, background: pickerOpen ? "hsla(258,90%,66%,0.15)" : "hsl(var(--card))", border: pickerOpen ? "1px solid hsla(258,90%,66%,0.4)" : "1px solid hsl(var(--border))" }}
                 data-testid={`button-icon-picker-${idx}`}
               >
                 <CardIcon size={16} />
               </button>
               <input
-                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
+                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
                 value={card.title}
                 onChange={(e) => update(idx, "title", e.target.value)}
                 placeholder="Card title"
@@ -339,14 +339,14 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
               </button>
             </div>
             <textarea
-              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
               value={card.desc}
               onChange={(e) => update(idx, "desc", e.target.value)}
               placeholder="Short description for this feature card"
               data-testid={`input-card-desc-${idx}`}
             />
             {pickerOpen && (
-              <div style={{ borderTop: "1px solid hsl(220,15%,18%)", paddingTop: "10px" }}>
+              <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "10px" }}>
                 <p style={{ fontSize: "10px", color: "hsl(220,10%,45%)", marginBottom: "8px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
                   {ICON_LIST.map((name) => {
@@ -360,7 +360,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                         data-testid={`button-icon-${name}-${idx}`}
                         onClick={() => { update(idx, "icon", name); setOpenPickerIdx(null); }}
                         style={{
-                          padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(220,15%,18%)",
+                          padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
                           background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
                           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                           color: selected ? "hsl(258,90%,72%)" : "hsl(220,10%,55%)",
@@ -461,7 +461,7 @@ export default function ControlPanel() {
   if (isLoading) {
     return (
       <AdminLayout title="Control Panel">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px", gap: "10px", color: "hsl(220, 10%, 45%)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px", gap: "10px", color: "hsl(var(--muted-foreground))" }}>
           <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
           <span style={{ fontSize: "13px" }}>Loading settings…</span>
         </div>
@@ -500,7 +500,7 @@ export default function ControlPanel() {
     <AdminLayout title="Control Panel" actions={saveBtn}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ marginBottom: "20px" }}>
-        <p style={{ fontSize: "12px", color: "hsl(220, 10%, 42%)", margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
           Manage system-wide configuration and feature toggles
         </p>
       </div>
@@ -508,7 +508,7 @@ export default function ControlPanel() {
       {/* ── Site Identity ───────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Site Identity</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -580,7 +580,7 @@ export default function ControlPanel() {
       {/* ── Contact & Social ────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Phone size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Phone size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Contact & Social</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -615,8 +615,8 @@ export default function ControlPanel() {
               />
             </div>
           </div>
-          <div style={{ borderTop: "1px solid hsl(220, 15%, 12%)", paddingTop: "14px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220, 10%, 50%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ borderTop: "1px solid hsl(var(--input))", paddingTop: "14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Social Links
             </div>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "10px" }}>
@@ -645,7 +645,7 @@ export default function ControlPanel() {
       {/* ── SEO ─────────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Search size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Search size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>SEO Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -683,7 +683,7 @@ export default function ControlPanel() {
       {/* ── General ─────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Globe size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>General Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
@@ -748,7 +748,7 @@ export default function ControlPanel() {
       {/* ── System Toggles ──────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <ToggleLeft size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <ToggleLeft size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>System Toggles</span>
         </div>
         <SettingRow key="user_registration" label="User Registration" description="Allow new users to create accounts">
@@ -771,7 +771,7 @@ export default function ControlPanel() {
       {/* ── Notifications ───────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Bell size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Bell size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Admin Notification Events</span>
         </div>
         {[
@@ -790,7 +790,7 @@ export default function ControlPanel() {
       {/* ── Security ────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Shield size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Shield size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Security & Access</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
@@ -844,7 +844,7 @@ export default function ControlPanel() {
       {/* ── User & Access ───────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <Users size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <Users size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>User Management</span>
         </div>
         <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
@@ -853,7 +853,7 @@ export default function ControlPanel() {
         <SettingRow label="Allow Social Login" description="Enable Google, Facebook, and Discord sign-in" note="Sign-in buttons appear once OAuth credentials are configured in API Integration." apiSlug="social-auth-google">
           <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
         </SettingRow>
-        <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
+        <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(var(--input))" }}>
           <label style={labelStyle}>New Account Approval</label>
           <select
             data-testid="select-account-approval"
@@ -875,7 +875,7 @@ export default function ControlPanel() {
       {/* ── Legal & Footer ──────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Footer & Legal</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -909,8 +909,8 @@ export default function ControlPanel() {
             />
           </div>
         </div>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220, 15%, 12%)", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(var(--input))", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Override the default content for each legal page. Leave blank to use the built-in defaults.
           </p>
           {[
@@ -936,11 +936,11 @@ export default function ControlPanel() {
       {/* ── About Us Page ───────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+          <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>About Us Page</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: 0 }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Customize the public About Us page. Leave any field blank to use the built-in default.
           </p>
           <div>
@@ -976,8 +976,8 @@ export default function ControlPanel() {
         </div>
         <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210, 40%, 85%)" }}>About Page Stats</span>
-            <p style={{ fontSize: "11px", color: "hsl(220, 10%, 50%)", margin: "4px 0 0" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>About Page Stats</span>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
               Override the live counts shown on the About page. Enter 0 to display the real database count.
             </p>
           </div>
@@ -1087,7 +1087,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   };
 
   const card: React.CSSProperties = {
-    background: "hsl(220, 20%, 9%)",
+    background: "hsl(var(--card))",
     border: "1px solid hsl(220, 15%, 13%)",
     borderRadius: "8px",
     marginBottom: "16px",
@@ -1104,8 +1104,8 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: "8px 12px",
-    background: "hsl(220, 20%, 11%)",
-    border: "1px solid hsl(220, 15%, 18%)",
+    background: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
     borderRadius: "4px",
     color: "hsl(210, 40%, 92%)",
     fontSize: "14px",
@@ -1115,14 +1115,14 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
     display: "block",
     fontSize: "12px",
     fontWeight: 600,
-    color: "hsl(210, 40%, 85%)",
+    color: "hsl(var(--foreground))",
     marginBottom: "4px",
   };
 
   return (
     <div style={card}>
       <div style={sectionHeader}>
-        <DollarSign size={15} style={{ color: "hsl(258, 90%, 66%)" }} />
+        <DollarSign size={15} style={{ color: "hsl(var(--primary))" }} />
         <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Fees & Taxes</span>
       </div>
 
@@ -1131,7 +1131,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
         <Toggle checked={bool("tax_enabled")} onChange={() => toggle("tax_enabled")} />
       </SettingRow>
       {bool("tax_enabled") && (
-        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
+        <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: "14px", borderTop: "1px solid hsl(var(--input))" }}>
           <div>
             <label style={labelStyle}>Tax Name</label>
             <input data-testid="input-tax-name" style={inputStyle} value={local.tax_name ?? "VAT"} onChange={(e) => set("tax_name", e.target.value)} />
@@ -1152,20 +1152,20 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
       )}
 
       {/* Additional Fees Section */}
-      <div style={{ borderTop: "1px solid hsl(220, 15%, 12%)", padding: "16px 20px" }}>
+      <div style={{ borderTop: "1px solid hsl(var(--input))", padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
           <label style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Additional Charges</label>
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); setShowForm(!showForm); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }}
-            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "6px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
+            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "6px 12px", background: "hsl(var(--primary))", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}
           >
             <Plus size={12} /> Add Fee
           </button>
         </div>
 
         {showForm && (
-          <form onSubmit={handleSubmit} style={{ marginBottom: "16px", padding: "12px", background: "hsl(220, 15%, 12%)", borderRadius: "4px" }}>
+          <form onSubmit={handleSubmit} style={{ marginBottom: "16px", padding: "12px", background: "hsl(var(--input))", borderRadius: "4px" }}>
             <div style={{ marginBottom: "10px" }}>
               <label style={labelStyle}>Fee Name</label>
               <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Processing Fee" style={inputStyle} />
@@ -1184,26 +1184,26 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
               </div>
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
-              <button type="submit" style={{ flex: 1, padding: "8px 12px", background: "hsl(258, 90%, 66%)", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }} disabled={createFee.isPending || updateFee.isPending}>
+              <button type="submit" style={{ flex: 1, padding: "8px 12px", background: "hsl(var(--primary))", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }} disabled={createFee.isPending || updateFee.isPending}>
                 {editingId ? "Update" : "Add"}
               </button>
-              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }} style={{ flex: 1, padding: "8px 12px", background: "hsl(220, 15%, 18%)", color: "hsl(210, 40%, 85%)", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}>
+              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }} style={{ flex: 1, padding: "8px 12px", background: "hsl(var(--border))", color: "hsl(var(--foreground))", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: 600 }}>
                 Cancel
               </button>
             </div>
           </form>
         )}
 
-        {isLoading ? <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "13px" }}>Loading fees...</p> : (
+        {isLoading ? <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading fees...</p> : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {fees.length === 0 ? (
-              <p style={{ color: "hsl(220, 10%, 50%)", fontSize: "12px" }}>No additional fees configured. All charges will be free.</p>
+              <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>No additional fees configured. All charges will be free.</p>
             ) : (
               fees.map((fee) => (
-                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(220, 15%, 18%)" }}>
+                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(var(--border))" }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>{fee.name}</div>
-                    <div style={{ fontSize: "12px", color: "hsl(220, 10%, 50%)", marginTop: "2px" }}>
+                    <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
                       {fee.type === "percentage" ? `${parseFloat(fee.amount).toFixed(2)}%` : `${parseFloat(fee.amount).toFixed(2)}`} • {fee.isActive ? "Active" : "Inactive"}
                     </div>
                   </div>
@@ -1211,7 +1211,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
                     <button
                       type="button"
                       onClick={() => { setEditingId(fee.id); setFormData({ name: fee.name, amount: fee.amount, type: fee.type, isActive: fee.isActive }); setShowForm(true); }}
-                      style={{ padding: "4px 8px", background: "hsl(220, 15%, 18%)", color: "hsl(210, 40%, 85%)", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
+                      style={{ padding: "4px 8px", background: "hsl(var(--border))", color: "hsl(var(--foreground))", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px" }}
                     >
                       Edit
                     </button>

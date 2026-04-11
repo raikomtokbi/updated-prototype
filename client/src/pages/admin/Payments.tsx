@@ -137,7 +137,7 @@ export default function Payments() {
         <Toolbar>
           <SearchInput value={search} onChange={setSearch} placeholder="Search order #, UTR, user, method..." />
           <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
-          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(220, 10%, 42%)" }}>
+          <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
             {rows.length} row{rows.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
@@ -263,7 +263,7 @@ export default function Payments() {
                         </tr>
                         {isExpanded && (
                           <tr key={`assign-${p.id}`}>
-                            <td colSpan={8} style={{ ...tdStyle, background: "hsl(220,20%,8%)", padding: "10px 16px" }}>
+                            <td colSpan={8} style={{ ...tdStyle, background: "hsl(var(--background))", padding: "10px 16px" }}>
                               <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                                 <span style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>Assign to Order #:</span>
                                 <input
@@ -271,7 +271,7 @@ export default function Payments() {
                                   placeholder="Paste order ID (UUID)..."
                                   value={assignOrderId[p.id] || ""}
                                   onChange={e => setAssignOrderId(prev => ({ ...prev, [p.id]: e.target.value }))}
-                                  style={{ flex: 1, minWidth: "220px", padding: "5px 9px", borderRadius: "5px", border: "1px solid hsl(220,15%,18%)", background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
+                                  style={{ flex: 1, minWidth: "220px", padding: "5px 9px", borderRadius: "5px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
                                   data-testid={`input-assign-order-${p.id}`}
                                 />
                                 <button

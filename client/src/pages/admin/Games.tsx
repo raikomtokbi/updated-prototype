@@ -8,15 +8,15 @@ import type { Game, Service, Plugin } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
 };
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem 0.75rem",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210,40%,92%)",
   fontSize: "13px",
@@ -106,7 +106,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(220,22%,8%)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
@@ -145,7 +145,7 @@ function MapPluginModal({
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "460px", background: "hsl(220,22%,8%)", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "460px", background: "hsl(var(--background))", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Plug size={15} color="hsl(187,100%,42%)" />
@@ -160,7 +160,7 @@ function MapPluginModal({
         {isLoading ? (
           <div style={{ textAlign: "center", padding: "1.5rem", color: "hsl(220,10%,40%)", fontSize: "13px" }}>Loading plugins...</div>
         ) : enabledPlugins.length === 0 ? (
-          <div style={{ padding: "1.25rem", background: "hsl(220,20%,10%)", borderRadius: "6px", border: "1px dashed hsl(220,15%,20%)", textAlign: "center" }}>
+          <div style={{ padding: "1.25rem", background: "hsl(var(--card))", borderRadius: "6px", border: "1px dashed hsl(220,15%,20%)", textAlign: "center" }}>
             <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)", margin: 0 }}>No enabled plugins found.</p>
             <p style={{ fontSize: "11px", color: "hsl(220,10%,30%)", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
           </div>
@@ -170,8 +170,8 @@ function MapPluginModal({
               style={{
                 display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
                 borderRadius: "6px", cursor: "pointer",
-                background: selected === null ? "rgba(34,211,238,0.07)" : "hsl(220,20%,10%)",
-                border: `1px solid ${selected === null ? "rgba(34,211,238,0.3)" : "hsl(220,15%,16%)"}`,
+                background: selected === null ? "rgba(34,211,238,0.07)" : "hsl(var(--card))",
+                border: `1px solid ${selected === null ? "rgba(34,211,238,0.3)" : "hsl(var(--border))"}`,
               }}
             >
               <input type="radio" name="plugin" checked={selected === null} onChange={() => setSelected(null)}
@@ -188,8 +188,8 @@ function MapPluginModal({
                 style={{
                   display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
                   borderRadius: "6px", cursor: "pointer",
-                  background: selected === p.slug ? "rgba(34,211,238,0.07)" : "hsl(220,20%,10%)",
-                  border: `1px solid ${selected === p.slug ? "rgba(34,211,238,0.3)" : "hsl(220,15%,16%)"}`,
+                  background: selected === p.slug ? "rgba(34,211,238,0.07)" : "hsl(var(--card))",
+                  border: `1px solid ${selected === p.slug ? "rgba(34,211,238,0.3)" : "hsl(var(--border))"}`,
                 }}
               >
                 <input type="radio" name="plugin" checked={selected === p.slug} onChange={() => setSelected(p.slug)}
@@ -197,7 +197,7 @@ function MapPluginModal({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>{p.name}</div>
                   <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", display: "flex", gap: "6px", alignItems: "center" }}>
-                    <code style={{ background: "hsl(220,20%,14%)", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
+                    <code style={{ background: "hsl(var(--card))", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
                     {p.description && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description}</span>}
                   </div>
                 </div>
@@ -208,7 +208,7 @@ function MapPluginModal({
         )}
 
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
-          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(220,15%,16%)", color: "hsl(220,10%,50%)", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
+          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(220,10%,50%)", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
             Cancel
           </button>
           <button
@@ -261,7 +261,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
                 padding: "8px 12px",
                 borderRadius: "7px",
                 border: `1px solid ${on ? "hsl(258,90%,60%)" : "hsl(220,15%,20%)"}`,
-                background: on ? "hsla(258,90%,66%,0.12)" : "hsl(220,20%,11%)",
+                background: on ? "hsla(258,90%,66%,0.12)" : "hsl(var(--card))",
                 cursor: "pointer",
                 textAlign: "left",
                 width: "100%",
@@ -549,7 +549,7 @@ function ServicesPanel({ game }: { game: Game }) {
       {isLoading ? (
         <div style={{ textAlign: "center", padding: "1rem", color: "hsl(220,10%,42%)", fontSize: "12px" }}>Loading...</div>
       ) : svcs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(220,10%,38%)", fontSize: "12px", border: "1px dashed hsl(220,15%,18%)", borderRadius: "6px" }}>
+        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(220,10%,38%)", fontSize: "12px", border: "1px dashed hsl(var(--border))", borderRadius: "6px" }}>
           No services yet. Add your first top-up option.
         </div>
       ) : (
@@ -594,7 +594,7 @@ function ServicesPanel({ game }: { game: Game }) {
                           padding: "5px 10px", borderRadius: "5px", fontSize: "11px", cursor: "pointer",
                           ...(s.pluginSlug
                             ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(187,100%,42%)" }
-                            : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(220,15%,16%)" }
+                            : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(var(--border))" }
                           )
                         }}
                         onClick={() => setMapTarget({ type: "service", id: s.id, name: s.name, currentSlug: s.pluginSlug })}
@@ -715,7 +715,7 @@ export default function Games() {
                       {g.logoUrl ? (
                         <img src={g.logoUrl} alt={g.name} style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                       ) : (
-                        <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "hsl(var(--primary) / 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <Gamepad2 size={18} style={{ color: "hsla(258,90%,66%,0.6)" }} />
                         </div>
                       )}
@@ -777,7 +777,7 @@ export default function Games() {
                       {g.logoUrl ? (
                         <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
                       ) : (
-                        <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "hsl(var(--primary) / 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
                         </div>
                       )}

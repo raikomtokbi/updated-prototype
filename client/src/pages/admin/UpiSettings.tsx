@@ -22,7 +22,7 @@ const inp: React.CSSProperties = {
   padding: "0.55rem 0.75rem",
   borderRadius: "0.5rem",
   border: "1px solid hsl(220,15%,20%)",
-  background: "hsl(220, 20%, 11%)",
+  background: "hsl(var(--card))",
   color: "hsl(210,40%,92%)",
   fontSize: "14px",
   outline: "none",
@@ -37,8 +37,8 @@ const label: React.CSSProperties = {
 };
 
 const section: React.CSSProperties = {
-  background: "hsl(220,20%,9%)",
-  border: "1px solid hsl(220,15%,16%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "0.75rem",
   padding: "1.25rem",
   marginBottom: "1rem",
@@ -198,7 +198,7 @@ export default function UpiSettings() {
                 ) : (
                   <div style={{
                     width: "160px", height: "160px", borderRadius: "0.5rem",
-                    border: "1px dashed hsl(220,15%,22%)", background: "hsl(220,20%,10%)",
+                    border: "1px dashed hsl(220,15%,22%)", background: "hsl(var(--card))",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
                     <span style={{ fontSize: "11px", color: "hsl(220,10%,40%)", textAlign: "center", padding: "0.5rem" }}>

@@ -277,7 +277,7 @@ function buildEmailHtmlClient(form: FormState, siteName = "Nexcoin"): string {
 // ─── Shared Styles ─────────────────────────────────────────────────────────────
 
 const card: React.CSSProperties = {
-  background: "hsl(220, 20%, 9%)",
+  background: "hsl(var(--card))",
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
 };
@@ -285,8 +285,8 @@ const card: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  background: "hsl(220, 20%, 11%)",
-  border: "1px solid hsl(220, 15%, 18%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
   color: "hsl(210, 40%, 92%)",
   fontSize: "13px",
@@ -305,7 +305,7 @@ const textareaStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220, 10%, 48%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "4px",
   display: "block",
   textTransform: "uppercase",
@@ -398,7 +398,7 @@ function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => vo
         <div
           style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 100,
-            background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,17%)",
+            background: "hsl(var(--card))", border: "1px solid hsl(220,15%,17%)",
             borderRadius: 8, width: 280, maxHeight: 380, overflow: "auto",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
           }}
@@ -471,7 +471,7 @@ function ColorInput({ value, onChange }: { value: string; onChange: (v: string) 
         value={hexFromValue}
         onChange={(e) => onChange(e.target.value)}
         title="Pick a solid color (replaces gradient)"
-        style={{ width: 28, height: 26, borderRadius: 4, border: "1px solid hsl(220,15%,18%)", background: "none", cursor: "pointer", padding: 1, flexShrink: 0 }}
+        style={{ width: 28, height: 26, borderRadius: 4, border: "1px solid hsl(var(--border))", background: "none", cursor: "pointer", padding: 1, flexShrink: 0 }}
       />
       <input
         type="text"
@@ -670,7 +670,7 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
       onClick={onClose}
     >
       <div
-        style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,17%)", borderRadius: 12, width: "100%", maxWidth: 440 }}
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(220,15%,17%)", borderRadius: 12, width: "100%", maxWidth: 440 }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ padding: "14px 16px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -750,7 +750,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
         padding: "8px 14px",
         borderBottom: "1px solid hsl(220,15%,13%)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "hsl(220,20%,8%)", flexShrink: 0,
+        background: "hsl(var(--background))", flexShrink: 0,
       }}>
         {!hideTitle && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -769,7 +769,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               borderRadius: 5, fontSize: "11px", fontWeight: 600, border: "1px solid",
               cursor: "pointer", transition: "all 0.15s",
               background: previewMode === "desktop" ? "rgba(124,58,237,0.15)" : "transparent",
-              borderColor: previewMode === "desktop" ? "rgba(124,58,237,0.4)" : "hsl(220,15%,18%)",
+              borderColor: previewMode === "desktop" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
               color: previewMode === "desktop" ? "#a78bfa" : "hsl(220,10%,45%)",
             }}
           >
@@ -783,7 +783,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               borderRadius: 5, fontSize: "11px", fontWeight: 600, border: "1px solid",
               cursor: "pointer", transition: "all 0.15s",
               background: previewMode === "mobile" ? "rgba(124,58,237,0.15)" : "transparent",
-              borderColor: previewMode === "mobile" ? "rgba(124,58,237,0.4)" : "hsl(220,15%,18%)",
+              borderColor: previewMode === "mobile" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
               color: previewMode === "mobile" ? "#a78bfa" : "hsl(220,10%,45%)",
             }}
           >
@@ -1303,7 +1303,7 @@ export default function EmailTemplates() {
           padding: "10px 16px",
           borderBottom: "1px solid hsl(220,15%,11%)",
           display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
-          background: "hsl(220,20%,8%)",
+          background: "hsl(var(--background))",
         }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Mail size={16} color="#a78bfa" />
@@ -1323,7 +1323,7 @@ export default function EmailTemplates() {
               width: sidebarWidth, flexShrink: 0,
               borderRight: "1px solid hsl(220,15%,11%)",
               display: "flex", flexDirection: "column", overflow: "hidden",
-              background: "hsl(220,20%,8%)",
+              background: "hsl(var(--background))",
             }}>
               <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid hsl(220,15%,11%)" }}>
                 <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(220,10%,38%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
