@@ -187,7 +187,7 @@ function UpiPaymentOverlay({
         {data.upiId && (() => {
           const pa = encodeURIComponent(data.upiId);
           const pn = encodeURIComponent("Nexcoin");
-          const am = parseFloat(data.amount).toFixed(2);
+          const am = String(Math.round(parseFloat(data.amount)));
           const tn = encodeURIComponent("Order " + (data.orderNumber || data.orderId.slice(0, 8)));
           // Intent URI: works on Android Chrome — opens GPay directly if installed,
           // falls back to Play Store otherwise. Do NOT use target="_blank" for deeplinks.
@@ -228,7 +228,7 @@ function UpiPaymentOverlay({
             <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Or scan QR to pay</p>
             <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px" }}>
               <QRCodeSVG
-                value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=Nexcoin&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&tn=Order+Payment`}
+                value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=Nexcoin&am=${Math.round(parseFloat(data.amount))}&cu=INR&tn=Order+Payment`}
                 size={160}
                 bgColor="#ffffff"
                 fgColor="#000000"

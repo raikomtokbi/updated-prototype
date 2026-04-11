@@ -2077,7 +2077,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
               upiId: upiSettings.upiId,
               amount,
               currency,
-              expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+              expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
               gatewayType: "manual_upi",
               gatewayId: method.id,
             });
@@ -2987,7 +2987,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         upiId: settings.upiId,
         amount,
         currency,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       });
     } catch (err: any) {
       console.error("UPI initiate error:", err);
