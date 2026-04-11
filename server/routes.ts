@@ -514,9 +514,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   }
 
   function getBaseUrl(req: Request) {
-    const proto = req.headers["x-forwarded-proto"] ?? req.protocol;
-    const host = req.headers["x-forwarded-host"] ?? req.get("host");
-    return `${proto}://${host}`;
+    return `${req.protocol}://${req.get("host")}`;
   }
 
   app.get("/api/auth/social-providers", async (_req, res) => {
@@ -559,7 +557,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } else if (provider === "facebook") {
       const cfg = await getSocialPluginConfig("social-auth-facebook");
       if (!cfg.FACEBOOK_APP_ID) return res.status(400).json({ message: "Facebook OAuth not configured" });
-      authUrl = `https://www.facebook.com/v18.0/dialog/oauth?` + new URLSearchParams({
+      authUrl = `https://www.facebook.com/v25.0/dialog/oauth?` + new URLSearchParams({
         client_id: cfg.FACEBOOK_APP_ID,
         redirect_uri: `${baseUrl}/api/auth/oauth/facebook/callback`,
         scope: "email",
@@ -568,7 +566,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } else if (provider === "discord") {
       const cfg = await getSocialPluginConfig("social-auth-discord");
       if (!cfg.DISCORD_CLIENT_ID) return res.status(400).json({ message: "Discord OAuth not configured" });
-      authUrl = `https://discord.com/api/oauth2/authorize?` + new URLSearchParams({
+      authUrl = `https://discord.com/oauth2/authorize?` + new URLSearchParams({
         client_id: cfg.DISCORD_CLIENT_ID,
         redirect_uri: `${baseUrl}/api/auth/oauth/discord/callback`,
         response_type: "code",
@@ -609,11 +607,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         });
         const td = await tokenRes.json() as any;
         if (!tokenRes.ok) throw new Error(td.error_description || "Google token exchange failed");
-        const ud = await (await fetch("https://www.googleapis.com/oauth2/v2/userinfo", { headers: { Authorization: `Bearer ${td.access_token}` } })).json() as any;
+        const ud = await (await fetch("https://openidconnect.googleapis.com/v1/userinfo", { headers: { Authorization: `Bearer ${td.access_token}` } })).json() as any;
         email = ud.email; name = ud.name;
       } else if (provider === "facebook") {
         const cfg = await getSocialPluginConfig("social-auth-facebook");
-        const tokenRes = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?` + new URLSearchParams({ client_id: cfg.FACEBOOK_APP_ID, client_secret: cfg.FACEBOOK_APP_SECRET, redirect_uri: `${baseUrl}/api/auth/oauth/facebook/callback`, code }));
+        const tokenRes = await fetch(`https://graph.facebook.com/v25.0/oauth/access_token?` + new URLSearchParams({ client_id: cfg.FACEBOOK_APP_ID, client_secret: cfg.FACEBOOK_APP_SECRET, redirect_uri: `${baseUrl}/api/auth/oauth/facebook/callback`, code }));
         const td = await tokenRes.json() as any;
         if (!tokenRes.ok) throw new Error(td.error?.message || "Facebook token exchange failed");
         const ud = await (await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${td.access_token}`)).json() as any;
