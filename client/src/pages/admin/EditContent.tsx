@@ -135,7 +135,7 @@ function SliderForm({
           style={inputStyle}
           value={form.title}
           onChange={(e) => set("title", e.target.value)}
-          placeholder="Level Up Your Gameplay (leave blank for image-only)"
+          placeholder="Leave blank to hide the title"
         />
       </div>
       <div>
@@ -163,7 +163,7 @@ function SliderForm({
             style={inputStyle}
             value={form.buttonText}
             onChange={(e) => set("buttonText", e.target.value)}
-            placeholder="Browse Games"
+            placeholder="Leave blank to hide the button"
           />
         </div>
         <div>
@@ -174,44 +174,6 @@ function SliderForm({
             onChange={(e) => set("buttonLink", e.target.value)}
             placeholder="/products"
           />
-        </div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>Show Text Overlay</label>
-          <button
-            type="button"
-            onClick={() => set("showText", !form.showText)}
-            style={{
-              padding: "3px 12px",
-              borderRadius: "4px",
-              border: `1px solid ${form.showText ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
-              background: form.showText ? "rgba(124,58,237,0.15)" : "transparent",
-              color: form.showText ? "hsl(258,90%,70%)" : "hsl(220,10%,50%)",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            {form.showText ? "Enabled" : "Disabled"}
-          </button>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>Show Button</label>
-          <button
-            type="button"
-            onClick={() => set("showButton", !form.showButton)}
-            style={{
-              padding: "3px 12px",
-              borderRadius: "4px",
-              border: `1px solid ${form.showButton ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
-              background: form.showButton ? "rgba(124,58,237,0.15)" : "transparent",
-              color: form.showButton ? "hsl(258,90%,70%)" : "hsl(220,10%,50%)",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            {form.showButton ? "Enabled" : "Disabled"}
-          </button>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobileSlider ? "1fr" : "1fr 1fr 1fr", gap: "10px" }}>

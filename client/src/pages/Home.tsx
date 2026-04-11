@@ -37,27 +37,19 @@ function HeroSlider() {
   const defaultSlide = {
     id: "default",
     bg: siteSettings.hero_bg_image || "",
-    badge: "FEATURED",
-    title: [(siteSettings.hero_title || "Welcome to Game Marketplace").split(" ")].flat(),
-    highlight: 0,
-    sub: siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
-    cta1: { label: "Browse Games", href: "/products" },
-    cta2: { label: "View Offers", href: "/offers" },
-    showButton: true,
-    showText: true,
+    title: (siteSettings.hero_title || "Welcome to Game Marketplace").trim(),
+    sub: (siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.").trim(),
+    btnLabel: "Browse Games",
+    btnHref: "/products",
   };
 
   const apiMapped = apiSliders.map((s: any) => ({
     id: s.id,
     bg: s.bannerUrl || "",
-    badge: "FEATURED",
-    title: [s.title || siteSettings.hero_title || "Welcome to Game Marketplace"],
-    highlight: 0,
-    sub: s.subtitle || siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
-    cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
-    cta2: { label: "View Offers", href: "/offers" },
-    showButton: s.showButton !== false,
-    showText: s.showText !== false,
+    title: (s.title || "").trim(),
+    sub: (s.subtitle || "").trim(),
+    btnLabel: (s.buttonText || "").trim(),
+    btnHref: s.buttonLink || "/products",
   }));
 
   // Always keep the default slide in rotation so it shows even after uploading banners
@@ -155,138 +147,111 @@ function HeroSlider() {
         }}
       />
 
-      {/* Content — conditionally overlaid based on showText */}
-      {slide.showText && (
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          maxWidth: "1320px",
-          margin: "0 auto",
-          padding: "0 1.5rem",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ maxWidth: "580px" }}>
+      {/* Content — only rendered when there is something to show */}
+      {(slide.title || slide.sub || slide.btnLabel) && (
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            maxWidth: "1320px",
+            margin: "0 auto",
+            padding: "0 1.5rem",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ maxWidth: "580px" }}>
 
-          {/* Badge */}
-          <div
-            className="hero-badge"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.3rem 0.8rem",
-              borderRadius: "9999px",
-              background: "rgba(124, 58, 237, 0.2)",
-              border: "1px solid rgba(124, 58, 237, 0.4)",
-              marginBottom: "1rem",
-            }}
-          >
-            <Zap size={12} color="#a78bfa" />
-            <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
-              {slide.badge}
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="font-orbitron hero-headline" style={{ lineHeight: 1.05, marginBottom: "0.85rem" }}>
-            {slide.title.map((line, i) => (
+            {/* Badge — only when there is a title */}
+            {slide.title && (
               <div
-                key={i}
-                style={{
-                  display: "block",
-                  fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  color: i === slide.highlight ? "transparent" : "#e5e7eb",
-                  background: i === slide.highlight ? "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)" : undefined,
-                  WebkitBackgroundClip: i === slide.highlight ? "text" : undefined,
-                  WebkitTextFillColor: i === slide.highlight ? "transparent" : undefined,
-                  backgroundClip: i === slide.highlight ? "text" : undefined,
-                  textShadow: i !== slide.highlight ? "0 0 40px rgba(124,58,237,0.3)" : undefined,
-                }}
-              >
-                {line}
-              </div>
-            ))}
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className="hero-sub"
-            style={{
-              fontSize: "clamp(0.75rem, 1.3vw, 1rem)",
-              color: "rgba(229, 231, 235, 0.65)",
-              lineHeight: 1.6,
-              marginBottom: "1.25rem",
-              maxWidth: "460px",
-            }}
-          >
-            {slide.sub}
-          </p>
-
-          {/* CTAs */}
-          <div className="hero-cta-row" style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-            <Link
-              href={slide.cta1.href}
-              data-testid="link-browse-games"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                padding: "0.55rem 1.1rem",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
-                color: "white",
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                boxShadow: "0 0 20px rgba(124,58,237,0.45)",
-                transition: "box-shadow 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
-            >
-              <Gamepad2 size={14} />
-              {slide.cta1.label}
-            </Link>
-            {slide.showButton && (
-              <Link
-                href={slide.cta2.href}
-                data-testid="link-view-offers"
+                className="hero-badge"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "0.4rem",
-                  padding: "0.55rem 1.1rem",
-                  borderRadius: "8px",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  color: "rgba(229,231,235,0.9)",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  backdropFilter: "blur(6px)",
-                  transition: "border-color 0.2s, background 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
-                  e.currentTarget.style.background = "rgba(124,58,237,0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  padding: "0.3rem 0.8rem",
+                  borderRadius: "9999px",
+                  background: "rgba(124, 58, 237, 0.2)",
+                  border: "1px solid rgba(124, 58, 237, 0.4)",
+                  marginBottom: "1rem",
                 }}
               >
-                {slide.cta2.label}
-              </Link>
+                <Zap size={12} color="#a78bfa" />
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+                  FEATURED
+                </span>
+              </div>
             )}
+
+            {/* Headline — only when title has content */}
+            {slide.title && (
+              <h1 className="font-orbitron hero-headline" style={{ lineHeight: 1.05, marginBottom: "0.85rem" }}>
+                <div
+                  style={{
+                    display: "block",
+                    fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.02em",
+                    background: "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  {slide.title}
+                </div>
+              </h1>
+            )}
+
+            {/* Subtitle — only when sub has content */}
+            {slide.sub && (
+              <p
+                className="hero-sub"
+                style={{
+                  fontSize: "clamp(0.75rem, 1.3vw, 1rem)",
+                  color: "rgba(229, 231, 235, 0.65)",
+                  lineHeight: 1.6,
+                  marginBottom: "1.25rem",
+                  maxWidth: "460px",
+                }}
+              >
+                {slide.sub}
+              </p>
+            )}
+
+            {/* CTA button — only when button text has content */}
+            {slide.btnLabel && (
+              <div className="hero-cta-row" style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
+                <Link
+                  href={slide.btnHref}
+                  data-testid="link-browse-games"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    padding: "0.55rem 1.1rem",
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    color: "white",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    boxShadow: "0 0 20px rgba(124,58,237,0.45)",
+                    transition: "box-shadow 0.2s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
+                >
+                  <Gamepad2 size={14} />
+                  {slide.btnLabel}
+                </Link>
+              </div>
+            )}
+
           </div>
         </div>
-      </div>
       )}
 
       {/* Dot indicators */}
