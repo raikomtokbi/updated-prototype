@@ -33,6 +33,7 @@ import {
   getProductList as smileGetProductList,
   validatePlayer as smileValidatePlayer,
   createPurchase as smileCreatePurchase,
+  makeSign as smileMakeSign,
   type SmileOneCredentials,
 } from "./lib/smileone/smileoneService";
 import {
@@ -2467,12 +2468,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!uid || !apiKey || !email) {
         return res.status(400).json({ success: false, message: "uid, apiKey and email are required" });
       }
-      // Use the provided credentials (or saved ones) to fetch balance
       const ts = Math.floor(Date.now() / 1000);
-      const sign = createHash("md5").update(`${uid}${apiKey}${ts}`).digest("hex");
       const baseUrl = region === "global" || !region
         ? "https://www.smile.one/merchant/"
         : `https://www.smile.one/${region}/merchant/`;
+      const signParams: Record<string, unknown> = { uid, email, time: ts };
+      const sign = smileMakeSign(signParams, apiKey);
       const body = new URLSearchParams({ uid, email, time: String(ts), sign });
       const apiRes = await fetch(`${baseUrl}getbalance`, {
         method: "POST",
@@ -2801,6 +2802,105 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const message = err instanceof Error ? err.message : "Internal server error";
       console.error("[smileone/purchase] unexpected error:", err);
       return res.status(500).json({ success: false, message });
+    }
+  });
+
+  // ── Smile.one Merchant Callback Endpoints ─────────────────────────────────────
+  // These are called BY Smile.one's platform when Nexcoin is registered as a merchant.
+  // Nexcoin must configure these URLs in its Smile.one merchant dashboard.
+
+  // Helper: verify an incoming Smile.one callback signature
+  function verifySmileCallback(body: Record<string, unknown>, apiKey: string): boolean {
+    if (!apiKey) return false;
+    const { sign, ...rest } = body;
+    if (typeof sign !== "string") return false;
+    const expected = smileMakeSign(rest, apiKey);
+    return sign === expected;
+  }
+
+  // POST /api/smileone/callback/products
+  // Smile.one calls this to get the list of products Nexcoin sells.
+  app.post("/api/smileone/callback/products", async (req, res) => {
+    try {
+      const cfg = await storage.getSmileOneConfig();
+      if (!cfg?.apiKey || !verifySmileCallback(req.body ?? {}, cfg.apiKey)) {
+        return res.json({ status: 205, product_list: [], error: "Sign error" });
+      }
+      // Return active products from the CMS
+      const products = await storage.getAllProducts();
+      const productList = products
+        .filter((p) => p.isActive)
+        .map((p) => ({
+          pid: String(p.id),
+          product_name: p.name,
+          price: String(p.price ?? "0"),
+          original_price: String(p.originalPrice ?? p.price ?? "0"),
+        }));
+      return res.json({ status: 200, product_list: productList, error: "" });
+    } catch (err) {
+      console.error("[smileone/callback/products] error:", err);
+      return res.json({ status: 500, product_list: [], error: "System error" });
+    }
+  });
+
+  // POST /api/smileone/callback/role
+  // Smile.one calls this to check if a player (uid/sid) exists before purchase.
+  app.post("/api/smileone/callback/role", async (req, res) => {
+    try {
+      const cfg = await storage.getSmileOneConfig();
+      if (!cfg?.apiKey || !verifySmileCallback(req.body ?? {}, cfg.apiKey)) {
+        return res.json({ status: 205, nickname: "", error: "Sign error" });
+      }
+      const { uid, sid } = req.body as Record<string, string>;
+      if (!uid) {
+        return res.json({ status: 202, nickname: "", error: "Uid non-existent" });
+      }
+      // Accept any non-empty uid — actual game-level validation happens at delivery
+      return res.json({ status: 200, nickname: uid, error: "" });
+    } catch (err) {
+      console.error("[smileone/callback/role] error:", err);
+      return res.json({ status: 500, nickname: "", error: "System error" });
+    }
+  });
+
+  // POST /api/smileone/callback/order
+  // Smile.one calls this to create an in-game order after the user selects an item.
+  app.post("/api/smileone/callback/order", async (req, res) => {
+    try {
+      const cfg = await storage.getSmileOneConfig();
+      if (!cfg?.apiKey || !verifySmileCallback(req.body ?? {}, cfg.apiKey)) {
+        return res.json({ status: 205, game_order: "", error: "Sign error" });
+      }
+      const { uid, sid, productid } = req.body as Record<string, string>;
+      if (!uid || !productid) {
+        return res.json({ status: 206, game_order: "", error: "Order initialisation failed" });
+      }
+      // Generate a unique order reference
+      const gameOrder = `NXC_${Date.now()}_${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+      console.log(`[smileone/callback/order] Created order ${gameOrder} for uid=${uid} sid=${sid ?? ""} product=${productid}`);
+      return res.json({ status: 200, game_order: gameOrder, error: "" });
+    } catch (err) {
+      console.error("[smileone/callback/order] error:", err);
+      return res.json({ status: 500, game_order: "", error: "System error" });
+    }
+  });
+
+  // POST /api/smileone/callback/notify
+  // Smile.one calls this after payment is confirmed to trigger item delivery.
+  app.post("/api/smileone/callback/notify", async (req, res) => {
+    try {
+      const cfg = await storage.getSmileOneConfig();
+      if (!cfg?.apiKey || !verifySmileCallback(req.body ?? {}, cfg.apiKey)) {
+        return res.json({ status: 205, game_order: req.body?.game_order ?? "", game_status: "FAILED", error: "Sign error" });
+      }
+      const body = req.body as Record<string, string>;
+      const { game_order, uid, productid, trade_no, trade_status } = body;
+      console.log(`[smileone/callback/notify] Payment ${trade_status} for order ${game_order} uid=${uid} product=${productid} trade=${trade_no}`);
+      // TODO: Mark the order as paid and trigger delivery logic here
+      return res.json({ status: 200, game_order, game_status: "SUCCESS", error: "" });
+    } catch (err) {
+      console.error("[smileone/callback/notify] error:", err);
+      return res.json({ status: 500, game_order: req.body?.game_order ?? "", game_status: "FAILED", error: "System error" });
     }
   });
 

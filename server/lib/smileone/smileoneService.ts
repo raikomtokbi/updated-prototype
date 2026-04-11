@@ -100,6 +100,20 @@ export interface SmileOneCredentials {
   defaultRegion?: string;
 }
 
+// ─── Signature (per official docs) ────────────────────────────────────────────
+// Algorithm: sort all request params by key → build query string → append API key → double MD5
+// PHP equivalent: md5(md5(http_build_query(ksorted($params)) . $apiKey))
+
+export function makeSign(params: Record<string, unknown>, apiKey: string): string {
+  const sorted = Object.keys(params).sort();
+  const queryStr = sorted
+    .map((k) => `${k}=${String(params[k])}`)
+    .join("&");
+  const raw = queryStr + apiKey;
+  const firstMd5  = createHash("md5").update(raw).digest("hex");
+  return createHash("md5").update(firstMd5).digest("hex");
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getConfig(override?: SmileOneCredentials) {
@@ -110,15 +124,11 @@ function getConfig(override?: SmileOneCredentials) {
 
   if (!uid || !key || !email) {
     throw new Error(
-      "Smile.one credentials not configured. Set them in Admin → Smile.one, or via SMILEONE_UID / SMILEONE_KEY / SMILEONE_EMAIL environment variables."
+      "Smile.one credentials not configured. Set them in Admin → Smile.one."
     );
   }
 
   return { uid, key, email, defaultRegion };
-}
-
-function buildSignature(uid: string, key: string, time: number): string {
-  return createHash("md5").update(`${uid}${key}${time}`).digest("hex");
 }
 
 function resolveBaseUrl(region: string): string {
@@ -137,10 +147,20 @@ function resolveProductName(gameSlug: string): string {
   return name;
 }
 
-function buildAuthPayload(uid: string, key: string, email: string): Record<string, string | number> {
+/**
+ * Build the base auth payload (uid, email, time) and compute the correct
+ * double-MD5 signature over all fields including any extra params.
+ */
+function buildAuthPayload(
+  uid: string,
+  apiKey: string,
+  email: string,
+  extra: Record<string, unknown> = {}
+): Record<string, string | number> {
   const time = Math.floor(Date.now() / 1000);
-  const sign = buildSignature(uid, key, time);
-  return { uid, email, time, sign };
+  const paramsForSign: Record<string, unknown> = { uid, email, time, ...extra };
+  const sign = makeSign(paramsForSign, apiKey);
+  return { uid, email, time, ...extra, sign } as Record<string, string | number>;
 }
 
 async function smilePost<T = Record<string, unknown>>(
@@ -158,6 +178,7 @@ async function smilePost<T = Record<string, unknown>>(
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
+    signal: AbortSignal.timeout(15000),
   });
 
   const text = await res.text();
@@ -174,8 +195,10 @@ async function smilePost<T = Record<string, unknown>>(
   return data;
 }
 
-function parseError(data: Record<string, unknown>): { message: string; code?: string | number } {
-  const code = data.code ?? data.status;
+function parseError(data: Record<string, unknown>): { message: string; code?: number } {
+  const rawCode = data.code ?? data.status;
+  const code = rawCode != null ? Number(rawCode) : undefined;
+
   let message: string;
   if (typeof data.msg === "string" && data.msg) {
     message = data.msg;
@@ -183,21 +206,19 @@ function parseError(data: Record<string, unknown>): { message: string; code?: st
     message = data.message;
   } else if (typeof data.error === "string" && data.error) {
     message = data.error;
-  } else if (code === 6001 || code === "6001") {
-    message = "Invalid user ID or zone ID";
-  } else if (code === 6002 || code === "6002") {
-    message = "Product unavailable";
-  } else if (code === 6003 || code === "6003") {
-    message = "Insufficient balance";
-  } else if (code === 6004 || code === "6004") {
-    message = "Duplicate order";
-  } else if (code === 6006 || code === "6006") {
-    message = "Invalid API credentials";
   } else {
-    message = `API error (code: ${code ?? "unknown"})`;
+    switch (code) {
+      case 202: message = "User ID or Server ID does not exist"; break;
+      case 203: message = "User already owns this subscription"; break;
+      case 204: message = "Order already delivered"; break;
+      case 205: message = "Invalid signature — check API key"; break;
+      case 206: message = "Order initialisation failed"; break;
+      case 500: message = "Smile.one system error"; break;
+      default:  message = `Smile.one error (code: ${code ?? "unknown"})`;
+    }
   }
-  const numCode = typeof code === "string" ? Number(code) : code;
-  return { message, code: typeof numCode === "number" ? numCode : undefined };
+
+  return { message, code };
 }
 
 function isSuccess(data: Record<string, unknown>): boolean {
@@ -208,7 +229,7 @@ function isSuccess(data: Record<string, unknown>): boolean {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Fetch the product/top-up list for a game from Smile.one.
+ * Fetch the product list for a game from Smile.one.
  */
 export async function getProductList(
   gameSlug: string,
@@ -222,11 +243,7 @@ export async function getProductList(
     const baseUrl = resolveBaseUrl(resolvedRegion);
     const url = `${baseUrl}${productName}/product`;
 
-    const payload = {
-      ...buildAuthPayload(uid, key, email),
-      product: productName,
-    };
-
+    const payload = buildAuthPayload(uid, key, email, { product: productName });
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
@@ -235,12 +252,18 @@ export async function getProductList(
       return { success: false, message, code };
     }
 
-    // Normalize the product list — the API returns different shapes per product
-    const rawList = (data.product_list ?? data.products ?? data.data ?? []) as Record<string, unknown>[];
+    // The API returns product_list as an object (keyed by pid) or array
+    const rawList = (
+      Array.isArray(data.product_list)
+        ? data.product_list
+        : typeof data.product_list === "object" && data.product_list !== null
+          ? Object.values(data.product_list as Record<string, unknown>)
+          : (data.products ?? data.data ?? []) as unknown[]
+    ) as Record<string, unknown>[];
 
     const products: SmileOneProduct[] = rawList.map((item) => ({
-      product_id: String(item.product ?? item.id ?? item.product_id ?? ""),
-      name: String(item.product_name ?? item.name ?? ""),
+      product_id: String(item.pid ?? item.product ?? item.id ?? item.product_id ?? ""),
+      name: String(item.product_name ?? item.name ?? item.title ?? ""),
       price: Number(item.price ?? 0),
       original_price: item.original_price != null ? Number(item.original_price) : undefined,
       currency: String(item.currency ?? "USD"),
@@ -256,7 +279,7 @@ export async function getProductList(
 }
 
 /**
- * Validate a player's user ID (and optional zone ID) for a game.
+ * Validate a player's user ID (and optional zone/server ID) for a game.
  */
 export async function validatePlayer(
   gameSlug: string,
@@ -278,25 +301,23 @@ export async function validatePlayer(
       return { success: false, message: "user_id is required for player validation" };
     }
 
-    const payload: Record<string, unknown> = {
-      ...buildAuthPayload(uid, key, email),
+    // Build the extra params to be included in both the payload and the signature
+    const extra: Record<string, unknown> = {
       product: productName,
       userid: userId,
     };
+    if (zoneId) extra.zoneid = zoneId;
 
-    if (zoneId) payload.zoneid = zoneId;
-
-    // Forward additional dynamic fields (e.g. server_id for some games)
+    // Forward any additional game-specific fields
     const knownAliases = new Set([
       "user_id", "userId", "userid",
       "zone_id", "zoneId", "zoneid",
     ]);
     for (const [k, v] of Object.entries(userInput)) {
-      if (!knownAliases.has(k) && v) {
-        payload[k] = v;
-      }
+      if (!knownAliases.has(k) && v) extra[k] = v;
     }
 
+    const payload = buildAuthPayload(uid, key, email, extra);
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
@@ -349,26 +370,22 @@ export async function createPurchase(
       return { success: false, message: "product_id is required for purchase" };
     }
 
-    const payload: Record<string, unknown> = {
-      ...buildAuthPayload(uid, key, email),
+    const extra: Record<string, unknown> = {
       product: productName,
       productid: productId,
       userid: userId,
     };
+    if (zoneId) extra.zoneid = zoneId;
 
-    if (zoneId) payload.zoneid = zoneId;
-
-    // Forward any additional dynamic fields the caller provides
     const knownFields = new Set([
       "user_id", "userId", "userid",
       "zone_id", "zoneId", "zoneid",
     ]);
     for (const [k, v] of Object.entries(userInput)) {
-      if (!knownFields.has(k) && v) {
-        payload[k] = v;
-      }
+      if (!knownFields.has(k) && v) extra[k] = v;
     }
 
+    const payload = buildAuthPayload(uid, key, email, extra);
     const data = await smilePost<Record<string, unknown>>(url, payload);
 
     if (!isSuccess(data)) {
@@ -378,7 +395,7 @@ export async function createPurchase(
     }
 
     const transactionId = String(
-      data.order_id ?? data.transaction_id ?? data.trade_no ?? data.id ?? ""
+      data.order_id ?? data.transaction_id ?? data.trade_no ?? data.game_order ?? data.id ?? ""
     ).trim() || undefined;
 
     const status: SmileOnePurchaseResult["status"] =

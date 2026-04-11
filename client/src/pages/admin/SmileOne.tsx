@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Wifi, Save, Trash2, RefreshCw, CheckCircle,
-  XCircle, Loader2, Link2, ArrowRight,
+  XCircle, Loader2, Link2, ArrowRight, Copy, Check,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
@@ -173,6 +173,61 @@ function ConfigTab() {
             Save Config
           </button>
         </div>
+      </div>
+
+      <WebhookUrlsPanel />
+    </div>
+  );
+}
+
+function WebhookUrlsPanel() {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const webhooks = [
+    { label: "Product List",       path: "/api/smileone/callback/products", desc: "Returns available products to Smile.one" },
+    { label: "Role Check",         path: "/api/smileone/callback/role",     desc: "Verifies player UID/SID before purchase" },
+    { label: "Game Order",         path: "/api/smileone/callback/order",    desc: "Creates an order when user confirms" },
+    { label: "Payment Notify",     path: "/api/smileone/callback/notify",   desc: "Called by Smile.one after payment success" },
+  ];
+
+  function copy(path: string) {
+    navigator.clipboard.writeText(`${origin}${path}`);
+    setCopiedKey(path);
+    setTimeout(() => setCopiedKey(null), 2000);
+  }
+
+  return (
+    <div style={{ ...card, padding: "20px", marginTop: "16px" }}>
+      <p style={sectionTitle}>Merchant Callback URLs</p>
+      <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
+        Register these URLs in your Smile.one Merchant Dashboard so Smile.one can call back to your store.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {webhooks.map((wh) => (
+          <div key={wh.path} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,80%)" }}>{wh.label}</span>
+              <span style={{ fontSize: "10px", color: "hsl(220,10%,45%)" }}>{wh.desc}</span>
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)",
+              borderRadius: "6px", padding: "6px 10px",
+            }}>
+              <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {origin}{wh.path}
+              </code>
+              <button
+                data-testid={`button-copy-${wh.label.replace(/\s+/g, "-").toLowerCase()}`}
+                onClick={() => copy(wh.path)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,55%)", display: "flex", alignItems: "center", flexShrink: 0 }}
+              >
+                {copiedKey === wh.path ? <Check size={13} style={{ color: "#4ade80" }} /> : <Copy size={13} />}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
