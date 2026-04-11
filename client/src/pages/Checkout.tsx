@@ -343,31 +343,133 @@ function UpiPaymentOverlay({
 }
 
 // ─── Success Overlay ──────────────────────────────────────────────────────────
-function SuccessOverlay({ utr, onViewOrders, onContinue }: { utr?: string; onViewOrders: () => void; onContinue: () => void }) {
+const CONFETTI_COLORS = ["#7c3aed","#22c55e","#3b82f6","#f59e0b","#ec4899","#06b6d4"];
+const CONFETTI_COUNT = 18;
+
+function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }) {
+  const [, navigate] = useLocation();
+  const [countdown, setCountdown] = useState(5);
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      navigate(redirectTo);
+      return;
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown, navigate, redirectTo]);
+
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", background: "rgba(0,0,0,0.75)" }}>
-      <div style={{ width: "100%", maxWidth: "420px", background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "1rem", padding: "2rem", textAlign: "center" }}>
-        <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "hsla(142,70%,55%,0.15)", border: "2px solid hsl(142,70%,55%)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
-          <CheckCircle size={36} style={{ color: "hsl(142,70%,55%)" }} />
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 3000,
+      background: "hsl(220,22%,6%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      overflow: "hidden",
+    }}>
+      {/* Confetti particles */}
+      {Array.from({ length: CONFETTI_COUNT }).map((_, i) => {
+        const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+        const left = `${(i * 5.5 + 2) % 100}%`;
+        const delay = `${(i * 0.15) % 2}s`;
+        const dur = `${2.5 + (i % 4) * 0.4}s`;
+        const size = 8 + (i % 3) * 4;
+        return (
+          <div key={i} style={{
+            position: "absolute", top: "-30px", left,
+            width: size, height: size,
+            background: color, borderRadius: i % 3 === 0 ? "50%" : "2px",
+            animation: `confetti-fall ${dur} ${delay} ease-in forwards`,
+            opacity: 0,
+          }} />
+        );
+      })}
+
+      {/* Radial glow behind checkmark */}
+      <div style={{
+        position: "absolute", width: "400px", height: "400px", borderRadius: "50%",
+        background: "radial-gradient(circle, hsla(142,70%,45%,0.12) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Content card */}
+      <div style={{
+        position: "relative", zIndex: 1,
+        textAlign: "center", padding: "0 1.5rem",
+        animation: "success-fade-in 0.5s ease both",
+        maxWidth: "420px", width: "100%",
+      }}>
+        {/* Animated checkmark */}
+        <div style={{
+          width: "110px", height: "110px", borderRadius: "50%",
+          margin: "0 auto 1.75rem",
+          animation: "ring-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) both, pulse-glow 2s 0.8s ease-in-out infinite",
+          background: "hsla(142,70%,50%,0.12)",
+          border: "3px solid hsl(142,70%,48%)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <polyline
+              points="14,27 23,36 38,18"
+              stroke="hsl(142,70%,55%)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="200"
+              style={{ animation: "check-draw 0.5s 0.4s ease both" }}
+            />
+          </svg>
         </div>
-        <h2 className="font-orbitron" style={{ fontSize: "1.3rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.5rem" }}>Payment Confirmed!</h2>
-        <p style={{ color: "hsl(220,10%,58%)", fontSize: "0.875rem", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-          Your payment has been verified. Your order is being processed.
+
+        <h1 className="font-orbitron" style={{
+          fontSize: "clamp(1.4rem, 5vw, 2rem)", fontWeight: 800,
+          color: "hsl(210,40%,95%)", marginBottom: "0.625rem", letterSpacing: "0.01em",
+        }}>
+          Payment Successful!
+        </h1>
+        <p style={{ color: "hsl(220,10%,55%)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
+          Your order has been confirmed and is now being processed.
         </p>
+
         {utr && (
-          <div style={{ background: "hsla(258,70%,65%,0.08)", border: "1px solid hsla(258,70%,65%,0.2)", borderRadius: "8px", padding: "0.65rem 1rem", marginBottom: "1.25rem", textAlign: "left" }}>
-            <p style={{ margin: "0 0 2px", fontSize: "10px", color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>UTR Reference</p>
-            <p style={{ margin: 0, fontSize: "13px", color: "hsl(210,40%,85%)", fontFamily: "monospace" }}>{utr}</p>
+          <div style={{
+            background: "hsla(142,70%,50%,0.07)", border: "1px solid hsla(142,70%,50%,0.2)",
+            borderRadius: "10px", padding: "0.75rem 1.1rem", marginBottom: "1.5rem",
+            textAlign: "left",
+          }}>
+            <p style={{ margin: "0 0 3px", fontSize: "10px", color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>UPI Transaction ID</p>
+            <p style={{ margin: 0, fontSize: "14px", color: "hsl(142,60%,65%)", fontFamily: "monospace", fontWeight: 600 }}>{utr}</p>
           </div>
         )}
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <button onClick={onViewOrders} className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="button-view-orders">
-            View Orders <ArrowRight size={15} />
-          </button>
-          <button onClick={onContinue} style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.1rem", borderRadius: "0.5rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,65%)", fontSize: "0.875rem", cursor: "pointer" }} data-testid="button-continue-shopping">
-            Continue Shopping
-          </button>
+
+        {/* Countdown bar */}
+        <div style={{ marginBottom: "1.25rem" }}>
+          <div style={{
+            height: "3px", borderRadius: "99px",
+            background: "hsl(220,15%,14%)", overflow: "hidden", marginBottom: "0.6rem",
+          }}>
+            <div style={{
+              height: "100%", borderRadius: "99px",
+              background: "linear-gradient(90deg, hsl(142,70%,48%), hsl(258,70%,60%))",
+              animation: `progress-drain ${5}s linear both`,
+            }} />
+          </div>
+          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,45%)" }}>
+            Redirecting in <span style={{ color: "hsl(210,40%,80%)", fontWeight: 600 }}>{countdown}s</span>…
+          </p>
         </div>
+
+        <button
+          onClick={() => navigate(redirectTo)}
+          data-testid="button-go-back"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
+            background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
+            color: "hsl(210,40%,80%)", fontSize: "0.875rem", cursor: "pointer",
+          }}
+        >
+          Go Back Now <ArrowRight size={15} />
+        </button>
       </div>
     </div>
   );
@@ -687,13 +789,9 @@ export default function Checkout() {
         />
       )}
 
-      {/* ─── Payment Success Overlay ─────────────────────────────────────── */}
+      {/* ─── Payment Success Screen ──────────────────────────────────────── */}
       {upiSuccess && (
-        <SuccessOverlay
-          utr={upiSuccess.utr}
-          onViewOrders={() => navigate("/orders")}
-          onContinue={() => navigate("/products")}
-        />
+        <SuccessScreen utr={upiSuccess.utr} redirectTo={backHref} />
       )}
 
       {/* ─── Main Checkout ────────────────────────────────────────────────── */}

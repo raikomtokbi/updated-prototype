@@ -14,7 +14,6 @@ import Register from "./pages/Register";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
-import Orders from "./pages/Orders";
 import Support from "./pages/Support";
 import About from "./pages/About";
 import Faq from "./pages/Faq";
@@ -98,7 +97,6 @@ function PublicRoutes() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/payment-return" component={PaymentReturn} />
           <Route path="/payment/upi/:orderId" component={UpiPayment} />
-          <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/auth/callback" component={AuthCallback} />

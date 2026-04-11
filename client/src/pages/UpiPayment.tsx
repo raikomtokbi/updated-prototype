@@ -113,7 +113,7 @@ export default function UpiPayment() {
   // Redirect to success after showing payment confirmed
   useEffect(() => {
     if (isSuccess) {
-      const t = setTimeout(() => navigate(`/orders`), 4000);
+      const t = setTimeout(() => navigate(`/account`), 4000);
       return () => clearTimeout(t);
     }
   }, [isSuccess]);
@@ -154,7 +154,7 @@ export default function UpiPayment() {
           </div>
         )}
         <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/orders" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="link-view-orders">
+          <Link href="/account" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="link-view-orders">
             View Orders <ArrowRight size={16} />
           </Link>
           <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }}>
@@ -162,7 +162,7 @@ export default function UpiPayment() {
           </Link>
         </div>
         <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", marginTop: "1.5rem" }}>
-          Redirecting to your orders automatically...
+          Redirecting to your account automatically...
         </p>
       </div>
     );
@@ -183,7 +183,7 @@ export default function UpiPayment() {
             : error || "Your payment could not be processed. Please try again or use a different payment method."}
         </p>
         <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/orders" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-check-orders">
+          <Link href="/account" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-check-orders">
             View Orders
           </Link>
           <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }} data-testid="link-try-again">
