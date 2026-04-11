@@ -78,48 +78,6 @@ const SERVICES: ServiceDef[] = [
       { key: "SMTP_FROM_NAME", label: "From Name", placeholder: "Nexcoin Support" },
     ],
   },
-  {
-    slug: "sms-otp",
-    name: "SMS / OTP Provider",
-    note: "Used for OTP verification and SMS alerts",
-    fields: [
-      { key: "SMS_API_KEY", label: "API Key", placeholder: "your-api-key" },
-      { key: "SMS_SENDER_ID", label: "Sender ID", placeholder: "NEXCOIN" },
-    ],
-  },
-  {
-    slug: "game-api",
-    name: "Game Data API",
-    note: "Used for live game data and player lookups",
-    fields: [
-      { key: "GAME_API_KEY", label: "API Key", placeholder: "your-game-api-key" },
-      { key: "GAME_API_URL", label: "API Base URL", placeholder: "https://api.gamedata.com" },
-    ],
-  },
-  {
-    slug: "push-notifications",
-    name: "Push Notifications (FCM)",
-    note: "Used for push alerts on mobile and web",
-    fields: [
-      { key: "FCM_SERVER_KEY", label: "FCM Server Key", placeholder: "AAAA..." },
-      { key: "FCM_PROJECT_ID", label: "FCM Project ID", placeholder: "my-firebase-project" },
-    ],
-  },
-  {
-    slug: "analytics",
-    name: "Analytics",
-    note: "Used for tracking visits and conversions",
-    fields: [{ key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" }],
-  },
-  {
-    slug: "webhook",
-    name: "Webhook Integration",
-    note: "Used to push events to external systems",
-    fields: [
-      { key: "WEBHOOK_SECRET", label: "Webhook Secret", placeholder: "your-webhook-secret" },
-      { key: "WEBHOOK_URL", label: "Webhook URL", placeholder: "https://your-server.com/hook" },
-    ],
-  },
 ];
 
 // ─── Configure Modal (for standard services) ──────────────────────────────────
