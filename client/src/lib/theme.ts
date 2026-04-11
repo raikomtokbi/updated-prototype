@@ -4,7 +4,29 @@ export interface ThemePreset {
   primary: string;
   accent: string;
   bg: string;
+  foreground?: string;
+  card?: string;
+  cardForeground?: string;
+  muted?: string;
+  mutedForeground?: string;
+  border?: string;
+  input?: string;
+  primaryForeground?: string;
+  btnBuy?: string;
+  isLight?: boolean;
 }
+
+const DARK_BASE = {
+  foreground: "210 40% 95%",
+  card: "220 20% 9%",
+  cardForeground: "210 40% 95%",
+  muted: "220 15% 14%",
+  mutedForeground: "220 10% 55%",
+  border: "220 15% 16%",
+  input: "220 15% 14%",
+  primaryForeground: "0 0% 100%",
+  accentForeground: "220 20% 6%",
+};
 
 export const PRESET_THEMES: ThemePreset[] = [
   { id: "dark-purple", name: "Dark Purple", primary: "258 90% 66%", accent: "196 100% 50%", bg: "220 20% 6%" },
@@ -13,6 +35,23 @@ export const PRESET_THEMES: ThemePreset[] = [
   { id: "dark-red",    name: "Dark Red",    primary: "0 72% 51%",   accent: "25 95% 53%",   bg: "0 20% 6%"   },
   { id: "dark-gold",   name: "Dark Gold",   primary: "38 92% 50%",  accent: "48 96% 53%",   bg: "40 20% 6%"  },
   { id: "midnight",    name: "Midnight",    primary: "270 50% 60%", accent: "210 80% 60%",  bg: "240 25% 5%" },
+  {
+    id: "light-blue",
+    name: "Light Blue",
+    primary: "217 91% 50%",
+    accent: "142 71% 40%",
+    bg: "0 0% 100%",
+    foreground: "220 20% 8%",
+    card: "220 13% 94%",
+    cardForeground: "220 20% 10%",
+    muted: "220 14% 97%",
+    mutedForeground: "220 12% 38%",
+    border: "220 13% 87%",
+    input: "220 14% 96%",
+    primaryForeground: "0 0% 100%",
+    btnBuy: "142 71% 36%",
+    isLight: true,
+  },
 ];
 
 function hslToHex(hsl: string): string {
@@ -39,12 +78,14 @@ export function applyThemeVars(
 
   let primary: string;
   let accent: string;
+  let preset: ThemePreset | undefined;
 
   if (themeId === "custom" && customPrimary && customAccent) {
     primary = customPrimary;
     accent = customAccent;
+    preset = undefined;
   } else {
-    const preset = PRESET_THEMES.find((t) => t.id === themeId) ?? PRESET_THEMES[0];
+    preset = PRESET_THEMES.find((t) => t.id === themeId) ?? PRESET_THEMES[0];
     primary = preset.primary;
     accent = preset.accent;
   }
@@ -53,7 +94,24 @@ export function applyThemeVars(
   root.style.setProperty("--ring", primary);
   root.style.setProperty("--accent", accent);
 
-  // Update browser tab color
+  const bg = preset?.bg ?? "220 20% 8%";
+  root.style.setProperty("--background", bg);
+  root.style.setProperty("--foreground", preset?.foreground ?? DARK_BASE.foreground);
+  root.style.setProperty("--card", preset?.card ?? DARK_BASE.card);
+  root.style.setProperty("--card-foreground", preset?.cardForeground ?? DARK_BASE.cardForeground);
+  root.style.setProperty("--muted", preset?.muted ?? DARK_BASE.muted);
+  root.style.setProperty("--muted-foreground", preset?.mutedForeground ?? DARK_BASE.mutedForeground);
+  root.style.setProperty("--border", preset?.border ?? DARK_BASE.border);
+  root.style.setProperty("--input", preset?.input ?? DARK_BASE.input);
+  root.style.setProperty("--primary-foreground", preset?.primaryForeground ?? DARK_BASE.primaryForeground);
+  root.style.setProperty("--btn-buy", preset?.btnBuy ?? primary);
+
+  if (preset?.isLight) {
+    root.setAttribute("data-theme", "light");
+  } else {
+    root.setAttribute("data-theme", "dark");
+  }
+
   const hex = hslToHex(primary);
   let metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
   if (!metaTheme) {

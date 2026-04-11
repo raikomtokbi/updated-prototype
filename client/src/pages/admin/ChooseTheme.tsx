@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Palette, RotateCcw, Save } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
-import { applyThemeVars, PRESET_THEMES } from "@/lib/theme";
+import { applyThemeVars, PRESET_THEMES, type ThemePreset } from "@/lib/theme";
 import { useNavGuard } from "@/hooks/useNavGuard";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
@@ -209,22 +209,35 @@ export default function ChooseTheme() {
                     </div>
                   )}
                   {/* Mini preview */}
-                  <div style={{ borderRadius: "5px", height: "60px", background: `hsl(${theme.bg})`, marginBottom: "8px", overflow: "hidden", position: "relative" }}>
+                  <div style={{ borderRadius: "5px", height: "60px", background: `hsl(${theme.bg})`, marginBottom: "8px", overflow: "hidden", position: "relative", border: theme.isLight ? "1px solid hsl(220,13%,87%)" : "none" }}>
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "2px", background: `hsl(${theme.primary})` }} />
-                    <div style={{ display: "flex", gap: "5px", padding: "8px" }}>
+                    <div style={{ display: "flex", gap: "5px", padding: "8px", alignItems: "center" }}>
                       <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: `hsl(${theme.primary})` }} />
                       <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: `hsl(${theme.accent})` }} />
+                      {theme.btnBuy && (
+                        <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: `hsl(${theme.btnBuy})` }} title="Buy button color" />
+                      )}
                     </div>
                     <div style={{ display: "flex", gap: "5px", padding: "0 8px" }}>
                       <div style={{ height: "5px", borderRadius: "2px", background: `hsl(${theme.primary})`, width: "42%", opacity: 0.75 }} />
                       <div style={{ height: "5px", borderRadius: "2px", background: `hsl(${theme.accent})`, width: "26%", opacity: 0.5 }} />
                     </div>
                   </div>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)", marginBottom: "6px" }}>{theme.name}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "6px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>{theme.name}</span>
+                    {theme.isLight && (
+                      <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "3px", background: "hsla(217,91%,50%,0.2)", color: "hsl(217,91%,70%)", border: "1px solid hsla(217,91%,50%,0.35)", fontWeight: 700, letterSpacing: "0.04em" }}>LIGHT</span>
+                    )}
+                  </div>
                   <ColorSwatch color={theme.primary} label="Primary" />
                   <div style={{ marginTop: "3px" }}>
                     <ColorSwatch color={theme.accent} label="Accent" />
                   </div>
+                  {theme.btnBuy && (
+                    <div style={{ marginTop: "3px" }}>
+                      <ColorSwatch color={theme.btnBuy} label="Buy btn" />
+                    </div>
+                  )}
                 </button>
               );
             })}

@@ -1032,7 +1032,7 @@ export default function Checkout() {
             type="button"
             disabled={isProcessing || paymentTypes.length === 0}
             onClick={handlePayment}
-            className="btn-primary"
+            className="btn-buy-action"
             style={{
               width: "100%",
               justifyContent: "center",
