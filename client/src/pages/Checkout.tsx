@@ -48,7 +48,7 @@ interface UpiData {
   expiresAt?: string;
 }
 
-const TIMEOUT_SECONDS = 600;
+const TIMEOUT_SECONDS = 300;
 
 function UpiPaymentOverlay({
   data,
@@ -158,16 +158,12 @@ function UpiPaymentOverlay({
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", background: "rgba(0,0,0,0.75)" }}>
-      <div style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "1rem", padding: "1.5rem" }}>
+      <div style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "1rem", padding: "1.5rem", scrollbarWidth: "none" }}>
+        <style>{`div::-webkit-scrollbar { display: none; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,95%)" }}>Complete UPI Payment</h3>
-            <p style={{ margin: "2px 0 0", fontSize: "0.75rem", color: "hsl(220,10%,50%)" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer", padding: "4px" }} data-testid="button-close-upi-modal">
-            <X size={18} />
-          </button>
+        <div style={{ marginBottom: "1.25rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,95%)" }}>Complete UPI Payment</h3>
+          <p style={{ margin: "2px 0 0", fontSize: "0.75rem", color: "hsl(220,10%,50%)" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
         </div>
 
         {/* Amount + Timer */}
@@ -215,12 +211,12 @@ function UpiPaymentOverlay({
                   color: "#fff", fontWeight: 800, fontSize: "14px", flexShrink: 0,
                 }}>G</span>
                 <div>
-                  <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>Open Google Pay</span>
+                  <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>Open UPI App</span>
                   <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,48%)", marginTop: "1px" }}>Amount &amp; UPI ID pre-filled</span>
                 </div>
               </a>
               <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(220,10%,38%)", textAlign: "center" }}>
-                Tap the button to open Google Pay — just confirm and pay
+                Tap to open your UPI app — just confirm and pay
               </p>
             </div>
           );
@@ -271,55 +267,55 @@ function UpiPaymentOverlay({
         <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
           <p style={{ margin: "0 0 0.5rem", fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>How to pay</p>
           <ol style={{ margin: 0, paddingLeft: "1.1rem", color: "hsl(220,10%,55%)", fontSize: "12px", lineHeight: 1.8 }}>
-            <li>Tap "Open Google Pay" above — amount &amp; UPI ID are pre-filled</li>
-            <li>Or scan the QR code / enter the UPI ID manually</li>
-            <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> if asked</li>
-            <li>After paying, enter your <strong style={{ color: "hsl(210,40%,85%)" }}>UTR / transaction ID</strong> below</li>
+            <li>Open your UPI app (GPay, PhonePe, Paytm, etc.)</li>
+            <li>Scan the QR code or enter the UPI ID manually</li>
+            <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> shown above</li>
+            <li>After paying, enter your <strong style={{ color: "hsl(210,40%,85%)" }}>UPI Txn ID</strong> below</li>
           </ol>
         </div>
 
-        {/* UTR Submission */}
+        {/* UPI Txn ID Submission */}
         {utrSubmitted ? (
-          <div style={{ background: "hsla(142,70%,50%,0.08)", border: "1px solid hsla(142,70%,50%,0.25)", borderRadius: "0.5rem", padding: "1rem", textAlign: "center" }}>
+          <div style={{ background: "hsla(142,70%,50%,0.08)", border: "1px solid hsla(142,70%,50%,0.25)", borderRadius: "0.5rem", padding: "1rem", textAlign: "center", marginBottom: "1rem" }}>
             <CheckCircle size={20} style={{ color: "hsl(142,70%,55%)", marginBottom: "6px" }} />
-            <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>UTR Submitted!</p>
+            <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>UPI Txn ID Submitted!</p>
             <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,52%)" }}>Your payment is under review. You'll be notified once verified.</p>
             <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(258,80%,68%)", fontFamily: "monospace" }}>{utrInput}</p>
           </div>
         ) : (
-          <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(258,50%,30%)", borderRadius: "0.5rem", padding: "0.875rem" }}>
-            <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 600, color: "hsl(258,80%,72%)" }}>After paying — enter your UTR</p>
+          <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(258,50%,30%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
+            <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 600, color: "hsl(258,80%,72%)" }}>After paying — enter your UPI Txn ID</p>
             <p style={{ margin: "0 0 10px", fontSize: "11px", color: "hsl(220,10%,48%)" }}>
-              Find the 12-digit UTR in your UPI app under transaction details.
+              Find the transaction ID in your UPI app under payment history.
             </p>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <input
-                data-testid="input-utr"
-                value={utrInput}
-                onChange={(e) => { setUtrInput(e.target.value); setUtrError(null); }}
-                placeholder="e.g. 123456789012"
-                maxLength={50}
-                style={{
-                  flex: 1, padding: "0.55rem 0.75rem", borderRadius: "6px",
-                  background: "hsl(220,20%,8%)", border: `1px solid ${utrError ? "#ef4444" : "hsl(220,15%,22%)"}`,
-                  color: "hsl(210,40%,90%)", fontSize: "13px", outline: "none",
-                }}
-              />
-              <button
-                data-testid="button-submit-utr"
-                onClick={handleUtrSubmit}
-                disabled={utrSubmitting || !utrInput.trim()}
-                style={{
-                  padding: "0.55rem 1rem", borderRadius: "6px", border: "none",
-                  background: utrSubmitting ? "hsl(258,50%,30%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
-                  color: "#fff", fontSize: "13px", fontWeight: 600, cursor: utrSubmitting ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap",
-                }}
-              >
-                {utrSubmitting ? <Loader2 size={13} style={{ animation: "spin 1.5s linear infinite" }} /> : <CheckCircle size={13} />}
-                {utrSubmitting ? "Submitting…" : "Submit"}
-              </button>
-            </div>
+            <input
+              data-testid="input-utr"
+              value={utrInput}
+              onChange={(e) => { setUtrInput(e.target.value); setUtrError(null); }}
+              placeholder="e.g. 123456789012"
+              maxLength={50}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                padding: "0.6rem 0.75rem", borderRadius: "6px",
+                background: "hsl(220,20%,8%)", border: `1px solid ${utrError ? "#ef4444" : "hsl(220,15%,22%)"}`,
+                color: "hsl(210,40%,90%)", fontSize: "13px", outline: "none", marginBottom: "8px",
+              }}
+            />
+            <button
+              data-testid="button-submit-utr"
+              onClick={handleUtrSubmit}
+              disabled={utrSubmitting || !utrInput.trim()}
+              style={{
+                width: "100%", padding: "0.6rem 1rem", borderRadius: "6px", border: "none",
+                background: utrSubmitting || !utrInput.trim() ? "hsl(258,50%,28%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                color: utrSubmitting || !utrInput.trim() ? "hsl(210,20%,55%)" : "#fff",
+                fontSize: "13px", fontWeight: 600, cursor: utrSubmitting ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              }}
+            >
+              {utrSubmitting ? <Loader2 size={13} style={{ animation: "spin 1.5s linear infinite" }} /> : <CheckCircle size={13} />}
+              {utrSubmitting ? "Submitting…" : "Submit UPI Txn ID"}
+            </button>
             {utrError && <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>{utrError}</p>}
             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", color: "hsl(220,10%,40%)", fontSize: "11px" }}>
               <Loader2 size={11} style={{ animation: "spin 1.5s linear infinite" }} />
@@ -328,7 +324,18 @@ function UpiPaymentOverlay({
           </div>
         )}
 
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        {/* Cancel Button */}
+        <button
+          data-testid="button-cancel-upi"
+          onClick={onClose}
+          style={{
+            width: "100%", padding: "0.6rem", borderRadius: "6px",
+            background: "none", border: "1px solid hsl(220,15%,22%)",
+            color: "hsl(220,10%,50%)", fontSize: "13px", cursor: "pointer",
+          }}
+        >
+          Cancel Payment
+        </button>
       </div>
     </div>
   );
