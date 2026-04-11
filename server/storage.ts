@@ -756,10 +756,10 @@ export class DatabaseStorage implements IStorage {
   // ── Analytics ──────────────────────────────────────────────────────────────
   async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone = "UTC") {
     const trunc =
-      groupBy === "hour" ? sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-%d %H:00:00')`
-      : groupBy === "day" ? sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-%d')`
-      : groupBy === "week" ? sql`DATE_FORMAT(DATE_SUB(${orders.createdAt}, INTERVAL WEEKDAY(${orders.createdAt}) DAY), '%Y-%m-%d')`
-      : sql`DATE_FORMAT(${orders.createdAt}, '%Y-%m-01')`;
+      groupBy === "hour" ? sql`to_char(${orders.createdAt}, 'YYYY-MM-DD HH24:00:00')`
+      : groupBy === "day" ? sql`to_char(${orders.createdAt}, 'YYYY-MM-DD')`
+      : groupBy === "week" ? sql`to_char(date_trunc('week', ${orders.createdAt}), 'YYYY-MM-DD')`
+      : sql`to_char(date_trunc('month', ${orders.createdAt}), 'YYYY-MM-DD')`;
 
     const trendRows = await db
       .select({
@@ -772,7 +772,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(trunc);
 
     function fmtLabel(period: unknown, gb: string) {
-      // MySQL DATE_FORMAT returns plain strings like "2026-04-08 14:00:00" (no timezone marker).
+      // PostgreSQL to_char returns plain strings like "2026-04-08 14:00:00" (no timezone marker).
       // Append "Z" so JavaScript parses them as UTC, then format using the site timezone
       // so hourly labels appear in the admin's local time, not UTC.
       const raw = (period as string).trim();

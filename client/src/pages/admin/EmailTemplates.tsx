@@ -1248,9 +1248,6 @@ export default function EmailTemplates() {
 
   const { data: templates = [], isLoading } = useQuery<EmailTemplate[]>({
     queryKey: ["/api/admin/email-templates"],
-    queryFn: () =>
-      fetch("/api/admin/email-templates", { headers: { "x-admin-role": "super_admin" }, credentials: "include" })
-        .then((r) => r.json()),
   });
 
   const [selectedType, setSelectedType] = useState<string>(TEMPLATE_DEFS[0].type);
