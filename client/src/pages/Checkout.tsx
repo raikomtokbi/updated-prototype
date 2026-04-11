@@ -61,6 +61,9 @@ function UpiPaymentOverlay({
   onExpired: () => void;
   onClose: () => void;
 }) {
+  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"] });
+  const merchantName = encodeURIComponent(siteSettings?.site_name || "Merchant");
+
   const [secondsLeft, setSecondsLeft] = useState(() => {
     if (data.expiresAt) {
       return Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000));
@@ -186,33 +189,31 @@ function UpiPaymentOverlay({
         {/* UPI App Deep Link Buttons */}
         {data.upiId && (() => {
           const pa = encodeURIComponent(data.upiId);
-          const pn = encodeURIComponent("Nexcoin");
           const am = String(Math.round(parseFloat(data.amount)));
           const tn = encodeURIComponent("Order " + (data.orderNumber || data.orderId.slice(0, 8)));
-          // Intent URI: works on Android Chrome — opens GPay directly if installed,
-          // falls back to Play Store otherwise. Do NOT use target="_blank" for deeplinks.
-          const gpayLink = `intent://upi/pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;end`;
+          // Universal UPI deep link — opens any installed UPI app (GPay, PhonePe, Paytm, BHIM, etc.)
+          const upiLink = `upi://pay?pa=${pa}&pn=${merchantName}&am=${am}&cu=INR&tn=${tn}`;
           return (
             <div style={{ marginBottom: "0.875rem" }}>
               <p style={{ margin: "0 0 8px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pay instantly with</p>
               <a
-                href={gpayLink}
+                href={upiLink}
                 data-testid="button-open-gpay"
                 style={{
                   display: "flex", alignItems: "center", gap: "12px",
                   padding: "12px 16px", borderRadius: "8px",
-                  background: "rgba(66,133,244,0.12)", border: "1px solid rgba(66,133,244,0.3)",
+                  background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)",
                   textDecoration: "none", cursor: "pointer",
                 }}
               >
                 <span style={{
                   width: "32px", height: "32px", borderRadius: "8px",
-                  background: "#4285F4", display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#fff", fontWeight: 800, fontSize: "14px", flexShrink: 0,
-                }}>G</span>
+                  background: "linear-gradient(135deg,#7c3aed,#6d28d9)", display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#fff", fontWeight: 800, fontSize: "12px", flexShrink: 0,
+                }}>UPI</span>
                 <div>
                   <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>Open UPI App</span>
-                  <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,48%)", marginTop: "1px" }}>Amount &amp; UPI ID pre-filled</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,48%)", marginTop: "1px" }}>Works with GPay, PhonePe, Paytm &amp; more</span>
                 </div>
               </a>
               <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(220,10%,38%)", textAlign: "center" }}>
@@ -228,7 +229,7 @@ function UpiPaymentOverlay({
             <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Or scan QR to pay</p>
             <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px" }}>
               <QRCodeSVG
-                value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=Nexcoin&am=${Math.round(parseFloat(data.amount))}&cu=INR&tn=Order+Payment`}
+                value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=${merchantName}&am=${Math.round(parseFloat(data.amount))}&cu=INR&tn=Order+Payment`}
                 size={160}
                 bgColor="#ffffff"
                 fgColor="#000000"
