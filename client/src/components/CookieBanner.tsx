@@ -32,7 +32,7 @@ export default function CookieBanner({ enabled }: { enabled: boolean }) {
         left: 0,
         right: 0,
         zIndex: 9998,
-        background: "hsl(220, 20%, 10%)",
+        background: "hsl(var(--card))",
         borderTop: "1px solid hsl(220, 15%, 18%)",
         padding: "16px 24px",
         display: "flex",

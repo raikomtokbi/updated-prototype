@@ -17,8 +17,8 @@ declare global { interface Window { Razorpay: any } }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
-  background: "hsl(220,20%,9%)",
-  border: "1px solid hsl(220,15%,16%)",
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "0.75rem",
   padding: "1.25rem",
 };
@@ -161,24 +161,24 @@ function UpiPaymentOverlay({
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", background: "rgba(0,0,0,0.75)" }}>
-      <div style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", background: "hsl(220,20%,8%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "1rem", padding: "1.5rem", scrollbarWidth: "none" }}>
+      <div style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "1rem", padding: "1.5rem", scrollbarWidth: "none" }}>
         <style>{`div::-webkit-scrollbar { display: none; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
         {/* Header */}
         <div style={{ marginBottom: "1.25rem" }}>
-          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,95%)" }}>Complete UPI Payment</h3>
-          <p style={{ margin: "2px 0 0", fontSize: "0.75rem", color: "hsl(220,10%,50%)" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
+          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Complete UPI Payment</h3>
+          <p style={{ margin: "2px 0 0", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
         </div>
 
         {/* Amount + Timer */}
         <div style={{ ...card, padding: "1rem", marginBottom: "0.875rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
-            <p style={{ margin: "0 0 2px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Amount to Pay</p>
+            <p style={{ margin: "0 0 2px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Amount to Pay</p>
             <p style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "hsl(258,90%,72%)" }}>{currencySymbol}{parseFloat(data.amount).toFixed(2)}</p>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end", marginBottom: "2px" }}>
               <Clock size={12} style={{ color: timerColor }} />
-              <span style={{ fontSize: "11px", color: "hsl(220,10%,50%)" }}>Expires in</span>
+              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Expires in</span>
             </div>
             <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: timerColor, fontVariantNumeric: "tabular-nums" }}>
               {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
@@ -195,7 +195,7 @@ function UpiPaymentOverlay({
           const upiLink = `upi://pay?pa=${pa}&pn=${merchantName}&am=${am}&cu=INR&tn=${tn}`;
           return (
             <div style={{ marginBottom: "0.875rem" }}>
-              <p style={{ margin: "0 0 8px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pay instantly with</p>
+              <p style={{ margin: "0 0 8px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pay instantly with</p>
               <a
                 href={upiLink}
                 data-testid="button-open-gpay"
@@ -212,11 +212,11 @@ function UpiPaymentOverlay({
                   color: "#fff", fontWeight: 800, fontSize: "12px", flexShrink: 0,
                 }}>UPI</span>
                 <div>
-                  <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>Open UPI App</span>
-                  <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,48%)", marginTop: "1px" }}>Works with GPay, PhonePe, Paytm &amp; more</span>
+                  <span style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Open UPI App</span>
+                  <span style={{ display: "block", fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>Works with GPay, PhonePe, Paytm &amp; more</span>
                 </div>
               </a>
-              <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(220,10%,38%)", textAlign: "center" }}>
+              <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(var(--muted-foreground))", textAlign: "center" }}>
                 Tap to open your UPI app — just confirm and pay
               </p>
             </div>
@@ -226,7 +226,7 @@ function UpiPaymentOverlay({
         {/* QR Code — auto-generated from UPI ID + amount */}
         {data.upiId && (
           <div style={{ ...card, padding: "1rem", marginBottom: "0.875rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-            <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,50%)" }}>Or scan QR to pay</p>
+            <p style={{ margin: 0, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Or scan QR to pay</p>
             <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "10px" }}>
               <QRCodeSVG
                 value={`upi://pay?pa=${encodeURIComponent(data.upiId)}&pn=${merchantName}&am=${Math.round(parseFloat(data.amount))}&cu=INR&tn=Order+Payment`}
@@ -243,9 +243,9 @@ function UpiPaymentOverlay({
         {/* UPI ID */}
         {data.upiId && (
           <div style={{ marginBottom: "0.875rem" }}>
-            <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Or pay to UPI ID</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
-              <span style={{ flex: 1, color: "hsl(210,40%,92%)", fontSize: "0.9rem", fontWeight: 600, wordBreak: "break-all" }} data-testid="text-upi-id">{data.upiId}</span>
+            <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Or pay to UPI ID</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
+              <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "0.9rem", fontWeight: 600, wordBreak: "break-all" }} data-testid="text-upi-id">{data.upiId}</span>
               <button onClick={() => copyText(data.upiId, "upiId")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "upiId" ? "#22c55e" : "hsl(220,10%,50%)", padding: "2px", flexShrink: 0 }} data-testid="button-copy-upi-id">
                 {copied === "upiId" ? <CheckCircle size={15} /> : <Copy size={15} />}
               </button>
@@ -255,9 +255,9 @@ function UpiPaymentOverlay({
 
         {/* Exact Amount */}
         <div style={{ marginBottom: "0.875rem" }}>
-          <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Exact amount to enter</p>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,18%)", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
-            <span style={{ flex: 1, color: "hsl(210,40%,92%)", fontSize: "0.9rem", fontWeight: 600 }} data-testid="text-exact-amount">{parseFloat(data.amount).toFixed(2)}</span>
+          <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Exact amount to enter</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
+            <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "0.9rem", fontWeight: 600 }} data-testid="text-exact-amount">{parseFloat(data.amount).toFixed(2)}</span>
             <button onClick={() => copyText(parseFloat(data.amount).toFixed(2), "amount")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "amount" ? "#22c55e" : "hsl(220,10%,50%)", padding: "2px", flexShrink: 0 }} data-testid="button-copy-amount">
               {copied === "amount" ? <CheckCircle size={15} /> : <Copy size={15} />}
             </button>
@@ -265,13 +265,13 @@ function UpiPaymentOverlay({
         </div>
 
         {/* Instructions */}
-        <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
-          <p style={{ margin: "0 0 0.5rem", fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>How to pay</p>
-          <ol style={{ margin: 0, paddingLeft: "1.1rem", color: "hsl(220,10%,55%)", fontSize: "12px", lineHeight: 1.8 }}>
+        <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
+          <p style={{ margin: "0 0 0.5rem", fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>How to pay</p>
+          <ol style={{ margin: 0, paddingLeft: "1.1rem", color: "hsl(var(--muted-foreground))", fontSize: "12px", lineHeight: 1.8 }}>
             <li>Open your UPI app (GPay, PhonePe, Paytm, etc.)</li>
             <li>Scan the QR code or enter the UPI ID manually</li>
-            <li>Enter the <strong style={{ color: "hsl(210,40%,85%)" }}>exact amount</strong> shown above</li>
-            <li>After paying, enter your <strong style={{ color: "hsl(210,40%,85%)" }}>UPI Txn ID</strong> below</li>
+            <li>Enter the <strong style={{ color: "hsl(var(--foreground))" }}>exact amount</strong> shown above</li>
+            <li>After paying, enter your <strong style={{ color: "hsl(var(--foreground))" }}>UPI Txn ID</strong> below</li>
           </ol>
         </div>
 
@@ -279,14 +279,14 @@ function UpiPaymentOverlay({
         {utrSubmitted ? (
           <div style={{ background: "hsla(142,70%,50%,0.08)", border: "1px solid hsla(142,70%,50%,0.25)", borderRadius: "0.5rem", padding: "1rem", textAlign: "center", marginBottom: "1rem" }}>
             <CheckCircle size={20} style={{ color: "hsl(142,70%,55%)", marginBottom: "6px" }} />
-            <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>UPI Txn ID Submitted!</p>
-            <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,52%)" }}>Your payment is under review. You'll be notified once verified.</p>
+            <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>UPI Txn ID Submitted!</p>
+            <p style={{ margin: 0, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Your payment is under review. You'll be notified once verified.</p>
             <p style={{ margin: "8px 0 0", fontSize: "11px", color: "hsl(258,80%,68%)", fontFamily: "monospace" }}>{utrInput}</p>
           </div>
         ) : (
-          <div style={{ background: "hsl(220,20%,11%)", border: "1px solid hsl(258,50%,30%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
+          <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(258,50%,30%)", borderRadius: "0.5rem", padding: "0.875rem", marginBottom: "1rem" }}>
             <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 600, color: "hsl(258,80%,72%)" }}>After paying — enter your UPI Txn ID</p>
-            <p style={{ margin: "0 0 10px", fontSize: "11px", color: "hsl(220,10%,48%)" }}>
+            <p style={{ margin: "0 0 10px", fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
               Find the transaction ID in your UPI app under payment history.
             </p>
             <input
@@ -298,8 +298,8 @@ function UpiPaymentOverlay({
               style={{
                 width: "100%", boxSizing: "border-box",
                 padding: "0.6rem 0.75rem", borderRadius: "6px",
-                background: "hsl(220,20%,8%)", border: `1px solid ${utrError ? "#ef4444" : "hsl(220,15%,22%)"}`,
-                color: "hsl(210,40%,90%)", fontSize: "13px", outline: "none", marginBottom: "8px",
+                background: "hsl(var(--background))", border: `1px solid ${utrError ? "#ef4444" : "hsl(var(--border))"}`,
+                color: "hsl(var(--foreground))", fontSize: "13px", outline: "none", marginBottom: "8px",
               }}
             />
             <button
@@ -309,7 +309,7 @@ function UpiPaymentOverlay({
               style={{
                 width: "100%", padding: "0.6rem 1rem", borderRadius: "6px", border: "none",
                 background: utrSubmitting || !utrInput.trim() ? "hsl(258,50%,28%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
-                color: utrSubmitting || !utrInput.trim() ? "hsl(210,20%,55%)" : "#fff",
+                color: utrSubmitting || !utrInput.trim() ? "hsl(var(--muted-foreground))" : "#fff",
                 fontSize: "13px", fontWeight: 600, cursor: utrSubmitting ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
               }}
@@ -318,7 +318,7 @@ function UpiPaymentOverlay({
               {utrSubmitting ? "Submitting…" : "Submit UPI Txn ID"}
             </button>
             {utrError && <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>{utrError}</p>}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", color: "hsl(220,10%,40%)", fontSize: "11px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>
               <Loader2 size={11} style={{ animation: "spin 1.5s linear infinite" }} />
               <span>Also checking for automatic verification every 5s…</span>
             </div>
@@ -331,8 +331,8 @@ function UpiPaymentOverlay({
           onClick={onClose}
           style={{
             width: "100%", padding: "0.6rem", borderRadius: "6px",
-            background: "none", border: "1px solid hsl(220,15%,22%)",
-            color: "hsl(220,10%,50%)", fontSize: "13px", cursor: "pointer",
+            background: "none", border: "1px solid hsl(var(--border))",
+            color: "hsl(var(--muted-foreground))", fontSize: "13px", cursor: "pointer",
           }}
         >
           Cancel Payment
@@ -362,7 +362,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 3000,
-      background: "hsl(220,22%,6%)",
+      background: "hsl(var(--background))",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       overflow: "hidden",
     }}>
@@ -422,11 +422,11 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
 
         <h1 className="font-orbitron" style={{
           fontSize: "clamp(1.4rem, 5vw, 2rem)", fontWeight: 800,
-          color: "hsl(210,40%,95%)", marginBottom: "0.625rem", letterSpacing: "0.01em",
+          color: "hsl(var(--foreground))", marginBottom: "0.625rem", letterSpacing: "0.01em",
         }}>
           Payment Successful!
         </h1>
-        <p style={{ color: "hsl(220,10%,55%)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
           Your order has been confirmed and is now being processed.
         </p>
 
@@ -436,7 +436,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
             borderRadius: "10px", padding: "0.75rem 1.1rem", marginBottom: "1.5rem",
             textAlign: "left",
           }}>
-            <p style={{ margin: "0 0 3px", fontSize: "10px", color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>UPI Transaction ID</p>
+            <p style={{ margin: "0 0 3px", fontSize: "10px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>UPI Transaction ID</p>
             <p style={{ margin: 0, fontSize: "14px", color: "hsl(142,60%,65%)", fontFamily: "monospace", fontWeight: 600 }}>{utr}</p>
           </div>
         )}
@@ -445,7 +445,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{
             height: "3px", borderRadius: "99px",
-            background: "hsl(220,15%,14%)", overflow: "hidden", marginBottom: "0.6rem",
+            background: "hsl(var(--input))", overflow: "hidden", marginBottom: "0.6rem",
           }}>
             <div style={{
               height: "100%", borderRadius: "99px",
@@ -453,8 +453,8 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
               animation: `progress-drain ${5}s linear both`,
             }} />
           </div>
-          <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,45%)" }}>
-            Redirecting in <span style={{ color: "hsl(210,40%,80%)", fontWeight: 600 }}>{countdown}s</span>…
+          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+            Redirecting in <span style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>{countdown}s</span>…
           </p>
         </div>
 
@@ -464,8 +464,8 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
           style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
-            background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
-            color: "hsl(210,40%,80%)", fontSize: "0.875rem", cursor: "pointer",
+            background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))",
+            color: "hsl(var(--foreground))", fontSize: "0.875rem", cursor: "pointer",
           }}
         >
           Go Back Now <ArrowRight size={15} />
@@ -760,8 +760,8 @@ export default function Checkout() {
   if (items.length === 0 && !upiModalData && !upiSuccess) {
     return (
       <div style={{ maxWidth: "480px", margin: "0 auto", padding: "4rem 1.5rem", textAlign: "center" }}>
-        <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "1rem" }}>Your Cart is Empty</h2>
-        <p style={{ color: "hsl(220,10%,50%)", marginBottom: "2rem" }}>Add items to your cart before proceeding to checkout.</p>
+        <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "1rem" }}>Your Cart is Empty</h2>
+        <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: "2rem" }}>Add items to your cart before proceeding to checkout.</p>
         <Link href="/products" className="btn-primary" data-testid="link-browse-products">
           <ArrowLeft size={16} /> Browse Products
         </Link>
@@ -797,68 +797,68 @@ export default function Checkout() {
 
       {/* ─── Main Checkout ────────────────────────────────────────────────── */}
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "1.5rem 1rem 4rem" }}>
-        <Link href={backHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(220,10%,55%)", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
+        <Link href={backHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
           <ArrowLeft size={15} /> Back to {backLabel}
         </Link>
 
-        <h1 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,95%)", marginBottom: "1.5rem" }}>Checkout</h1>
+        <h1 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "1.5rem" }}>Checkout</h1>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 
           {/* ── Order Summary ── */}
           <div style={card}>
-            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(220,10%,52%)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
               Order Summary
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1rem" }}>
               {items.map((item) => (
                 <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,92%)" }}>{item.productTitle}</div>
-                    <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,48%)", marginTop: "2px" }}>
+                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                    <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
                       {item.packageName} × {item.quantity}
                     </div>
                     {/* Player info */}
                     {(item.userId || item.playerId || item.zoneId) && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginTop: "5px" }}>
                         {(item.userId || item.playerId) && (
-                          <span style={{ fontSize: "0.7rem", color: "hsl(220,10%,42%)" }}>
+                          <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
                             User ID: {item.playerId || item.userId}
                           </span>
                         )}
                         {item.zoneId && (
-                          <span style={{ fontSize: "0.7rem", color: "hsl(220,10%,42%)" }}>
+                          <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
                             Zone / Server: {item.zoneId}
                           </span>
                         )}
                       </div>
                     )}
                   </div>
-                  <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(210,40%,88%)", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(var(--foreground))", whiteSpace: "nowrap" }}>
                     {currencySymbol}{(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ borderTop: "1px solid hsl(220,15%,16%)", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+            <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                <span style={{ color: "hsl(220,10%,50%)" }}>Subtotal</span>
-                <span style={{ color: "hsl(210,40%,82%)" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
+                <span style={{ color: "hsl(var(--muted-foreground))" }}>Subtotal</span>
+                <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               {fees.map((fee) => {
                 const amt = fee.type === "percentage" ? subtotal * (parseFloat(fee.amount) / 100) : parseFloat(fee.amount);
                 return (
                   <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                    <span style={{ color: "hsl(220,10%,50%)" }}>{fee.name}{fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}</span>
-                    <span style={{ color: "hsl(210,40%,82%)" }}>{currencySymbol}{amt.toFixed(2)}</span>
+                    <span style={{ color: "hsl(var(--muted-foreground))" }}>{fee.name}{fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}</span>
+                    <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{amt.toFixed(2)}</span>
                   </div>
                 );
               })}
               {taxEnabled && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
-                  <span style={{ color: "hsl(220,10%,50%)" }}>{taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 1)}%)</span>
-                  <span style={{ color: "hsl(210,40%,82%)" }}>{currencySymbol}{taxAmount.toFixed(2)}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 1)}%)</span>
+                  <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{taxAmount.toFixed(2)}</span>
                 </div>
               )}
               {couponApplied && couponDiscount > 0 && (
@@ -867,8 +867,8 @@ export default function Checkout() {
                   <span style={{ color: "hsl(142,70%,55%)" }}>-{currencySymbol}{couponDiscount.toFixed(2)}</span>
                 </div>
               )}
-              <div style={{ borderTop: "1px solid hsl(220,15%,16%)", paddingTop: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,92%)" }}>Total</span>
+              <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Total</span>
                 <span className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(258,90%,72%)" }} data-testid="text-checkout-total">
                   {currencySymbol}{total.toFixed(2)}
                 </span>
@@ -880,7 +880,7 @@ export default function Checkout() {
           <div style={card}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
               <Tag size={13} style={{ color: "hsl(258,90%,68%)" }} />
-              <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(210,40%,85%)" }}>Coupon Code</span>
+              <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Coupon Code</span>
             </div>
             {couponApplied ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsla(142,70%,55%,0.1)", border: "1px solid hsla(142,70%,55%,0.25)", borderRadius: "0.5rem", padding: "0.6rem 0.75rem" }}>
@@ -902,7 +902,7 @@ export default function Checkout() {
                   onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
                   placeholder="Enter coupon code"
                   data-testid="input-coupon"
-                  style={{ flex: 1, padding: "0.6rem 0.75rem", borderRadius: "0.5rem", border: `1px solid ${couponError ? "hsla(0,72%,55%,0.5)" : "hsl(220,15%,18%)"}`, background: "hsl(220,20%,11%)", color: "hsl(210,40%,92%)", fontSize: "0.875rem", outline: "none" }}
+                  style={{ flex: 1, padding: "0.6rem 0.75rem", borderRadius: "0.5rem", border: `1px solid ${couponError ? "hsla(0,72%,55%,0.5)" : "hsl(var(--border))"}`, background: "hsl(var(--input))", color: "hsl(var(--foreground))", fontSize: "0.875rem", outline: "none" }}
                 />
                 <button
                   onClick={applyCoupon}
@@ -920,7 +920,7 @@ export default function Checkout() {
 
           {/* ── Payment Method Type Selection ── */}
           <div style={card}>
-            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(220,10%,52%)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.875rem" }}>
+            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.875rem" }}>
               Payment Method
             </h3>
             {paymentTypes.length === 0 ? (
@@ -944,7 +944,7 @@ export default function Checkout() {
                         padding: "0.875rem 1rem",
                         borderRadius: "0.625rem",
                         border: `1px solid ${isSelected ? "hsl(258,90%,58%)" : "hsl(220,15%,18%)"}`,
-                        background: isSelected ? "hsla(258,90%,58%,0.1)" : "hsl(220,20%,11%)",
+                        background: isSelected ? "hsla(258,90%,58%,0.1)" : "hsl(var(--card))",
                         cursor: "pointer",
                         textAlign: "left",
                         width: "100%",
@@ -954,7 +954,7 @@ export default function Checkout() {
                       {/* Radio dot */}
                       <div style={{
                         width: "18px", height: "18px", borderRadius: "50%", flexShrink: 0,
-                        border: `2px solid ${isSelected ? "hsl(258,90%,62%)" : "hsl(220,15%,32%)"}`,
+                        border: `2px solid ${isSelected ? "hsl(258,90%,62%)" : "hsl(var(--border))"}`,
                         background: isSelected ? "hsl(258,90%,62%)" : "transparent",
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
@@ -964,7 +964,7 @@ export default function Checkout() {
                       {/* Icon */}
                       <div style={{
                         width: "36px", height: "36px", borderRadius: "8px",
-                        background: isSelected ? "hsla(258,90%,62%,0.18)" : "hsl(220,20%,14%)",
+                        background: isSelected ? "hsla(258,90%,62%,0.18)" : "hsl(var(--card))",
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                         color: isSelected ? "hsl(258,90%,70%)" : "hsl(220,10%,55%)",
                       }}>
@@ -973,10 +973,10 @@ export default function Checkout() {
 
                       {/* Label */}
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "hsl(210,40%,95%)" : "hsl(210,40%,75%)" }}>
+                        <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>
                           {pt.label}
                         </div>
-                        <div style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)", marginTop: "1px" }}>
+                        <div style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
                           {PAYMENT_DESCRIPTIONS[pt.key] || pt.label}
                         </div>
                       </div>
@@ -992,7 +992,7 @@ export default function Checkout() {
           {/* ── Payer Name (UPI only) ── */}
           {selectedPaymentType === "UPI" && (
             <div style={card}>
-              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(210,40%,80%)", marginBottom: "0.5rem" }}>
+              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
                 Your name (as in UPI / bank account)
               </label>
               <input
@@ -1005,15 +1005,15 @@ export default function Checkout() {
                   width: "100%",
                   padding: "0.7rem 0.875rem",
                   borderRadius: "0.5rem",
-                  border: "1px solid hsl(220,15%,22%)",
-                  background: "hsl(220,20%,11%)",
-                  color: "hsl(210,40%,92%)",
+                  border: "1px solid hsl(var(--border))",
+                  background: "hsl(var(--card))",
+                  color: "hsl(var(--foreground))",
                   fontSize: "0.9rem",
                   outline: "none",
                   boxSizing: "border-box",
                 }}
               />
-              <p style={{ margin: "0.375rem 0 0", fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+              <p style={{ margin: "0.375rem 0 0", fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
                 Optional — helps us match your payment faster when multiple orders arrive at the same time.
               </p>
             </div>
@@ -1052,7 +1052,7 @@ export default function Checkout() {
           </button>
 
           {selectedPaymentType && (
-            <p style={{ textAlign: "center", fontSize: "0.7rem", color: "hsl(220,10%,35%)" }}>
+            <p style={{ textAlign: "center", fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
               Secured payment via {paymentTypes.find(t => t.key === selectedPaymentType)?.label || selectedPaymentType}
               {" · "}Encrypted end-to-end
             </p>

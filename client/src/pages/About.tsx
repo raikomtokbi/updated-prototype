@@ -54,8 +54,8 @@ export default function About() {
           textAlign: "center",
           padding: "3rem 1rem",
           marginBottom: "3rem",
-          background: "hsl(220,20%,9%)",
-          border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
           borderRadius: "1.25rem",
           position: "relative",
           overflow: "hidden",
@@ -91,11 +91,11 @@ export default function About() {
         </div>
         <h1
           className="font-orbitron"
-          style={{ fontSize: "2rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.75rem", position: "relative" }}
+          style={{ fontSize: "2rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.75rem", position: "relative" }}
         >
           {headline}
         </h1>
-        <p style={{ fontSize: "1rem", color: "hsl(220,10%,55%)", maxWidth: "580px", margin: "0 auto", position: "relative" }}>
+        <p style={{ fontSize: "1rem", color: "hsl(var(--muted-foreground))", maxWidth: "580px", margin: "0 auto", position: "relative" }}>
           {tagline}
         </p>
       </div>
@@ -114,8 +114,8 @@ export default function About() {
             key={stat.label}
             data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
             style={{
-              background: "hsl(220,20%,9%)",
-              border: "1px solid hsl(220,15%,18%)",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: "0.75rem",
               padding: "1.5rem 1rem",
               textAlign: "center",
@@ -127,7 +127,7 @@ export default function About() {
             >
               {stat.value}
             </p>
-            <p style={{ fontSize: "0.78rem", color: "hsl(220,10%,50%)" }}>{stat.label}</p>
+            <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{stat.label}</p>
           </div>
         ))}
       </div>
@@ -135,7 +135,7 @@ export default function About() {
       {/* Why section */}
       <h2
         style={{
-          fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,85%)",
+          fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))",
           marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em",
         }}
       >
@@ -155,8 +155,8 @@ export default function About() {
             <div
               key={i}
               style={{
-                background: "hsl(220,20%,9%)",
-                border: "1px solid hsl(220,15%,18%)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "0.75rem",
                 padding: "1.5rem",
               }}
@@ -174,7 +174,7 @@ export default function About() {
               <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "0.4rem" }}>
                 {v.title}
               </h3>
-              <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,50%)", lineHeight: 1.6 }}>
+              <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
                 {v.desc}
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function About() {
       {/* Story */}
       <div
         style={{
-          background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,18%)",
+          background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
           borderRadius: "1rem", padding: "2rem", marginBottom: "2rem",
         }}
       >
@@ -194,18 +194,18 @@ export default function About() {
         </h2>
         {storyText ? (
           storyText.split("\n").filter(Boolean).map((para, i) => (
-            <p key={i} style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+            <p key={i} style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
               {para}
             </p>
           ))
         ) : (
           <>
-            <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+            <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
               {siteName} was founded with a simple mission: make digital top-ups fast, safe, and
               accessible for every gamer. We started with a handful of popular titles and have grown
               into a platform that covers hundreds of games and platforms worldwide.
             </p>
-            <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,55%)", lineHeight: 1.7 }}>
+            <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
               We work directly with publishers and authorised resellers to ensure every top-up you
               purchase is 100% legitimate and delivered in real time.
             </p>

@@ -43,10 +43,10 @@ function NotLoggedIn() {
       }}>
         <User size={32} style={{ color: "hsl(258,90%,66%)" }} />
       </div>
-      <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.75rem" }}>
+      <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
         Not Signed In
       </h2>
-      <p style={{ fontSize: "0.875rem", color: "hsl(220,10%,50%)", marginBottom: "2rem", lineHeight: 1.6 }}>
+      <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", marginBottom: "2rem", lineHeight: 1.6 }}>
         Sign in to manage your account, view orders and update your security settings.
       </p>
       <Link href="/login" className="btn-primary" data-testid="link-sign-in">
@@ -99,7 +99,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
     staff: { label: "Staff", color: "hsl(196,100%,55%)" },
     user: { label: "Member", color: "hsl(145,70%,55%)" },
   };
-  const roleInfo = ROLE_LABELS[user.role] ?? { label: user.role, color: "hsl(220,10%,60%)" };
+  const roleInfo = ROLE_LABELS[user.role] ?? { label: user.role, color: "hsl(var(--muted-foreground))" };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -107,10 +107,10 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
       {/* Edit form */}
       {editing && (
         <div style={{
-          background: "hsl(220,20%,9%)", border: "1px solid hsla(258,90%,66%,0.25)",
+          background: "hsl(var(--card))", border: "1px solid hsla(258,90%,66%,0.25)",
           borderRadius: "0.75rem", padding: "1.5rem",
         }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(220,10%,55%)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "1.25rem" }}>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "1.25rem" }}>
             Edit Profile
           </h3>
           <div style={{ display: "grid", gap: "1rem" }}>
@@ -120,7 +120,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
               { key: "phone", label: "Phone Number", placeholder: "+1 (555) 000-0000", type: "tel" },
             ].map(({ key, label, placeholder, type = "text" }) => (
               <div key={key}>
-                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
+                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
                   {label}
                 </label>
                 <input
@@ -130,9 +130,9 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
                   placeholder={placeholder}
                   data-testid={`input-${key}`}
                   style={{
-                    width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                    width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                     borderRadius: "0.5rem", padding: "0.6rem 0.9rem", fontSize: "0.875rem",
-                    color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+                    color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                   }}
                 />
               </div>
@@ -158,9 +158,9 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
       )}
 
       {/* Info fields */}
-      <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(220,10%,55%)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
+        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Account Details
           </h3>
           <button
@@ -176,9 +176,9 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
         {fields.map(({ key, label, value }) => (
           <div key={key} style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "0.9rem 1.5rem", borderBottom: "1px solid hsl(220,15%,12%)", gap: "1rem", flexWrap: "wrap",
+            padding: "0.9rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", gap: "1rem", flexWrap: "wrap",
           }}>
-            <span style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", minWidth: "120px" }}>{label}</span>
+            <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>{label}</span>
             {key === "id" ? (
               <span
                 data-testid="text-member-id"
@@ -192,7 +192,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
                 #{value}
               </span>
             ) : (
-              <span style={{ fontSize: "0.875rem", color: "hsl(210,40%,85%)", fontWeight: 500, wordBreak: "break-all" }}
+              <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))", fontWeight: 500, wordBreak: "break-all" }}
                 data-testid={`text-${key}`}>
                 {value}
               </span>
@@ -203,7 +203,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
           display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "0.9rem 1.5rem", gap: "1rem", flexWrap: "wrap",
         }}>
-          <span style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)", minWidth: "120px" }}>Account Status</span>
+          <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>Account Status</span>
           <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "hsl(145,70%,55%)", fontWeight: 500 }}>
             <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "hsl(145,70%,55%)", flexShrink: 0 }} />
             Active
@@ -243,7 +243,7 @@ function OrdersTab({ user }: { user: any }) {
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         {[1, 2, 3].map((i) => (
           <div key={i} style={{
-            background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+            background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
             borderRadius: "0.75rem", padding: "1.25rem",
             animation: "pulse 1.5s ease-in-out infinite",
             height: "90px",
@@ -256,7 +256,7 @@ function OrdersTab({ user }: { user: any }) {
   if (error && (error as any).status === 401) {
     return (
       <div style={{
-        background: "hsl(220,20%,9%)", border: "1px solid hsla(0,72%,55%,0.25)",
+        background: "hsl(var(--card))", border: "1px solid hsla(0,72%,55%,0.25)",
         borderRadius: "0.75rem", padding: "4rem 2rem", textAlign: "center",
       }}>
         <div style={{
@@ -266,8 +266,8 @@ function OrdersTab({ user }: { user: any }) {
         }}>
           <Lock size={24} style={{ color: "hsl(0,72%,65%)" }} />
         </div>
-        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,85%)", marginBottom: "0.5rem" }}>Session Expired</h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,45%)", marginBottom: "1.5rem" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>Session Expired</h3>
+        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
           Your session is no longer valid. Please sign in again to view your orders.
         </p>
         <button
@@ -284,7 +284,7 @@ function OrdersTab({ user }: { user: any }) {
   if (!orders || orders.length === 0) {
     return (
       <div style={{
-        background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
         borderRadius: "0.75rem", padding: "4rem 2rem", textAlign: "center",
       }}>
         <div style={{
@@ -294,8 +294,8 @@ function OrdersTab({ user }: { user: any }) {
         }}>
           <Package size={24} style={{ color: "hsl(258,90%,66%)" }} />
         </div>
-        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,85%)", marginBottom: "0.5rem" }}>No orders yet</h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(220,10%,45%)", marginBottom: "1.5rem" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>No orders yet</h3>
+        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
           Your order history will appear here once you make a purchase.
         </p>
         <Link href="/products" className="btn-primary" style={{ fontSize: "0.85rem" }} data-testid="link-browse-products">
@@ -309,7 +309,7 @@ function OrdersTab({ user }: { user: any }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-        <span style={{ fontSize: "0.82rem", color: "hsl(220,10%,50%)" }}>
+        <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>
           {orders.length} order{orders.length !== 1 ? "s" : ""} total
         </span>
       </div>
@@ -318,7 +318,7 @@ function OrdersTab({ user }: { user: any }) {
         const isExpanded = expandedOrder === order.id;
         return (
           <div key={order.id} style={{
-            background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+            background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
             borderRadius: "0.75rem", overflow: "hidden",
           }} data-testid={`card-order-${order.id}`}>
             <button
@@ -338,7 +338,7 @@ function OrdersTab({ user }: { user: any }) {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>
+                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                     #{order.orderNumber}
                   </span>
                   <span style={{
@@ -349,50 +349,50 @@ function OrdersTab({ user }: { user: any }) {
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                  <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                     <Calendar size={11} /> {formatDate(order.createdAt)}
                   </span>
                   {order.items?.length > 0 && (
-                    <span style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                       <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <div className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,92%)" }}>
+                <div className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
                   {formatCurrency(order.totalAmount, order.currency)}
                 </div>
                 <ChevronRight size={14} style={{
-                  color: "hsl(220,10%,40%)", marginTop: "0.25rem", float: "right",
+                  color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", float: "right",
                   transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.2s",
                 }} />
               </div>
             </button>
 
             {isExpanded && order.items && order.items.length > 0 && (
-              <div style={{ borderTop: "1px solid hsl(220,15%,14%)", padding: "0.75rem 1.25rem 1rem" }}>
-                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "hsl(220,10%,45%)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+              <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
+                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
                   Order Items
                 </div>
                 {order.items.map((item: any) => (
                   <div key={item.id} style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "0.6rem 0", borderBottom: "1px solid hsl(220,15%,12%)", gap: "0.5rem", flexWrap: "wrap",
+                    padding: "0.6rem 0", borderBottom: "1px solid hsl(var(--border))", gap: "0.5rem", flexWrap: "wrap",
                   }} data-testid={`row-order-item-${item.id}`}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 500, color: "hsl(210,40%,85%)" }}>{item.productTitle}</div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
                       {item.packageLabel && (
-                        <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,50%)" }}>{item.packageLabel} × {item.quantity}</div>
+                        <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
                       )}
                     </div>
-                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)", flexShrink: 0 }}>
+                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
                       {formatCurrency(item.totalPrice)}
                     </div>
                   </div>
                 ))}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
-                  <span style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>Order Total</span>
+                  <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
                   <span className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(258,90%,70%)" }}>
                     {formatCurrency(order.totalAmount, order.currency)}
                   </span>
@@ -462,7 +462,7 @@ function SecurityTab({ user }: { user: any }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
       {/* Security overview */}
       <div style={{
-        background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
         borderRadius: "0.75rem", padding: "1.25rem",
         display: "flex", alignItems: "center", gap: "1rem",
       }}>
@@ -474,24 +474,24 @@ function SecurityTab({ user }: { user: any }) {
           <Shield size={20} style={{ color: "hsl(145,70%,55%)" }} />
         </div>
         <div>
-          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "0.2rem" }}>Account Security</div>
-          <div style={{ fontSize: "0.8rem", color: "hsl(220,10%,50%)" }}>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem" }}>Account Security</div>
+          <div style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
             Manage your password to keep your account safe.
           </div>
         </div>
       </div>
 
       {/* Change Password */}
-      <div style={{ background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)", borderRadius: "0.75rem", overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(220,10%,55%)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
+        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Change Password
           </h3>
         </div>
         <form onSubmit={handleSubmit} style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Current password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Current Password
             </label>
             <div style={{ position: "relative" }}>
@@ -504,14 +504,14 @@ function SecurityTab({ user }: { user: any }) {
                 autoComplete="current-password"
                 data-testid="input-current-password"
                 style={{
-                  width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                  width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{
                 position: "absolute", right: "0.7rem", top: "50%", transform: "translateY(-50%)",
-                background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", padding: "0.2rem",
+                background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "0.2rem",
               }} data-testid="button-toggle-current-password">
                 {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -520,7 +520,7 @@ function SecurityTab({ user }: { user: any }) {
 
           {/* New password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               New Password
             </label>
             <div style={{ position: "relative" }}>
@@ -533,14 +533,14 @@ function SecurityTab({ user }: { user: any }) {
                 autoComplete="new-password"
                 data-testid="input-new-password"
                 style={{
-                  width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                  width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowNew(!showNew)} style={{
                 position: "absolute", right: "0.7rem", top: "50%", transform: "translateY(-50%)",
-                background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", padding: "0.2rem",
+                background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "0.2rem",
               }} data-testid="button-toggle-new-password">
                 {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -563,7 +563,7 @@ function SecurityTab({ user }: { user: any }) {
 
           {/* Confirm password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Confirm New Password
             </label>
             <div style={{ position: "relative" }}>
@@ -576,15 +576,15 @@ function SecurityTab({ user }: { user: any }) {
                 autoComplete="new-password"
                 data-testid="input-confirm-password"
                 style={{
-                  width: "100%", background: "hsl(220,20%,7%)",
+                  width: "100%", background: "hsl(var(--background))",
                   border: `1px solid ${form.confirmPassword && form.confirmPassword !== form.newPassword ? "hsla(0,72%,55%,0.5)" : "hsl(220,15%,18%)"}`,
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{
                 position: "absolute", right: "0.7rem", top: "50%", transform: "translateY(-50%)",
-                background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", padding: "0.2rem",
+                background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "0.2rem",
               }} data-testid="button-toggle-confirm-password">
                 {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -598,10 +598,10 @@ function SecurityTab({ user }: { user: any }) {
 
           {/* Password requirements */}
           <div style={{
-            background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,16%)",
+            background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
             borderRadius: "0.5rem", padding: "0.85rem 1rem",
           }}>
-            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
               Requirements
             </div>
             {[
@@ -686,7 +686,7 @@ function DeleteAccountSection() {
           <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(0,72%,60%)", marginBottom: "0.25rem" }}>
             Delete Account
           </h3>
-          <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,50%)", margin: 0 }}>
+          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Permanently delete your account and all associated data. This action cannot be undone.
           </p>
         </div>
@@ -713,7 +713,7 @@ function DeleteAccountSection() {
             This will permanently delete your account, orders, and personal information. This cannot be reversed.
           </div>
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "0.3rem" }}>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>
               Enter your password to confirm
             </label>
             <input
@@ -723,9 +723,9 @@ function DeleteAccountSection() {
               placeholder="Your password"
               data-testid="input-delete-password"
               style={{
-                width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                 borderRadius: "0.5rem", padding: "0.6rem 0.9rem",
-                fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+                fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
               }}
             />
           </div>
@@ -828,7 +828,7 @@ function TicketsTab({ user }: { user: any }) {
   });
 
   const baseBox: React.CSSProperties = {
-    background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+    background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
     borderRadius: "0.75rem", overflow: "hidden",
   };
 
@@ -844,7 +844,7 @@ function TicketsTab({ user }: { user: any }) {
         </button>
 
         {detailLoading || !ticket ? (
-          <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)" }}>
+          <div style={{ textAlign: "center", padding: "3rem", color: "hsl(var(--muted-foreground))" }}>
             <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
           </div>
         ) : (
@@ -852,8 +852,8 @@ function TicketsTab({ user }: { user: any }) {
             <div style={{ ...baseBox, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                 <div>
-                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(210,40%,92%)", marginBottom: "0.3rem" }}>{ticket.subject}</div>
-                  <div style={{ fontSize: "0.78rem", color: "hsl(220,10%,45%)" }}>
+                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>{ticket.subject}</div>
+                  <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
                     #{ticket.ticketNumber} · {formatDate(ticket.createdAt)}
                     {ticket.category && <> · {ticket.category}</>}
                   </div>
@@ -863,8 +863,8 @@ function TicketsTab({ user }: { user: any }) {
             </div>
 
             <div style={baseBox}>
-              <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
-                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+              <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
+                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                   Conversation
                 </span>
               </div>
@@ -881,13 +881,13 @@ function TicketsTab({ user }: { user: any }) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-                      <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(210,40%,85%)" }}>{user.username}</span>
-                      <span style={{ fontSize: "0.72rem", color: "hsl(220,10%,40%)" }}>{formatDate(ticket.createdAt)}</span>
+                      <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{user.username}</span>
+                      <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(ticket.createdAt)}</span>
                     </div>
                     <div style={{
-                      background: "hsl(220,20%,12%)", border: "1px solid hsl(220,15%,20%)",
+                      background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)",
                       borderRadius: "0 0.75rem 0.75rem 0.75rem", padding: "0.75rem 1rem",
-                      fontSize: "0.85rem", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                      fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                     }}>
                       {ticket.message}
                     </div>
@@ -913,14 +913,14 @@ function TicketsTab({ user }: { user: any }) {
                           <span style={{ fontSize: "0.8rem", fontWeight: 600, color: isAdmin ? "hsl(258,90%,70%)" : "hsl(210,40%,85%)" }}>
                             {isAdmin ? "Support" : user.username}
                           </span>
-                          <span style={{ fontSize: "0.72rem", color: "hsl(220,10%,40%)" }}>{formatDate(r.createdAt)}</span>
+                          <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(r.createdAt)}</span>
                         </div>
                         <div style={{
                           background: isAdmin ? "hsla(258,90%,55%,0.12)" : "hsl(220,20%,12%)",
                           border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.25)" : "hsl(220,15%,20%)"}`,
                           borderRadius: isAdmin ? "0.75rem 0 0.75rem 0.75rem" : "0 0.75rem 0.75rem 0.75rem",
                           padding: "0.75rem 1rem",
-                          fontSize: "0.85rem", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                          fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                         }}>
                           {r.message}
                         </div>
@@ -938,7 +938,7 @@ function TicketsTab({ user }: { user: any }) {
                 })}
 
                 {ticket.replies?.length === 0 && (
-                  <div style={{ textAlign: "center", fontSize: "0.8rem", color: "hsl(220,10%,38%)", padding: "1rem 0" }}>
+                  <div style={{ textAlign: "center", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", padding: "1rem 0" }}>
                     No replies yet. We'll respond within 24 hours.
                   </div>
                 )}
@@ -948,8 +948,8 @@ function TicketsTab({ user }: { user: any }) {
             {/* Reply form — only if ticket is not closed */}
             {ticket.status !== "closed" && (
               <div style={baseBox}>
-                <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
-                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                     Send Reply
                   </span>
                 </div>
@@ -960,9 +960,9 @@ function TicketsTab({ user }: { user: any }) {
                     placeholder="Type your reply..."
                     rows={4}
                     style={{
-                      width: "100%", background: "hsl(220,20%,7%)", border: "1px solid hsl(220,15%,18%)",
+                      width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                       borderRadius: "0.5rem", padding: "0.7rem 1rem",
-                      fontSize: "0.875rem", color: "hsl(210,40%,90%)", outline: "none",
+                      fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none",
                       resize: "vertical", minHeight: "80px", boxSizing: "border-box",
                     }}
                   />
@@ -981,7 +981,7 @@ function TicketsTab({ user }: { user: any }) {
                         display: "inline-flex", alignItems: "center", gap: "0.4rem",
                         background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
                         borderRadius: "0.5rem", padding: "0.45rem 0.85rem",
-                        fontSize: "0.78rem", fontWeight: 600, color: "hsl(220,10%,60%)", cursor: "pointer",
+                        fontSize: "0.78rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                       }}
                     >
                       <Paperclip size={13} />
@@ -1020,7 +1020,7 @@ function TicketsTab({ user }: { user: any }) {
   return (
     <div style={baseBox}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 1.25rem", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "1rem 1.25rem", borderBottom: "1px solid hsl(var(--border))" }}>
         <div style={{
           width: "36px", height: "36px", borderRadius: "0.6rem", flexShrink: 0,
           background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
@@ -1029,18 +1029,18 @@ function TicketsTab({ user }: { user: any }) {
           <Headphones size={16} style={{ color: "hsl(258,90%,70%)" }} />
         </div>
         <div>
-          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Support Tickets</div>
-          <div style={{ fontSize: "0.72rem", color: "hsl(220,10%,45%)" }}>View and manage your submitted support requests</div>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>Support Tickets</div>
+          <div style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>View and manage your submitted support requests</div>
         </div>
       </div>
 
       {/* Content */}
       {isLoading ? (
-        <div style={{ textAlign: "center", padding: "3rem", color: "hsl(220,10%,40%)" }}>
+        <div style={{ textAlign: "center", padding: "3rem", color: "hsl(var(--muted-foreground))" }}>
           <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
         </div>
       ) : tickets.length === 0 ? (
-        <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "0.875rem" }}>
+        <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "0.875rem" }}>
           <Headphones size={36} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
           <p style={{ fontWeight: 600, marginBottom: "0.4rem" }}>No tickets yet</p>
           <p style={{ fontSize: "0.8rem" }}>
@@ -1058,7 +1058,7 @@ function TicketsTab({ user }: { user: any }) {
               style={{
                 display: "flex", alignItems: "center", gap: "1rem",
                 padding: "1rem 1.25rem", cursor: t.status === "closed" ? "not-allowed" : "pointer",
-                borderBottom: i < tickets.length - 1 ? "1px solid hsl(220,15%,14%)" : "none",
+                borderBottom: i < tickets.length - 1 ? "1px solid hsl(var(--border))" : "none",
                 transition: "background 0.15s",
                 opacity: t.status === "closed" ? 0.6 : 1,
               }}
@@ -1066,10 +1066,10 @@ function TicketsTab({ user }: { user: any }) {
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {t.subject}
                 </div>
-                <div style={{ fontSize: "0.75rem", color: "hsl(220,10%,40%)" }}>
+                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
                   #{t.ticketNumber} · {formatDate(t.createdAt)}
                   {t.category && <> · {t.category}</>}
                 </div>
@@ -1112,13 +1112,13 @@ export default function Account() {
     staff: { label: "Staff", color: "hsl(196,100%,55%)" },
     user: { label: "Member", color: "hsl(145,70%,55%)" },
   };
-  const roleInfo = ROLE_LABELS[user.role] ?? { label: user.role, color: "hsl(220,10%,60%)" };
+  const roleInfo = ROLE_LABELS[user.role] ?? { label: user.role, color: "hsl(var(--muted-foreground))" };
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", padding: "3.5rem 1.25rem 4rem" }}>
       {/* Header */}
       <div style={{
-        background: "hsl(220,20%,9%)", border: "1px solid hsl(220,15%,16%)",
+        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
         borderRadius: "1rem", padding: "1.25rem 1.5rem",
         marginBottom: "1.5rem",
       }}>
@@ -1139,7 +1139,7 @@ export default function Account() {
             )}
           </div>
           <div style={{ minWidth: 0 }}>
-            <h1 className="font-orbitron" style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(210,40%,95%)", marginBottom: "0.25rem" }}
+            <h1 className="font-orbitron" style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}
               data-testid="text-username">
               {user.fullName || user.username}
             </h1>
@@ -1155,7 +1155,7 @@ export default function Account() {
         </div>
         {/* Bottom row: actions */}
         <div style={{
-          borderTop: "1px solid hsl(220,15%,14%)", padding: "0.75rem 0 0",
+          borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 0 0",
           display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center",
         }}>
           {isStaff() && (
@@ -1175,8 +1175,8 @@ export default function Account() {
 
       {/* Tabs */}
       <div style={{
-        display: "flex", gap: "0.25rem", background: "hsl(220,20%,8%)",
-        border: "1px solid hsl(220,15%,14%)", borderRadius: "0.75rem",
+        display: "flex", gap: "0.25rem", background: "hsl(var(--background))",
+        border: "1px solid hsl(var(--border))", borderRadius: "0.75rem",
         padding: "0.3rem", marginBottom: "1.5rem",
       }}>
         {TABS.map(({ id, label, icon: Icon }) => {

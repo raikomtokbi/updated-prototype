@@ -186,7 +186,7 @@ function MaintenancePage({ siteName }: { siteName?: string }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "hsl(220, 20%, 6%)",
+        background: "hsl(var(--background))",
         flexDirection: "column",
         gap: "20px",
         padding: "2rem",

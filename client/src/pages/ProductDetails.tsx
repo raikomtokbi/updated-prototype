@@ -122,7 +122,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
         onClick={() => onChange(Math.max(1, value - 1))}
         data-testid="button-qty-minus"
         style={{
-          width: "38px", height: "38px", background: "hsl(220,20%,12%)",
+          width: "38px", height: "38px", background: "hsl(var(--card))",
           border: "none", cursor: "pointer", color: "hsl(210,40%,75%)",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "16px", transition: "background 0.15s",
@@ -131,9 +131,9 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
         <Minus size={14} />
       </button>
       <span data-testid="text-qty" style={{
-        minWidth: "44px", height: "38px", background: "hsl(220,20%,9%)",
+        minWidth: "44px", height: "38px", background: "hsl(var(--card))",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: "hsl(210,40%,92%)", fontSize: "14px", fontWeight: 700,
+        color: "hsl(var(--foreground))", fontSize: "14px", fontWeight: 700,
         borderLeft: "1px solid hsl(220,15%,18%)", borderRight: "1px solid hsl(220,15%,18%)",
       }}>
         {value}
@@ -142,7 +142,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
         onClick={() => onChange(value + 1)}
         data-testid="button-qty-plus"
         style={{
-          width: "38px", height: "38px", background: "hsl(220,20%,12%)",
+          width: "38px", height: "38px", background: "hsl(var(--card))",
           border: "none", cursor: "pointer", color: "hsl(210,40%,75%)",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "16px", transition: "background 0.15s",
@@ -159,8 +159,8 @@ function InfoSection({ items }: { items: { icon?: string; text: string }[] }) {
   if (!items.length) return null;
   return (
     <div style={{
-      background: "hsl(220,20%,10%)",
-      border: "1px solid hsl(220,15%,16%)",
+      background: "hsl(var(--card))",
+      border: "1px solid hsl(var(--border))",
       borderRadius: "10px",
       padding: "12px 14px",
       display: "flex", flexDirection: "column", gap: "8px",
@@ -357,13 +357,13 @@ function GameDetailView({ game }: { game: Game }) {
             <img
               src={game.bannerUrl ?? game.logoUrl ?? ""}
               alt={game.name}
-              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(220,15%,16%)" }}
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(var(--border))" }}
             />
           ) : (
             <div style={{
               width: "100%", aspectRatio: "16/9", borderRadius: "14px",
-              border: "1px solid hsl(220,15%,16%)",
-              background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
+              border: "1px solid hsl(var(--border))",
+              background: "linear-gradient(135deg, hsl(var(--muted)), hsl(var(--card)))",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <Gamepad2 size={72} style={{ color: "hsla(258,90%,66%,0.3)" }} />
@@ -395,12 +395,12 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Description (desktop only) */}
           {game.description && (
             <div className="hidden lg:block" style={{
-              background: "hsl(220,20%,10%)",
+              background: "hsl(var(--card))",
               border: "1px solid hsl(220,15%,15%)",
               borderRadius: "10px",
               padding: "14px 16px",
             }}>
-              <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 About
               </p>
               <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
@@ -438,13 +438,13 @@ function GameDetailView({ game }: { game: Game }) {
 
           {/* Package selection */}
           <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Select Package
             </p>
             {svcsLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(220,20%,11%)", animation: "pulse 1.5s infinite" }} />
+                  <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(var(--card))", animation: "pulse 1.5s infinite" }} />
                 ))}
               </div>
             ) : services.length === 0 ? (
@@ -475,7 +475,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* User ID — only shown if required */}
           {needsUserId && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 User ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -493,7 +493,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Zone / Server ID — only shown if required */}
           {needsZoneId && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Zone / Server ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -528,7 +528,7 @@ function GameDetailView({ game }: { game: Game }) {
                   </div>
                 )}
                 {validateStatus === "unavailable" && (
-                  <span style={{ fontSize: "11px", color: "hsl(220,10%,55%)", fontStyle: "italic" }}>
+                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>
                     Validation not set up for this game
                   </span>
                 )}
@@ -574,7 +574,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Email — only shown if required */}
           {needsEmail && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Email <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -593,7 +593,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Player ID — only shown if required */}
           {needsPlayerId && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Player ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -610,7 +610,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Login ID — only shown if required */}
           {needsLoginId && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Login ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -627,7 +627,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Character Name — only shown if required */}
           {needsCharacterName && (
             <div>
-              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Character Name <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
               </label>
               <input
@@ -644,14 +644,14 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Quantity + price summary */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
             <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Quantity
               </p>
               <QuantitySelector value={quantity} onChange={setQuantity} />
             </div>
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginBottom: "2px" }}>Total</p>
+                <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
                 <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
@@ -685,13 +685,13 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Description (mobile only) */}
           {game.description && (
             <div className="lg:hidden" style={{
-              background: "hsl(220,20%,10%)",
+              background: "hsl(var(--card))",
               border: "1px solid hsl(220,15%,15%)",
               borderRadius: "10px",
               padding: "14px 16px",
               marginTop: "4px",
             }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,50%)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
               <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
@@ -717,8 +717,8 @@ function GameDetailView({ game }: { game: Game }) {
           zIndex: 50,
         }}>
           <div style={{
-            background: "hsl(220,13%,10%)",
-            border: "1px solid hsl(220,15%,16%)",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "12px",
             padding: "2rem",
             maxWidth: "400px",
@@ -887,13 +887,13 @@ function ProductDetailView({ product }: { product: Product }) {
             <img
               src={product.imageUrl}
               alt={product.title}
-              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(220,15%,16%)" }}
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", border: "1px solid hsl(var(--border))" }}
             />
           ) : (
             <div style={{
               width: "100%", aspectRatio: "16/9", borderRadius: "14px",
-              border: "1px solid hsl(220,15%,16%)",
-              background: "linear-gradient(135deg, hsl(258,35%,14%), hsl(220,28%,9%))",
+              border: "1px solid hsl(var(--border))",
+              background: "linear-gradient(135deg, hsl(var(--muted)), hsl(var(--card)))",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <Icon size={72} style={{ color: "hsla(258,90%,66%,0.3)" }} />
@@ -923,12 +923,12 @@ function ProductDetailView({ product }: { product: Product }) {
           {/* Description desktop */}
           {product.description && (
             <div className="hidden lg:block" style={{
-              background: "hsl(220,20%,10%)",
+              background: "hsl(var(--card))",
               border: "1px solid hsl(220,15%,15%)",
               borderRadius: "10px",
               padding: "14px 16px",
             }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,50%)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
               <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
@@ -966,13 +966,13 @@ function ProductDetailView({ product }: { product: Product }) {
 
           {/* Packages */}
           <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Select Package
             </p>
             {pkgsLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(220,20%,11%)", animation: "pulse 1.5s infinite" }} />
+                  <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(var(--card))", animation: "pulse 1.5s infinite" }} />
                 ))}
               </div>
             ) : activePackages.length === 0 ? (
@@ -1005,7 +1005,7 @@ function ProductDetailView({ product }: { product: Product }) {
 
           {/* Account ID */}
           <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <label style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               User ID <span style={{ color: "hsl(0,72%,60%)" }}>*</span>
             </label>
             <input
@@ -1022,14 +1022,14 @@ function ProductDetailView({ product }: { product: Product }) {
           {/* Quantity + price summary */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
             <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 Quantity
               </p>
               <QuantitySelector value={quantity} onChange={setQuantity} />
             </div>
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginBottom: "2px" }}>Total</p>
+                <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
                 <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
@@ -1063,13 +1063,13 @@ function ProductDetailView({ product }: { product: Product }) {
           {/* Description mobile */}
           {product.description && (
             <div className="lg:hidden" style={{
-              background: "hsl(220,20%,10%)",
+              background: "hsl(var(--card))",
               border: "1px solid hsl(220,15%,15%)",
               borderRadius: "10px",
               padding: "14px 16px",
               marginTop: "4px",
             }}>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,50%)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
               <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
@@ -1117,16 +1117,16 @@ export default function ProductDetails() {
   if (isLoading) {
     return (
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "1.5rem 1rem" }}>
-        <div style={{ height: "48px", width: "100px", background: "hsl(220,20%,11%)", borderRadius: "8px", marginBottom: "1.25rem", animation: "pulse 1.5s infinite" }} />
+        <div style={{ height: "48px", width: "100px", background: "hsl(var(--card))", borderRadius: "8px", marginBottom: "1.25rem", animation: "pulse 1.5s infinite" }} />
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-2/5">
-            <div style={{ width: "100%", aspectRatio: "16/9", background: "hsl(220,20%,9%)", borderRadius: "14px", animation: "pulse 1.5s infinite" }} />
+            <div style={{ width: "100%", aspectRatio: "16/9", background: "hsl(var(--card))", borderRadius: "14px", animation: "pulse 1.5s infinite" }} />
           </div>
           <div className="w-full lg:w-3/5 flex flex-col gap-3">
-            <div style={{ height: "36px", width: "60%", background: "hsl(220,20%,11%)", borderRadius: "6px", animation: "pulse 1.5s infinite" }} />
+            <div style={{ height: "36px", width: "60%", background: "hsl(var(--card))", borderRadius: "6px", animation: "pulse 1.5s infinite" }} />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
               {[...Array(6)].map((_, i) => (
-                <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(220,20%,11%)", animation: "pulse 1.5s infinite" }} />
+                <div key={i} style={{ height: "72px", borderRadius: "10px", background: "hsl(var(--card))", animation: "pulse 1.5s infinite" }} />
               ))}
             </div>
           </div>
@@ -1140,7 +1140,7 @@ export default function ProductDetails() {
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "4rem 1rem", textAlign: "center" }}>
         <Zap size={48} style={{ color: "hsl(258,90%,66%)", opacity: 0.3, marginBottom: "1rem" }} />
         <h2 style={{ color: "hsl(210,40%,80%)", marginBottom: "0.5rem" }}>Product not found</h2>
-        <p style={{ color: "hsl(220,10%,45%)", fontSize: "14px", marginBottom: "1.5rem" }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "14px", marginBottom: "1.5rem" }}>
           This product may have been removed or the link is incorrect.
         </p>
         <button className="btn-secondary" onClick={() => navigate("/products")} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>

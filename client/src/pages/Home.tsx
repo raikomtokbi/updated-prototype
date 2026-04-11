@@ -173,7 +173,7 @@ function HeroSlider() {
                   gap: "0.4rem",
                   padding: "0.3rem 0.8rem",
                   borderRadius: "9999px",
-                  background: "rgba(124, 58, 237, 0.2)",
+                  background: "hsl(var(--primary) / 0.2)",
                   border: "1px solid rgba(124, 58, 237, 0.4)",
                   marginBottom: "1rem",
                 }}
@@ -211,7 +211,7 @@ function HeroSlider() {
                 className="hero-sub"
                 style={{
                   fontSize: "clamp(0.75rem, 1.3vw, 1rem)",
-                  color: "rgba(229, 231, 235, 0.65)",
+                  color: "hsl(var(--muted-foreground))",
                   lineHeight: 1.6,
                   marginBottom: "1.25rem",
                   maxWidth: "460px",
@@ -312,9 +312,9 @@ function FeaturesStrip() {
   return (
     <section
       style={{
-        background: "#0b1020",
-        borderTop: "1px solid rgba(124,58,237,0.12)",
-        borderBottom: "1px solid rgba(124,58,237,0.12)",
+        background: "hsl(var(--card))",
+        borderTop: "1px solid hsl(var(--primary) / 0.12)",
+        borderBottom: "1px solid hsl(var(--primary) / 0.12)",
         padding: "1.25rem 1.5rem",
       }}
     >
@@ -339,8 +339,8 @@ function FeaturesStrip() {
                   width: "44px",
                   height: "44px",
                   borderRadius: "10px",
-                  background: "rgba(124,58,237,0.12)",
-                  border: "1px solid rgba(124,58,237,0.25)",
+                  background: "hsl(var(--primary) / 0.12)",
+                  border: "1px solid hsl(var(--primary) / 0.25)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -354,7 +354,7 @@ function FeaturesStrip() {
                 <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "#e5e7eb", marginBottom: "0.3rem" }}>
                   {title}
                 </h3>
-                <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.65)", lineHeight: 1.5 }}>{desc}</p>
+                <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{desc}</p>
               </div>
             </div>
           );
@@ -395,7 +395,7 @@ function TrendingGames() {
               Trending Now
             </span>
           </div>
-          <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
             Top up the most popular games instantly
           </p>
         </div>
@@ -430,11 +430,11 @@ function TrendingGames() {
         {isLoading ? (
           <div style={{ display: "flex", gap: "1rem" }}>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ flexShrink: 0, width: "110px", height: "120px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+              <div key={i} style={{ flexShrink: 0, width: "110px", height: "120px", borderRadius: "10px", background: "hsl(var(--primary) / 0.06)", border: "1px solid hsl(var(--primary) / 0.12)" }} />
             ))}
           </div>
         ) : trendingGames.length === 0 ? (
-          <div style={{ padding: "2.5rem 0", color: "rgba(148,163,184,0.4)", fontSize: "0.82rem" }}>
+          <div style={{ padding: "2.5rem 0", color: "hsl(var(--muted-foreground))", fontSize: "0.82rem" }}>
             No trending games yet. Enable trending in the admin panel.
           </div>
         ) : (
@@ -451,8 +451,8 @@ function TrendingGames() {
                 textDecoration: "none",
                 display: "block",
                 position: "relative",
-                border: "1px solid rgba(124,58,237,0.15)",
-                background: "#0b1020",
+                border: "1px solid hsl(var(--primary) / 0.15)",
+                background: "hsl(var(--card))",
                 transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
               }}
               onMouseEnter={(e) => {
@@ -466,7 +466,7 @@ function TrendingGames() {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
               }}
             >
-              <div style={{ width: "100%", aspectRatio: "1/1", overflow: "visible", position: "relative", background: "hsl(258,35%,14%)" }}>
+              <div style={{ width: "100%", aspectRatio: "1/1", overflow: "visible", position: "relative", background: "hsl(var(--muted))" }}>
                 {game.logoUrl ? (
                   <img src={game.logoUrl} alt={game.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
@@ -505,7 +505,7 @@ function VouchersSection() {
   if (!isLoading && vouchers.length === 0) return null;
 
   return (
-    <section style={{ padding: "1.5rem 0", background: "#070b14" }}>
+    <section style={{ padding: "1.5rem 0", background: "hsl(var(--background))" }}>
       <div style={{ maxWidth: "1320px", margin: "0 auto" }}>
         <div
           style={{
@@ -528,7 +528,7 @@ function VouchersSection() {
                 Vouchers & Gift Cards
               </span>
             </div>
-            <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+            <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
               Top up instantly with vouchers and gift cards
             </p>
           </div>
@@ -563,7 +563,7 @@ function VouchersSection() {
           {isLoading ? (
             <>
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} style={{ flexShrink: 0, width: "140px", height: "150px", borderRadius: "10px", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+                <div key={i} style={{ flexShrink: 0, width: "140px", height: "150px", borderRadius: "10px", background: "hsl(var(--primary) / 0.06)", border: "1px solid hsl(var(--primary) / 0.12)" }} />
               ))}
             </>
           ) : (
@@ -579,8 +579,8 @@ function VouchersSection() {
                   overflow: "hidden",
                   textDecoration: "none",
                   display: "block",
-                  border: "1px solid rgba(124,58,237,0.15)",
-                  background: "#0b1020",
+                  border: "1px solid hsl(var(--primary) / 0.15)",
+                  background: "hsl(var(--card))",
                   transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
                 }}
                 onMouseEnter={(e) => {
@@ -595,7 +595,7 @@ function VouchersSection() {
                 }}
               >
                 {/* Image area */}
-                <div style={{ width: "100%", aspectRatio: "16/10", overflow: "hidden", position: "relative", background: "hsl(258,35%,12%)" }}>
+                <div style={{ width: "100%", aspectRatio: "16/10", overflow: "hidden", position: "relative", background: "hsl(var(--muted))" }}>
                   {product.imageUrl ? (
                     <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
@@ -651,7 +651,7 @@ function GamesGrid() {
   if (!isLoading && games.length === 0) return null;
 
   return (
-    <section style={{ padding: "1.5rem 0 1rem", background: "#070b14" }}>
+    <section style={{ padding: "1.5rem 0 1rem", background: "hsl(var(--background))" }}>
       <div style={{ maxWidth: "1320px", margin: "0 auto", padding: "0 1.5rem" }}>
         {/* Header */}
         <div style={{ marginBottom: "1.5rem" }}>
@@ -664,7 +664,7 @@ function GamesGrid() {
               Games
             </span>
           </div>
-          <p style={{ fontSize: "0.78rem", color: "rgba(148,163,184,0.6)" }}>
+          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
             Browse our full game catalog and top up instantly
           </p>
         </div>
@@ -673,7 +673,7 @@ function GamesGrid() {
         {isLoading ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "0.625rem" }}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-              <div key={i} style={{ borderRadius: "10px", aspectRatio: "1/1", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.1)" }} />
+              <div key={i} style={{ borderRadius: "10px", aspectRatio: "1/1", background: "hsl(var(--primary) / 0.06)", border: "1px solid hsl(var(--primary) / 0.12)" }} />
             ))}
           </div>
         ) : (
@@ -688,8 +688,8 @@ function GamesGrid() {
                   textDecoration: "none",
                   borderRadius: "10px",
                   overflow: "hidden",
-                  border: "1px solid rgba(124,58,237,0.15)",
-                  background: "#0b1020",
+                  border: "1px solid hsl(var(--primary) / 0.15)",
+                  background: "hsl(var(--card))",
                   transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
                 }}
                 onMouseEnter={(e) => {
@@ -704,7 +704,7 @@ function GamesGrid() {
                 }}
               >
                 {/* Square image */}
-                <div style={{ width: "100%", aspectRatio: "1/1", background: "hsl(258,35%,12%)", position: "relative", overflow: "hidden" }}>
+                <div style={{ width: "100%", aspectRatio: "1/1", background: "hsl(var(--muted))", position: "relative", overflow: "hidden" }}>
                   {game.logoUrl ? (
                     <img
                       src={game.logoUrl}
@@ -734,7 +734,7 @@ function GamesGrid() {
                 gap: "0.5rem",
                 padding: "0.7rem 2rem",
                 borderRadius: "8px",
-                background: "rgba(124,58,237,0.12)",
+                background: "hsl(var(--primary) / 0.12)",
                 border: "1px solid rgba(124,58,237,0.35)",
                 color: "#a78bfa",
                 fontSize: "0.875rem",
@@ -809,7 +809,7 @@ function BonusBanner() {
               display: "inline-block",
               padding: "0.2rem 0.65rem",
               borderRadius: "9999px",
-              background: "rgba(124,58,237,0.25)",
+              background: "hsl(var(--primary) / 0.2)",
               border: "1px solid rgba(124,58,237,0.45)",
               fontSize: "0.65rem",
               fontWeight: 700,
@@ -906,7 +906,7 @@ function Footer() {
   return (
     <footer
       style={{
-        background: "#070b14",
+        background: "hsl(var(--background))",
         borderTop: "1px solid rgba(124,58,237,0.15)",
         padding: "3.5rem 1.5rem 1.5rem",
       }}
@@ -966,7 +966,7 @@ function Footer() {
                 {siteSettings.site_tagline}
               </p>
             )}
-            <p style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
+            <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
               {siteSettings?.site_description || "The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide."}
             </p>
             {/* Support Email */}
@@ -979,7 +979,7 @@ function Footer() {
                   gap: "0.4rem",
                   marginBottom: "0.8rem",
                   fontSize: "0.78rem",
-                  color: "rgba(148,163,184,0.6)",
+                  color: "hsl(var(--muted-foreground))",
                   textDecoration: "none",
                   transition: "color 0.15s",
                 }}
@@ -1055,7 +1055,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1085,7 +1085,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1115,7 +1115,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "rgba(148,163,184,0.6)", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1130,7 +1130,7 @@ function Footer() {
         {/* Bottom bar */}
         <div
           style={{
-            borderTop: "1px solid rgba(124,58,237,0.12)",
+            borderTop: "1px solid hsl(var(--primary) / 0.12)",
             paddingTop: "1.5rem",
             display: "flex",
             alignItems: "center",
@@ -1139,7 +1139,7 @@ function Footer() {
             gap: "0.75rem",
           }}
         >
-          <p style={{ fontSize: "0.75rem", color: "rgba(148,163,184,0.4)", margin: 0 }}>
+          <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             {siteSettings?.footer_copyright || `© ${new Date().getFullYear()} ${siteSettings?.site_name || "Nexcoin"}. All rights reserved.`}
           </p>
           {siteSettings?.footer_button_name && (
@@ -1180,7 +1180,7 @@ function MaintenancePage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#070b14",
+        background: "hsl(var(--background))",
         padding: "2rem",
       }}
     >
@@ -1242,14 +1242,14 @@ export default function Home() {
 
   if (status === "maintenance") {
     return (
-      <div style={{ minHeight: "100vh", background: "#070b14" }}>
+      <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
         <MaintenancePage />
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(220, 20%, 8%)" }}>
+    <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
       <HeroSlider />
       <TrendingGames />
       <FeaturesStrip />
