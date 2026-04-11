@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plug, CheckCircle, XCircle, Settings, Zap,
   RefreshCw, Trash2, Plus, Package, Save, Smile,
-  Wifi, Loader2, Link2, ArrowRight,
+  Wifi, Loader2, Link2, ArrowRight, ShieldCheck,
 } from "lucide-react";
+import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
@@ -109,33 +110,6 @@ const SERVICES: ServiceDef[] = [
     name: "Analytics",
     note: "Used for tracking visits and conversions",
     fields: [{ key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" }],
-  },
-  {
-    slug: "social-auth-google",
-    name: "Social Login — Google",
-    note: "Required for Google OAuth sign-in",
-    fields: [
-      { key: "GOOGLE_CLIENT_ID", label: "Google Client ID", placeholder: "xxxx.apps.googleusercontent.com" },
-      { key: "GOOGLE_CLIENT_SECRET", label: "Google Client Secret", placeholder: "GOCSPX-..." },
-    ],
-  },
-  {
-    slug: "social-auth-facebook",
-    name: "Social Login — Facebook",
-    note: "Required for Facebook OAuth sign-in",
-    fields: [
-      { key: "FACEBOOK_APP_ID", label: "Facebook App ID", placeholder: "1234567890" },
-      { key: "FACEBOOK_APP_SECRET", label: "Facebook App Secret", placeholder: "abc123..." },
-    ],
-  },
-  {
-    slug: "social-auth-discord",
-    name: "Social Login — Discord",
-    note: "Required for Discord OAuth sign-in",
-    fields: [
-      { key: "DISCORD_CLIENT_ID", label: "Discord Client ID", placeholder: "1234567890123456789" },
-      { key: "DISCORD_CLIENT_SECRET", label: "Discord Client Secret", placeholder: "abcdefghijklmnopqrstuvwxyz" },
-    ],
   },
   {
     slug: "webhook",
@@ -999,11 +973,156 @@ function SmileOneModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Social Auth Modal ────────────────────────────────────────────────────────
+interface ProviderSectionProps {
+  slug: string;
+  label: string;
+  icon: React.ReactNode;
+  accentColor: string;
+  fields: { key: string; label: string; placeholder: string }[];
+  plugins: Plugin[];
+}
+
+function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: ProviderSectionProps) {
+  const qc = useQueryClient();
+  const plugin = plugins.find((p) => p.slug === slug);
+  const existingConfig = (() => { try { return JSON.parse(plugin?.config ?? "{}"); } catch { return {}; } })();
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    fields.forEach((f) => { init[f.key] = existingConfig[f.key] ?? ""; });
+    return init;
+  });
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const cfg = (() => { try { return JSON.parse(plugin?.config ?? "{}"); } catch { return {}; } })();
+    setValues(() => {
+      const init: Record<string, string> = {};
+      fields.forEach((f) => { init[f.key] = cfg[f.key] ?? ""; });
+      return init;
+    });
+  }, [plugin]);
+
+  const saveMut = useMutation({
+    mutationFn: () => adminApi.put(`/plugins/${slug}`, { name: label, config: JSON.stringify(values) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/plugins"] });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+  });
+
+  const isConfigured = fields.every((f) => Boolean(values[f.key]));
+
+  return (
+    <div style={{ border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", overflow: "hidden" }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 16px", background: "hsl(220,20%,8%)", gap: "10px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{
+            width: "30px", height: "30px", borderRadius: "6px", flexShrink: 0,
+            background: isConfigured ? "rgba(74,222,128,0.08)" : "hsl(220,15%,13%)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: accentColor,
+          }}>
+            {icon}
+          </div>
+          <div>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>{label}</div>
+            {isConfigured
+              ? <div style={{ fontSize: "11px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px", marginTop: "1px" }}>
+                  <CheckCircle size={10} /> Configured
+                </div>
+              : <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>Not configured</div>
+            }
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px", background: "hsl(220,20%,7%)" }}>
+        {fields.map((f) => (
+          <div key={f.key}>
+            <label style={labelStyle}>{f.label}</label>
+            <input
+              style={inputStyle}
+              type="text"
+              value={values[f.key]}
+              onChange={(e) => setValues((prev) => ({ ...prev, [f.key]: e.target.value }))}
+              placeholder={f.placeholder}
+              autoComplete="off"
+              data-testid={`input-${slug}-${f.key.toLowerCase()}`}
+            />
+          </div>
+        ))}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}>
+          {saved && <span style={{ fontSize: "11px", color: "hsl(142,71%,48%)", alignSelf: "center", marginRight: "8px" }}>Saved</span>}
+          <button
+            onClick={() => saveMut.mutate()}
+            disabled={saveMut.isPending}
+            style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }}
+            data-testid={`button-save-${slug}`}
+          >
+            {saveMut.isPending ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SocialAuthModal({ plugins, onClose }: { plugins: Plugin[]; onClose: () => void }) {
+  return (
+    <Modal title="Social Login Configuration" onClose={onClose}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", lineHeight: 1.6, margin: 0 }}>
+          Configure OAuth credentials for each provider. Sign-in buttons appear on the login page once
+          credentials are saved and "Allow Social Login" is enabled in the Control Panel.
+        </p>
+        <ProviderSection
+          slug="social-auth-google"
+          label="Google"
+          icon={<SiGoogle size={14} />}
+          accentColor="#EA4335"
+          fields={[
+            { key: "GOOGLE_CLIENT_ID", label: "Client ID", placeholder: "xxxx.apps.googleusercontent.com" },
+            { key: "GOOGLE_CLIENT_SECRET", label: "Client Secret", placeholder: "GOCSPX-..." },
+          ]}
+          plugins={plugins}
+        />
+        <ProviderSection
+          slug="social-auth-facebook"
+          label="Facebook"
+          icon={<SiFacebook size={14} />}
+          accentColor="#1877F2"
+          fields={[
+            { key: "FACEBOOK_APP_ID", label: "App ID", placeholder: "1234567890" },
+            { key: "FACEBOOK_APP_SECRET", label: "App Secret", placeholder: "abc123..." },
+          ]}
+          plugins={plugins}
+        />
+        <ProviderSection
+          slug="social-auth-discord"
+          label="Discord"
+          icon={<SiDiscord size={14} />}
+          accentColor="#5865F2"
+          fields={[
+            { key: "DISCORD_CLIENT_ID", label: "Client ID", placeholder: "1234567890123456789" },
+            { key: "DISCORD_CLIENT_SECRET", label: "Client Secret", placeholder: "abcdefghijklmnopqrstuvwxyz" },
+          ]}
+          plugins={plugins}
+        />
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ApiIntegration() {
   const [configuring, setConfiguring] = useState<ServiceDef | null>(null);
   const [busanOpen, setBusanOpen] = useState(false);
   const [smileOneOpen, setSmileOneOpen] = useState(false);
+  const [socialAuthOpen, setSocialAuthOpen] = useState(false);
 
   const { data: plugins = [] } = useQuery<Plugin[]>({
     queryKey: ["/api/admin/plugins"],
@@ -1050,6 +1169,16 @@ export default function ApiIntegration() {
 
   const busanConfigured = Boolean(busanConfig?.apiToken);
   const smileOneConfigured = Boolean(smileOneConfig?.apiKey);
+
+  const socialAuthConfigured = (() => {
+    const slugs = ["social-auth-google", "social-auth-facebook", "social-auth-discord"];
+    return slugs.some((slug) => {
+      const p = pluginMap[slug];
+      if (!p) return false;
+      try { const cfg = JSON.parse(p.config ?? "{}"); return Object.values(cfg).some(Boolean); }
+      catch { return false; }
+    });
+  })();
 
   // Shared row renderer
   const renderRow = (
@@ -1129,6 +1258,19 @@ export default function ApiIntegration() {
               </div>
             ))}
 
+            {/* Social Login row */}
+            <div id="social-auth-google">
+              {renderRow(
+                <ShieldCheck size={14} />,
+                "Social Login (Google / Facebook / Discord)",
+                "Configure OAuth credentials for Google, Facebook, and Discord sign-in",
+                socialAuthConfigured,
+                () => setSocialAuthOpen(true),
+                "button-configure-social-auth",
+                false,
+              )}
+            </div>
+
             {/* Busan Integration row */}
             {renderRow(
               <Zap size={14} />,
@@ -1160,6 +1302,7 @@ export default function ApiIntegration() {
       )}
       {busanOpen && <BusanModal onClose={() => setBusanOpen(false)} />}
       {smileOneOpen && <SmileOneModal onClose={() => setSmileOneOpen(false)} />}
+      {socialAuthOpen && <SocialAuthModal plugins={plugins} onClose={() => setSocialAuthOpen(false)} />}
     </AdminLayout>
   );
 }
