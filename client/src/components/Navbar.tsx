@@ -80,7 +80,7 @@ function SearchDropdown({
         left: 0,
         right: 0,
         background: "hsl(var(--card))",
-        border: "1px solid rgba(124, 58, 237, 0.3)",
+        border: "1px solid hsl(var(--primary) / 0.3)",
         borderRadius: "10px",
         boxShadow: "0 16px 40px rgba(0,0,0,0.6)",
         zIndex: 2000,
@@ -100,7 +100,7 @@ function SearchDropdown({
             gap: "10px",
             padding: "9px 12px",
             textDecoration: "none",
-            borderBottom: "1px solid rgba(124,58,237,0.08)",
+            borderBottom: "1px solid hsl(var(--primary) / 0.08)",
             transition: "background 0.12s",
           }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
@@ -119,7 +119,7 @@ function SearchDropdown({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "rgba(167,139,250,0.7)",
+              color: "hsl(var(--primary) / 0.7)",
             }}
           >
             {item.imageUrl ? (
@@ -147,18 +147,18 @@ function SearchDropdown({
             >
               {item.name}
             </div>
-            <div style={{ fontSize: "0.7rem", color: "rgba(148,163,184,0.55)", marginTop: "1px" }}>
+            <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
               {CATEGORY_LABEL[item.category] ?? item.category}
             </div>
           </div>
 
           {/* Arrow hint */}
-          <div style={{ color: "rgba(167,139,250,0.4)", fontSize: "0.7rem", flexShrink: 0 }}>→</div>
+          <div style={{ color: "hsl(var(--primary) / 0.4)", fontSize: "0.7rem", flexShrink: 0 }}>→</div>
         </Link>
       ))}
 
       {results.length === 0 && query.trim() && (
-        <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.78rem", color: "rgba(148,163,184,0.4)" }}>
+        <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
           No results for "{query}"
         </div>
       )}
@@ -258,7 +258,7 @@ export default function Navbar() {
             zIndex: 1001,
             height: `${announcementBarHeight}px`,
             background: "linear-gradient(90deg, hsl(258,90%,30%) 0%, hsl(258,80%,22%) 100%)",
-            borderBottom: "1px solid rgba(124,58,237,0.35)",
+            borderBottom: "1px solid hsl(var(--primary) / 0.35)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -274,8 +274,8 @@ export default function Navbar() {
       )}
       <nav
         style={{
-          background: isLight ? "rgba(255,255,255,0.93)" : "rgba(7, 11, 20, 0.95)",
-          borderBottom: isLight ? "1px solid hsl(var(--border))" : "1px solid rgba(124, 58, 237, 0.18)",
+          background: isLight ? "rgba(255,255,255,0.93)" : "rgba(0, 0, 0, 0.88)",
+          borderBottom: isLight ? "1px solid hsl(var(--border))" : "1px solid hsl(var(--primary) / 0.18)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           position: "fixed",
@@ -318,7 +318,7 @@ export default function Navbar() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 0 10px rgba(124, 58, 237, 0.5)",
+                  boxShadow: "0 0 10px hsl(var(--primary) / 0.5)",
                   flexShrink: 0,
                 }}
               >
@@ -354,7 +354,7 @@ export default function Navbar() {
                 left: "0.8rem",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: isLight ? "hsl(var(--muted-foreground))" : "rgba(148, 163, 184, 0.5)",
+                color: isLight ? "hsl(var(--muted-foreground))" : "hsl(var(--muted-foreground))",
                 pointerEvents: "none",
                 zIndex: 1,
               }}
@@ -373,15 +373,15 @@ export default function Navbar() {
                 width: "100%",
                 padding: "0.42rem 1rem 0.42rem 2.1rem",
                 background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.2)"}`,
+                border: `1px solid ${isLight ? "hsl(var(--border))" : "hsl(var(--primary) / 0.2)"}`,
                 borderRadius: "8px",
                 color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
                 fontSize: "0.78rem",
                 outline: "none",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.55)"; }}
-              onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
-              onBlurCapture={(e) => { e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.2)"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.55)"; }}
+              onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.2)"; }}
+              onBlurCapture={(e) => { e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.2)"; }}
             />
             {showDropdown && (
               <SearchDropdown
@@ -404,11 +404,11 @@ export default function Navbar() {
                   textDecoration: "none",
                   fontSize: "0.78rem",
                   fontWeight: 500,
-                  color: location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "rgba(148, 163, 184, 0.85)"),
+                  color: location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"),
                   whiteSpace: "nowrap",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "rgba(148, 163, 184, 0.85)"); }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"); }}
               >
                 {link.label}
               </Link>
@@ -432,9 +432,9 @@ export default function Navbar() {
                 width: "34px",
                 height: "34px",
                 borderRadius: "8px",
-                background: "rgba(124,58,237,0.08)",
-                border: "1px solid rgba(124,58,237,0.22)",
-                color: "hsl(var(--primary))",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                color: "hsl(var(--foreground))",
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -454,19 +454,19 @@ export default function Navbar() {
                 width: "34px",
                 height: "34px",
                 borderRadius: "8px",
-                border: "1px solid hsl(var(--primary) / 0.25)",
-                background: "rgba(124, 58, 237, 0.08)",
-                color: "rgba(148, 163, 184, 0.85)",
+                border: "1px solid hsl(var(--border))",
+                background: "hsl(var(--card))",
+                color: "hsl(var(--foreground))",
                 textDecoration: "none",
                 flexShrink: 0,
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124, 58, 237, 0.6)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary))";
                 (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary))";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.25)";
-                (e.currentTarget as HTMLElement).style.color = "rgba(148, 163, 184, 0.85)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                (e.currentTarget as HTMLElement).style.color = "hsl(var(--foreground))";
               }}
             >
               <ShoppingCart size={15} />
@@ -508,7 +508,7 @@ export default function Navbar() {
                   padding: "0.38rem 0.85rem",
                   borderRadius: "8px",
                   background: "hsl(var(--primary) / 0.12)",
-                  border: "1px solid rgba(124, 58, 237, 0.35)",
+                  border: "1px solid hsl(var(--primary) / 0.35)",
                   color: "hsl(var(--primary))",
                   fontSize: "0.76rem",
                   fontWeight: 600,
@@ -531,15 +531,15 @@ export default function Navbar() {
                     padding: "0.5rem 0.9rem",
                     borderRadius: "8px",
                     background: "transparent",
-                    border: "1px solid rgba(124, 58, 237, 0.42)",
+                    border: "1px solid hsl(var(--primary))",
                     color: "hsl(var(--primary))",
                     fontSize: "0.76rem",
                     fontWeight: 600,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.8)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(124,58,237,0.42)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(var(--primary) / 0.08)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   Register
                 </Link>
@@ -558,7 +558,7 @@ export default function Navbar() {
                     fontWeight: 700,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
-                    boxShadow: "0 0 12px rgba(124, 58, 237, 0.3)",
+                    boxShadow: "0 0 12px hsl(var(--primary) / 0.3)",
                     flexShrink: 0,
                   }}
                 >
@@ -581,9 +581,9 @@ export default function Navbar() {
                 width: "34px",
                 height: "34px",
                 borderRadius: "8px",
-                background: "hsl(var(--primary) / 0.1)",
-                border: "1px solid rgba(124,58,237,0.25)",
-                color: "hsl(var(--primary))",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                color: "hsl(var(--foreground))",
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -610,7 +610,7 @@ export default function Navbar() {
                 left: "1.75rem",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: isLight ? "hsl(var(--muted-foreground))" : "rgba(148, 163, 184, 0.45)",
+                color: isLight ? "hsl(var(--muted-foreground))" : "hsl(var(--muted-foreground))",
                 pointerEvents: "none",
               }}
             />
@@ -627,7 +627,7 @@ export default function Navbar() {
                 width: "100%",
                 padding: "0.55rem 1rem 0.55rem 2.1rem",
                 background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.3)"}`,
+                border: `1px solid ${isLight ? "hsl(var(--border))" : "hsl(var(--primary) / 0.3)"}`,
                 borderRadius: "8px",
                 color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
                 fontSize: "0.85rem",
@@ -644,7 +644,7 @@ export default function Navbar() {
                   left: "1rem",
                   right: "1rem",
                   background: "hsl(var(--card))",
-                  border: "1px solid rgba(124, 58, 237, 0.3)",
+                  border: "1px solid hsl(var(--primary) / 0.3)",
                   borderRadius: "10px",
                   boxShadow: "0 16px 40px rgba(0,0,0,0.6)",
                   zIndex: 2000,
@@ -664,7 +664,7 @@ export default function Navbar() {
                       gap: "10px",
                       padding: "9px 12px",
                       textDecoration: "none",
-                      borderBottom: "1px solid rgba(124,58,237,0.08)",
+                      borderBottom: "1px solid hsl(var(--primary) / 0.08)",
                     }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
@@ -681,7 +681,7 @@ export default function Navbar() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "rgba(167,139,250,0.7)",
+                        color: "hsl(var(--primary) / 0.7)",
                       }}
                     >
                       {item.imageUrl ? (
@@ -694,7 +694,7 @@ export default function Navbar() {
                       <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {item.name}
                       </div>
-                      <div style={{ fontSize: "0.7rem", color: "rgba(148,163,184,0.5)" }}>
+                      <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
                         {CATEGORY_LABEL[item.category] ?? item.category}
                       </div>
                     </div>
@@ -821,12 +821,12 @@ export default function Navbar() {
                 textDecoration: "none",
                 fontSize: "0.92rem",
                 fontWeight: 500,
-                color: location === link.href ? "hsl(var(--primary))" : "rgba(203, 213, 225, 0.85)",
+                color: location === link.href ? "hsl(var(--primary))" : "hsl(var(--foreground))",
                 background: location === link.href ? "hsl(var(--primary) / 0.1)" : "transparent",
                 marginBottom: "2px",
                 transition: "background 0.15s",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.08)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.08)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = location === link.href ? "hsl(var(--primary) / 0.1)" : "transparent"; }}
             >
               {link.label}
@@ -857,7 +857,7 @@ export default function Navbar() {
                     fontWeight: 600,
                     color: "hsl(var(--primary))",
                     background: "hsl(var(--primary) / 0.1)",
-                    border: "1px solid rgba(124,58,237,0.25)",
+                    border: "1px solid hsl(var(--primary) / 0.25)",
                   }}
                 >
                   <User size={15} />
@@ -940,7 +940,7 @@ export default function Navbar() {
             padding: "1rem 1.25rem",
             borderTop: "1px solid hsl(var(--primary) / 0.12)",
             fontSize: "0.72rem",
-            color: "rgba(148,163,184,0.35)",
+            color: "hsl(var(--muted-foreground))",
           }}
         >
           {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}
