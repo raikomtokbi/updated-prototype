@@ -133,6 +133,9 @@ const navSections: NavSection[] = [
 
 function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: boolean }) {
   const [location] = useLocation();
+  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
+  const siteLogo = siteSettings?.site_logo || "";
+  const siteName = siteSettings?.site_name || "Nexcoin";
 
   return (
     <aside
@@ -162,22 +165,26 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: "28px",
-            height: "28px",
-            borderRadius: "6px",
-            background: "hsl(var(--primary))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <LayoutDashboard size={14} color="white" />
-        </div>
+        {siteLogo ? (
+          <img src={siteLogo} alt={siteName} style={{ width: "28px", height: "28px", objectFit: "contain", borderRadius: "6px", flexShrink: 0 }} />
+        ) : (
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              background: "hsl(var(--primary))",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <LayoutDashboard size={14} color="white" />
+          </div>
+        )}
         <span style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))", letterSpacing: "0.02em", flex: 1 }}>
-          Admin Panel
+          {siteLogo ? siteName : "Admin Panel"}
         </span>
         {onClose && (
           <button

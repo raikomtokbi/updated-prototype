@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Zap, KeyRound, ArrowLeft, Send } from "lucide-react";
 
 export default function ForgotPassword() {
   const [, navigate] = useLocation();
+  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
+  const siteLogo = siteSettings?.site_logo || "";
+  const siteName = siteSettings?.site_name || "Nexcoin";
   const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -91,21 +95,29 @@ export default function ForgotPassword() {
         </Link>
 
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "0.75rem",
-              background: "hsla(258,90%,66%,0.12)",
-              border: "1px solid hsla(258,90%,66%,0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 1rem",
-            }}
-          >
-            <KeyRound size={24} style={{ color: "hsl(var(--primary))" }} />
-          </div>
+          {siteLogo ? (
+            <img
+              src={siteLogo}
+              alt={siteName}
+              style={{ width: "56px", height: "56px", objectFit: "contain", borderRadius: "0.75rem", margin: "0 auto 1rem", display: "block" }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "0.75rem",
+                background: "hsl(var(--primary) / 0.12)",
+                border: "1px solid hsl(var(--primary) / 0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1rem",
+              }}
+            >
+              <KeyRound size={24} style={{ color: "hsl(var(--primary))" }} />
+            </div>
+          )}
           <h1
             className="font-orbitron"
             style={{

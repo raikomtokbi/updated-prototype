@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Zap, Eye, EyeOff, LogIn, KeyRound } from "lucide-react";
 import { SiFacebook, SiDiscord } from "react-icons/si";
 import GoogleIcon from "@/components/icons/GoogleIcon";
@@ -15,6 +16,9 @@ interface SocialProviders {
 export default function Login() {
   const [, navigate] = useLocation();
   const { setUser, isAuthenticated } = useAuthStore();
+  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
+  const siteLogo = siteSettings?.site_logo || "";
+  const siteName = siteSettings?.site_name || "Nexcoin";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -115,28 +119,36 @@ export default function Login() {
       >
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "0.75rem",
-              background: "hsla(258,90%,66%,0.12)",
-              border: "1px solid hsla(258,90%,66%,0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 1rem",
-            }}
-          >
-            <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
-          </div>
+          {siteLogo ? (
+            <img
+              src={siteLogo}
+              alt={siteName}
+              style={{ width: "56px", height: "56px", objectFit: "contain", borderRadius: "0.75rem", margin: "0 auto 1rem", display: "block" }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "0.75rem",
+                background: "hsl(var(--primary) / 0.12)",
+                border: "1px solid hsl(var(--primary) / 0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1rem",
+              }}
+            >
+              <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
+            </div>
+          )}
           <h1
             className="font-orbitron"
             style={{ fontSize: "1.5rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.4rem" }}
           >
             Welcome Back
           </h1>
-          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Sign in to your Nexcoin account</p>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Sign in to your {siteName} account</p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

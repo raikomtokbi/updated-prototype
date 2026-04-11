@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Zap, ShieldCheck, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export default function VerifyResetOtp() {
   const [, navigate] = useLocation();
   const search = useSearch();
+  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
+  const siteLogo = siteSettings?.site_logo || "";
+  const siteName = siteSettings?.site_name || "Nexcoin";
   const params = new URLSearchParams(search);
   const tokenId = params.get("tid") ?? "";
 
@@ -113,21 +117,25 @@ export default function VerifyResetOtp() {
         </Link>
 
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "0.75rem",
-              background: "hsla(258,90%,66%,0.12)",
-              border: "1px solid hsla(258,90%,66%,0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 1rem",
-            }}
-          >
-            <ShieldCheck size={24} style={{ color: "hsl(var(--primary))" }} />
-          </div>
+          {siteLogo ? (
+            <img src={siteLogo} alt={siteName} style={{ width: "56px", height: "56px", objectFit: "contain", borderRadius: "0.75rem", margin: "0 auto 1rem", display: "block" }} />
+          ) : (
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "0.75rem",
+                background: "hsl(var(--primary) / 0.12)",
+                border: "1px solid hsl(var(--primary) / 0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 1rem",
+              }}
+            >
+              <ShieldCheck size={24} style={{ color: "hsl(var(--primary))" }} />
+            </div>
+          )}
           <h1
             className="font-orbitron"
             style={{
