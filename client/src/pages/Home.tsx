@@ -122,6 +122,7 @@ function HeroSlider() {
               src={s.bg}
               alt=""
               aria-hidden
+              className="hero-slide-img"
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
             />
           )}
