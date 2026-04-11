@@ -249,6 +249,7 @@ const DEFAULTS: SettingsMap = {
   contact_email: "support@nexcoin.gg",
   contact_phone: "+1 (800) 123-4567",
   contact_address: "123 Gaming Ave, Singapore",
+  social_whatsapp: "",
   social_twitter: "",
   social_facebook: "",
   social_instagram: "",
@@ -620,7 +621,7 @@ export default function ControlPanel() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "10px" }}>
               {[
-                { key: "social_twitter", label: "Twitter / X" },
+                { key: "social_whatsapp", label: "WhatsApp" },
                 { key: "social_facebook", label: "Facebook" },
                 { key: "social_instagram", label: "Instagram" },
                 { key: "social_discord", label: "Discord" },

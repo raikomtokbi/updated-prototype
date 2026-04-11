@@ -210,6 +210,7 @@ export const heroSliders = pgTable("hero_sliders", {
   linkedProductId: varchar("linked_product_id", { length: 36 }).references(() => products.id, { onDelete: "set null" }),
   startsAt: timestamp("starts_at"),
   endsAt: timestamp("ends_at"),
+  showButton: boolean("show_button").notNull().default(true),
   isActive: boolean("is_active").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -43,6 +43,7 @@ function HeroSlider() {
     sub: siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
     cta1: { label: "Browse Games", href: "/products" },
     cta2: { label: "View Offers", href: "/offers" },
+    showButton: true,
   };
 
   const apiMapped = apiSliders.map((s: any) => ({
@@ -54,6 +55,7 @@ function HeroSlider() {
     sub: s.subtitle || siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.",
     cta1: { label: s.buttonText || "Browse Games", href: s.buttonLink || "/products" },
     cta2: { label: "View Offers", href: "/offers" },
+    showButton: s.showButton !== false,
   }));
 
   // Always keep the default slide in rotation so it shows even after uploading banners
@@ -104,13 +106,11 @@ function HeroSlider() {
   const slide = SLIDES[current] ?? SLIDES[0];
 
   return (
-    <section className="hero-section">
-      <div
-        aria-hidden
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}
-      />
+    <section
+      className="hero-section"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
 
       {/* Slide backgrounds — fade transition */}
       {SLIDES.map((s, i) => (
@@ -250,35 +250,37 @@ function HeroSlider() {
               <Gamepad2 size={14} />
               {slide.cta1.label}
             </Link>
-            <Link
-              href={slide.cta2.href}
-              data-testid="link-view-offers"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                padding: "0.55rem 1.1rem",
-                borderRadius: "8px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                color: "rgba(229,231,235,0.9)",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                backdropFilter: "blur(6px)",
-                transition: "border-color 0.2s, background 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
-                e.currentTarget.style.background = "rgba(124,58,237,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-              }}
-            >
-              {slide.cta2.label}
-            </Link>
+            {slide.showButton && (
+              <Link
+                href={slide.cta2.href}
+                data-testid="link-view-offers"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  padding: "0.55rem 1.1rem",
+                  borderRadius: "8px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  color: "rgba(229,231,235,0.9)",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  backdropFilter: "blur(6px)",
+                  transition: "border-color 0.2s, background 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.5)";
+                  e.currentTarget.style.background = "rgba(124,58,237,0.12)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                }}
+              >
+                {slide.cta2.label}
+              </Link>
+            )}
           </div>
         </div>
       </div>
