@@ -738,7 +738,7 @@ export default function Navbar() {
           flexDirection: "column",
           transform: drawerOpen ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
-          boxShadow: "-8px 0 32px rgba(0,0,0,0.4)",
+          boxShadow: drawerOpen ? "-8px 0 32px rgba(0,0,0,0.4)" : "none",
         }}
       >
         {/* Drawer header */}
