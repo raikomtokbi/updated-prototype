@@ -1334,6 +1334,19 @@ export default function ApiIntegration() {
             </p>
           </div>
           <div style={{ padding: "0 20px" }}>
+            {/* Social Login row — toggles live inside the modal per-provider */}
+            <div id="social-auth-google">
+              {renderRow(
+                <ShieldCheck size={14} />,
+                "Social Login (Google / Facebook / Discord)",
+                "Configure OAuth credentials for Google, Facebook, and Discord sign-in",
+                socialAuthConfigured,
+                () => setSocialAuthOpen(true),
+                "button-configure-social-auth",
+                false,
+              )}
+            </div>
+
             {/* Standard services */}
             {SERVICES.map((svc) => {
               const plug = pluginMap[svc.slug];
@@ -1360,19 +1373,6 @@ export default function ApiIntegration() {
                 </div>
               );
             })}
-
-            {/* Social Login row — toggles live inside the modal per-provider */}
-            <div id="social-auth-google">
-              {renderRow(
-                <ShieldCheck size={14} />,
-                "Social Login (Google / Facebook / Discord)",
-                "Configure OAuth credentials for Google, Facebook, and Discord sign-in",
-                socialAuthConfigured,
-                () => setSocialAuthOpen(true),
-                "button-configure-social-auth",
-                false,
-              )}
-            </div>
 
             {/* Busan Integration row */}
             {renderRow(
