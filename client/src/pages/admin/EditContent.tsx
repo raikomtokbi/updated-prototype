@@ -102,6 +102,7 @@ function SliderForm({
     bannerUrl: initial.bannerUrl ?? "",
     buttonText: initial.buttonText ?? "",
     buttonLink: initial.buttonLink ?? "",
+    showButton: initial.showButton !== false,
     startsAt: toInput(initial.startsAt),
     endsAt: toInput(initial.endsAt),
     isActive: initial.isActive !== false,
@@ -121,6 +122,7 @@ function SliderForm({
           sortOrder: parseInt(form.sortOrder) || 0,
           startsAt: form.startsAt || null,
           endsAt: form.endsAt || null,
+          showButton: form.showButton,
         });
       }}
       style={{ display: "flex", flexDirection: "column", gap: "12px" }}
@@ -172,6 +174,24 @@ function SliderForm({
             placeholder="/products"
           />
         </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <label style={{ ...labelStyle, marginBottom: 0 }}>Show Button</label>
+        <button
+          type="button"
+          onClick={() => set("showButton", !form.showButton)}
+          style={{
+            padding: "3px 12px",
+            borderRadius: "4px",
+            border: `1px solid ${form.showButton ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
+            background: form.showButton ? "rgba(124,58,237,0.15)" : "transparent",
+            color: form.showButton ? "hsl(258,90%,70%)" : "hsl(220,10%,50%)",
+            fontSize: "12px",
+            cursor: "pointer",
+          }}
+        >
+          {form.showButton ? "Enabled" : "Disabled"}
+        </button>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobileSlider ? "1fr" : "1fr 1fr 1fr", gap: "10px" }}>
         <div>

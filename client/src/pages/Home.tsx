@@ -2,9 +2,9 @@ import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Zap, Shield, Tag, Heart, Star, ArrowRight, ChevronLeft, ChevronRight,
-  Facebook, Twitter, Instagram, Gamepad2, Gift, HeadphonesIcon,
-  Wrench, Mail,
+  Zap, Shield, Tag, Heart, Star, ArrowRight,
+  Facebook, Instagram, Gamepad2, Gift, HeadphonesIcon,
+  Wrench, Mail, MessageCircle,
 } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 
@@ -22,6 +22,7 @@ const DEFAULT_FEATURES = [
 function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartRef = useRef<number | null>(null);
 
   const { data: apiSliders = [] } = useQuery<any[]>({
     queryKey: ["/api/hero-sliders/active"],
@@ -77,10 +78,39 @@ function HeroSlider() {
     startTimer();
   }
 
+  function nextSlide() {
+    goTo((current + 1) % SLIDES.length);
+  }
+
+  function prevSlide() {
+    goTo((current - 1 + SLIDES.length) % SLIDES.length);
+  }
+
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    touchStartRef.current = e.touches[0]?.clientX ?? null;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    const start = touchStartRef.current;
+    const end = e.changedTouches[0]?.clientX ?? null;
+    touchStartRef.current = null;
+    if (start == null || end == null) return;
+    const delta = start - end;
+    if (Math.abs(delta) < 40) return;
+    if (delta > 0) nextSlide();
+    else prevSlide();
+  }
+
   const slide = SLIDES[current] ?? SLIDES[0];
 
   return (
     <section className="hero-section">
+      <div
+        aria-hidden
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}
+      />
 
       {/* Slide backgrounds — fade transition */}
       {SLIDES.map((s, i) => (
@@ -252,40 +282,6 @@ function HeroSlider() {
           </div>
         </div>
       </div>
-
-      {/* Prev button */}
-      <button
-        onClick={() => goTo((current - 1 + SLIDES.length) % SLIDES.length)}
-        data-testid="button-slide-prev"
-        style={{
-          position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)",
-          zIndex: 10, width: "36px", height: "36px", borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)",
-          color: "white", cursor: "pointer", display: "flex", alignItems: "center",
-          justifyContent: "center", backdropFilter: "blur(4px)", transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronLeft size={16} />
-      </button>
-
-      {/* Next button */}
-      <button
-        onClick={() => goTo((current + 1) % SLIDES.length)}
-        data-testid="button-slide-next"
-        style={{
-          position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)",
-          zIndex: 10, width: "36px", height: "36px", borderRadius: "50%",
-          background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)",
-          color: "white", cursor: "pointer", display: "flex", alignItems: "center",
-          justifyContent: "center", backdropFilter: "blur(4px)", transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.4)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.15)"; }}
-      >
-        <ChevronRight size={16} />
-      </button>
 
       {/* Dot indicators */}
       <div
@@ -1027,7 +1023,7 @@ function Footer() {
             <div style={{ display: "flex", gap: "0.6rem" }}>
               {[
                 { icon: Facebook, label: "Facebook", url: siteSettings?.social_facebook },
-                { icon: Twitter, label: "Twitter", url: siteSettings?.social_twitter },
+                { icon: MessageCircle, label: "WhatsApp", url: siteSettings?.social_whatsapp || siteSettings?.social_twitter },
                 { icon: Instagram, label: "Instagram", url: siteSettings?.social_instagram },
                 { icon: FaDiscord, label: "Discord", url: siteSettings?.social_discord },
               ].map(({ icon: Icon, label, url }) => (
