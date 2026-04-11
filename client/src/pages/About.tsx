@@ -95,7 +95,7 @@ export default function About() {
         >
           {headline}
         </h1>
-        <p style={{ fontSize: "1rem", color: "hsl(var(--muted-foreground))", maxWidth: "580px", margin: "0 auto", position: "relative" }}>
+        <p style={{ fontSize: "0.9rem", color: "hsl(var(--muted-foreground))", maxWidth: "580px", margin: "0 auto", position: "relative" }}>
           {tagline}
         </p>
       </div>
@@ -127,7 +127,7 @@ export default function About() {
             >
               {stat.value}
             </p>
-            <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{stat.label}</p>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{stat.label}</p>
           </div>
         ))}
       </div>
@@ -135,7 +135,7 @@ export default function About() {
       {/* Why section */}
       <h2
         style={{
-          fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))",
+          fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))",
           marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em",
         }}
       >
@@ -174,7 +174,7 @@ export default function About() {
               <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.4rem" }}>
                 {v.title}
               </h3>
-              <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
                 {v.desc}
               </p>
             </div>
@@ -189,23 +189,23 @@ export default function About() {
           borderRadius: "1rem", padding: "2rem", marginBottom: "2rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
+        <h2 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           Our Story
         </h2>
         {storyText ? (
           storyText.split("\n").filter(Boolean).map((para, i) => (
-            <p key={i} style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+            <p key={i} style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
               {para}
             </p>
           ))
         ) : (
           <>
-            <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, marginBottom: "0.75rem" }}>
               {siteName} was founded with a simple mission: make digital top-ups fast, safe, and
               accessible for every gamer. We started with a handful of popular titles and have grown
               into a platform that covers hundreds of games and platforms worldwide.
             </p>
-            <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
               We work directly with publishers and authorised resellers to ensure every top-up you
               purchase is 100% legitimate and delivered in real time.
             </p>

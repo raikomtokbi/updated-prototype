@@ -125,7 +125,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
           width: "38px", height: "38px", background: "hsl(var(--card))",
           border: "none", cursor: "pointer", color: "hsl(var(--foreground))",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "16px", transition: "background 0.15s",
+          fontSize: "13px", transition: "background 0.15s",
         }}
       >
         <Minus size={14} />
@@ -133,7 +133,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
       <span data-testid="text-qty" style={{
         minWidth: "44px", height: "38px", background: "hsl(var(--card))",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: "hsl(var(--foreground))", fontSize: "14px", fontWeight: 700,
+        color: "hsl(var(--foreground))", fontSize: "13px", fontWeight: 700,
         borderLeft: "1px solid hsl(var(--border))", borderRight: "1px solid hsl(var(--border))",
       }}>
         {value}
@@ -145,7 +145,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
           width: "38px", height: "38px", background: "hsl(var(--card))",
           border: "none", cursor: "pointer", color: "hsl(var(--foreground))",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "16px", transition: "background 0.15s",
+          fontSize: "13px", transition: "background 0.15s",
         }}
       >
         <Plus size={14} />
@@ -652,7 +652,7 @@ function GameDetailView({ game }: { game: Game }) {
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
-                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
+                <p style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
               </div>
@@ -756,7 +756,7 @@ function GameDetailView({ game }: { game: Game }) {
                   border: "1px solid hsl(220,15%,25%)",
                   color: "hsl(var(--foreground))",
                   cursor: "pointer",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   fontWeight: 600,
                 }}
               >
@@ -772,7 +772,7 @@ function GameDetailView({ game }: { game: Game }) {
                   color: "white",
                   border: "none",
                   cursor: "pointer",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   fontWeight: 700,
                 }}
                 data-testid="button-register-now"
@@ -1030,7 +1030,7 @@ function ProductDetailView({ product }: { product: Product }) {
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
-                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
+                <p style={{ fontSize: "1.15rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
               </div>
@@ -1140,7 +1140,7 @@ export default function ProductDetails() {
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "4rem 1rem", textAlign: "center" }}>
         <Zap size={48} style={{ color: "hsl(var(--primary))", opacity: 0.3, marginBottom: "1rem" }} />
         <h2 style={{ color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>Product not found</h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "14px", marginBottom: "1.5rem" }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginBottom: "1.5rem" }}>
           This product may have been removed or the link is incorrect.
         </p>
         <button className="btn-secondary" onClick={() => navigate("/products")} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>

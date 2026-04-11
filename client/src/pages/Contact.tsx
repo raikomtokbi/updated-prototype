@@ -52,7 +52,7 @@ export default function Contact() {
         >
           Contact Us
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
           Have a question or want to work with us? Drop us a message.
         </p>
       </div>
@@ -115,7 +115,7 @@ export default function Contact() {
                     <Icon size={16} style={{ color: "hsl(var(--primary))" }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.1rem" }}>
+                    <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.1rem" }}>
                       {item.label}
                     </p>
                     <p style={{ fontSize: "0.82rem", color: "hsl(var(--foreground))", fontWeight: 500 }}>
@@ -135,13 +135,13 @@ export default function Contact() {
               borderRadius: "0.75rem",
             }}
           >
-            <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Response time
             </p>
             <p style={{ fontSize: "0.82rem", color: "hsl(var(--foreground))", fontWeight: 500 }}>
               Within 24 hours
             </p>
-            <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.3rem" }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "0.3rem" }}>
               Mon – Sun, including public holidays
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function Contact() {
                 htmlFor="contact-name"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -188,7 +188,7 @@ export default function Contact() {
                 htmlFor="contact-email"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -213,7 +213,7 @@ export default function Contact() {
                 htmlFor="contact-message"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -241,7 +241,7 @@ export default function Contact() {
                   border: "1px solid hsla(0,72%,51%,0.3)",
                   borderRadius: "0.5rem",
                   color: "hsl(0,72%,65%)",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                 }}
               >
                 {error}
@@ -256,7 +256,7 @@ export default function Contact() {
                   border: "1px solid hsla(142,76%,36%,0.3)",
                   borderRadius: "0.5rem",
                   color: "hsl(142,76%,55%)",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                 }}
               >
                 {success}

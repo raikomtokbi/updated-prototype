@@ -111,7 +111,7 @@ export default function ResetPassword() {
               display: "inline-flex",
               alignItems: "center",
               gap: "0.35rem",
-              fontSize: "0.8rem",
+              fontSize: "0.68rem",
               color: "hsl(var(--muted-foreground))",
               textDecoration: "none",
               marginBottom: "1.75rem",
@@ -154,7 +154,7 @@ export default function ResetPassword() {
           >
             {success ? "Password Updated" : "Set New Password"}
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             {success
               ? "Your password has been changed. Redirecting to login..."
               : "Choose a strong password of at least 8 characters."}
@@ -169,7 +169,7 @@ export default function ResetPassword() {
               border: "1px solid hsla(142,72%,45%,0.3)",
               borderRadius: "0.5rem",
               color: "hsl(142,72%,60%)",
-              fontSize: "0.85rem",
+              fontSize: "0.68rem",
               textAlign: "center",
             }}
           >
@@ -187,7 +187,7 @@ export default function ResetPassword() {
                 htmlFor="new-password"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -235,7 +235,7 @@ export default function ResetPassword() {
                 htmlFor="confirm-password"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -293,7 +293,7 @@ export default function ResetPassword() {
                       display: "flex",
                       alignItems: "center",
                       gap: "0.4rem",
-                      fontSize: "0.75rem",
+                      fontSize: "0.68rem",
                       color: ok ? "hsl(142,72%,60%)" : "hsl(var(--muted-foreground))",
                     }}
                   >
@@ -321,7 +321,7 @@ export default function ResetPassword() {
                   border: "1px solid hsla(0,72%,51%,0.3)",
                   borderRadius: "0.5rem",
                   color: "hsl(0,72%,65%)",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                 }}
               >
                 {error}

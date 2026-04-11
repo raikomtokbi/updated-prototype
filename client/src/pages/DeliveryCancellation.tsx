@@ -66,7 +66,7 @@ export default function DeliveryCancellation() {
         >
           Delivery & Cancellation Policy
         </h1>
-        <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
           Last updated: {LAST_UPDATED}
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function DeliveryCancellation() {
             border: "1px solid hsl(var(--border))",
             borderRadius: "0.75rem",
             padding: "1.5rem",
-            fontSize: "0.85rem",
+            fontSize: "0.68rem",
             color: "hsl(var(--muted-foreground))",
             lineHeight: 1.75,
             whiteSpace: "pre-wrap",
@@ -102,7 +102,7 @@ export default function DeliveryCancellation() {
               </h3>
               <p
                 style={{
-                  fontSize: "0.85rem",
+                  fontSize: "0.68rem",
                   color: "hsl(var(--muted-foreground))",
                   lineHeight: 1.75,
                 }}

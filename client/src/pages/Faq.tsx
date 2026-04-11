@@ -64,7 +64,7 @@ function FaqRow({ item, index }: { item: FaqItem; index: number }) {
         <div
           style={{
             padding: "0 1.4rem 1.2rem 3.6rem",
-            fontSize: "0.875rem",
+            fontSize: "0.68rem",
             color: "hsl(var(--muted-foreground))",
             lineHeight: 1.7,
             borderTop: "1px solid hsl(var(--border))",
@@ -168,7 +168,7 @@ export default function Faq() {
           textAlign: "center",
         }}
       >
-        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.75rem" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.75rem" }}>
           Still have questions? Our support team is available 24/7.
         </p>
         <Link href="/support">

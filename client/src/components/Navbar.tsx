@@ -137,7 +137,7 @@ function SearchDropdown({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(var(--foreground))",
                 overflow: "hidden",
@@ -147,18 +147,18 @@ function SearchDropdown({
             >
               {item.name}
             </div>
-            <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+            <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
               {CATEGORY_LABEL[item.category] ?? item.category}
             </div>
           </div>
 
           {/* Arrow hint */}
-          <div style={{ color: "hsl(var(--primary) / 0.4)", fontSize: "0.7rem", flexShrink: 0 }}>→</div>
+          <div style={{ color: "hsl(var(--primary) / 0.4)", fontSize: "0.68rem", flexShrink: 0 }}>→</div>
         </Link>
       ))}
 
       {results.length === 0 && query.trim() && (
-        <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+        <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
           No results for "{query}"
         </div>
       )}
@@ -262,7 +262,7 @@ export default function Navbar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "0.78rem",
+            fontSize: "0.68rem",
             fontWeight: 500,
             color: "hsl(var(--foreground))",
             letterSpacing: "0.01em",
@@ -328,7 +328,7 @@ export default function Navbar() {
             <span
               className="font-orbitron"
               style={{
-                fontSize: "1rem",
+                fontSize: "0.9rem",
                 fontWeight: 800,
                 letterSpacing: "0.05em",
                 background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
@@ -376,7 +376,7 @@ export default function Navbar() {
                 border: `1px solid ${isLight ? "hsl(var(--border))" : "hsl(var(--primary) / 0.2)"}`,
                 borderRadius: "8px",
                 color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
-                fontSize: "0.78rem",
+                fontSize: "0.68rem",
                 outline: "none",
               }}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.55)"; }}
@@ -402,7 +402,7 @@ export default function Navbar() {
                   padding: "0.38rem 0.8rem",
                   borderRadius: "6px",
                   textDecoration: "none",
-                  fontSize: "0.78rem",
+                  fontSize: "0.68rem",
                   fontWeight: 500,
                   color: location === link.href ? "hsl(var(--primary))" : (isLight ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"),
                   whiteSpace: "nowrap",
@@ -510,7 +510,7 @@ export default function Navbar() {
                   background: "hsl(var(--primary) / 0.12)",
                   border: "1px solid hsl(var(--primary) / 0.35)",
                   color: "hsl(var(--primary))",
-                  fontSize: "0.76rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   textDecoration: "none",
                   whiteSpace: "nowrap",
@@ -533,7 +533,7 @@ export default function Navbar() {
                     background: "transparent",
                     border: "1px solid hsl(var(--primary))",
                     color: "hsl(var(--primary))",
-                    fontSize: "0.76rem",
+                    fontSize: "0.68rem",
                     fontWeight: 600,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
@@ -554,7 +554,7 @@ export default function Navbar() {
                     borderRadius: "8px",
                     background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                     color: "white",
-                    fontSize: "0.76rem",
+                    fontSize: "0.68rem",
                     fontWeight: 700,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
@@ -630,7 +630,7 @@ export default function Navbar() {
                 border: `1px solid ${isLight ? "hsl(var(--border))" : "hsl(var(--primary) / 0.3)"}`,
                 borderRadius: "8px",
                 color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
-                fontSize: "0.85rem",
+                fontSize: "0.68rem",
                 outline: "none",
                 boxSizing: "border-box",
               }}
@@ -694,7 +694,7 @@ export default function Navbar() {
                       <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {item.name}
                       </div>
-                      <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
+                      <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                         {CATEGORY_LABEL[item.category] ?? item.category}
                       </div>
                     </div>
@@ -939,7 +939,7 @@ export default function Navbar() {
           style={{
             padding: "1rem 1.25rem",
             borderTop: "1px solid hsl(var(--primary) / 0.12)",
-            fontSize: "0.72rem",
+            fontSize: "0.68rem",
             color: "hsl(var(--muted-foreground))",
           }}
         >

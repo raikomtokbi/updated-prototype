@@ -179,7 +179,7 @@ function HeroSlider() {
                 }}
               >
                 <Zap size={12} color="hsl(var(--primary))" />
-                <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
+                <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
                   FEATURED
                 </span>
               </div>
@@ -191,7 +191,7 @@ function HeroSlider() {
                 <div
                   style={{
                     display: "block",
-                    fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
+                    fontSize: "clamp(1.9rem, 6vw, 3.8rem)",
                     fontWeight: 900,
                     letterSpacing: "-0.02em",
                     color: "hsl(var(--primary))",
@@ -232,7 +232,7 @@ function HeroSlider() {
                     borderRadius: "8px",
                     background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                     color: "white",
-                    fontSize: "0.8rem",
+                    fontSize: "0.68rem",
                     fontWeight: 700,
                     textDecoration: "none",
                     boxShadow: "0 0 20px hsl(var(--primary) / 0.45)",
@@ -348,10 +348,10 @@ function FeaturesStrip() {
                 <Icon size={20} color="hsl(var(--primary))" />
               </div>
               <div>
-                <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>
+                <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>
                   {title}
                 </h3>
-                <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{desc}</p>
+                <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{desc}</p>
               </div>
             </div>
           );
@@ -387,12 +387,12 @@ function TrendingGames() {
             <Zap size={16} color="hsl(var(--primary))" />
             <span
               className="font-orbitron"
-              style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
             >
               Trending Now
             </span>
           </div>
-          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Top up the most popular games instantly
           </p>
         </div>
@@ -403,7 +403,7 @@ function TrendingGames() {
             display: "flex",
             alignItems: "center",
             gap: "0.25rem",
-            fontSize: "0.78rem",
+            fontSize: "0.68rem",
             fontWeight: 600,
             color: "hsl(var(--primary))",
             textDecoration: "none",
@@ -520,12 +520,12 @@ function VouchersSection() {
               <Gift size={16} color="hsl(var(--primary))" />
               <span
                 className="font-orbitron"
-                style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+                style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
               >
                 Vouchers & Gift Cards
               </span>
             </div>
-            <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
               Top up instantly with vouchers and gift cards
             </p>
           </div>
@@ -535,7 +535,7 @@ function VouchersSection() {
               display: "flex",
               alignItems: "center",
               gap: "0.25rem",
-              fontSize: "0.78rem",
+              fontSize: "0.68rem",
               fontWeight: 600,
               color: "hsl(var(--primary))",
               textDecoration: "none",
@@ -613,7 +613,7 @@ function VouchersSection() {
                 {/* Info */}
                 <div style={{ padding: "0.65rem 0.75rem" }}>
                   <p style={{
-                    fontSize: "0.75rem", fontWeight: 700, color: "hsl(var(--foreground))",
+                    fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))",
                     margin: "0 0 0.25rem",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>
@@ -656,12 +656,12 @@ function GamesGrid() {
             <Gamepad2 size={16} color="hsl(var(--primary))" />
             <span
               className="font-orbitron"
-              style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
             >
               Games
             </span>
           </div>
-          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Browse our full game catalog and top up instantly
           </p>
         </div>
@@ -734,7 +734,7 @@ function GamesGrid() {
                 background: "hsl(var(--primary) / 0.12)",
                 border: "1px solid hsl(var(--primary) / 0.35)",
                 color: "hsl(var(--primary))",
-                fontSize: "0.875rem",
+                fontSize: "0.68rem",
                 fontWeight: 700,
                 textDecoration: "none",
                 transition: "background 0.2s, border-color 0.2s, box-shadow 0.2s",
@@ -820,7 +820,7 @@ function BonusBanner() {
           <h2
             className="font-orbitron"
             style={{
-              fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
+              fontSize: "clamp(1.3rem, 2.6vw, 2rem)",
               fontWeight: 900,
               color: "hsl(var(--foreground))",
               lineHeight: 1.1,
@@ -833,7 +833,7 @@ function BonusBanner() {
             </span>{" "}
             {mainTitleSuffix}
           </h2>
-          <p style={{ fontSize: "0.825rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
             {description}
           </p>
           <Link
@@ -847,7 +847,7 @@ function BonusBanner() {
               borderRadius: "8px",
               background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
               color: "white",
-              fontSize: "0.8rem",
+              fontSize: "0.68rem",
               fontWeight: 700,
               textDecoration: "none",
               boxShadow: "0 0 16px hsl(var(--primary) / 0.4)",
@@ -940,7 +940,7 @@ function Footer() {
               <span
                 className="font-orbitron"
                 style={{
-                  fontSize: "1rem",
+                  fontSize: "0.9rem",
                   fontWeight: 800,
                   color: "hsl(var(--primary))",
                 }}
@@ -949,11 +949,11 @@ function Footer() {
               </span>
             </div>
             {siteSettings?.site_tagline && (
-              <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.6rem", fontStyle: "italic" }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.6rem", fontStyle: "italic" }}>
                 {siteSettings.site_tagline}
               </p>
             )}
-            <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, maxWidth: "260px", marginBottom: "1.5rem" }}>
               {siteSettings?.site_description || "The fastest, safest marketplace for game top-ups. Trusted by thousands of players worldwide."}
             </p>
             {/* Support Email */}
@@ -965,7 +965,7 @@ function Footer() {
                   alignItems: "center",
                   gap: "0.4rem",
                   marginBottom: "0.8rem",
-                  fontSize: "0.78rem",
+                  fontSize: "0.68rem",
                   color: "hsl(var(--muted-foreground))",
                   textDecoration: "none",
                   transition: "color 0.15s",
@@ -1027,7 +1027,7 @@ function Footer() {
           <div>
             <h4
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.68rem",
                 fontWeight: 700,
                 color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
@@ -1042,7 +1042,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1057,7 +1057,7 @@ function Footer() {
           <div>
             <h4
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.68rem",
                 fontWeight: 700,
                 color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
@@ -1072,7 +1072,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1087,7 +1087,7 @@ function Footer() {
           <div>
             <h4
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.68rem",
                 fontWeight: 700,
                 color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
@@ -1102,7 +1102,7 @@ function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
+                    style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
@@ -1126,7 +1126,7 @@ function Footer() {
             gap: "0.75rem",
           }}
         >
-          <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             {siteSettings?.footer_copyright || `© ${new Date().getFullYear()} ${siteSettings?.site_name || "Nexcoin"}. All rights reserved.`}
           </p>
           {siteSettings?.footer_button_name && (
@@ -1134,7 +1134,7 @@ function Footer() {
               href={siteSettings.footer_button_link || "#"}
               data-testid="link-footer-button"
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.68rem",
                 color: "rgba(148,163,184,0.45)",
                 textDecoration: "none",
                 transition: "color 0.15s",

@@ -133,7 +133,7 @@ export default function Register() {
           >
             Create Account
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Join Nexcoin and start topping up instantly
           </p>
         </div>
@@ -148,7 +148,7 @@ export default function Register() {
                 htmlFor="reg-firstname"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(var(--muted-foreground))",
                   marginBottom: "0.4rem",
@@ -171,7 +171,7 @@ export default function Register() {
                 htmlFor="reg-lastname"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(var(--muted-foreground))",
                   marginBottom: "0.4rem",
@@ -195,7 +195,7 @@ export default function Register() {
               htmlFor="reg-username"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
@@ -219,7 +219,7 @@ export default function Register() {
               htmlFor="reg-email"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
@@ -244,7 +244,7 @@ export default function Register() {
               htmlFor="reg-password"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
@@ -289,7 +289,7 @@ export default function Register() {
               htmlFor="reg-confirm"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(var(--muted-foreground))",
                 marginBottom: "0.4rem",
@@ -316,7 +316,7 @@ export default function Register() {
                 border: "1px solid hsla(0,72%,51%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(0,72%,65%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {error}
@@ -331,7 +331,7 @@ export default function Register() {
                 border: "1px solid hsla(142,76%,36%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(142,76%,55%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {success}
@@ -359,13 +359,13 @@ export default function Register() {
           <div style={{ marginTop: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
-              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or sign up with</span>
+              <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or sign up with</span>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {socialProviders.google && (
                 <a href="/api/auth/oauth/google" style={{ textDecoration: "none" }} data-testid="button-social-google">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <GoogleIcon size={18} />
                     Continue with Google
                   </div>
@@ -373,7 +373,7 @@ export default function Register() {
               )}
               {socialProviders.facebook && (
                 <a href="/api/auth/oauth/facebook" style={{ textDecoration: "none" }} data-testid="button-social-facebook">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiFacebook size={16} style={{ color: "#1877F2" }} />
                     Continue with Facebook
                   </div>
@@ -381,7 +381,7 @@ export default function Register() {
               )}
               {socialProviders.discord && (
                 <a href="/api/auth/oauth/discord" style={{ textDecoration: "none" }} data-testid="button-social-discord">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiDiscord size={16} style={{ color: "#5865F2" }} />
                     Continue with Discord
                   </div>
@@ -392,7 +392,7 @@ export default function Register() {
         )}
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Already have an account?{" "}
             <Link
               href="/login"

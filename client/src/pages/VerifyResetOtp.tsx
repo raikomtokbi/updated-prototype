@@ -101,7 +101,7 @@ export default function VerifyResetOtp() {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.35rem",
-            fontSize: "0.8rem",
+            fontSize: "0.68rem",
             color: "hsl(var(--muted-foreground))",
             textDecoration: "none",
             marginBottom: "1.75rem",
@@ -139,7 +139,7 @@ export default function VerifyResetOtp() {
           >
             Enter OTP
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Enter the 6-digit code sent to your registered email. It expires in 10 minutes.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function VerifyResetOtp() {
               htmlFor="otp"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(220,10%,65%)",
                 marginBottom: "0.4rem",
@@ -187,7 +187,7 @@ export default function VerifyResetOtp() {
                 border: "1px solid hsla(0,72%,51%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(0,72%,65%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {error}
@@ -213,7 +213,7 @@ export default function VerifyResetOtp() {
         </form>
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Didn't receive it?{" "}
             <Link
               href="/auth/forgot-password"

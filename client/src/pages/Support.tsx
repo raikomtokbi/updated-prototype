@@ -64,7 +64,7 @@ export default function Support() {
         >
           Support Center
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
           Find answers to common questions or reach out to our team.
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function Support() {
       <section style={{ marginBottom: "3rem" }}>
         <h2
           style={{
-            fontSize: "1rem",
+            fontSize: "0.9rem",
             fontWeight: 700,
             color: "hsl(var(--foreground))",
             marginBottom: "1rem",
@@ -112,7 +112,7 @@ export default function Support() {
                     cursor: "pointer",
                     color: "hsl(var(--foreground))",
                     fontWeight: 600,
-                    fontSize: "0.875rem",
+                    fontSize: "0.68rem",
                     textAlign: "left",
                     gap: "0.5rem",
                   }}
@@ -124,7 +124,7 @@ export default function Support() {
                   <div
                     style={{
                       padding: "0 1.25rem 1rem",
-                      fontSize: "0.85rem",
+                      fontSize: "0.68rem",
                       color: "hsl(var(--muted-foreground))",
                       lineHeight: 1.65,
                     }}
@@ -142,7 +142,7 @@ export default function Support() {
       <section>
         <h2
           style={{
-            fontSize: "1rem",
+            fontSize: "0.9rem",
             fontWeight: 700,
             color: "hsl(var(--foreground))",
             marginBottom: "1rem",
@@ -183,10 +183,10 @@ export default function Support() {
               <Headphones size={18} style={{ color: "hsl(var(--primary))" }} />
             </div>
             <div>
-              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
+              <p style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                 Our support team
               </p>
-              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                 Typically responds within 24 hours
               </p>
             </div>
@@ -199,7 +199,7 @@ export default function Support() {
             {!isAuthenticated && (
               <p
                 style={{
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   color: "hsl(45,80%,60%)",
                   padding: "0.6rem 0.9rem",
                   background: "hsla(45,80%,60%,0.08)",
@@ -212,7 +212,7 @@ export default function Support() {
             )}
 
             <div>
-              <label htmlFor="ticket-category" style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}>
+              <label htmlFor="ticket-category" style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(220,10%,65%)", marginBottom: "0.4rem" }}>
                 Category
               </label>
               <select
@@ -237,7 +237,7 @@ export default function Support() {
                 htmlFor="ticket-subject"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -260,7 +260,7 @@ export default function Support() {
                 htmlFor="ticket-message"
                 style={{
                   display: "block",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 600,
                   color: "hsl(220,10%,65%)",
                   marginBottom: "0.4rem",
@@ -288,7 +288,7 @@ export default function Support() {
                   border: "1px solid hsla(0,72%,51%,0.3)",
                   borderRadius: "0.5rem",
                   color: "hsl(0,72%,65%)",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                 }}
               >
                 {error}
@@ -303,7 +303,7 @@ export default function Support() {
                   border: "1px solid hsla(142,76%,36%,0.3)",
                   borderRadius: "0.5rem",
                   color: "hsl(142,76%,55%)",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                 }}
               >
                 {success}

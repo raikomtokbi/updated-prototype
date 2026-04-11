@@ -165,8 +165,8 @@ function UpiPaymentOverlay({
         <style>{`div::-webkit-scrollbar { display: none; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
         {/* Header */}
         <div style={{ marginBottom: "1.25rem" }}>
-          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Complete UPI Payment</h3>
-          <p style={{ margin: "2px 0 0", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
+          <h3 style={{ margin: 0, fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Complete UPI Payment</h3>
+          <p style={{ margin: "2px 0 0", fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order #{data.orderNumber || data.orderId.slice(0, 8)}</p>
         </div>
 
         {/* Amount + Timer */}
@@ -180,7 +180,7 @@ function UpiPaymentOverlay({
               <Clock size={12} style={{ color: timerColor }} />
               <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Expires in</span>
             </div>
-            <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: timerColor, fontVariantNumeric: "tabular-nums" }}>
+            <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 700, color: timerColor, fontVariantNumeric: "tabular-nums" }}>
               {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
             </p>
           </div>
@@ -437,7 +437,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
             textAlign: "left",
           }}>
             <p style={{ margin: "0 0 3px", fontSize: "10px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>UPI Transaction ID</p>
-            <p style={{ margin: 0, fontSize: "14px", color: "hsl(142,60%,65%)", fontFamily: "monospace", fontWeight: 600 }}>{utr}</p>
+            <p style={{ margin: 0, fontSize: "13px", color: "hsl(142,60%,65%)", fontFamily: "monospace", fontWeight: 600 }}>{utr}</p>
           </div>
         )}
 
@@ -453,7 +453,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
               animation: `progress-drain ${5}s linear both`,
             }} />
           </div>
-          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Redirecting in <span style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>{countdown}s</span>…
           </p>
         </div>
@@ -465,7 +465,7 @@ function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
             background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
-            color: "hsl(var(--foreground))", fontSize: "0.875rem", cursor: "pointer",
+            color: "hsl(var(--foreground))", fontSize: "0.68rem", cursor: "pointer",
           }}
         >
           Go Back Now <ArrowRight size={15} />
@@ -797,7 +797,7 @@ export default function Checkout() {
 
       {/* ─── Main Checkout ────────────────────────────────────────────────── */}
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "1.5rem 1rem 4rem" }}>
-        <Link href={backHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.875rem" }} data-testid="link-back-to-cart">
+        <Link href={backHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem", textDecoration: "none", fontSize: "0.68rem" }} data-testid="link-back-to-cart">
           <ArrowLeft size={15} /> Back to {backLabel}
         </Link>
 
@@ -807,34 +807,34 @@ export default function Checkout() {
 
           {/* ── Order Summary ── */}
           <div style={card}>
-            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
               Order Summary
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1rem" }}>
               {items.map((item) => (
                 <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
-                    <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                    <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
                       {item.packageName} × {item.quantity}
                     </div>
                     {/* Player info */}
                     {(item.userId || item.playerId || item.zoneId) && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginTop: "5px" }}>
                         {(item.userId || item.playerId) && (
-                          <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
+                          <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                             User ID: {item.playerId || item.userId}
                           </span>
                         )}
                         {item.zoneId && (
-                          <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
+                          <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                             Zone / Server: {item.zoneId}
                           </span>
                         )}
                       </div>
                     )}
                   </div>
-                  <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(var(--foreground))", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", whiteSpace: "nowrap" }}>
                     {currencySymbol}{(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
@@ -842,34 +842,34 @@ export default function Checkout() {
             </div>
 
             <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
                 <span style={{ color: "hsl(var(--muted-foreground))" }}>Subtotal</span>
                 <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               {fees.map((fee) => {
                 const amt = fee.type === "percentage" ? subtotal * (parseFloat(fee.amount) / 100) : parseFloat(fee.amount);
                 return (
-                  <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                  <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
                     <span style={{ color: "hsl(var(--muted-foreground))" }}>{fee.name}{fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}</span>
                     <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{amt.toFixed(2)}</span>
                   </div>
                 );
               })}
               {taxEnabled && (
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
                   <span style={{ color: "hsl(var(--muted-foreground))" }}>{taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 1)}%)</span>
                   <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{taxAmount.toFixed(2)}</span>
                 </div>
               )}
               {couponApplied && couponDiscount > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
                   <span style={{ color: "hsl(142,70%,55%)" }}>Coupon Discount</span>
                   <span style={{ color: "hsl(142,70%,55%)" }}>-{currencySymbol}{couponDiscount.toFixed(2)}</span>
                 </div>
               )}
               <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Total</span>
-                <span className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(var(--primary))" }} data-testid="text-checkout-total">
+                <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--primary))" }} data-testid="text-checkout-total">
                   {currencySymbol}{total.toFixed(2)}
                 </span>
               </div>
@@ -880,14 +880,14 @@ export default function Checkout() {
           <div style={card}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
               <Tag size={13} style={{ color: "hsl(258,90%,68%)" }} />
-              <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Coupon Code</span>
+              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Coupon Code</span>
             </div>
             {couponApplied ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsla(142,70%,55%,0.1)", border: "1px solid hsla(142,70%,55%,0.25)", borderRadius: "0.5rem", padding: "0.6rem 0.75rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <Tag size={12} style={{ color: "hsl(142,70%,55%)" }} />
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(142,70%,60%)" }}>{couponCode.toUpperCase()}</span>
-                  <span style={{ fontSize: "0.75rem", color: "hsl(142,70%,50%)" }}>(-{currencySymbol}{couponDiscount.toFixed(2)})</span>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(142,70%,60%)" }}>{couponCode.toUpperCase()}</span>
+                  <span style={{ fontSize: "0.68rem", color: "hsl(142,70%,50%)" }}>(-{currencySymbol}{couponDiscount.toFixed(2)})</span>
                 </div>
                 <button onClick={removeCoupon} data-testid="button-remove-coupon" style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(142,70%,50%)" }}>
                   <X size={14} />
@@ -902,29 +902,29 @@ export default function Checkout() {
                   onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
                   placeholder="Enter coupon code"
                   data-testid="input-coupon"
-                  style={{ flex: 1, padding: "0.6rem 0.75rem", borderRadius: "0.5rem", border: `1px solid ${couponError ? "hsla(0,72%,55%,0.5)" : "hsl(var(--border))"}`, background: "hsl(var(--input))", color: "hsl(var(--foreground))", fontSize: "0.875rem", outline: "none" }}
+                  style={{ flex: 1, padding: "0.6rem 0.75rem", borderRadius: "0.5rem", border: `1px solid ${couponError ? "hsla(0,72%,55%,0.5)" : "hsl(var(--border))"}`, background: "hsl(var(--input))", color: "hsl(var(--foreground))", fontSize: "0.68rem", outline: "none" }}
                 />
                 <button
                   onClick={applyCoupon}
                   disabled={couponLoading || !couponCode.trim()}
                   data-testid="button-apply-coupon"
-                  style={{ padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(258,90%,58%)", color: "#fff", border: "none", fontWeight: 600, fontSize: "0.8rem", cursor: couponLoading || !couponCode.trim() ? "not-allowed" : "pointer", opacity: couponLoading || !couponCode.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+                  style={{ padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(258,90%,58%)", color: "#fff", border: "none", fontWeight: 600, fontSize: "0.68rem", cursor: couponLoading || !couponCode.trim() ? "not-allowed" : "pointer", opacity: couponLoading || !couponCode.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
                 >
                   {couponLoading ? "..." : "Apply"}
                 </button>
               </div>
             )}
-            {couponError && <p style={{ fontSize: "0.75rem", color: "hsl(0,72%,60%)", marginTop: "0.4rem" }}>{couponError}</p>}
-            {couponSuccessMsg && !couponError && <p style={{ fontSize: "0.75rem", color: "hsl(142,70%,50%)", marginTop: "0.4rem" }}>{couponSuccessMsg}</p>}
+            {couponError && <p style={{ fontSize: "0.68rem", color: "hsl(0,72%,60%)", marginTop: "0.4rem" }}>{couponError}</p>}
+            {couponSuccessMsg && !couponError && <p style={{ fontSize: "0.68rem", color: "hsl(142,70%,50%)", marginTop: "0.4rem" }}>{couponSuccessMsg}</p>}
           </div>
 
           {/* ── Payment Method Type Selection ── */}
           <div style={card}>
-            <h3 style={{ fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.875rem" }}>
+            <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.875rem" }}>
               Payment Method
             </h3>
             {paymentTypes.length === 0 ? (
-              <p style={{ fontSize: "0.875rem", color: "hsl(0,72%,60%)", textAlign: "center", padding: "1rem 0" }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(0,72%,60%)", textAlign: "center", padding: "1rem 0" }}>
                 No payment methods configured. Please contact support.
               </p>
             ) : (
@@ -976,7 +976,7 @@ export default function Checkout() {
                         <div style={{ fontSize: "0.9rem", fontWeight: 700, color: isSelected ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>
                           {pt.label}
                         </div>
-                        <div style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+                        <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
                           {PAYMENT_DESCRIPTIONS[pt.key] || pt.label}
                         </div>
                       </div>
@@ -992,7 +992,7 @@ export default function Checkout() {
           {/* ── Payer Name (UPI only) ── */}
           {selectedPaymentType === "UPI" && (
             <div style={card}>
-              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+              <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
                 Your name (as in UPI / bank account)
               </label>
               <input
@@ -1023,7 +1023,7 @@ export default function Checkout() {
           {errorMsg && (
             <div style={{ background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.25)", borderRadius: "0.75rem", padding: "0.85rem 1rem", display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
               <AlertCircle size={15} style={{ color: "hsl(0,72%,58%)", flexShrink: 0, marginTop: "1px" }} />
-              <div style={{ fontSize: "0.8rem", color: "hsl(0,72%,62%)" }}>{errorMsg}</div>
+              <div style={{ fontSize: "0.68rem", color: "hsl(0,72%,62%)" }}>{errorMsg}</div>
             </div>
           )}
 
@@ -1037,7 +1037,7 @@ export default function Checkout() {
               width: "100%",
               justifyContent: "center",
               padding: "0.95rem 1.5rem",
-              fontSize: "1rem",
+              fontSize: "0.9rem",
               fontWeight: 700,
               opacity: isProcessing || paymentTypes.length === 0 ? 0.7 : 1,
               cursor: isProcessing || paymentTypes.length === 0 ? "not-allowed" : "pointer",
@@ -1052,7 +1052,7 @@ export default function Checkout() {
           </button>
 
           {selectedPaymentType && (
-            <p style={{ textAlign: "center", fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
+            <p style={{ textAlign: "center", fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
               Secured payment via {paymentTypes.find(t => t.key === selectedPaymentType)?.label || selectedPaymentType}
               {" · "}Encrypted end-to-end
             </p>

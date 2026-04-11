@@ -74,7 +74,7 @@ export default function Login() {
     background: "hsl(var(--border))",
     border: "1px solid hsl(var(--border))",
     color: "hsl(var(--foreground))",
-    fontSize: "0.85rem",
+    fontSize: "0.68rem",
     fontWeight: 500,
     cursor: "pointer",
     transition: "background 0.15s",
@@ -136,14 +136,14 @@ export default function Login() {
           >
             Welcome Back
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>Sign in to your Nexcoin account</p>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Sign in to your Nexcoin account</p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div>
             <label
               htmlFor="username"
-              style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}
+              style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}
             >
               Username / Email / User ID
             </label>
@@ -163,14 +163,14 @@ export default function Login() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
               <label
                 htmlFor="password"
-                style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}
+                style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}
               >
                 Password
               </label>
               <Link
                 href="/auth/forgot-password"
                 style={{
-                  fontSize: "0.75rem",
+                  fontSize: "0.68rem",
                   color: "hsl(var(--primary))",
                   textDecoration: "none",
                   display: "inline-flex",
@@ -226,7 +226,7 @@ export default function Login() {
                 border: "1px solid hsla(0,72%,51%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(0,72%,65%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {error}
@@ -255,7 +255,7 @@ export default function Login() {
           <div style={{ marginTop: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
-              <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or continue with</span>
+              <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or continue with</span>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -300,7 +300,7 @@ export default function Login() {
         )}
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Don't have an account?{" "}
             <Link
               href="/register"

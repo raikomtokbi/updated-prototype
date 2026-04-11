@@ -69,7 +69,7 @@ function GameCard({ game }: { game: Game }) {
         )}
         {/* Game name hanging below */}
         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.4rem", paddingX: "0" }}>
-          <h3 style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
+          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
             {game.name}
           </h3>
         </div>
@@ -130,7 +130,7 @@ function ProductCard({ product }: { product: Product }) {
           </span>
         </div>
         {product.description && (
-          <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
             {product.description.length > 70 ? product.description.slice(0, 70) + "…" : product.description}
           </p>
         )}
@@ -140,7 +140,7 @@ function ProductCard({ product }: { product: Product }) {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.35rem",
-            fontSize: "0.78rem",
+            fontSize: "0.68rem",
             fontWeight: 600,
             color: "hsl(var(--primary))",
           }}
@@ -200,7 +200,7 @@ export default function Products() {
         >
           All Products
         </h1>
-        <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
           Game top-ups, gift cards, vouchers, and subscription plans — all in one place.
         </p>
       </div>
@@ -236,7 +236,7 @@ export default function Products() {
                   border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(var(--border))"}`,
                   background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
                   color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(var(--muted-foreground))",
-                  fontSize: "0.8rem",
+                  fontSize: "0.68rem",
                   fontWeight: 500,
                   cursor: "pointer",
                   transition: "all 0.15s",
@@ -253,7 +253,7 @@ export default function Products() {
 
       {/* Count */}
       {!isLoading && (
-        <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
           {filtered.length} {filtered.length === 1 ? "item" : "items"} found
         </p>
       )}
@@ -277,7 +277,7 @@ export default function Products() {
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "5rem 1rem", color: "hsl(var(--muted-foreground))" }}>
           <Zap size={48} style={{ marginBottom: "1rem", opacity: 0.3 }} />
-          <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>No products found.</p>
+          <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>No products found.</p>
           {search && (
             <button
               className="btn-secondary"

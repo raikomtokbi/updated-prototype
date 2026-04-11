@@ -51,7 +51,7 @@ export default function Offers() {
           }}
         >
           <Tag size={13} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
+          <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
             EXCLUSIVE DEALS
           </span>
         </div>
@@ -111,10 +111,10 @@ export default function Offers() {
           }}
         >
           <Megaphone size={40} style={{ color: "hsl(var(--primary))", opacity: 0.4, marginBottom: "1rem" }} />
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "0.5rem" }}>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "0.5rem" }}>
             No Active Offers Right Now
           </h3>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Check back soon — new deals are added regularly.
           </p>
         </div>
@@ -203,7 +203,7 @@ export default function Offers() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: "0.25rem",
-                        fontSize: "0.7rem",
+                        fontSize: "0.68rem",
                         color: expired ? "hsl(0,72%,55%)" : "hsl(var(--muted-foreground))",
                       }}
                     >
@@ -252,7 +252,7 @@ export default function Offers() {
                       borderRadius: "6px",
                       background: color,
                       color: "white",
-                      fontSize: "0.78rem",
+                      fontSize: "0.68rem",
                       fontWeight: 700,
                       textDecoration: "none",
                       alignSelf: "flex-start",
@@ -279,10 +279,10 @@ export default function Offers() {
           textAlign: "center",
         }}
       >
-        <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+        <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
           Can't find what you're looking for?
         </h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.25rem" }}>
           Browse our full catalog of games, gift cards, and subscriptions.
         </p>
         <Link
@@ -295,7 +295,7 @@ export default function Offers() {
             borderRadius: "8px",
             background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
             color: "white",
-            fontSize: "0.85rem",
+            fontSize: "0.68rem",
             fontWeight: 700,
             textDecoration: "none",
             boxShadow: "0 0 16px rgba(124,58,237,0.3)",

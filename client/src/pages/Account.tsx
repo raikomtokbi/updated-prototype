@@ -46,7 +46,7 @@ function NotLoggedIn() {
       <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
         Not Signed In
       </h2>
-      <p style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", marginBottom: "2rem", lineHeight: 1.6 }}>
+      <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "2rem", lineHeight: 1.6 }}>
         Sign in to manage your account, view orders and update your security settings.
       </p>
       <Link href="/login" className="btn-primary" data-testid="link-sign-in">
@@ -110,7 +110,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
           background: "hsl(var(--card))", border: "1px solid hsla(258,90%,66%,0.25)",
           borderRadius: "0.75rem", padding: "1.5rem",
         }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "1.25rem" }}>
+          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "1.25rem" }}>
             Edit Profile
           </h3>
           <div style={{ display: "grid", gap: "1rem" }}>
@@ -120,7 +120,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
               { key: "phone", label: "Phone Number", placeholder: "+1 (555) 000-0000", type: "tel" },
             ].map(({ key, label, placeholder, type = "text" }) => (
               <div key={key}>
-                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+                <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
                   {label}
                 </label>
                 <input
@@ -131,7 +131,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
                   data-testid={`input-${key}`}
                   style={{
                     width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem", padding: "0.6rem 0.9rem", fontSize: "0.875rem",
+                    borderRadius: "0.5rem", padding: "0.6rem 0.9rem", fontSize: "0.68rem",
                     color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                   }}
                 />
@@ -143,13 +143,13 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
               onClick={() => updateMutation.mutate(form)}
               disabled={updateMutation.isPending}
               className="btn-primary"
-              style={{ fontSize: "0.85rem" }}
+              style={{ fontSize: "0.68rem" }}
               data-testid="button-save-profile"
             >
               {updateMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
               Save Changes
             </button>
-            <button onClick={() => setEditing(false)} className="btn-secondary" style={{ fontSize: "0.85rem" }} data-testid="button-cancel-edit">
+            <button onClick={() => setEditing(false)} className="btn-secondary" style={{ fontSize: "0.68rem" }} data-testid="button-cancel-edit">
               <X size={14} />
               Cancel
             </button>
@@ -160,13 +160,13 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
       {/* Info fields */}
       <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
         <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Account Details
           </h3>
           <button
             onClick={() => { setEditing(!editing); if (!editing) setForm({ fullName: user.fullName ?? "", email: user.email ?? "", phone: "" }); }}
             className="btn-secondary"
-            style={{ fontSize: "0.75rem" }}
+            style={{ fontSize: "0.68rem" }}
             data-testid="button-edit-profile"
           >
             <Settings size={13} />
@@ -192,7 +192,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
                 #{value}
               </span>
             ) : (
-              <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))", fontWeight: 500, wordBreak: "break-all" }}
+              <span style={{ fontSize: "0.68rem", color: "hsl(var(--foreground))", fontWeight: 500, wordBreak: "break-all" }}
                 data-testid={`text-${key}`}>
                 {value}
               </span>
@@ -204,7 +204,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
           padding: "0.9rem 1.5rem", gap: "1rem", flexWrap: "wrap",
         }}>
           <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>Account Status</span>
-          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "hsl(145,70%,55%)", fontWeight: 500 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.68rem", color: "hsl(145,70%,55%)", fontWeight: 500 }}>
             <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "hsl(145,70%,55%)", flexShrink: 0 }} />
             Active
           </span>
@@ -266,13 +266,13 @@ function OrdersTab({ user }: { user: any }) {
         }}>
           <Lock size={24} style={{ color: "hsl(0,72%,65%)" }} />
         </div>
-        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>Session Expired</h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
+        <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>Session Expired</h3>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
           Your session is no longer valid. Please sign in again to view your orders.
         </p>
         <button
           className="btn-primary"
-          style={{ fontSize: "0.85rem" }}
+          style={{ fontSize: "0.68rem" }}
           onClick={() => { logout(); navigate("/login"); }}
         >
           Sign In Again
@@ -294,11 +294,11 @@ function OrdersTab({ user }: { user: any }) {
         }}>
           <Package size={24} style={{ color: "hsl(var(--primary))" }} />
         </div>
-        <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>No orders yet</h3>
-        <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
+        <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>No orders yet</h3>
+        <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
           Your order history will appear here once you make a purchase.
         </p>
-        <Link href="/products" className="btn-primary" style={{ fontSize: "0.85rem" }} data-testid="link-browse-products">
+        <Link href="/products" className="btn-primary" style={{ fontSize: "0.68rem" }} data-testid="link-browse-products">
           <ShoppingBag size={14} />
           Browse Products
         </Link>
@@ -338,29 +338,29 @@ function OrdersTab({ user }: { user: any }) {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                     #{order.orderNumber}
                   </span>
                   <span style={{
-                    fontSize: "0.7rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
+                    fontSize: "0.68rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
                     background: sc.bg, color: sc.text, textTransform: "capitalize",
                   }}>
                     {order.status}
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                     <Calendar size={11} /> {formatDate(order.createdAt)}
                   </span>
                   {order.items?.length > 0 && (
-                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                    <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                       <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <div className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
+                <div className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
                   {formatCurrency(order.totalAmount, order.currency)}
                 </div>
                 <ChevronRight size={14} style={{
@@ -372,7 +372,7 @@ function OrdersTab({ user }: { user: any }) {
 
             {isExpanded && order.items && order.items.length > 0 && (
               <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
-                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
                   Order Items
                 </div>
                 {order.items.map((item: any) => (
@@ -381,19 +381,19 @@ function OrdersTab({ user }: { user: any }) {
                     padding: "0.6rem 0", borderBottom: "1px solid hsl(var(--border))", gap: "0.5rem", flexWrap: "wrap",
                   }} data-testid={`row-order-item-${item.id}`}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
                       {item.packageLabel && (
-                        <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
+                        <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
                       )}
                     </div>
-                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
                       {formatCurrency(item.totalPrice)}
                     </div>
                   </div>
                 ))}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
-                  <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
-                  <span className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
+                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
+                  <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
                     {formatCurrency(order.totalAmount, order.currency)}
                   </span>
                 </div>
@@ -474,8 +474,8 @@ function SecurityTab({ user }: { user: any }) {
           <Shield size={20} style={{ color: "hsl(145,70%,55%)" }} />
         </div>
         <div>
-          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem" }}>Account Security</div>
-          <div style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+          <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem" }}>Account Security</div>
+          <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Manage your password to keep your account safe.
           </div>
         </div>
@@ -484,14 +484,14 @@ function SecurityTab({ user }: { user: any }) {
       {/* Change Password */}
       <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
         <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Change Password
           </h3>
         </div>
         <form onSubmit={handleSubmit} style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Current password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Current Password
             </label>
             <div style={{ position: "relative" }}>
@@ -506,7 +506,7 @@ function SecurityTab({ user }: { user: any }) {
                 style={{
                   width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.68rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{
@@ -520,7 +520,7 @@ function SecurityTab({ user }: { user: any }) {
 
           {/* New password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               New Password
             </label>
             <div style={{ position: "relative" }}>
@@ -535,7 +535,7 @@ function SecurityTab({ user }: { user: any }) {
                 style={{
                   width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.68rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowNew(!showNew)} style={{
@@ -554,7 +554,7 @@ function SecurityTab({ user }: { user: any }) {
                     transition: "width 0.3s, background 0.3s", borderRadius: "99px",
                   }} />
                 </div>
-                <div style={{ fontSize: "0.72rem", color: strength.color, marginTop: "0.3rem" }}>
+                <div style={{ fontSize: "0.68rem", color: strength.color, marginTop: "0.3rem" }}>
                   Strength: {strength.label}
                 </div>
               </div>
@@ -563,7 +563,7 @@ function SecurityTab({ user }: { user: any }) {
 
           {/* Confirm password */}
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
               Confirm New Password
             </label>
             <div style={{ position: "relative" }}>
@@ -579,7 +579,7 @@ function SecurityTab({ user }: { user: any }) {
                   width: "100%", background: "hsl(var(--background))",
                   border: `1px solid ${form.confirmPassword && form.confirmPassword !== form.newPassword ? "hsla(0,72%,55%,0.5)" : "hsl(var(--border))"}`,
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
-                  fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
+                  fontSize: "0.68rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
               />
               <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{
@@ -590,7 +590,7 @@ function SecurityTab({ user }: { user: any }) {
               </button>
             </div>
             {form.confirmPassword && form.confirmPassword !== form.newPassword && (
-              <div style={{ fontSize: "0.72rem", color: "hsl(0,72%,60%)", marginTop: "0.3rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "hsl(0,72%,60%)", marginTop: "0.3rem" }}>
                 Passwords do not match
               </div>
             )}
@@ -601,7 +601,7 @@ function SecurityTab({ user }: { user: any }) {
             background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
             borderRadius: "0.5rem", padding: "0.85rem 1rem",
           }}>
-            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
+            <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
               Requirements
             </div>
             {[
@@ -614,7 +614,7 @@ function SecurityTab({ user }: { user: any }) {
                 <span style={{ color: met ? "hsl(145,70%,55%)" : "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                   {met ? <Check size={12} /> : <X size={12} />}
                 </span>
-                <span style={{ fontSize: "0.78rem", color: met ? "hsl(145,70%,55%)" : "hsl(var(--muted-foreground))" }}>{label}</span>
+                <span style={{ fontSize: "0.68rem", color: met ? "hsl(145,70%,55%)" : "hsl(var(--muted-foreground))" }}>{label}</span>
               </div>
             ))}
           </div>
@@ -623,7 +623,7 @@ function SecurityTab({ user }: { user: any }) {
             type="submit"
             disabled={changeMutation.isPending || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword}
             className="btn-primary"
-            style={{ alignSelf: "flex-start", fontSize: "0.85rem" }}
+            style={{ alignSelf: "flex-start", fontSize: "0.68rem" }}
             data-testid="button-change-password"
           >
             {changeMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
@@ -686,14 +686,14 @@ function DeleteAccountSection() {
           <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(0,72%,60%)", marginBottom: "0.25rem" }}>
             Delete Account
           </h3>
-          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Permanently delete your account and all associated data. This action cannot be undone.
           </p>
         </div>
         <button
           onClick={() => setShowDelete(!showDelete)}
           className="btn-secondary"
-          style={{ fontSize: "0.8rem", flexShrink: 0 }}
+          style={{ fontSize: "0.68rem", flexShrink: 0 }}
           data-testid="button-delete-account-toggle"
         >
           {showDelete ? "Cancel" : "Delete"}
@@ -708,12 +708,12 @@ function DeleteAccountSection() {
           <div style={{
             background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.15)",
             borderRadius: "0.5rem", padding: "0.75rem",
-            fontSize: "0.78rem", color: "hsl(0,72%,65%)",
+            fontSize: "0.68rem", color: "hsl(0,72%,65%)",
           }}>
             This will permanently delete your account, orders, and personal information. This cannot be reversed.
           </div>
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>
               Enter your password to confirm
             </label>
             <input
@@ -725,7 +725,7 @@ function DeleteAccountSection() {
               style={{
                 width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                 borderRadius: "0.5rem", padding: "0.6rem 0.9rem",
-                fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
+                fontSize: "0.68rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
               }}
             />
           </div>
@@ -735,7 +735,7 @@ function DeleteAccountSection() {
             style={{
               background: "hsl(0,72%,55%)", color: "white", border: "none",
               borderRadius: "0.5rem", padding: "0.6rem 1rem",
-              fontSize: "0.85rem", fontWeight: 600, cursor: "pointer",
+              fontSize: "0.68rem", fontWeight: 600, cursor: "pointer",
               opacity: deleteMutation.isPending || !deletePassword ? 0.6 : 1,
             }}
             data-testid="button-confirm-delete"
@@ -760,7 +760,7 @@ function TicketStatusBadge({ status }: { status: string }) {
   const c = TICKET_STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(var(--muted-foreground))" };
   return (
     <span style={{
-      display: "inline-block", fontSize: "0.72rem", fontWeight: 600,
+      display: "inline-block", fontSize: "0.68rem", fontWeight: 600,
       padding: "2px 8px", borderRadius: "999px",
       background: c.bg, color: c.text, textTransform: "capitalize",
     }}>
@@ -838,7 +838,7 @@ function TicketsTab({ user }: { user: any }) {
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <button
           onClick={() => setSelectedTicketId(null)}
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "0.85rem", fontWeight: 600, padding: 0 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "0.68rem", fontWeight: 600, padding: 0 }}
         >
           <ArrowLeft size={15} /> Back to tickets
         </button>
@@ -852,8 +852,8 @@ function TicketsTab({ user }: { user: any }) {
             <div style={{ ...baseBox, padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                 <div>
-                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>{ticket.subject}</div>
-                  <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>{ticket.subject}</div>
+                  <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                     #{ticket.ticketNumber} · {formatDate(ticket.createdAt)}
                     {ticket.category && <> · {ticket.category}</>}
                   </div>
@@ -864,7 +864,7 @@ function TicketsTab({ user }: { user: any }) {
 
             <div style={baseBox}>
               <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
-                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                   Conversation
                 </span>
               </div>
@@ -875,19 +875,19 @@ function TicketsTab({ user }: { user: any }) {
                     width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
                     background: "linear-gradient(135deg,hsl(258,90%,45%),hsl(196,100%,40%))",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "0.75rem", fontWeight: 700, color: "white",
+                    fontSize: "0.68rem", fontWeight: 700, color: "white",
                   }}>
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-                      <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{user.username}</span>
-                      <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(ticket.createdAt)}</span>
+                      <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{user.username}</span>
+                      <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(ticket.createdAt)}</span>
                     </div>
                     <div style={{
                       background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                       borderRadius: "0 0.75rem 0.75rem 0.75rem", padding: "0.75rem 1rem",
-                      fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                      fontSize: "0.68rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                     }}>
                       {ticket.message}
                     </div>
@@ -904,30 +904,30 @@ function TicketsTab({ user }: { user: any }) {
                         background: isAdmin ? "linear-gradient(135deg,hsl(258,90%,55%),hsl(196,100%,45%))" : "hsl(220,20%,18%)",
                         border: isAdmin ? "none" : "1px solid hsl(220,15%,24%)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "0.75rem", fontWeight: 700, color: "white",
+                        fontSize: "0.68rem", fontWeight: 700, color: "white",
                       }}>
                         {isAdmin ? "S" : user.username.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1, maxWidth: "85%" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", justifyContent: isAdmin ? "flex-end" : "flex-start" }}>
-                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: isAdmin ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>
+                          <span style={{ fontSize: "0.68rem", fontWeight: 600, color: isAdmin ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>
                             {isAdmin ? "Support" : user.username}
                           </span>
-                          <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(r.createdAt)}</span>
+                          <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(r.createdAt)}</span>
                         </div>
                         <div style={{
                           background: isAdmin ? "hsla(258,90%,55%,0.12)" : "hsl(var(--card))",
                           border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.25)" : "hsl(var(--border))"}`,
                           borderRadius: isAdmin ? "0.75rem 0 0.75rem 0.75rem" : "0 0.75rem 0.75rem 0.75rem",
                           padding: "0.75rem 1rem",
-                          fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                          fontSize: "0.68rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                         }}>
                           {r.message}
                         </div>
                         {r.attachmentUrl && (
                           <div style={{ marginTop: "0.35rem", textAlign: isAdmin ? "right" : "left" }}>
                             <a href={r.attachmentUrl} target="_blank" rel="noreferrer"
-                              style={{ fontSize: "0.75rem", color: "hsl(var(--primary))", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                              style={{ fontSize: "0.68rem", color: "hsl(var(--primary))", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
                               <Paperclip size={12} /> Attachment
                             </a>
                           </div>
@@ -938,7 +938,7 @@ function TicketsTab({ user }: { user: any }) {
                 })}
 
                 {ticket.replies?.length === 0 && (
-                  <div style={{ textAlign: "center", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", padding: "1rem 0" }}>
+                  <div style={{ textAlign: "center", fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", padding: "1rem 0" }}>
                     No replies yet. We'll respond within 24 hours.
                   </div>
                 )}
@@ -949,7 +949,7 @@ function TicketsTab({ user }: { user: any }) {
             {ticket.status !== "closed" && (
               <div style={baseBox}>
                 <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
-                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                     Send Reply
                   </span>
                 </div>
@@ -962,7 +962,7 @@ function TicketsTab({ user }: { user: any }) {
                     style={{
                       width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                       borderRadius: "0.5rem", padding: "0.7rem 1rem",
-                      fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none",
+                      fontSize: "0.68rem", color: "hsl(var(--foreground))", outline: "none",
                       resize: "vertical", minHeight: "80px", boxSizing: "border-box",
                     }}
                   />
@@ -981,7 +981,7 @@ function TicketsTab({ user }: { user: any }) {
                         display: "inline-flex", alignItems: "center", gap: "0.4rem",
                         background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem", padding: "0.45rem 0.85rem",
-                        fontSize: "0.78rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
+                        fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                       }}
                     >
                       <Paperclip size={13} />
@@ -989,7 +989,7 @@ function TicketsTab({ user }: { user: any }) {
                     </button>
                     {attachment && (
                       <button onClick={() => { setAttachment(null); if (fileRef.current) fileRef.current.value = ""; }}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(0,72%,60%)", fontSize: "0.75rem", padding: 0 }}>
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(0,72%,60%)", fontSize: "0.68rem", padding: 0 }}>
                         Remove
                       </button>
                     )}
@@ -1000,7 +1000,7 @@ function TicketsTab({ user }: { user: any }) {
                         marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "0.5rem",
                         background: "linear-gradient(135deg,hsl(258,90%,55%),hsl(258,90%,45%))",
                         border: "none", borderRadius: "0.5rem", padding: "0.5rem 1.1rem",
-                        fontSize: "0.85rem", fontWeight: 600, color: "white", cursor: "pointer",
+                        fontSize: "0.68rem", fontWeight: 600, color: "white", cursor: "pointer",
                         opacity: !replyMsg.trim() || replyMutation.isPending ? 0.6 : 1,
                       }}
                     >
@@ -1029,8 +1029,8 @@ function TicketsTab({ user }: { user: any }) {
           <Headphones size={16} style={{ color: "hsl(var(--primary))" }} />
         </div>
         <div>
-          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>Support Tickets</div>
-          <div style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>View and manage your submitted support requests</div>
+          <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>Support Tickets</div>
+          <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>View and manage your submitted support requests</div>
         </div>
       </div>
 
@@ -1040,10 +1040,10 @@ function TicketsTab({ user }: { user: any }) {
           <Loader2 size={24} className="animate-spin" style={{ margin: "0 auto" }} />
         </div>
       ) : tickets.length === 0 ? (
-        <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "0.875rem" }}>
+        <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "0.68rem" }}>
           <Headphones size={36} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
           <p style={{ fontWeight: 600, marginBottom: "0.4rem" }}>No tickets yet</p>
-          <p style={{ fontSize: "0.8rem" }}>
+          <p style={{ fontSize: "0.68rem" }}>
             Visit the{" "}
             <Link href="/support" style={{ color: "hsl(var(--primary))" }}>Support page</Link>
             {" "}to submit a ticket.
@@ -1066,10 +1066,10 @@ function TicketsTab({ user }: { user: any }) {
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {t.subject}
                 </div>
-                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
+                <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                   #{t.ticketNumber} · {formatDate(t.createdAt)}
                   {t.category && <> · {t.category}</>}
                 </div>
@@ -1147,7 +1147,7 @@ export default function Account() {
               <span className="badge" style={{ background: `${roleInfo.color}20`, color: roleInfo.color, border: `1px solid ${roleInfo.color}40` }}>
                 {roleInfo.label}
               </span>
-              <span style={{ fontFamily: "monospace", fontSize: "0.72rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
+              <span style={{ fontFamily: "monospace", fontSize: "0.68rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
                 #{user.id.slice(0, 12)}…
               </span>
             </div>
@@ -1159,13 +1159,13 @@ export default function Account() {
           display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "center",
         }}>
           {isStaff() && (
-            <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.78rem" }} data-testid="button-go-to-admin">
+            <button onClick={() => navigate("/admin")} className="btn-primary" style={{ fontSize: "0.68rem" }} data-testid="button-go-to-admin">
               <Lock size={12} />
               Admin Panel
             </button>
           )}
           <button onClick={handleLogout} className="btn-secondary"
-            style={{ fontSize: "0.78rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
+            style={{ fontSize: "0.68rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
             data-testid="button-logout">
             <LogOut size={12} />
             Sign Out

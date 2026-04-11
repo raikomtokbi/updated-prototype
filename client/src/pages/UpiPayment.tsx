@@ -144,7 +144,7 @@ export default function UpiPayment() {
         <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           Payment Confirmed!
         </h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
           Your UPI payment has been verified. Your order is being processed and digital products will be delivered shortly.
         </p>
         {orderStatus?.utr && (
@@ -157,7 +157,7 @@ export default function UpiPayment() {
           <Link href="/account" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }} data-testid="link-view-orders">
             View Orders <ArrowRight size={16} />
           </Link>
-          <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }}>
+          <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.68rem", textDecoration: "none" }}>
             Continue Shopping
           </Link>
         </div>
@@ -177,16 +177,16 @@ export default function UpiPayment() {
         <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           {isExpired ? "Payment Window Expired" : "Payment Failed"}
         </h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem", marginBottom: "2rem", lineHeight: 1.6 }}>
           {isExpired
             ? "The payment window has closed. If you completed the payment, our system will still verify it within a few minutes."
             : error || "Your payment could not be processed. Please try again or use a different payment method."}
         </p>
         <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/account" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-check-orders">
+          <Link href="/account" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.68rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-check-orders">
             View Orders
           </Link>
-          <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }} data-testid="link-try-again">
+          <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.68rem", textDecoration: "none" }} data-testid="link-try-again">
             <RotateCcw size={15} /> Try Again
           </Link>
         </div>
@@ -199,7 +199,7 @@ export default function UpiPayment() {
       <div style={{ maxWidth: "520px", margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
+          <h1 style={{ fontSize: "13px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
             Complete Your Payment
           </h1>
           <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginTop: "0.4rem" }}>
@@ -211,7 +211,7 @@ export default function UpiPayment() {
         <div style={{ ...card, marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
             <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px", margin: "0 0 2px" }}>Amount to Pay</p>
-            <p style={{ color: "hsl(var(--foreground))", fontSize: "24px", fontWeight: 700, margin: 0 }}>
+            <p style={{ color: "hsl(var(--foreground))", fontSize: "21px", fontWeight: 700, margin: 0 }}>
               {currencySymbol}{parseFloat(amount || "0").toFixed(2)}
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function UpiPayment() {
               <Clock size={14} style={{ color: timerColor }} />
               <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>Time remaining</span>
             </div>
-            <p style={{ color: timerColor, fontSize: "22px", fontWeight: 700, margin: 0, fontVariantNumeric: "tabular-nums" }}>
+            <p style={{ color: timerColor, fontSize: "13px", fontWeight: 700, margin: 0, fontVariantNumeric: "tabular-nums" }}>
               {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
             </p>
           </div>
@@ -248,7 +248,7 @@ export default function UpiPayment() {
               Or Pay Using UPI ID
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
-              <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "15px", fontWeight: 600, wordBreak: "break-all" }} data-testid="text-upi-id">
+              <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "13px", fontWeight: 600, wordBreak: "break-all" }} data-testid="text-upi-id">
                 {upiId}
               </span>
               <button
@@ -269,7 +269,7 @@ export default function UpiPayment() {
             Exact Amount (copy and paste)
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
-            <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "15px", fontWeight: 600 }} data-testid="text-exact-amount">
+            <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "13px", fontWeight: 600 }} data-testid="text-exact-amount">
               {parseFloat(amount || "0").toFixed(2)}
             </span>
             <button

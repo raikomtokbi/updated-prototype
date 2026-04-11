@@ -95,7 +95,7 @@ export default function Cart() {
         <button
           onClick={clearCart}
           className="btn-secondary"
-          style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
+          style={{ fontSize: "0.68rem", padding: "0.45rem 0.9rem", color: "hsl(0,72%,60%)", borderColor: "hsla(0,72%,51%,0.3)" }}
           data-testid="button-clear-cart"
         >
           <Trash2 size={14} />
@@ -139,10 +139,10 @@ export default function Cart() {
               <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
                 {item.productTitle}
               </h3>
-              <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
                 Package: {item.packageName}
               </p>
-              <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+              <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
                 Player ID: <span style={{ color: "hsl(var(--muted-foreground))" }}>{item.userId}</span>
                 {item.zoneId && (
                   <> · Zone: <span style={{ color: "hsl(var(--muted-foreground))" }}>{item.zoneId}</span></>
@@ -153,7 +153,7 @@ export default function Cart() {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem" }}>
               <span
                 className="font-orbitron"
-                style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--primary))" }}
+                style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}
               >
                 {currencySymbol}{(item.price * item.quantity).toFixed(2)}
               </span>
@@ -179,7 +179,7 @@ export default function Cart() {
                 </button>
                 <span
                   data-testid={`text-quantity-${item.id}`}
-                  style={{ minWidth: "24px", textAlign: "center", fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}
+                  style={{ minWidth: "24px", textAlign: "center", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}
                 >
                   {item.quantity}
                 </span>
@@ -214,7 +214,7 @@ export default function Cart() {
                   display: "flex",
                   alignItems: "center",
                   gap: "0.25rem",
-                  fontSize: "0.75rem",
+                  fontSize: "0.68rem",
                   padding: "0.2rem 0",
                 }}
               >
@@ -236,11 +236,11 @@ export default function Cart() {
           padding: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "1.25rem" }}>
+        <h2 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "1.25rem" }}>
           Order Summary
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.25rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
             <span style={{ color: "hsl(var(--muted-foreground))" }}>Subtotal ({items.length} {items.length === 1 ? "item" : "items"})</span>
             <span style={{ color: "hsl(var(--foreground))" }}>{currencySymbol}{subtotal.toFixed(2)}</span>
           </div>
@@ -249,7 +249,7 @@ export default function Cart() {
               ? subtotal * (parseFloat(fee.amount) / 100)
               : parseFloat(fee.amount);
             return (
-              <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+              <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
                 <span style={{ color: "hsl(var(--muted-foreground))" }}>
                   {fee.name}
                   {fee.type === "percentage" && ` (${parseFloat(fee.amount).toFixed(2)}%)`}
@@ -259,7 +259,7 @@ export default function Cart() {
             );
           })}
           {taxEnabled && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem" }}>
               <span style={{ color: "hsl(var(--muted-foreground))" }}>
                 {taxName} ({(taxRate * 100).toFixed(taxRate * 100 % 1 === 0 ? 0 : 2)}%)
               </span>
@@ -271,11 +271,11 @@ export default function Cart() {
         </div>
         <hr style={{ border: "none", borderTop: "1px solid hsl(var(--border))", marginBottom: "1.25rem" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <span style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Total</span>
+          <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Total</span>
           <span
             className="font-orbitron"
             data-testid="text-cart-total"
-            style={{ fontSize: "1.25rem", fontWeight: 800, color: "hsl(var(--primary))" }}
+            style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--primary))" }}
           >
             {currencySymbol}{total.toFixed(2)}
           </span>

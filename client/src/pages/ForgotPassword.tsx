@@ -79,7 +79,7 @@ export default function ForgotPassword() {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.35rem",
-            fontSize: "0.8rem",
+            fontSize: "0.68rem",
             color: "hsl(var(--muted-foreground))",
             textDecoration: "none",
             marginBottom: "1.75rem",
@@ -117,7 +117,7 @@ export default function ForgotPassword() {
           >
             Forgot Password
           </h1>
-          <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Enter your email, username, or user ID to receive a reset OTP.
           </p>
         </div>
@@ -131,7 +131,7 @@ export default function ForgotPassword() {
               htmlFor="identifier"
               style={{
                 display: "block",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
                 fontWeight: 600,
                 color: "hsl(220,10%,65%)",
                 marginBottom: "0.4rem",
@@ -161,7 +161,7 @@ export default function ForgotPassword() {
                 border: "1px solid hsla(0,72%,51%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(0,72%,65%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {error}
@@ -177,7 +177,7 @@ export default function ForgotPassword() {
                 border: "1px solid hsla(142,72%,45%,0.3)",
                 borderRadius: "0.5rem",
                 color: "hsl(142,72%,60%)",
-                fontSize: "0.8rem",
+                fontSize: "0.68rem",
               }}
             >
               {success}
@@ -203,7 +203,7 @@ export default function ForgotPassword() {
         </form>
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Remember your password?{" "}
             <Link
               href="/login"

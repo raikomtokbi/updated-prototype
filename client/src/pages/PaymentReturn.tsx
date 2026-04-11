@@ -91,10 +91,10 @@ export default function PaymentReturn() {
     return (
       <div style={{ maxWidth: "480px", margin: "4rem auto", padding: "2rem 1.5rem", textAlign: "center" }}>
         <Loader2 size={48} style={{ color: "hsl(258,70%,65%)", animation: "spin 1s linear infinite", margin: "0 auto 1.5rem" }} />
-        <h2 className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
+        <h2 className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
           Confirming Payment...
         </h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem" }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem" }}>
           Please wait while we verify your payment.
         </p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -111,7 +111,7 @@ export default function PaymentReturn() {
         <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           Payment Successful!
         </h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
           Your order has been confirmed. Digital products will be delivered to your email shortly. Check your spam folder if needed.
         </p>
         {state.transactionId && (
@@ -133,10 +133,10 @@ export default function PaymentReturn() {
         <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "hsla(40,70%,55%,0.15)", border: "2px solid hsl(40,70%,55%)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
           <Loader2 size={40} style={{ color: "hsl(40,70%,55%)", animation: "spin 1s linear infinite" }} />
         </div>
-        <h2 className="font-orbitron" style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
+        <h2 className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           Payment Pending
         </h2>
-        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem", marginBottom: "2rem", lineHeight: 1.6 }}>
           {state.message || "Your payment is being processed. You will receive a confirmation email once confirmed."}
         </p>
         <Link href="/products" className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -155,14 +155,14 @@ export default function PaymentReturn() {
       <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
         Payment Failed
       </h2>
-      <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+      <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.68rem", marginBottom: "2rem", lineHeight: 1.6 }}>
         {state.message || "Your payment could not be processed. Please try again or use a different payment method."}
       </p>
       <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-        <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-retry-payment">
+        <Link href="/checkout" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsla(258,70%,65%,0.15)", border: "1px solid hsla(258,70%,65%,0.3)", color: "hsl(258,70%,72%)", fontSize: "0.68rem", fontWeight: 600, textDecoration: "none" }} data-testid="link-retry-payment">
           <RotateCcw size={15} /> Try Again
         </Link>
-        <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.875rem", textDecoration: "none" }}>
+        <Link href="/products" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.6rem 1.25rem", borderRadius: "0.5rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,65%)", fontSize: "0.68rem", textDecoration: "none" }}>
           Browse Products
         </Link>
       </div>
