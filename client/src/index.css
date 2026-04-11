@@ -384,7 +384,7 @@ textarea {
 /* Hero slider — zoom in on mobile */
 @media (max-width: 768px) {
   .hero-slide-img {
-    transform: scale(1.78) translateY(-1%);
+    transform: scale(1.78) translateY(1%);
     transform-origin: center center;
   }
 }
