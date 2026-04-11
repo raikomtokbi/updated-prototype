@@ -32,8 +32,10 @@ import {
   smileOneConfigs, smileOneMappings,
   busanConfigs, busanMappings,
   upiPaymentSettings, unmatchedPayments,
+  rolePermissions,
   type UpiPaymentSettings, type InsertUpiPaymentSettings,
   type UnmatchedPayment, type InsertUnmatchedPayment,
+  type RolePermission,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -232,6 +234,13 @@ export interface IStorage {
     salesTrend: { label: string; sales: number }[];
     orderStatus: { name: string; value: number }[];
   }>;
+
+  // Role Permissions
+  getAllRolePermissions(): Promise<RolePermission[]>;
+  getRolePermission(role: string): Promise<RolePermission | undefined>;
+  upsertRolePermission(role: string, label: string, permissions: string[], isSystem?: boolean): Promise<RolePermission>;
+  deleteRolePermission(role: string): Promise<void>;
+  seedDefaultRolePermissions(): Promise<void>;
 }
 
 // ─── Helper: fetch-after-write (no RETURNING needed) ─────────────────────────
@@ -1029,6 +1038,56 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
+  }
+
+  // ── Role Permissions ──────────────────────────────────────────────────────────
+  async getAllRolePermissions(): Promise<RolePermission[]> {
+    return db.select().from(rolePermissions).orderBy(asc(rolePermissions.createdAt));
+  }
+
+  async getRolePermission(role: string): Promise<RolePermission | undefined> {
+    const [row] = await db.select().from(rolePermissions).where(eq(rolePermissions.role, role));
+    return row;
+  }
+
+  async upsertRolePermission(role: string, label: string, permissions: string[], isSystem = false): Promise<RolePermission> {
+    const existing = await this.getRolePermission(role);
+    if (existing) {
+      await db.update(rolePermissions)
+        .set({ label, permissions: JSON.stringify(permissions), isSystem, updatedAt: new Date() })
+        .where(eq(rolePermissions.role, role));
+    } else {
+      const id = randomUUID();
+      await db.insert(rolePermissions).values({ id, role, label, permissions: JSON.stringify(permissions), isSystem });
+    }
+    return (await this.getRolePermission(role))!;
+  }
+
+  async deleteRolePermission(role: string): Promise<void> {
+    await db.delete(rolePermissions).where(eq(rolePermissions.role, role));
+  }
+
+  async seedDefaultRolePermissions(): Promise<void> {
+    const ALL_PERMS = [
+      "dashboard","topup_orders","voucher_orders","payments","refunds",
+      "contact_submissions","support_tickets","games","gift_cards","vouchers",
+      "subscriptions","users","subscribers","campaigns","coupons",
+      "control_panel","payment_method","api_integration","plugins","email_templates",
+      "theme","content","roles_permissions"
+    ];
+    const defaults: Array<{ role: string; label: string; isSystem: boolean; permissions: string[] }> = [
+      { role: "super_admin", label: "Super Admin", isSystem: true, permissions: ALL_PERMS },
+      { role: "admin", label: "Admin", isSystem: true, permissions: ALL_PERMS.filter(p => p !== "roles_permissions") },
+      { role: "staff", label: "Staff", isSystem: true, permissions: ["dashboard","topup_orders","voucher_orders","contact_submissions","support_tickets","users"] },
+      { role: "user", label: "User", isSystem: true, permissions: [] },
+    ];
+    for (const d of defaults) {
+      const existing = await this.getRolePermission(d.role);
+      if (!existing) {
+        const id = randomUUID();
+        await db.insert(rolePermissions).values({ id, role: d.role, label: d.label, isSystem: d.isSystem, permissions: JSON.stringify(d.permissions) });
+      }
+    }
   }
 }
 

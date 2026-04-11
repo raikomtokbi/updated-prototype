@@ -33,6 +33,7 @@ import {
   Mail,
   X,
   Trash2,
+  Key,
 } from "lucide-react";
 
 import { useAuthStore } from "@/lib/store/authstore";
@@ -54,6 +55,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   path: string;
+  permKey?: string;
 }
 
 interface NavSection {
@@ -65,68 +67,74 @@ const navSections: NavSection[] = [
   {
     title: "",
     items: [
-      { label: "Dashboard", icon: <LayoutDashboard size={15} />, path: "/admin" },
+      { label: "Dashboard", icon: <LayoutDashboard size={15} />, path: "/admin", permKey: "dashboard" },
     ],
   },
   {
     title: "ORDERS",
     items: [
-      { label: "Top up orders", icon: <ShoppingCart size={15} />, path: "/admin/topup-orders" },
-      { label: "Voucher orders", icon: <Tag size={15} />, path: "/admin/voucher-orders" },
+      { label: "Top up orders", icon: <ShoppingCart size={15} />, path: "/admin/topup-orders", permKey: "topup_orders" },
+      { label: "Voucher orders", icon: <Tag size={15} />, path: "/admin/voucher-orders", permKey: "voucher_orders" },
     ],
   },
   {
     title: "TRANSACTIONS",
     items: [
-      { label: "Payment", icon: <CreditCard size={15} />, path: "/admin/payments" },
-      { label: "Refund", icon: <RotateCcw size={15} />, path: "/admin/refunds" },
+      { label: "Payment", icon: <CreditCard size={15} />, path: "/admin/payments", permKey: "payments" },
+      { label: "Refund", icon: <RotateCcw size={15} />, path: "/admin/refunds", permKey: "refunds" },
     ],
   },
   {
     title: "SUPPORT",
     items: [
-      { label: "Contact submissions", icon: <Mail size={15} />, path: "/admin/contact-submissions" },
-      { label: "Support tickets", icon: <LifeBuoy size={15} />, path: "/admin/support-tickets" },
+      { label: "Contact submissions", icon: <Mail size={15} />, path: "/admin/contact-submissions", permKey: "contact_submissions" },
+      { label: "Support tickets", icon: <LifeBuoy size={15} />, path: "/admin/support-tickets", permKey: "support_tickets" },
     ],
   },
   {
     title: "PRODUCT",
     items: [
-      { label: "Games", icon: <Gamepad2 size={15} />, path: "/admin/games" },
-      { label: "Gift Cards", icon: <Package size={15} />, path: "/admin/gift-cards" },
-      { label: "Vouchers", icon: <Ticket size={15} />, path: "/admin/vouchers" },
-      { label: "Subscription", icon: <RefreshCcw size={15} />, path: "/admin/subscriptions" },
+      { label: "Games", icon: <Gamepad2 size={15} />, path: "/admin/games", permKey: "games" },
+      { label: "Gift Cards", icon: <Package size={15} />, path: "/admin/gift-cards", permKey: "gift_cards" },
+      { label: "Vouchers", icon: <Ticket size={15} />, path: "/admin/vouchers", permKey: "vouchers" },
+      { label: "Subscription", icon: <RefreshCcw size={15} />, path: "/admin/subscriptions", permKey: "subscriptions" },
     ],
   },
   {
     title: "USER MANAGER",
     items: [
-      { label: "User", icon: <Users size={15} />, path: "/admin/users" },
-      { label: "Subscriber", icon: <UserCheck size={15} />, path: "/admin/subscribers" },
+      { label: "User", icon: <Users size={15} />, path: "/admin/users", permKey: "users" },
+      { label: "Subscriber", icon: <UserCheck size={15} />, path: "/admin/subscribers", permKey: "subscribers" },
     ],
   },
   {
     title: "MARKETING",
     items: [
-      { label: "Campaigns", icon: <Megaphone size={15} />, path: "/admin/campaigns" },
-      { label: "Coupons", icon: <BadgePercent size={15} />, path: "/admin/coupons" },
+      { label: "Campaigns", icon: <Megaphone size={15} />, path: "/admin/campaigns", permKey: "campaigns" },
+      { label: "Coupons", icon: <BadgePercent size={15} />, path: "/admin/coupons", permKey: "coupons" },
     ],
   },
   {
     title: "SETTINGS",
     items: [
-      { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel" },
-      { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method" },
-      { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration" },
-      { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins" },
-      { label: "Email Templates", icon: <Mail size={15} />, path: "/admin/email-templates" },
+      { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel", permKey: "control_panel" },
+      { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method", permKey: "payment_method" },
+      { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration", permKey: "api_integration" },
+      { label: "Plugins", icon: <Package size={15} />, path: "/admin/plugins", permKey: "plugins" },
+      { label: "Email Templates", icon: <Mail size={15} />, path: "/admin/email-templates", permKey: "email_templates" },
     ],
   },
   {
     title: "APPEARANCE",
     items: [
-      { label: "Theme", icon: <Palette size={15} />, path: "/admin/choose-theme" },
-      { label: "Content", icon: <FileEdit size={15} />, path: "/admin/edit-content" },
+      { label: "Theme", icon: <Palette size={15} />, path: "/admin/choose-theme", permKey: "theme" },
+      { label: "Content", icon: <FileEdit size={15} />, path: "/admin/edit-content", permKey: "content" },
+    ],
+  },
+  {
+    title: "ACCESS",
+    items: [
+      { label: "Roles & Permissions", icon: <Key size={15} />, path: "/admin/roles-permissions", permKey: "roles_permissions" },
     ],
   },
 ];
@@ -136,6 +144,23 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
   const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
   const siteLogo = siteSettings?.site_logo || "";
   const siteName = siteSettings?.site_name || "Nexcoin";
+  const { data: myPerms, isLoading: permsLoading } = useQuery<{ role: string; permissions: string[] }>({
+    queryKey: ["/api/admin/my-permissions"],
+    queryFn: () => adminApi.get("/my-permissions"),
+    staleTime: 30000,
+    retry: false,
+  });
+  const isSuperAdmin = myPerms?.role === "super_admin";
+  const permSet = new Set(myPerms?.permissions ?? []);
+  // While loading or on error, show all nav items (safe fallback)
+  const visibleSections = permsLoading || !myPerms
+    ? navSections
+    : navSections
+        .map(section => ({
+          ...section,
+          items: section.items.filter(item => !item.permKey || isSuperAdmin || permSet.has(item.permKey)),
+        }))
+        .filter(section => section.items.length > 0);
 
   return (
     <aside
@@ -209,7 +234,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
       </div>
 
       <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-        {navSections.map((section) => (
+        {visibleSections.map((section) => (
           <div key={section.title || "root"} style={{ marginBottom: "2px" }}>
             {section.title && (
               <div

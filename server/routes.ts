@@ -3174,6 +3174,67 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ── Role Permissions ────────────────────────────────────────────────────────
+  // Seed defaults (safe: only inserts if row doesn't exist)
+  storage.seedDefaultRolePermissions().catch(console.error);
+
+  // GET all role permission entries (super_admin only)
+  app.get("/api/admin/role-permissions", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      if (adminRole !== "super_admin") return res.status(403).json({ error: "Forbidden" });
+      const rows = await storage.getAllRolePermissions();
+      res.json(rows.map(r => ({ ...r, permissions: JSON.parse(r.permissions as string || "[]") })));
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET single role permission
+  app.get("/api/admin/role-permissions/:role", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      if (adminRole !== "super_admin") return res.status(403).json({ error: "Forbidden" });
+      const row = await storage.getRolePermission(req.params.role);
+      if (!row) return res.status(404).json({ error: "Not found" });
+      res.json({ ...row, permissions: JSON.parse(row.permissions as string || "[]") });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // POST /api/admin/role-permissions — create or update
+  app.post("/api/admin/role-permissions", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      if (adminRole !== "super_admin") return res.status(403).json({ error: "Forbidden" });
+      const { role, label, permissions, isSystem } = req.body;
+      if (!role || !label) return res.status(400).json({ error: "role and label are required" });
+      if (!Array.isArray(permissions)) return res.status(400).json({ error: "permissions must be an array" });
+      const row = await storage.upsertRolePermission(role, label, permissions, !!isSystem);
+      res.json({ ...row, permissions: JSON.parse(row.permissions as string || "[]") });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // DELETE /api/admin/role-permissions/:role (non-system roles only)
+  app.delete("/api/admin/role-permissions/:role", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      if (adminRole !== "super_admin") return res.status(403).json({ error: "Forbidden" });
+      const row = await storage.getRolePermission(req.params.role);
+      if (!row) return res.status(404).json({ error: "Not found" });
+      if (row.isSystem) return res.status(400).json({ error: "Cannot delete system roles" });
+      await storage.deleteRolePermission(req.params.role);
+      res.json({ success: true });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // Public endpoint — get permissions for a specific role (used by admin UI)
+  app.get("/api/admin/my-permissions", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      const row = await storage.getRolePermission(adminRole);
+      const permissions = row ? JSON.parse(row.permissions as string || "[]") : [];
+      res.json({ role: adminRole, permissions });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // Start UPI email payment poller — pass handleOrderCompleted so auto-matched
   // payments also trigger Busan fulfillment + confirmation email.
   startEmailPaymentPoller((orderId) => handleOrderCompleted(orderId));

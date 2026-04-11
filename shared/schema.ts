@@ -529,6 +529,21 @@ export const insertUnmatchedPaymentSchema = createInsertSchema(unmatchedPayments
 export type UnmatchedPayment = typeof unmatchedPayments.$inferSelect;
 export type InsertUnmatchedPayment = z.infer<typeof insertUnmatchedPaymentSchema>;
 
+// ─── Role Permissions ─────────────────────────────────────────────────────────
+export const rolePermissions = pgTable("role_permissions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  role: varchar("role", { length: 80 }).notNull().unique(),
+  label: varchar("label", { length: 120 }).notNull(),
+  isSystem: boolean("is_system").notNull().default(false),
+  permissions: text("permissions").notNull().default("[]"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({ createdAt: true, updatedAt: true });
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+
 // ─── Type Exports ─────────────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
