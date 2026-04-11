@@ -34,17 +34,17 @@ const REGIONS = [
 
 // ─── Shared Styles ───────────────────────────────────────────────────────────
 const sectionTitle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)",
+  fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))",
   textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px",
 };
 const tabBtn = (active: boolean): React.CSSProperties => ({
   padding: "7px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
   cursor: "pointer", border: "none", transition: "all 0.15s",
   background: active ? "hsl(258, 90%, 62%)" : "transparent",
-  color: active ? "white" : "hsl(220,10%,60%)",
+  color: active ? "white" : "hsl(var(--muted-foreground))",
 });
 const fieldRow: React.CSSProperties = { display: "flex", flexDirection: "column", gap: "4px" };
-const labelStyle: React.CSSProperties = { fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,60%)" };
+const labelStyle: React.CSSProperties = { fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))" };
 
 // ─── Configuration Tab ────────────────────────────────────────────────────────
 function ConfigTab() {
@@ -188,28 +188,28 @@ function WebhookUrlsPanel() {
   return (
     <div style={{ ...card, padding: "20px", marginTop: "16px" }}>
       <p style={sectionTitle}>Merchant Callback URLs</p>
-      <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
+      <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "14px", lineHeight: 1.5 }}>
         Register these URLs in your Smile.one Merchant Dashboard so Smile.one can call back to your store.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {webhooks.map((wh) => (
           <div key={wh.path} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,80%)" }}>{wh.label}</span>
-              <span style={{ fontSize: "10px", color: "hsl(220,10%,45%)" }}>{wh.desc}</span>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{wh.label}</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>{wh.desc}</span>
             </div>
             <div style={{
               display: "flex", alignItems: "center", gap: "6px",
               background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
               borderRadius: "6px", padding: "6px 10px",
             }}>
-              <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <code style={{ flex: 1, fontSize: "11px", color: "hsl(var(--muted-foreground))", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {origin}{wh.path}
               </code>
               <button
                 data-testid={`button-copy-${wh.label.replace(/\s+/g, "-").toLowerCase()}`}
                 onClick={() => copy(wh.path)}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,55%)", display: "flex", alignItems: "center", flexShrink: 0 }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", flexShrink: 0 }}
               >
                 {copiedKey === wh.path ? <Check size={13} style={{ color: "#4ade80" }} /> : <Copy size={13} />}
               </button>
@@ -324,7 +324,7 @@ function MappingTab() {
           </div>
           {leftGame && (
             <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "260px", overflowY: "auto" }}>
-              {loadingServices && <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>Loading...</p>}
+              {loadingServices && <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Loading...</p>}
               {!loadingServices && services.length === 0 && (
                 <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>No services for this game yet.</p>
               )}
@@ -337,12 +337,12 @@ function MappingTab() {
                     padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
                     background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
                     border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
-                    color: "hsl(210,40%,88%)",
+                    color: "hsl(var(--foreground))",
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                   }}
                 >
                   <span>{svc.name}</span>
-                  <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>${svc.finalPrice}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>${svc.finalPrice}</span>
                 </div>
               ))}
             </div>
@@ -419,12 +419,12 @@ function MappingTab() {
                   padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
                   background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
                   border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
-                  color: "hsl(210,40%,88%)",
+                  color: "hsl(var(--foreground))",
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}
               >
                 <span>{p.name}</span>
-                <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>{p.currency} {p.price}</span>
+                <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.currency} {p.price}</span>
               </div>
             ))}
           </div>
@@ -433,7 +433,7 @@ function MappingTab() {
 
       {/* Selection summary */}
       {(selectedService || selectedSmile) && (
-        <div style={{ ...card, padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(210,40%,80%)", flexWrap: "wrap" }}>
+        <div style={{ ...card, padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(var(--foreground))", flexWrap: "wrap" }}>
           <span style={{ color: selectedService ? "#4ade80" : "hsl(220,10%,40%)" }}>
             {selectedService ? `CMS: ${selectedService.name}` : "No CMS product selected"}
           </span>
@@ -459,17 +459,17 @@ function MappingTab() {
               <thead>
                 <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
                   {["Game", "Region", "CMS Product", "Smile.one Product", "Actions"].map((h) => (
-                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px" }}>{h}</th>
+                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(var(--muted-foreground))", fontWeight: 600, fontSize: "11px" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {mappings.map((m) => (
                   <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                    <td style={{ padding: "10px 14px", color: "hsl(210,40%,85%)" }}>{m.gameSlug}</td>
-                    <td style={{ padding: "10px 14px", color: "hsl(220,10%,60%)" }}>{m.region}</td>
-                    <td style={{ padding: "10px 14px", color: "hsl(210,40%,85%)" }}>{m.cmsProductName ?? m.cmsProductId}</td>
-                    <td style={{ padding: "10px 14px", color: "hsl(210,40%,85%)" }}>{m.smileProductName ?? m.smileProductId}</td>
+                    <td style={{ padding: "10px 14px", color: "hsl(var(--foreground))" }}>{m.gameSlug}</td>
+                    <td style={{ padding: "10px 14px", color: "hsl(var(--muted-foreground))" }}>{m.region}</td>
+                    <td style={{ padding: "10px 14px", color: "hsl(var(--foreground))" }}>{m.cmsProductName ?? m.cmsProductId}</td>
+                    <td style={{ padding: "10px 14px", color: "hsl(var(--foreground))" }}>{m.smileProductName ?? m.smileProductId}</td>
                     <td style={{ padding: "10px 14px" }}>
                       <button
                         data-testid={`button-delete-mapping-${m.id}`}
@@ -507,10 +507,10 @@ export default function SmileOnePage() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
           <div>
-            <h2 style={{ fontSize: "16px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>
+            <h2 style={{ fontSize: "16px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
               Smile.one Integration
             </h2>
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", marginTop: "3px" }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: "3px" }}>
               Configure API credentials, define game input fields, and map products.
             </p>
           </div>

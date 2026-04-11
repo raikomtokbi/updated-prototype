@@ -46,7 +46,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210,40%,92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -55,7 +55,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220,10%,55%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "4px",
   display: "block",
   textTransform: "uppercase",
@@ -73,8 +73,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: "440px", maxHeight: "85vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
+          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
         </div>
         {children}
       </div>
@@ -209,7 +209,7 @@ function UserActionsMenu({ user, onUpdate, disabled }: {
           borderRadius: "5px",
           background: "hsl(var(--card))",
           border: "1px solid hsl(var(--border))",
-          color: isSelf ? "hsl(220,10%,35%)" : "hsl(220, 10%, 65%)",
+          color: isSelf ? "hsl(var(--muted-foreground))" : "hsl(220, 10%, 65%)",
           fontSize: "11px",
           cursor: isSelf ? "not-allowed" : "pointer",
           whiteSpace: "nowrap",
@@ -304,7 +304,7 @@ export default function Users() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading users...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading users...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={users.length === 0 ? "No users yet. Create the first user." : "No users match your filters."} />
           ) : (
@@ -324,7 +324,7 @@ export default function Users() {
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 70%)" }}>{u.fullName ?? "—"}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>
                     <td style={tdStyle}><StatusBadge value={u.role} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(u.createdAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(u.createdAt)}</td>
                     <td style={tdStyle}><StatusBadge value={u.isActive ? "active" : "inactive"} /></td>
                     <td style={tdStyle}>
                       <UserActionsMenu

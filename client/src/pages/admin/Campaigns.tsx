@@ -28,7 +28,7 @@ const STATUS_OPTIONS = [
 
 const inputStyle: React.CSSProperties = { ...sharedInput, padding: "7px 10px", fontSize: "13px" };
 const labelStyle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
+  fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "4px",
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
@@ -180,7 +180,7 @@ export default function Campaigns() {
       <div style={card}>
         <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
           <div style={{ flex: 1 }}>
-            <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,50%)", marginBottom: "8px", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>Homepage Announcement Banner</label>
+            <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "8px", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>Homepage Announcement Banner</label>
             <input
               data-testid="input-announcement-text"
               style={{ ...sharedInput, padding: "8px 12px", fontSize: "13px", width: "100%" }}
@@ -309,7 +309,7 @@ export default function Campaigns() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading campaigns...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading campaigns...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={campaigns.length === 0 ? "No campaigns yet. Create your first campaign." : "No campaigns match your filters."} />
           ) : (
@@ -326,8 +326,8 @@ export default function Campaigns() {
                   <tr key={c.id}>
                     <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{c.name}</td>
                     <td style={tdStyle}><StatusBadge value={c.type} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.startsAt)}</td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.endsAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(c.startsAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(c.endsAt)}</td>
                     <td style={tdStyle}><StatusBadge value={c.isActive ? "active" : "inactive"} /></td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", gap: "5px" }}>

@@ -40,7 +40,7 @@ export default function Subscribers() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading subscribers...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading subscribers...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={subscribers.length === 0 ? "No subscribers yet." : "No subscribers match your search."} />
           ) : (
@@ -58,7 +58,7 @@ export default function Subscribers() {
                     <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{s.username}</td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{s.email ?? "—"}</td>
                     <td style={tdStyle}><StatusBadge value={s.role} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(s.createdAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(s.createdAt)}</td>
                     <td style={tdStyle}><StatusBadge value={s.isActive ? "active" : "inactive"} /></td>
                   </tr>
                 ))}

@@ -87,7 +87,7 @@ export default function About() {
             margin: "0 auto 1.25rem", position: "relative",
           }}
         >
-          <Zap size={26} style={{ color: "hsl(258,90%,70%)" }} />
+          <Zap size={26} style={{ color: "hsl(var(--primary))" }} />
         </div>
         <h1
           className="font-orbitron"
@@ -169,9 +169,9 @@ export default function About() {
                   marginBottom: "0.85rem",
                 }}
               >
-                <Icon size={18} style={{ color: "hsl(258,90%,70%)" }} />
+                <Icon size={18} style={{ color: "hsl(var(--primary))" }} />
               </div>
-              <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "0.4rem" }}>
+              <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.4rem" }}>
                 {v.title}
               </h3>
               <p style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
@@ -189,7 +189,7 @@ export default function About() {
           borderRadius: "1rem", padding: "2rem", marginBottom: "2rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(210,40%,90%)", marginBottom: "0.75rem" }}>
+        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
           Our Story
         </h2>
         {storyText ? (

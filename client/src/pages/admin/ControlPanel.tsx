@@ -29,7 +29,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -42,7 +42,7 @@ const selectStyle: React.CSSProperties = {
     background: "hsl(var(--card))",
     border: "1px solid hsl(var(--border))",
     borderRadius: "6px",
-    color: "hsl(210, 40%, 92%)",
+    color: "hsl(var(--foreground))",
     fontSize: "13px",
     outline: "none",
     boxSizing: "border-box" as const,
@@ -55,7 +55,7 @@ const textareaStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -323,7 +323,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                 <CardIcon size={16} />
               </button>
               <input
-                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
+                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none" }}
                 value={card.title}
                 onChange={(e) => update(idx, "title", e.target.value)}
                 placeholder="Card title"
@@ -339,7 +339,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
               </button>
             </div>
             <textarea
-              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,90%)", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
               value={card.desc}
               onChange={(e) => update(idx, "desc", e.target.value)}
               placeholder="Short description for this feature card"
@@ -347,7 +347,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
             />
             {pickerOpen && (
               <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "10px" }}>
-                <p style={{ fontSize: "10px", color: "hsl(220,10%,45%)", marginBottom: "8px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
+                <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginBottom: "8px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
                   {ICON_LIST.map((name) => {
                     const Ic = ICON_MAP[name];
@@ -363,7 +363,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                           padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
                           background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
                           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                          color: selected ? "hsl(258,90%,72%)" : "hsl(220,10%,55%)",
+                          color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
                           transition: "all 0.1s",
                         }}
                       >
@@ -509,7 +509,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Site Identity</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Site Identity</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
@@ -581,7 +581,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Phone size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Contact & Social</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Contact & Social</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
@@ -646,7 +646,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Search size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>SEO Settings</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>SEO Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -684,7 +684,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>General Settings</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>General Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
           <div>
@@ -749,7 +749,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <ToggleLeft size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>System Toggles</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>System Toggles</span>
         </div>
         <SettingRow key="user_registration" label="User Registration" description="Allow new users to create accounts">
           <Toggle checked={bool("user_registration")} onChange={() => toggle("user_registration")} />
@@ -772,7 +772,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Bell size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Admin Notification Events</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Admin Notification Events</span>
         </div>
         {[
           { key: "notif_new_user", label: "New User Registrations", description: "Notify when a new user signs up" },
@@ -791,7 +791,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Shield size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Security & Access</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Security & Access</span>
         </div>
         <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
           <div>
@@ -845,7 +845,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <Users size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>User Management</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>User Management</span>
         </div>
         <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
           <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
@@ -876,7 +876,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Footer & Legal</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Footer & Legal</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -937,7 +937,7 @@ export default function ControlPanel() {
       <div style={card}>
         <div style={sectionHeader}>
           <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>About Us Page</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>About Us Page</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
@@ -1107,7 +1107,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
     background: "hsl(var(--card))",
     border: "1px solid hsl(var(--border))",
     borderRadius: "4px",
-    color: "hsl(210, 40%, 92%)",
+    color: "hsl(var(--foreground))",
     fontSize: "14px",
   };
 
@@ -1123,7 +1123,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
     <div style={card}>
       <div style={sectionHeader}>
         <DollarSign size={15} style={{ color: "hsl(var(--primary))" }} />
-        <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Fees & Taxes</span>
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Fees & Taxes</span>
       </div>
 
       {/* Tax Settings */}
@@ -1154,7 +1154,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
       {/* Additional Fees Section */}
       <div style={{ borderTop: "1px solid hsl(var(--input))", padding: "16px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-          <label style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Additional Charges</label>
+          <label style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Additional Charges</label>
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); setShowForm(!showForm); setEditingId(null); setFormData({ name: "", amount: "", type: "fixed", isActive: true }); }}
@@ -1202,7 +1202,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
               fees.map((fee) => (
                 <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(var(--border))" }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>{fee.name}</div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{fee.name}</div>
                     <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
                       {fee.type === "percentage" ? `${parseFloat(fee.amount).toFixed(2)}%` : `${parseFloat(fee.amount).toFixed(2)}`} • {fee.isActive ? "Active" : "Inactive"}
                     </div>

@@ -17,7 +17,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210,40%,92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -25,7 +25,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220,10%,55%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "4px",
   display: "block",
   textTransform: "uppercase",
@@ -64,7 +64,7 @@ const btnEdit: React.CSSProperties = {
   borderRadius: "5px",
   background: "rgba(124,58,237,0.1)",
   border: "1px solid rgba(124,58,237,0.25)",
-  color: "#a78bfa",
+  color: "hsl(var(--primary))",
   fontSize: "11px",
   cursor: "pointer",
 };
@@ -253,8 +253,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: "580px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
+          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
         </div>
         {children}
       </div>
@@ -328,7 +328,7 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
                 borderRadius: "5px",
                 border: `1px solid ${form.type === type ? getGatewayBadgeColor(type) : "hsl(var(--border))"}`,
                 background: form.type === type ? `${getGatewayBadgeColor(type)}22` : "hsl(var(--card))",
-                color: form.type === type ? getGatewayBadgeColor(type) : "hsl(220,10%,55%)",
+                color: form.type === type ? getGatewayBadgeColor(type) : "hsl(var(--muted-foreground))",
                 fontSize: "11px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -349,14 +349,14 @@ function PMForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_PM; onSu
             <button
               type="button"
               onClick={() => setShowNotes(!showNotes)}
-              style={{ background: "none", border: "none", color: "hsl(220,10%,45%)", cursor: "pointer", display: "flex", alignItems: "center", gap: "3px", fontSize: "10px" }}
+              style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", display: "flex", alignItems: "center", gap: "3px", fontSize: "10px" }}
             >
               Setup guide {showNotes ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
           )}
         </div>
         {showNotes && gatewayCfg.notes && (
-          <div style={{ fontSize: "11px", color: "hsl(220,10%,55%)", background: "hsl(var(--card))", borderRadius: "4px", padding: "8px", marginBottom: "0.6rem", lineHeight: 1.6 }}>
+          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", background: "hsl(var(--card))", borderRadius: "4px", padding: "8px", marginBottom: "0.6rem", lineHeight: 1.6 }}>
             {gatewayCfg.notes}
           </div>
         )}
@@ -475,18 +475,18 @@ export default function PaymentMethodPage() {
 
       {/* Info banner */}
       <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", lineHeight: 1.6, margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: 0 }}>
           Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual UPI, Manual</span>.
           Set a lower priority number to make a gateway take precedence over others when multiple gateways are active.
         </p>
       </div>
 
       {isLoading ? (
-        <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading...</div>
+        <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading...</div>
       ) : methods.length === 0 ? (
         <div style={{ ...card, padding: "3rem", textAlign: "center" }}>
           <CreditCard size={36} style={{ color: "rgba(124,58,237,0.3)", marginBottom: "0.75rem" }} />
-          <p style={{ color: "hsl(220,10%,42%)", fontSize: "13px", marginBottom: "12px" }}>No payment gateways configured yet.</p>
+          <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginBottom: "12px" }}>No payment gateways configured yet.</p>
           <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={13} /> Add First Gateway</button>
         </div>
       ) : (
@@ -504,7 +504,7 @@ export default function PaymentMethodPage() {
                     {getIcon(m.type)}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       {m.name}
                       <span style={{ padding: "1px 7px", borderRadius: "3px", fontSize: "10px", fontWeight: 600, background: `${color}22`, color }}>
                         {GATEWAY_CONFIGS[m.type]?.label || m.type}
@@ -513,7 +513,7 @@ export default function PaymentMethodPage() {
                         {m.mode?.toUpperCase() ?? "TEST"}
                       </span>
                     </div>
-                    <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginTop: "3px" }}>
+                    <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "3px" }}>
                       {m.supportedCurrencies ? `Currencies: ${m.supportedCurrencies}` : ""}
                       {m.publicKey ? ` · Key: ${m.publicKey.slice(0, 8)}...` : ""}
                     </div>
@@ -523,7 +523,7 @@ export default function PaymentMethodPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                   <button
                     onClick={() => toggleMut.mutate({ id: m.id, isActive: !m.isActive })}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: m.isActive ? "hsl(142,71%,45%)" : "hsl(220,10%,38%)", display: "flex", alignItems: "center" }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: m.isActive ? "hsl(142,71%,45%)" : "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}
                     title={m.isActive ? "Disable" : "Enable"}
                     data-testid={`toggle-payment-${m.type}`}
                   >

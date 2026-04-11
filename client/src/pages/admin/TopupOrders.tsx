@@ -54,9 +54,9 @@ function DeliveryBadge({ status, note }: { status: string | null | undefined; no
     );
   }
   if (status === "not_applicable") {
-    return <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>;
+    return <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>;
   }
-  return <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>{status}</span>;
+  return <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{status}</span>;
 }
 
 type AnyOrder = Order & { deliveryStatus?: string | null; deliveryNote?: string | null; utr?: string | null };
@@ -122,7 +122,7 @@ export default function TopupOrders() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading orders...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading orders...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={orders.length === 0 ? "No orders yet." : "No orders match your filters."} />
           ) : (
@@ -147,14 +147,14 @@ export default function TopupOrders() {
                         <td style={tdStyle}>
                           <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258, 90%, 70%)" }}>{o.orderNumber}</div>
                           {o.utr && (
-                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(220,10%,38%)", marginTop: "2px" }}>UTR: {o.utr}</div>
+                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>UTR: {o.utr}</div>
                           )}
                         </td>
                         <td style={tdStyle}>
                           {firstItem ? (
                             <div>
-                              <div style={{ fontWeight: 500, color: "hsl(210,40%,85%)", fontSize: "12px" }}>{firstItem.productTitle ?? "—"}</div>
-                              <div style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginTop: "1px" }}>{firstItem.packageName ?? ""}{firstItem.quantity && firstItem.quantity > 1 ? ` ×${firstItem.quantity}` : ""}</div>
+                              <div style={{ fontWeight: 500, color: "hsl(var(--foreground))", fontSize: "12px" }}>{firstItem.productTitle ?? "—"}</div>
+                              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>{firstItem.packageName ?? ""}{firstItem.quantity && firstItem.quantity > 1 ? ` ×${firstItem.quantity}` : ""}</div>
                               {items.length > 1 && (
                                 <button onClick={() => setExpandedOrder(isExpanded ? null : o.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "10px", color: "hsl(258,80%,65%)", padding: 0, marginTop: "2px" }}>
                                   +{items.length - 1} more
@@ -162,25 +162,25 @@ export default function TopupOrders() {
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: "hsl(220,10%,38%)", fontSize: "12px" }}>—</span>
+                            <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>—</span>
                           )}
                         </td>
                         <td style={tdStyle}>
                           {firstItem ? (
                             <div>
-                              {firstItem.userId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(210,40%,70%)" }}>ID: {firstItem.userId}</div>}
-                              {firstItem.zoneId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(220,10%,50%)" }}>Zone: {firstItem.zoneId}</div>}
-                              {o.userId && <div style={{ fontSize: "10px", color: "hsl(220,10%,38%)", marginTop: "2px" }}>User: {o.userId.slice(0, 12)}…</div>}
+                              {firstItem.userId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>ID: {firstItem.userId}</div>}
+                              {firstItem.zoneId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>Zone: {firstItem.zoneId}</div>}
+                              {o.userId && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>User: {o.userId.slice(0, 12)}…</div>}
                             </div>
                           ) : (
-                            <span style={{ color: "hsl(220,10%,38%)", fontSize: "12px" }}>{o.userId ? o.userId.slice(0, 12) + "…" : "Guest"}</span>
+                            <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>{o.userId ? o.userId.slice(0, 12) + "…" : "Guest"}</span>
                           )}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
                         <td style={tdStyle}>
                           <DeliveryBadge status={o.deliveryStatus} note={o.deliveryNote} />
                         </td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220, 10%, 46%)", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
+                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                             {o.status === "pending" && (
@@ -217,7 +217,7 @@ export default function TopupOrders() {
                               <span style={{ fontSize: "11px", color: "hsl(142,71%,45%)" }}>Delivered</span>
                             )}
                             {(o.status === "failed" || o.status === "refunded") && (
-                              <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>
+                              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>
                             )}
                           </div>
                         </td>
@@ -225,15 +225,15 @@ export default function TopupOrders() {
 
                       {isExpanded && items.slice(1).map((item, idx) => (
                         <tr key={`${o.id}-item-${idx}`} style={{ background: "hsl(220,20%,7%)", borderBottom: "1px solid hsl(220,15%,10%)" }}>
-                          <td style={{ ...tdStyle, color: "hsl(220,10%,35%)", fontSize: "11px" }} colSpan={2}>
+                          <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))", fontSize: "11px" }} colSpan={2}>
                             <div style={{ paddingLeft: "12px" }}>
-                              <div style={{ color: "hsl(210,40%,75%)", fontWeight: 500 }}>{item.productTitle ?? "—"}</div>
-                              <div style={{ color: "hsl(220,10%,45%)", fontSize: "10px" }}>{item.packageName ?? ""}</div>
+                              <div style={{ color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>{item.productTitle ?? "—"}</div>
+                              <div style={{ color: "hsl(var(--muted-foreground))", fontSize: "10px" }}>{item.packageName ?? ""}</div>
                             </div>
                           </td>
                           <td style={{ ...tdStyle, fontSize: "11px" }}>
-                            {item.userId && <div style={{ fontFamily: "monospace", color: "hsl(210,40%,65%)" }}>ID: {item.userId}</div>}
-                            {item.zoneId && <div style={{ fontFamily: "monospace", color: "hsl(220,10%,45%)" }}>Zone: {item.zoneId}</div>}
+                            {item.userId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>ID: {item.userId}</div>}
+                            {item.zoneId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>Zone: {item.zoneId}</div>}
                           </td>
                           <td colSpan={4} style={tdStyle} />
                         </tr>

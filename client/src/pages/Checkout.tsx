@@ -202,7 +202,7 @@ function UpiPaymentOverlay({
                 style={{
                   display: "flex", alignItems: "center", gap: "12px",
                   padding: "12px 16px", borderRadius: "8px",
-                  background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)",
+                  background: "hsl(var(--primary) / 0.1)", border: "1px solid rgba(124,58,237,0.3)",
                   textDecoration: "none", cursor: "pointer",
                 }}
               >
@@ -246,7 +246,7 @@ function UpiPaymentOverlay({
             <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Or pay to UPI ID</p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
               <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "0.9rem", fontWeight: 600, wordBreak: "break-all" }} data-testid="text-upi-id">{data.upiId}</span>
-              <button onClick={() => copyText(data.upiId, "upiId")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "upiId" ? "#22c55e" : "hsl(220,10%,50%)", padding: "2px", flexShrink: 0 }} data-testid="button-copy-upi-id">
+              <button onClick={() => copyText(data.upiId, "upiId")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "upiId" ? "#22c55e" : "hsl(var(--muted-foreground))", padding: "2px", flexShrink: 0 }} data-testid="button-copy-upi-id">
                 {copied === "upiId" ? <CheckCircle size={15} /> : <Copy size={15} />}
               </button>
             </div>
@@ -258,7 +258,7 @@ function UpiPaymentOverlay({
           <p style={{ margin: "0 0 6px", fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Exact amount to enter</p>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", padding: "0.75rem 1rem" }}>
             <span style={{ flex: 1, color: "hsl(var(--foreground))", fontSize: "0.9rem", fontWeight: 600 }} data-testid="text-exact-amount">{parseFloat(data.amount).toFixed(2)}</span>
-            <button onClick={() => copyText(parseFloat(data.amount).toFixed(2), "amount")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "amount" ? "#22c55e" : "hsl(220,10%,50%)", padding: "2px", flexShrink: 0 }} data-testid="button-copy-amount">
+            <button onClick={() => copyText(parseFloat(data.amount).toFixed(2), "amount")} style={{ background: "none", border: "none", cursor: "pointer", color: copied === "amount" ? "#22c55e" : "hsl(var(--muted-foreground))", padding: "2px", flexShrink: 0 }} data-testid="button-copy-amount">
               {copied === "amount" ? <CheckCircle size={15} /> : <Copy size={15} />}
             </button>
           </div>
@@ -308,7 +308,7 @@ function UpiPaymentOverlay({
               disabled={utrSubmitting || !utrInput.trim()}
               style={{
                 width: "100%", padding: "0.6rem 1rem", borderRadius: "6px", border: "none",
-                background: utrSubmitting || !utrInput.trim() ? "hsl(258,50%,28%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                background: utrSubmitting || !utrInput.trim() ? "hsl(258,50%,28%)" : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                 color: utrSubmitting || !utrInput.trim() ? "hsl(var(--muted-foreground))" : "#fff",
                 fontSize: "13px", fontWeight: 600, cursor: utrSubmitting ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
@@ -343,7 +343,7 @@ function UpiPaymentOverlay({
 }
 
 // ─── Success Overlay ──────────────────────────────────────────────────────────
-const CONFETTI_COLORS = ["#7c3aed","#22c55e","#3b82f6","#f59e0b","#ec4899","#06b6d4"];
+const CONFETTI_COLORS = ["hsl(var(--primary))","#22c55e","#3b82f6","#f59e0b","#ec4899","#06b6d4"];
 const CONFETTI_COUNT = 18;
 
 function SuccessScreen({ utr, redirectTo }: { utr?: string; redirectTo: string }) {
@@ -943,7 +943,7 @@ export default function Checkout() {
                         gap: "0.875rem",
                         padding: "0.875rem 1rem",
                         borderRadius: "0.625rem",
-                        border: `1px solid ${isSelected ? "hsl(258,90%,58%)" : "hsl(220,15%,18%)"}`,
+                        border: `1px solid ${isSelected ? "hsl(258,90%,58%)" : "hsl(var(--border))"}`,
                         background: isSelected ? "hsla(258,90%,58%,0.1)" : "hsl(var(--card))",
                         cursor: "pointer",
                         textAlign: "left",
@@ -954,8 +954,8 @@ export default function Checkout() {
                       {/* Radio dot */}
                       <div style={{
                         width: "18px", height: "18px", borderRadius: "50%", flexShrink: 0,
-                        border: `2px solid ${isSelected ? "hsl(258,90%,62%)" : "hsl(var(--border))"}`,
-                        background: isSelected ? "hsl(258,90%,62%)" : "transparent",
+                        border: `2px solid ${isSelected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
+                        background: isSelected ? "hsl(var(--primary))" : "transparent",
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
                         {isSelected && <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "white" }} />}
@@ -966,7 +966,7 @@ export default function Checkout() {
                         width: "36px", height: "36px", borderRadius: "8px",
                         background: isSelected ? "hsla(258,90%,62%,0.18)" : "hsl(var(--card))",
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                        color: isSelected ? "hsl(258,90%,70%)" : "hsl(220,10%,55%)",
+                        color: isSelected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                       }}>
                         {PAYMENT_ICONS[pt.key] || <CreditCard size={18} />}
                       </div>
@@ -981,7 +981,7 @@ export default function Checkout() {
                         </div>
                       </div>
 
-                      <ChevronRight size={15} style={{ color: isSelected ? "hsl(258,90%,68%)" : "hsl(220,10%,38%)", flexShrink: 0 }} />
+                      <ChevronRight size={15} style={{ color: isSelected ? "hsl(258,90%,68%)" : "hsl(var(--muted-foreground))", flexShrink: 0 }} />
                     </button>
                   );
                 })}

@@ -172,8 +172,8 @@ export function ImageUploadField({
                   gap: "6px",
                 }}
               >
-                <ImageIcon size={22} style={{ color: "hsl(220,10%,30%)" }} />
-                <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)", letterSpacing: "0.04em" }}>
+                <ImageIcon size={22} style={{ color: "hsl(var(--muted-foreground))" }} />
+                <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
                   No image — click to upload
                 </span>
               </div>
@@ -197,7 +197,7 @@ export function ImageUploadField({
                 ...btnBase,
                 background: "hsl(var(--primary) / 0.12)",
                 borderColor: "rgba(124,58,237,0.3)",
-                color: "#a78bfa",
+                color: "hsl(var(--primary))",
                 opacity: uploading || deleting ? 0.7 : 1,
                 cursor: uploading || deleting ? "not-allowed" : "pointer",
               }}
@@ -226,7 +226,7 @@ export function ImageUploadField({
           </div>
 
           {hint && (
-            <p style={{ fontSize: "10px", color: "hsl(220,10%,42%)", margin: 0 }}>
+            <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
               {hint} — the preview above shows exactly what will be visible in the hero.
             </p>
           )}
@@ -273,8 +273,8 @@ export function ImageUploadField({
                 }}
                 onClick={() => fileRef.current?.click()}
               >
-                <ImageIcon size={18} style={{ color: "hsl(220,10%,30%)" }} />
-                <span style={{ fontSize: "9px", color: "hsl(220,10%,35%)", letterSpacing: "0.04em", textAlign: "center" }}>
+                <ImageIcon size={18} style={{ color: "hsl(var(--muted-foreground))" }} />
+                <span style={{ fontSize: "9px", color: "hsl(var(--muted-foreground))", letterSpacing: "0.04em", textAlign: "center" }}>
                   No image
                 </span>
               </div>
@@ -299,7 +299,7 @@ export function ImageUploadField({
                   ...btnBase,
                   background: "hsl(var(--primary) / 0.12)",
                   borderColor: "rgba(124,58,237,0.3)",
-                  color: "#a78bfa",
+                  color: "hsl(var(--primary))",
                   opacity: uploading || deleting ? 0.7 : 1,
                   cursor: uploading || deleting ? "not-allowed" : "pointer",
                 }}
@@ -327,7 +327,7 @@ export function ImageUploadField({
               )}
             </div>
             {hint && (
-              <p style={{ fontSize: "10px", color: "hsl(220,10%,42%)", margin: 0 }}>{hint}</p>
+              <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", margin: 0 }}>{hint}</p>
             )}
           </div>
         </div>

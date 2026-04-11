@@ -95,7 +95,7 @@ export default function VoucherOrders() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading orders...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading orders...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={orders.length === 0 ? "No voucher orders yet." : "No orders match your filters."} />
           ) : (
@@ -119,14 +119,14 @@ export default function VoucherOrders() {
                         <td style={tdStyle}>
                           <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>{o.orderNumber}</div>
                           {o.utr && (
-                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(220,10%,38%)", marginTop: "2px" }}>UTR: {o.utr}</div>
+                            <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>UTR: {o.utr}</div>
                           )}
                         </td>
                         <td style={tdStyle}>
                           {firstItem ? (
                             <div>
-                              <div style={{ fontWeight: 500, color: "hsl(210,40%,85%)", fontSize: "12px" }}>{firstItem.productTitle ?? "—"}</div>
-                              <div style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginTop: "1px" }}>
+                              <div style={{ fontWeight: 500, color: "hsl(var(--foreground))", fontSize: "12px" }}>{firstItem.productTitle ?? "—"}</div>
+                              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
                                 {firstItem.packageName ?? ""}
                                 {firstItem.quantity && firstItem.quantity > 1 ? ` ×${firstItem.quantity}` : ""}
                               </div>
@@ -140,7 +140,7 @@ export default function VoucherOrders() {
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: "hsl(220,10%,38%)", fontSize: "12px" }}>—</span>
+                            <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>—</span>
                           )}
                         </td>
                         <td style={tdStyle}>
@@ -149,20 +149,20 @@ export default function VoucherOrders() {
                               {categoryLabel(firstItem.productCategory)}
                             </span>
                           ) : (
-                            <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>
+                            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>
                           )}
                         </td>
                         <td style={tdStyle}>
                           {firstItem?.email ? (
-                            <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(210,40%,70%)" }}>{firstItem.email}</div>
+                            <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>{firstItem.email}</div>
                           ) : o.userId ? (
-                            <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(220,10%,50%)" }}>{o.userId.slice(0, 14)}…</div>
+                            <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>{o.userId.slice(0, 14)}…</div>
                           ) : (
-                            <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>Guest</span>
+                            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Guest</span>
                           )}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220,10%,46%)", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
+                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                             {o.status === "pending" && (
@@ -186,7 +186,7 @@ export default function VoucherOrders() {
                               </>
                             )}
                             {(o.status === "completed" || o.status === "failed" || o.status === "refunded") && (
-                              <span style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>—</span>
+                              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>
                             )}
                           </div>
                         </td>
@@ -196,8 +196,8 @@ export default function VoucherOrders() {
                         <tr key={`${o.id}-item-${idx}`} style={{ background: "hsl(220,20%,7%)", borderBottom: "1px solid hsl(220,15%,10%)" }}>
                           <td colSpan={2} style={{ ...tdStyle, fontSize: "11px" }}>
                             <div style={{ paddingLeft: "12px" }}>
-                              <div style={{ color: "hsl(210,40%,75%)", fontWeight: 500 }}>{item.productTitle ?? "—"}</div>
-                              <div style={{ color: "hsl(220,10%,45%)", fontSize: "10px" }}>{item.packageName ?? ""}</div>
+                              <div style={{ color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>{item.productTitle ?? "—"}</div>
+                              <div style={{ color: "hsl(var(--muted-foreground))", fontSize: "10px" }}>{item.packageName ?? ""}</div>
                             </div>
                           </td>
                           <td colSpan={5} style={tdStyle} />

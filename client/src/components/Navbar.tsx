@@ -103,7 +103,7 @@ function SearchDropdown({
             borderBottom: "1px solid rgba(124,58,237,0.08)",
             transition: "background 0.12s",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.1)"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
         >
           {/* Thumbnail */}
@@ -114,8 +114,8 @@ function SearchDropdown({
               borderRadius: "6px",
               flexShrink: 0,
               overflow: "hidden",
-              background: "rgba(124,58,237,0.12)",
-              border: "1px solid rgba(124,58,237,0.18)",
+              background: "hsl(var(--primary) / 0.12)",
+              border: "1px solid hsl(var(--primary) / 0.18)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -139,7 +139,7 @@ function SearchDropdown({
               style={{
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: "hsl(210,40%,90%)",
+                color: "hsl(var(--foreground))",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -375,7 +375,7 @@ export default function Navbar() {
                 background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
                 border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.2)"}`,
                 borderRadius: "8px",
-                color: isLight ? "hsl(var(--foreground))" : "#e5e7eb",
+                color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
                 fontSize: "0.78rem",
                 outline: "none",
               }}
@@ -434,7 +434,7 @@ export default function Navbar() {
                 borderRadius: "8px",
                 background: "rgba(124,58,237,0.08)",
                 border: "1px solid rgba(124,58,237,0.22)",
-                color: "#a78bfa",
+                color: "hsl(var(--primary))",
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -454,7 +454,7 @@ export default function Navbar() {
                 width: "34px",
                 height: "34px",
                 borderRadius: "8px",
-                border: "1px solid rgba(124, 58, 237, 0.25)",
+                border: "1px solid hsl(var(--primary) / 0.25)",
                 background: "rgba(124, 58, 237, 0.08)",
                 color: "rgba(148, 163, 184, 0.85)",
                 textDecoration: "none",
@@ -462,10 +462,10 @@ export default function Navbar() {
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(124, 58, 237, 0.6)";
-                (e.currentTarget as HTMLElement).style.color = "#a78bfa";
+                (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary))";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124, 58, 237, 0.25)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.25)";
                 (e.currentTarget as HTMLElement).style.color = "rgba(148, 163, 184, 0.85)";
               }}
             >
@@ -477,7 +477,7 @@ export default function Navbar() {
                     position: "absolute",
                     top: "-5px",
                     right: "-5px",
-                    background: "#7c3aed",
+                    background: "hsl(var(--primary))",
                     color: "white",
                     fontSize: "0.58rem",
                     fontWeight: 700,
@@ -507,9 +507,9 @@ export default function Navbar() {
                   gap: "0.35rem",
                   padding: "0.38rem 0.85rem",
                   borderRadius: "8px",
-                  background: "rgba(124, 58, 237, 0.12)",
+                  background: "hsl(var(--primary) / 0.12)",
                   border: "1px solid rgba(124, 58, 237, 0.35)",
-                  color: "#a78bfa",
+                  color: "hsl(var(--primary))",
                   fontSize: "0.76rem",
                   fontWeight: 600,
                   textDecoration: "none",
@@ -532,7 +532,7 @@ export default function Navbar() {
                     borderRadius: "8px",
                     background: "transparent",
                     border: "1px solid rgba(124, 58, 237, 0.42)",
-                    color: "#a78bfa",
+                    color: "hsl(var(--primary))",
                     fontSize: "0.76rem",
                     fontWeight: 600,
                     textDecoration: "none",
@@ -552,7 +552,7 @@ export default function Navbar() {
                     gap: "0.3rem",
                     padding: "0.5rem 0.9rem",
                     borderRadius: "8px",
-                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                     color: "white",
                     fontSize: "0.76rem",
                     fontWeight: 700,
@@ -581,9 +581,9 @@ export default function Navbar() {
                 width: "34px",
                 height: "34px",
                 borderRadius: "8px",
-                background: "rgba(124,58,237,0.1)",
+                background: "hsl(var(--primary) / 0.1)",
                 border: "1px solid rgba(124,58,237,0.25)",
-                color: "#a78bfa",
+                color: "hsl(var(--primary))",
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -599,7 +599,7 @@ export default function Navbar() {
             className="mobile-only"
             style={{
               padding: "0.6rem 1rem",
-              borderTop: "1px solid rgba(124,58,237,0.12)",
+              borderTop: "1px solid hsl(var(--primary) / 0.12)",
               position: "relative",
             }}
           >
@@ -629,7 +629,7 @@ export default function Navbar() {
                 background: isLight ? "hsl(var(--input))" : "rgba(255,255,255,0.05)",
                 border: `1px solid ${isLight ? "hsl(var(--border))" : "rgba(124, 58, 237, 0.3)"}`,
                 borderRadius: "8px",
-                color: isLight ? "hsl(var(--foreground))" : "#e5e7eb",
+                color: isLight ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
                 fontSize: "0.85rem",
                 outline: "none",
                 boxSizing: "border-box",
@@ -666,7 +666,7 @@ export default function Navbar() {
                       textDecoration: "none",
                       borderBottom: "1px solid rgba(124,58,237,0.08)",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.1)"; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                   >
                     <div
@@ -676,8 +676,8 @@ export default function Navbar() {
                         borderRadius: "6px",
                         flexShrink: 0,
                         overflow: "hidden",
-                        background: "rgba(124,58,237,0.12)",
-                        border: "1px solid rgba(124,58,237,0.18)",
+                        background: "hsl(var(--primary) / 0.12)",
+                        border: "1px solid hsl(var(--primary) / 0.18)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -691,7 +691,7 @@ export default function Navbar() {
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(210,40%,90%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {item.name}
                       </div>
                       <div style={{ fontSize: "0.7rem", color: "rgba(148,163,184,0.5)" }}>
@@ -732,7 +732,7 @@ export default function Navbar() {
           bottom: 0,
           width: "min(320px, 88vw)",
           background: "hsl(var(--background))",
-          borderLeft: "1px solid rgba(124,58,237,0.2)",
+          borderLeft: "1px solid hsl(var(--primary) / 0.2)",
           zIndex: 1200,
           display: "flex",
           flexDirection: "column",
@@ -748,7 +748,7 @@ export default function Navbar() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "1rem 1.25rem",
-            borderBottom: "1px solid rgba(124,58,237,0.15)",
+            borderBottom: "1px solid hsl(var(--primary) / 0.15)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
@@ -797,9 +797,9 @@ export default function Navbar() {
               width: "32px",
               height: "32px",
               borderRadius: "7px",
-              background: "rgba(124,58,237,0.1)",
-              border: "1px solid rgba(124,58,237,0.2)",
-              color: "#a78bfa",
+              background: "hsl(var(--primary) / 0.1)",
+              border: "1px solid hsl(var(--primary) / 0.2)",
+              color: "hsl(var(--primary))",
               cursor: "pointer",
             }}
           >
@@ -821,13 +821,13 @@ export default function Navbar() {
                 textDecoration: "none",
                 fontSize: "0.92rem",
                 fontWeight: 500,
-                color: location === link.href ? "#a78bfa" : "rgba(203, 213, 225, 0.85)",
-                background: location === link.href ? "rgba(124,58,237,0.1)" : "transparent",
+                color: location === link.href ? "hsl(var(--primary))" : "rgba(203, 213, 225, 0.85)",
+                background: location === link.href ? "hsl(var(--primary) / 0.1)" : "transparent",
                 marginBottom: "2px",
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.08)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = location === link.href ? "rgba(124,58,237,0.1)" : "transparent"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = location === link.href ? "hsl(var(--primary) / 0.1)" : "transparent"; }}
             >
               {link.label}
             </Link>
@@ -838,7 +838,7 @@ export default function Navbar() {
             style={{
               marginTop: "1rem",
               paddingTop: "1rem",
-              borderTop: "1px solid rgba(124,58,237,0.12)",
+              borderTop: "1px solid hsl(var(--primary) / 0.12)",
             }}
           >
             {isAuthenticated ? (
@@ -855,8 +855,8 @@ export default function Navbar() {
                     textDecoration: "none",
                     fontSize: "0.9rem",
                     fontWeight: 600,
-                    color: "#a78bfa",
-                    background: "rgba(124,58,237,0.1)",
+                    color: "hsl(var(--primary))",
+                    background: "hsl(var(--primary) / 0.1)",
                     border: "1px solid rgba(124,58,237,0.25)",
                   }}
                 >
@@ -904,8 +904,8 @@ export default function Navbar() {
                     textDecoration: "none",
                     fontSize: "0.88rem",
                     fontWeight: 600,
-                    color: "#a78bfa",
-                    border: "1px solid rgba(124,58,237,0.4)",
+                    color: "hsl(var(--primary))",
+                    border: "1px solid hsl(var(--primary) / 0.4)",
                     textAlign: "center",
                   }}
                 >
@@ -923,7 +923,7 @@ export default function Navbar() {
                     fontSize: "0.88rem",
                     fontWeight: 700,
                     color: "white",
-                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                     textAlign: "center",
                   }}
                 >
@@ -938,7 +938,7 @@ export default function Navbar() {
         <div
           style={{
             padding: "1rem 1.25rem",
-            borderTop: "1px solid rgba(124,58,237,0.12)",
+            borderTop: "1px solid hsl(var(--primary) / 0.12)",
             fontSize: "0.72rem",
             color: "rgba(148,163,184,0.35)",
           }}

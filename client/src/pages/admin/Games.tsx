@@ -18,7 +18,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210,40%,92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -26,7 +26,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: "11px",
   fontWeight: 600,
-  color: "hsl(220,10%,55%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "4px",
   display: "block",
   textTransform: "uppercase",
@@ -70,7 +70,7 @@ const btnEdit: React.CSSProperties = {
   borderRadius: "6px",
   background: "rgba(124,58,237,0.1)",
   border: "1px solid rgba(124,58,237,0.25)",
-  color: "#a78bfa",
+  color: "hsl(var(--primary))",
   fontSize: "12px",
   fontWeight: 500,
   cursor: "pointer",
@@ -108,8 +108,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: "520px", maxHeight: "85vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
+          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
         </div>
         {children}
       </div>
@@ -148,13 +148,13 @@ function MapPluginModal({
       <div style={{ position: "relative", width: "100%", maxWidth: "460px", background: "hsl(var(--background))", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Plug size={15} color="hsl(187,100%,42%)" />
-            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>Map Plugin</h3>
+            <Plug size={15} color="hsl(var(--primary))" />
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>Map Plugin</h3>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(220,10%,50%)", cursor: "pointer" }}><X size={16} /></button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
         </div>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "16px", marginTop: "4px" }}>
-          <span style={{ color: "hsl(187,100%,42%)" }}>{target.name}</span> — {description}
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginBottom: "16px", marginTop: "4px" }}>
+          <span style={{ color: "hsl(var(--primary))" }}>{target.name}</span> — {description}
         </p>
 
         {isLoading ? (
@@ -162,7 +162,7 @@ function MapPluginModal({
         ) : enabledPlugins.length === 0 ? (
           <div style={{ padding: "1.25rem", background: "hsl(var(--card))", borderRadius: "6px", border: "1px dashed hsl(220,15%,20%)", textAlign: "center" }}>
             <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)", margin: 0 }}>No enabled plugins found.</p>
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,30%)", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "260px", overflowY: "auto" }}>
@@ -175,10 +175,10 @@ function MapPluginModal({
               }}
             >
               <input type="radio" name="plugin" checked={selected === null} onChange={() => setSelected(null)}
-                style={{ accentColor: "hsl(187,100%,42%)" }} />
+                style={{ accentColor: "hsl(var(--primary))" }} />
               <div>
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,70%)" }}>No Plugin</div>
-                <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>Remove mapping</div>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>No Plugin</div>
+                <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Remove mapping</div>
               </div>
             </label>
 
@@ -193,28 +193,28 @@ function MapPluginModal({
                 }}
               >
                 <input type="radio" name="plugin" checked={selected === p.slug} onChange={() => setSelected(p.slug)}
-                  style={{ accentColor: "hsl(187,100%,42%)" }} />
+                  style={{ accentColor: "hsl(var(--primary))" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>{p.name}</div>
+                  <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{p.name}</div>
                   <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", display: "flex", gap: "6px", alignItems: "center" }}>
                     <code style={{ background: "hsl(var(--card))", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
                     {p.description && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description}</span>}
                   </div>
                 </div>
-                {selected === p.slug && <span style={{ color: "hsl(187,100%,42%)", fontSize: "10px", fontWeight: 600, flexShrink: 0 }}>SELECTED</span>}
+                {selected === p.slug && <span style={{ color: "hsl(var(--primary))", fontSize: "10px", fontWeight: 600, flexShrink: 0 }}>SELECTED</span>}
               </label>
             ))}
           </div>
         )}
 
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
-          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(220,10%,50%)", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
+          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
             Cancel
           </button>
           <button
             onClick={() => onMap(selected)}
             disabled={loading}
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "6px", background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(187,100%,42%)", fontSize: "12px", fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "6px", background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(var(--primary))", fontSize: "12px", fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
           >
             {loading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Plug size={12} />}
             {loading ? "Saving..." : "Apply Mapping"}
@@ -243,7 +243,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
   return (
     <div>
       <label style={labelStyle}>Input Fields</label>
-      <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
+      <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "8px", marginTop: "2px" }}>
         Toggle which fields buyers must fill in on the top-up page.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -277,7 +277,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
                 {on && <span style={{ color: "white", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </span>
               <span>
-                <span style={{ display: "block", fontSize: "12px", fontWeight: 600, color: on ? "hsl(210,40%,92%)" : "hsl(220,10%,65%)" }}>
+                <span style={{ display: "block", fontSize: "12px", fontWeight: 600, color: on ? "hsl(var(--foreground))" : "hsl(220,10%,65%)" }}>
                   {opt.label}
                 </span>
                 <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>
@@ -306,7 +306,7 @@ function PluginPicker({ value, onChange }: { value: string; onChange: (v: string
   return (
     <div>
       <label style={labelStyle}>Delivery Plugin</label>
-      <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "8px", marginTop: "2px" }}>
+      <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "8px", marginTop: "2px" }}>
         Optional: map this game to a plugin for automated top-up delivery.
       </p>
       {isLoading ? (
@@ -324,7 +324,7 @@ function PluginPicker({ value, onChange }: { value: string; onChange: (v: string
         </select>
       )}
       {value && (
-        <p style={{ fontSize: "11px", color: "hsl(187,100%,42%)", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+        <p style={{ fontSize: "11px", color: "hsl(var(--primary))", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
           <Plug size={10} /> Mapped to: {value}
         </p>
       )}
@@ -412,7 +412,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
         >
           <span style={{
             width: "36px", height: "20px", borderRadius: "10px", flexShrink: 0,
-            background: form.instantDelivery ? "hsl(142,71%,45%)" : "hsl(220,10%,30%)",
+            background: form.instantDelivery ? "hsl(142,71%,45%)" : "hsl(var(--muted-foreground))",
             position: "relative", transition: "background 0.2s",
           }}>
             <span style={{
@@ -422,7 +422,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
               background: "white", transition: "left 0.2s",
             }} />
           </span>
-          <span style={{ fontSize: "12px", fontWeight: 600, color: form.instantDelivery ? "hsl(142,71%,52%)" : "hsl(220,10%,55%)" }}>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: form.instantDelivery ? "hsl(142,71%,52%)" : "hsl(var(--muted-foreground))" }}>
             {form.instantDelivery ? "Instant Delivery Enabled" : "Instant Delivery Disabled"}
           </span>
         </button>
@@ -542,14 +542,14 @@ function ServicesPanel({ game }: { game: Game }) {
   return (
     <div style={{ padding: "0 16px 16px", marginTop: "8px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(220,10%,55%)" }}>Services / Top-up Options</span>
+        <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>Services / Top-up Options</span>
         <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={12} /> Add Service</button>
       </div>
 
       {isLoading ? (
-        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(220,10%,42%)", fontSize: "12px" }}>Loading...</div>
+        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>Loading...</div>
       ) : svcs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(220,10%,38%)", fontSize: "12px", border: "1px dashed hsl(var(--border))", borderRadius: "6px" }}>
+        <div style={{ textAlign: "center", padding: "1rem", color: "hsl(var(--muted-foreground))", fontSize: "12px", border: "1px dashed hsl(var(--border))", borderRadius: "6px" }}>
           No services yet. Add your first top-up option.
         </div>
       ) : (
@@ -558,25 +558,25 @@ function ServicesPanel({ game }: { game: Game }) {
             <thead>
               <tr>
                 {["Name", "Price", "Discount", "Final", "Stock", "Status", ""].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(220,10%,38%)", borderBottom: "1px solid hsl(220,15%,13%)" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(var(--muted-foreground))", borderBottom: "1px solid hsl(220,15%,13%)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {svcs.map((s) => (
                 <tr key={s.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                  <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(210,40%,90%)" }}>
+                  <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(var(--foreground))" }}>
                     <div>{s.name}</div>
                     {s.pluginSlug && (
                       <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
-                        <Plug size={9} color="hsl(187,100%,42%)" />
-                        <span style={{ fontSize: "10px", color: "hsl(187,100%,42%)" }}>{s.pluginSlug}</span>
+                        <Plug size={9} color="hsl(var(--primary))" />
+                        <span style={{ fontSize: "10px", color: "hsl(var(--primary))" }}>{s.pluginSlug}</span>
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: "8px 10px", color: "hsl(210,40%,70%)" }}>{s.price}</td>
-                  <td style={{ padding: "8px 10px", color: "hsl(220,10%,55%)" }}>{s.discountPercent}%</td>
-                  <td style={{ padding: "8px 10px", color: "#a78bfa", fontWeight: 600 }}>{s.finalPrice}</td>
+                  <td style={{ padding: "8px 10px", color: "hsl(var(--muted-foreground))" }}>{s.price}</td>
+                  <td style={{ padding: "8px 10px", color: "hsl(var(--muted-foreground))" }}>{s.discountPercent}%</td>
+                  <td style={{ padding: "8px 10px", color: "hsl(var(--primary))", fontWeight: 600 }}>{s.finalPrice}</td>
                   <td style={{ padding: "8px 10px" }}>
                     {(s as any).stock === null || (s as any).stock === undefined
                       ? <span style={{ color: "hsl(220,10%,40%)", fontSize: "11px" }}>∞</span>
@@ -593,7 +593,7 @@ function ServicesPanel({ game }: { game: Game }) {
                           display: "inline-flex", alignItems: "center", gap: "4px",
                           padding: "5px 10px", borderRadius: "5px", fontSize: "11px", cursor: "pointer",
                           ...(s.pluginSlug
-                            ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(187,100%,42%)" }
+                            ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(var(--primary))" }
                             : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(var(--border))" }
                           )
                         }}
@@ -693,10 +693,10 @@ export default function Games() {
 
       <div style={card}>
         {isLoading ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading games...</div>
+          <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading games...</div>
         ) : gameList.length === 0 ? (
           <div style={{ padding: "3rem", textAlign: "center" }}>
-            <p style={{ color: "hsl(220,10%,42%)", fontSize: "13px", marginBottom: "12px" }}>No games yet. Add your first game to get started.</p>
+            <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginBottom: "12px" }}>No games yet. Add your first game to get started.</p>
             <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={13} /> Add First Game</button>
           </div>
         ) : (
@@ -720,12 +720,12 @@ export default function Games() {
                         </div>
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "15px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
-                        <div style={{ fontSize: "12px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "2px" }}>{g.slug}</div>
+                        <div style={{ fontWeight: 700, fontSize: "15px", color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                        <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "2px" }}>{g.slug}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                         <span style={statusBadge(g.status === "active")}>{g.status}</span>
-                        <span style={{ color: "hsl(220,10%,42%)" }}>
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>
                           {expandedId === g.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </span>
                       </div>
@@ -740,7 +740,7 @@ export default function Games() {
                         style={{
                           ...( g.isTrending
                             ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
-                            : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }
+                            : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(var(--muted-foreground))" }
                           ),
                           flex: 1,
                         }}
@@ -771,7 +771,7 @@ export default function Games() {
                     onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ color: "hsl(220,10%,42%)", flexShrink: 0 }}>
+                      <span style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                         {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                       </span>
                       {g.logoUrl ? (
@@ -782,8 +782,8 @@ export default function Games() {
                         </div>
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(210,40%,95%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
-                        <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
+                        <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
                       </div>
                       <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
                     </div>
@@ -795,7 +795,7 @@ export default function Games() {
                       <button
                         style={g.isTrending
                           ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
-                          : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(220,10%,45%)" }}
+                          : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(var(--muted-foreground))" }}
                         onClick={() => trendingMut.mutate(g.id)}
                         disabled={trendingMut.isPending}
                         title={g.isTrending ? "Remove from Trending" : "Add to Trending"}

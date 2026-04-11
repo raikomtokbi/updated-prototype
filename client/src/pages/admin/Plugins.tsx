@@ -174,7 +174,7 @@ function PluginSettingsDialog({
   const inputStyle: React.CSSProperties = {
     width: "100%", padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
     background: "hsl(220,15%,10%)", border: "1px solid hsl(220,15%,20%)",
-    color: "hsl(210,40%,90%)", outline: "none", boxSizing: "border-box",
+    color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
   };
 
   if (schema.length === 0) {
@@ -182,8 +182,8 @@ function PluginSettingsDialog({
       <div style={overlayStyle} onClick={onClose}>
         <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
           <DialogHeader title={`${plugin.name} Settings`} onClose={onClose} />
-          <div style={{ padding: "32px 20px", textAlign: "center", color: "hsl(220,10%,45%)", fontSize: "13px" }}>
-            <Settings size={32} color="hsl(220,10%,30%)" style={{ marginBottom: 12 }} />
+          <div style={{ padding: "32px 20px", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>
+            <Settings size={32} color="hsl(var(--muted-foreground))" style={{ marginBottom: 12 }} />
             <p style={{ margin: 0 }}>This plugin has no configurable settings.</p>
           </div>
         </div>
@@ -198,12 +198,12 @@ function PluginSettingsDialog({
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           {schema.map((field) => (
             <div key={field.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,80%)" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                 {field.label}
                 {field.required && <span style={{ color: "#ef4444", marginLeft: 3 }}>*</span>}
               </label>
               {field.description && (
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: 0 }}>{field.description}</p>
+                <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>{field.description}</p>
               )}
               {field.type === "boolean" ? (
                 <div
@@ -226,7 +226,7 @@ function PluginSettingsDialog({
                       transition: "left 0.2s",
                     }} />
                   </div>
-                  <span style={{ fontSize: "12px", color: "hsl(210,40%,80%)" }}>
+                  <span style={{ fontSize: "12px", color: "hsl(var(--foreground))" }}>
                     {values[field.key] ? "Enabled" : "Disabled"}
                   </span>
                 </div>
@@ -300,7 +300,7 @@ function ConfirmDialog({
       <div style={{ ...dialogStyle, maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
         <DialogHeader title={title} onClose={onCancel} />
         <div style={{ padding: "20px" }}>
-          <p style={{ fontSize: "13px", color: "hsl(210,40%,75%)", margin: "0 0 20px" }}>{message}</p>
+          <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", margin: "0 0 20px" }}>{message}</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <button onClick={onCancel} style={secondaryBtnStyle}>Cancel</button>
             <button onClick={onConfirm} style={danger ? dangerBtnStyle : primaryBtnStyle}>{confirmLabel}</button>
@@ -316,8 +316,8 @@ function ConfirmDialog({
 function DialogHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)" }}>{title}</span>
-      <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", padding: 4 }}>
+      <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{title}</span>
+      <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 4 }}>
         <X size={16} />
       </button>
     </div>
@@ -335,7 +335,7 @@ const primaryBtnStyle: React.CSSProperties = {
 const secondaryBtnStyle: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 14px",
   borderRadius: 6, fontSize: "12px", fontWeight: 600,
-  background: "hsl(220,15%,13%)", color: "hsl(210,40%,75%)",
+  background: "hsl(220,15%,13%)", color: "hsl(var(--muted-foreground))",
   border: "1px solid hsl(220,15%,20%)", cursor: "pointer",
 };
 const dangerBtnStyle: React.CSSProperties = {
@@ -411,20 +411,20 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
           {/* Title area */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)" }}>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))" }}>
                 {plugin.name}
               </span>
               <span style={{
                 fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: 20,
                 background: plugin.isEnabled ? "rgba(16,185,129,0.15)" : "hsl(220,15%,15%)",
-                color: plugin.isEnabled ? "#10b981" : "hsl(220,10%,45%)",
+                color: plugin.isEnabled ? "#10b981" : "hsl(var(--muted-foreground))",
                 border: `1px solid ${plugin.isEnabled ? "rgba(16,185,129,0.3)" : "hsl(220,15%,22%)"}`,
               }}>
                 {plugin.isEnabled ? "Active" : "Inactive"}
               </span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
-              <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
                 v{plugin.version ?? "1.0.0"}
               </span>
               <span style={{
@@ -459,7 +459,7 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
         {/* Body */}
         <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
           {plugin.description && (
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.6 }}>
               {plugin.description}
             </p>
           )}
@@ -481,7 +481,7 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
           {/* Hooks */}
           {hooks.length > 0 && (
             <div>
-              <span style={{ fontSize: "10px", fontWeight: 600, color: "hsl(220,10%,42%)", display: "block", marginBottom: 5 }}>HOOKS</span>
+              <span style={{ fontSize: "10px", fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 5 }}>HOOKS</span>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                 {hooks.map((h) => (
                   <span key={h} style={{
@@ -568,10 +568,10 @@ function PluginCard({ plugin }: { plugin: Plugin }) {
 function MetaItem({ icon, label, value, mono }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 5 }}>
-      <span style={{ color: "hsl(220,10%,38%)", marginTop: 2 }}>{icon}</span>
+      <span style={{ color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{icon}</span>
       <div>
-        <span style={{ fontSize: "9px", fontWeight: 700, color: "hsl(220,10%,38%)", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
-        <span style={{ fontSize: "11px", color: "hsl(210,40%,70%)", fontFamily: mono ? "monospace" : undefined }}>{value}</span>
+        <span style={{ fontSize: "9px", fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
+        <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontFamily: mono ? "monospace" : undefined }}>{value}</span>
       </div>
     </div>
   );
@@ -671,8 +671,8 @@ function UploadSection({ onInstalled }: { onInstalled: () => void }) {
       <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", gap: 10 }}>
         <UploadCloud size={16} color="#a78bfa" />
         <div>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,95%)" }}>Upload Plugin</span>
-          <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: "2px 0 0" }}>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Upload Plugin</span>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "2px 0 0" }}>
             Upload a .zip plugin package to extend platform functionality
           </p>
         </div>
@@ -746,24 +746,24 @@ function UploadSection({ onInstalled }: { onInstalled: () => void }) {
                     </svg>
                     <span style={{
                       position: "absolute", inset: 0, display: "flex", alignItems: "center",
-                      justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "#a78bfa",
+                      justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "hsl(var(--primary))",
                     }}>
                       {uploadProgress}%
                     </span>
                   </div>
-                  <span style={{ fontSize: "13px", color: "hsl(210,40%,80%)", fontWeight: 500 }}>
+                  <span style={{ fontSize: "13px", color: "hsl(var(--foreground))", fontWeight: 500 }}>
                     Uploading & validating...
                   </span>
                 </>
               ) : (
                 <>
-                  <UploadCloud size={38} color={dragOver ? "#a78bfa" : "hsl(220,10%,35%)"} />
+                  <UploadCloud size={38} color={dragOver ? "#a78bfa" : "hsl(var(--muted-foreground))"} />
                   <div style={{ textAlign: "center" }}>
                     <p style={{ fontSize: "13px", color: "hsl(210,40%,78%)", fontWeight: 500, margin: "0 0 4px" }}>
                       Drag & drop plugin package here
                     </p>
                     <p style={{ fontSize: "11px", color: "hsl(220,10%,40%)", margin: 0 }}>
-                      or click to browse — accepts <code style={{ color: "#a78bfa" }}>.zip</code> files up to 50MB
+                      or click to browse — accepts <code style={{ color: "hsl(var(--primary))" }}>.zip</code> files up to 50MB
                     </p>
                   </div>
                 </>
@@ -800,30 +800,30 @@ function UploadSection({ onInstalled }: { onInstalled: () => void }) {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                 <Info size={12} color="#6366f1" />
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,70%)" }}>Plugin Package Structure</span>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>Plugin Package Structure</span>
               </div>
-              <pre style={{ fontSize: "10px", color: "hsl(220,10%,45%)", margin: 0, lineHeight: 1.7, fontFamily: "monospace" }}>
+              <pre style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.7, fontFamily: "monospace" }}>
 {`my-plugin.zip
 ├── plugin.json     ← required manifest
 ├── index.js        ← required entry file
 └── ...             ← any other plugin files`}
               </pre>
-              <div style={{ marginTop: 10, fontSize: "10px", color: "hsl(220,10%,42%)", lineHeight: 1.7 }}>
-                <strong style={{ color: "hsl(210,40%,60%)" }}>plugin.json</strong> must include:{" "}
-                <code style={{ color: "#a78bfa" }}>name</code>,{" "}
-                <code style={{ color: "#a78bfa" }}>slug</code>,{" "}
-                <code style={{ color: "#a78bfa" }}>version</code>,{" "}
-                <code style={{ color: "#a78bfa" }}>pluginType</code>,{" "}
-                <code style={{ color: "#a78bfa" }}>entryFile</code>
+              <div style={{ marginTop: 10, fontSize: "10px", color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
+                <strong style={{ color: "hsl(var(--muted-foreground))" }}>plugin.json</strong> must include:{" "}
+                <code style={{ color: "hsl(var(--primary))" }}>name</code>,{" "}
+                <code style={{ color: "hsl(var(--primary))" }}>slug</code>,{" "}
+                <code style={{ color: "hsl(var(--primary))" }}>version</code>,{" "}
+                <code style={{ color: "hsl(var(--primary))" }}>pluginType</code>,{" "}
+                <code style={{ color: "hsl(var(--primary))" }}>entryFile</code>
               </div>
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(220,15%,14%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "10px", color: "hsl(220,10%,38%)" }}>Need a starting point?</span>
+                <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Need a starting point?</span>
                 <a
                   href="/example-plugin.zip"
                   download="example-plugin.zip"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 5,
-                    fontSize: "10px", fontWeight: 600, color: "#a78bfa",
+                    fontSize: "10px", fontWeight: 600, color: "hsl(var(--primary))",
                     textDecoration: "none", padding: "3px 8px", borderRadius: 5,
                     background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.25)",
                   }}
@@ -873,7 +873,7 @@ function PluginInstallPreview({
       }}>
         <Check size={14} color="#10b981" />
         <span style={{ fontSize: "12px", color: "#10b981", fontWeight: 600 }}>Plugin validated successfully</span>
-        <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", marginLeft: "auto" }}>{fileName}</span>
+        <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginLeft: "auto" }}>{fileName}</span>
       </div>
 
       {/* Plugin info card */}
@@ -890,8 +890,8 @@ function PluginInstallPreview({
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,95%)" }}>{manifest.name}</span>
-              <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)" }}>v{manifest.version}</span>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))" }}>{manifest.name}</span>
+              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>v{manifest.version}</span>
               <span style={{
                 fontSize: "10px", fontWeight: 600, padding: "1px 7px", borderRadius: 10,
                 background: `${typeColor}18`, color: typeColor, textTransform: "capitalize",
@@ -988,7 +988,7 @@ export default function Plugins() {
         {plugins.length > 0 && (
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>
                 Installed Plugins
               </span>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
@@ -1002,7 +1002,7 @@ export default function Plugins() {
                       border: "1px solid",
                       borderColor: statusFilter === s ? "#7c3aed" : "hsl(220,15%,20%)",
                       background: statusFilter === s ? "rgba(124,58,237,0.15)" : "transparent",
-                      color: statusFilter === s ? "#a78bfa" : "hsl(220,10%,45%)",
+                      color: statusFilter === s ? "#a78bfa" : "hsl(var(--muted-foreground))",
                       cursor: "pointer", textTransform: "capitalize",
                     }}
                   >
@@ -1059,10 +1059,10 @@ export default function Plugins() {
             ...card, padding: "48px 20px", textAlign: "center",
           }}>
             <Plug size={36} color="hsl(220,10%,28%)" style={{ marginBottom: 12 }} />
-            <h3 style={{ fontSize: "15px", fontWeight: 700, color: "hsl(210,40%,80%)", margin: "0 0 8px" }}>
+            <h3 style={{ fontSize: "15px", fontWeight: 700, color: "hsl(var(--foreground))", margin: "0 0 8px" }}>
               No plugins installed
             </h3>
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,42%)", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.6 }}>
               Upload a plugin package above to extend platform functionality.<br />
               Plugins can add payment gateways, validation, SMS/email, analytics, and more.
             </p>

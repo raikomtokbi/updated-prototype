@@ -30,7 +30,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -42,7 +42,7 @@ const textareaStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -250,7 +250,7 @@ function SliderForm({
             borderRadius: "4px",
             border: `1px solid ${form.isActive ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
             background: form.isActive ? "rgba(124,58,237,0.15)" : "transparent",
-            color: form.isActive ? "hsl(258,90%,70%)" : "hsl(220,10%,50%)",
+            color: form.isActive ? "hsl(258,90%,70%)" : "hsl(var(--muted-foreground))",
             fontSize: "12px",
             cursor: "pointer",
           }}
@@ -267,7 +267,7 @@ function SliderForm({
             borderRadius: "6px",
             background: "transparent",
             border: "1px solid hsl(220,15%,20%)",
-            color: "hsl(220,10%,55%)",
+            color: "hsl(var(--muted-foreground))",
             fontSize: "12px",
             cursor: "pointer",
           }}
@@ -354,14 +354,14 @@ function SliderItem({
               flexShrink: 0,
             }}
           >
-            <Image size={14} style={{ color: "hsl(220,10%,35%)" }} />
+            <Image size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {slider.title}
           </div>
-          <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
             Order: {slider.sortOrder} &middot; {slider.isActive ? "Active" : "Inactive"}
             {slider.endsAt && ` · Ends ${new Date(slider.endsAt).toLocaleDateString()}`}
           </div>
@@ -397,7 +397,7 @@ function SliderItem({
             borderRadius: "4px",
             background: "hsl(var(--card))",
             border: "1px solid hsl(220,15%,20%)",
-            color: isFirst ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
+            color: isFirst ? "hsl(220,10%,28%)" : "hsl(var(--muted-foreground))",
             cursor: isFirst ? "not-allowed" : "pointer",
           }}
         >
@@ -415,7 +415,7 @@ function SliderItem({
             borderRadius: "4px",
             background: "hsl(var(--card))",
             border: "1px solid hsl(220,15%,20%)",
-            color: isLast ? "hsl(220,10%,28%)" : "hsl(220,10%,55%)",
+            color: isLast ? "hsl(220,10%,28%)" : "hsl(var(--muted-foreground))",
             cursor: isLast ? "not-allowed" : "pointer",
           }}
         >
@@ -434,7 +434,7 @@ function SliderItem({
             borderRadius: "5px",
             background: "rgba(124,58,237,0.1)",
             border: "1px solid rgba(124,58,237,0.25)",
-            color: "#a78bfa",
+            color: "hsl(var(--primary))",
             fontSize: "11px",
             fontWeight: 600,
             cursor: "pointer",
@@ -646,7 +646,7 @@ export default function EditContent() {
       <div style={card}>
         <div style={sectionHeader}>
           <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Homepage Content & Media Assets</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Homepage Content & Media Assets</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -694,7 +694,7 @@ export default function EditContent() {
       <div style={card}>
         <div style={sectionHeader}>
           <Zap size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Features Strip</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Features Strip</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
@@ -721,7 +721,7 @@ export default function EditContent() {
                         background: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "6px",
-                        color: "hsl(210, 40%, 92%)",
+                        color: "hsl(var(--foreground))",
                         fontSize: "13px",
                         outline: "none",
                         boxSizing: "border-box",
@@ -744,7 +744,7 @@ export default function EditContent() {
                         borderRadius: "6px",
                         border: "1px solid hsl(var(--border))",
                         background: "hsl(var(--card))",
-                        color: "hsl(210,40%,92%)",
+                        color: "hsl(var(--foreground))",
                         fontSize: "13px",
                         cursor: "pointer",
                         width: "100%",
@@ -764,7 +764,7 @@ export default function EditContent() {
                 />
                 {local[`${feat.key}_picker_open`] && (
                   <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px", marginTop: "12px" }}>
-                    <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,45%)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
+                    <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
                       {ICON_LIST.map((iconName) => {
                         const Icon = ICON_MAP[iconName];
@@ -785,7 +785,7 @@ export default function EditContent() {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: selected ? "hsl(258,90%,72%)" : "hsl(220,10%,55%)",
+                              color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
                               transition: "all 0.1s",
                             }}
                           >
@@ -807,8 +807,8 @@ export default function EditContent() {
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Image size={15} style={{ color: "hsl(var(--primary))" }} />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>Hero Sliders</span>
-            <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>({sliders.length} slides)</span>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Hero Sliders</span>
+            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>({sliders.length} slides)</span>
           </div>
           {!showAddSlider && !editSlider && (
             <button
@@ -844,7 +844,7 @@ export default function EditContent() {
                 marginBottom: "8px",
               }}
             >
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,80%)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 New Slide
               </div>
               <SliderForm
@@ -860,7 +860,7 @@ export default function EditContent() {
 
           {/* Slider list */}
           {slidersLoading ? (
-            <div style={{ textAlign: "center", padding: "24px", color: "hsl(220,10%,42%)", fontSize: "12px" }}>
+            <div style={{ textAlign: "center", padding: "24px", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
               Loading slides…
             </div>
           ) : sliders.length === 0 && !showAddSlider ? (
@@ -868,7 +868,7 @@ export default function EditContent() {
               style={{
                 textAlign: "center",
                 padding: "32px",
-                color: "hsl(220,10%,38%)",
+                color: "hsl(var(--muted-foreground))",
                 fontSize: "13px",
                 border: "1px dashed hsl(var(--border))",
                 borderRadius: "6px",
@@ -888,7 +888,7 @@ export default function EditContent() {
                     padding: "16px",
                   }}
                 >
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(210,40%,80%)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                     Edit Slide
                   </div>
                   <SliderForm
@@ -923,8 +923,8 @@ export default function EditContent() {
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210, 40%, 92%)" }}>FAQ</span>
-            <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)" }}>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>FAQ</span>
+            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
               ({(() => { try { return JSON.parse(local.faq_items || "[]").length; } catch { return 0; } })()} items)
             </span>
           </div>

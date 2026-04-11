@@ -130,7 +130,7 @@ function HeroSlider() {
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(90deg, rgba(7,11,20,0.92) 0%, rgba(7,11,20,0.60) 55%, rgba(7,11,20,0.20) 100%), linear-gradient(0deg, rgba(7,11,20,0.88) 0%, transparent 45%)",
+                "linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.15) 100%), linear-gradient(0deg, rgba(0,0,0,0.70) 0%, transparent 45%)",
             }}
           />
         </div>
@@ -143,7 +143,7 @@ function HeroSlider() {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background: "radial-gradient(ellipse 40% 60% at 20% 50%, rgba(124,58,237,0.18) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 40% 60% at 20% 50%, hsl(var(--primary) / 0.18) 0%, transparent 65%)",
         }}
       />
 
@@ -174,12 +174,12 @@ function HeroSlider() {
                   padding: "0.3rem 0.8rem",
                   borderRadius: "9999px",
                   background: "hsl(var(--primary) / 0.2)",
-                  border: "1px solid rgba(124, 58, 237, 0.4)",
+                  border: "1px solid hsl(var(--primary) / 0.4)",
                   marginBottom: "1rem",
                 }}
               >
-                <Zap size={12} color="#a78bfa" />
-                <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.1em" }}>
+                <Zap size={12} color="hsl(var(--primary))" />
+                <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "hsl(var(--primary))", letterSpacing: "0.1em" }}>
                   FEATURED
                 </span>
               </div>
@@ -194,10 +194,7 @@ function HeroSlider() {
                     fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
                     fontWeight: 900,
                     letterSpacing: "-0.02em",
-                    background: "linear-gradient(135deg, #7c3aed, #9333ea, #a855f7)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
+                    color: "hsl(var(--primary))",
                   }}
                 >
                   {slide.title}
@@ -233,16 +230,16 @@ function HeroSlider() {
                     gap: "0.4rem",
                     padding: "0.55rem 1.1rem",
                     borderRadius: "8px",
-                    background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                    background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                     color: "white",
                     fontSize: "0.8rem",
                     fontWeight: 700,
                     textDecoration: "none",
-                    boxShadow: "0 0 20px rgba(124,58,237,0.45)",
+                    boxShadow: "0 0 20px hsl(var(--primary) / 0.45)",
                     transition: "box-shadow 0.2s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px rgba(124,58,237,0.65)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(124,58,237,0.45)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 30px hsl(var(--primary) / 0.65)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 20px hsl(var(--primary) / 0.45)"; }}
                 >
                   <Gamepad2 size={14} />
                   {slide.btnLabel}
@@ -268,9 +265,9 @@ function HeroSlider() {
             data-testid={`button-slide-dot-${i}`}
             style={{
               width: i === current ? "20px" : "6px", height: "6px", borderRadius: "9999px",
-              background: i === current ? "#7c3aed" : "rgba(255,255,255,0.25)",
+              background: i === current ? "hsl(var(--primary))" : "rgba(255,255,255,0.25)",
               border: "none", cursor: "pointer", transition: "all 0.3s ease",
-              boxShadow: i === current ? "0 0 8px rgba(124,58,237,0.6)" : "none",
+              boxShadow: i === current ? "0 0 8px hsl(var(--primary) / 0.6)" : "none",
             }}
           />
         ))}
@@ -345,13 +342,13 @@ function FeaturesStrip() {
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 0 12px rgba(124,58,237,0.15)",
+                  boxShadow: "0 0 12px hsl(var(--primary) / 0.15)",
                 }}
               >
-                <Icon size={20} color="#a78bfa" />
+                <Icon size={20} color="hsl(var(--primary))" />
               </div>
               <div>
-                <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "#e5e7eb", marginBottom: "0.3rem" }}>
+                <h3 style={{ fontSize: "0.875rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>
                   {title}
                 </h3>
                 <p style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{desc}</p>
@@ -387,10 +384,10 @@ function TrendingGames() {
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-            <Zap size={16} color="#a78bfa" />
+            <Zap size={16} color="hsl(var(--primary))" />
             <span
               className="font-orbitron"
-              style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+              style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
             >
               Trending Now
             </span>
@@ -408,7 +405,7 @@ function TrendingGames() {
             gap: "0.25rem",
             fontSize: "0.78rem",
             fontWeight: 600,
-            color: "#a78bfa",
+            color: "hsl(var(--primary))",
             textDecoration: "none",
           }}
         >
@@ -456,12 +453,12 @@ function TrendingGames() {
                 transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.55)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px hsl(var(--primary) / 0.2)";
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
                 (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
               }}
@@ -471,13 +468,13 @@ function TrendingGames() {
                   <img src={game.logoUrl} alt={game.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Gamepad2 size={32} style={{ color: "rgba(167,139,250,0.3)" }} />
+                    <Gamepad2 size={32} style={{ color: "hsl(var(--primary) / 0.3)" }} />
                   </div>
                 )}
-                <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "#7c3aed", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
+                <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "hsl(var(--primary))", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>HOT</span>
                 {/* Game name hanging below */}
                 <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.35rem" }}>
-                  <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0, paddingLeft: "0.05rem", paddingRight: "0.05rem" }}>
+                  <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", margin: 0, paddingLeft: "0.05rem", paddingRight: "0.05rem" }}>
                     {game.name}
                   </p>
                 </div>
@@ -520,10 +517,10 @@ function VouchersSection() {
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-              <Gift size={16} color="#a78bfa" />
+              <Gift size={16} color="hsl(var(--primary))" />
               <span
                 className="font-orbitron"
-                style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+                style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
               >
                 Vouchers & Gift Cards
               </span>
@@ -540,7 +537,7 @@ function VouchersSection() {
               gap: "0.25rem",
               fontSize: "0.78rem",
               fontWeight: 600,
-              color: "#a78bfa",
+              color: "hsl(var(--primary))",
               textDecoration: "none",
             }}
           >
@@ -584,12 +581,12 @@ function VouchersSection() {
                   transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.55)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px hsl(var(--primary) / 0.2)";
                   (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
                 }}
@@ -600,14 +597,14 @@ function VouchersSection() {
                     <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
                     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Gift size={28} style={{ color: "rgba(167,139,250,0.3)" }} />
+                      <Gift size={28} style={{ color: "hsl(var(--primary) / 0.3)" }} />
                     </div>
                   )}
                   {/* Category badge */}
                   <span style={{
                     position: "absolute", top: "0.4rem", left: "0.4rem",
                     padding: "0.15rem 0.45rem", borderRadius: "4px",
-                    background: product.category === "gift_card" ? "#0e7490" : "#7c3aed",
+                    background: product.category === "gift_card" ? "hsl(186,80%,35%)" : "hsl(var(--primary))",
                     color: "white", fontSize: "0.58rem", fontWeight: 800, letterSpacing: "0.05em",
                   }}>
                     {product.category === "gift_card" ? "GIFT" : "VOUCHER"}
@@ -616,14 +613,14 @@ function VouchersSection() {
                 {/* Info */}
                 <div style={{ padding: "0.65rem 0.75rem" }}>
                   <p style={{
-                    fontSize: "0.75rem", fontWeight: 700, color: "#e5e7eb",
+                    fontSize: "0.75rem", fontWeight: 700, color: "hsl(var(--foreground))",
                     margin: "0 0 0.25rem",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>
                     {product.name}
                   </p>
                   {product.price && (
-                    <p style={{ fontSize: "0.68rem", color: "#a78bfa", margin: 0, fontWeight: 600 }}>
+                    <p style={{ fontSize: "0.68rem", color: "hsl(var(--primary))", margin: 0, fontWeight: 600 }}>
                       From {typeof product.price === "number"
                         ? `$${(product.price / 100).toFixed(2)}`
                         : product.price}
@@ -656,10 +653,10 @@ function GamesGrid() {
         {/* Header */}
         <div style={{ marginBottom: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-            <Gamepad2 size={16} color="#a78bfa" />
+            <Gamepad2 size={16} color="hsl(var(--primary))" />
             <span
               className="font-orbitron"
-              style={{ fontSize: "1.1rem", fontWeight: 800, color: "#e5e7eb" }}
+              style={{ fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
             >
               Games
             </span>
@@ -693,12 +690,12 @@ function GamesGrid() {
                   transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.55)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px rgba(124,58,237,0.2)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.55)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 18px hsl(var(--primary) / 0.2)";
                   (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
                 }}
@@ -713,7 +710,7 @@ function GamesGrid() {
                     />
                   ) : (
                     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Gamepad2 size={28} style={{ color: "rgba(167,139,250,0.3)" }} />
+                      <Gamepad2 size={28} style={{ color: "hsl(var(--primary) / 0.3)" }} />
                     </div>
                   )}
                 </div>
@@ -735,21 +732,21 @@ function GamesGrid() {
                 padding: "0.7rem 2rem",
                 borderRadius: "8px",
                 background: "hsl(var(--primary) / 0.12)",
-                border: "1px solid rgba(124,58,237,0.35)",
-                color: "#a78bfa",
+                border: "1px solid hsl(var(--primary) / 0.35)",
+                color: "hsl(var(--primary))",
                 fontSize: "0.875rem",
                 fontWeight: 700,
                 textDecoration: "none",
                 transition: "background 0.2s, border-color 0.2s, box-shadow 0.2s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.22)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.6)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(124,58,237,0.25)";
+                (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.22)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.6)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px hsl(var(--primary) / 0.25)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.12)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
+                (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.12)";
+                (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.35)";
                 (e.currentTarget as HTMLElement).style.boxShadow = "none";
               }}
             >
@@ -783,9 +780,9 @@ function BonusBanner() {
           borderRadius: "16px",
           overflow: "hidden",
           position: "relative",
-          background: "linear-gradient(135deg, #0f0c29, #302b63, #0f0c29)",
-          border: "1px solid rgba(124,58,237,0.35)",
-          boxShadow: "0 0 40px rgba(124,58,237,0.15)",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--primary) / 0.25)",
+          boxShadow: "0 0 40px hsl(var(--primary) / 0.15)",
           display: "flex",
           alignItems: "center",
           minHeight: "180px",
@@ -797,7 +794,7 @@ function BonusBanner() {
           style={{
             position: "absolute",
             inset: 0,
-            background: "radial-gradient(ellipse 60% 80% at 30% 50%, rgba(124,58,237,0.25) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 60% 80% at 30% 50%, hsl(var(--primary) / 0.12) 0%, transparent 70%)",
             pointerEvents: "none",
           }}
         />
@@ -810,10 +807,10 @@ function BonusBanner() {
               padding: "0.2rem 0.65rem",
               borderRadius: "9999px",
               background: "hsl(var(--primary) / 0.2)",
-              border: "1px solid rgba(124,58,237,0.45)",
+              border: "1px solid hsl(var(--primary) / 0.45)",
               fontSize: "0.65rem",
               fontWeight: 700,
-              color: "#a78bfa",
+              color: "hsl(var(--primary))",
               letterSpacing: "0.1em",
               marginBottom: "0.75rem",
             }}
@@ -825,25 +822,18 @@ function BonusBanner() {
             style={{
               fontSize: "clamp(1.5rem, 3vw, 2.25rem)",
               fontWeight: 900,
-              color: "#e5e7eb",
+              color: "hsl(var(--foreground))",
               lineHeight: 1.1,
               marginBottom: "0.75rem",
             }}
           >
             {mainTitle}{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
+            <span style={{ color: "hsl(var(--primary))" }}>
               {bonusText} BONUS
             </span>{" "}
             {mainTitleSuffix}
           </h2>
-          <p style={{ fontSize: "0.825rem", color: "rgba(229,231,235,0.6)", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
+          <p style={{ fontSize: "0.825rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
             {description}
           </p>
           <Link
@@ -855,16 +845,16 @@ function BonusBanner() {
               gap: "0.4rem",
               padding: "0.6rem 1.25rem",
               borderRadius: "8px",
-              background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
               color: "white",
               fontSize: "0.8rem",
               fontWeight: 700,
               textDecoration: "none",
-              boxShadow: "0 0 16px rgba(124,58,237,0.4)",
+              boxShadow: "0 0 16px hsl(var(--primary) / 0.4)",
               transition: "box-shadow 0.2s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 28px rgba(124,58,237,0.65)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 16px rgba(124,58,237,0.4)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 28px hsl(var(--primary) / 0.65)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 16px hsl(var(--primary) / 0.4)"; }}
           >
             {buttonText} <ArrowRight size={14} />
           </Link>
@@ -907,7 +897,7 @@ function Footer() {
     <footer
       style={{
         background: "hsl(var(--background))",
-        borderTop: "1px solid rgba(124,58,237,0.15)",
+        borderTop: "1px solid hsl(var(--primary) / 0.15)",
         padding: "3.5rem 1.5rem 1.5rem",
       }}
     >
@@ -937,7 +927,7 @@ function Footer() {
                     width: "30px",
                     height: "30px",
                     borderRadius: "7px",
-                    background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                    background: "hsl(var(--primary))",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -952,17 +942,14 @@ function Footer() {
                 style={{
                   fontSize: "1rem",
                   fontWeight: 800,
-                  background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
+                  color: "hsl(var(--primary))",
                 }}
               >
                 {siteName}
               </span>
             </div>
             {siteSettings?.site_tagline && (
-              <p style={{ fontSize: "0.72rem", color: "rgba(167,139,250,0.7)", marginBottom: "0.6rem", fontStyle: "italic" }}>
+              <p style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.6rem", fontStyle: "italic" }}>
                 {siteSettings.site_tagline}
               </p>
             )}
@@ -983,7 +970,7 @@ function Footer() {
                   textDecoration: "none",
                   transition: "color 0.15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
               >
                 <Mail size={12} />
@@ -1008,8 +995,8 @@ function Footer() {
                     width: "32px",
                     height: "32px",
                     borderRadius: "7px",
-                    background: "rgba(124,58,237,0.1)",
-                    border: "1px solid rgba(124,58,237,0.2)",
+                    background: "hsl(var(--primary) / 0.1)",
+                    border: "1px solid hsl(var(--primary) / 0.2)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1021,12 +1008,12 @@ function Footer() {
                   }}
                   onMouseEnter={(e) => {
                     if (url) {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(124,58,237,0.5)";
-                      (e.currentTarget as HTMLAnchorElement).style.color = "#a78bfa";
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = "hsl(var(--primary) / 0.5)";
+                      (e.currentTarget as HTMLAnchorElement).style.color = "hsl(var(--primary))";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(124,58,237,0.2)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "hsl(var(--primary) / 0.2)";
                     (e.currentTarget as HTMLAnchorElement).style.color = url ? "rgba(148,163,184,0.8)" : "rgba(148,163,184,0.3)";
                   }}
                 >
@@ -1042,7 +1029,7 @@ function Footer() {
               style={{
                 fontSize: "0.75rem",
                 fontWeight: 700,
-                color: "#e5e7eb",
+                color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 marginBottom: "1rem",
@@ -1056,7 +1043,7 @@ function Footer() {
                   <Link
                     href={item.href}
                     style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
                     {item.label}
@@ -1072,7 +1059,7 @@ function Footer() {
               style={{
                 fontSize: "0.75rem",
                 fontWeight: 700,
-                color: "#e5e7eb",
+                color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 marginBottom: "1rem",
@@ -1086,7 +1073,7 @@ function Footer() {
                   <Link
                     href={item.href}
                     style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
                     {item.label}
@@ -1102,7 +1089,7 @@ function Footer() {
               style={{
                 fontSize: "0.75rem",
                 fontWeight: 700,
-                color: "#e5e7eb",
+                color: "hsl(var(--foreground))",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 marginBottom: "1rem",
@@ -1116,7 +1103,7 @@ function Footer() {
                   <Link
                     href={item.href}
                     style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a78bfa"; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
                   >
                     {item.label}

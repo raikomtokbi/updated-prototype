@@ -82,7 +82,7 @@ export const btnEdit: React.CSSProperties = {
   borderRadius: "5px",
   background: "hsl(var(--primary) / 0.1)",
   border: "1px solid hsl(var(--primary) / 0.25)",
-  color: "#a78bfa",
+  color: "hsl(var(--primary))",
   fontSize: "11px",
   cursor: "pointer",
   whiteSpace: "nowrap",

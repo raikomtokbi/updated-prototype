@@ -15,7 +15,7 @@ import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMappi
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "7px 10px", background: "hsl(var(--card))",
-  border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(210,40%,92%)",
+  border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))",
   fontSize: "13px", outline: "none", boxSizing: "border-box",
 };
 const selectStyle: React.CSSProperties = {
@@ -24,18 +24,18 @@ const selectStyle: React.CSSProperties = {
   backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
 };
 const labelStyle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
+  fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "4px",
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 const sectionTitle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,55%)",
+  fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))",
   textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px",
 };
 const tabBtn = (active: boolean): React.CSSProperties => ({
   padding: "7px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
   cursor: "pointer", border: "none", transition: "all 0.15s",
   background: active ? "hsl(258, 90%, 62%)" : "transparent",
-  color: active ? "white" : "hsl(220,10%,60%)",
+  color: active ? "white" : "hsl(var(--muted-foreground))",
 });
 const innerCard: React.CSSProperties = {
   background: "hsl(var(--background))",
@@ -132,7 +132,7 @@ function ConfigureModal({
   return (
     <Modal title={`Configure: ${service.name}`} onClose={onClose} wide>
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
           {service.note}. Credentials are stored in the database.
         </p>
         {service.fields.map((f) => (
@@ -145,7 +145,7 @@ function ConfigureModal({
         ))}
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
           <button onClick={onClose}
-            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(220,15%,14%)", border: "1px solid hsl(var(--border))", color: "hsl(220,10%,55%)", fontSize: "12px", cursor: "pointer" }}>
+            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(220,15%,14%)", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
             Cancel
           </button>
           <button onClick={() => saveMut.mutate()} style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }} disabled={saveMut.isPending}>
@@ -227,17 +227,17 @@ function BusanConfigTab() {
               onChange={e => setApiBaseUrl(e.target.value)}
               placeholder="e.g. https://busangame.com/api or https://api.yourdomain.com/v1"
               data-testid="input-busan-api-base-url" />
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "5px" }}>
               The base URL for the Busan API (without trailing slash). Correct this if you see HTML errors.
             </p>
           </div>
           <div>
-            <label style={labelStyle}>API Key <span style={{ fontWeight: 400, color: "hsl(220,10%,45%)" }}>(x-api-key header)</span></label>
+            <label style={labelStyle}>API Key <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>(x-api-key header)</span></label>
             <input style={inputStyle} type="password" value={apiToken}
               onChange={e => setApiToken(e.target.value)}
               placeholder="Enter your 1GameStopUp API key" autoComplete="off"
               data-testid="input-busan-api-token" />
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "5px" }}>
               Sent as the <code style={{ background: "rgba(255,255,255,0.06)", padding: "1px 4px", borderRadius: "3px" }}>x-api-key</code> header. Never exposed to the frontend.
             </p>
           </div>
@@ -261,7 +261,7 @@ function BusanConfigTab() {
               <CheckCircle size={13} /> Configuration saved
             </span>}
             {!isDirty && !saved && (
-              <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)" }}>No unsaved changes</span>
+              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>
             )}
           </div>
         </div>
@@ -270,7 +270,7 @@ function BusanConfigTab() {
       {/* Balance Check */}
       <div style={innerCard}>
         <p style={sectionTitle}>Account Balance</p>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", marginBottom: "14px", lineHeight: 1.6 }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginBottom: "14px", lineHeight: 1.6 }}>
           Verify your Busan API balance before processing orders.
         </p>
         {balanceData && (
@@ -299,7 +299,7 @@ function BusanConfigTab() {
           {balanceLoading ? "Checking..." : "Check Balance"}
         </button>
         {!isConfigured && (
-          <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "8px" }}>Save your API token first to check balance.</p>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "8px" }}>Save your API token first to check balance.</p>
         )}
       </div>
     </div>
@@ -420,7 +420,7 @@ function BusanMappingTab() {
                 })}
               </select>
               {cmsProducts.length === 0 && (
-                <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", marginTop: "5px" }}>
+                <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "5px" }}>
                   No services found. Add them in the Services section.
                 </p>
               )}
@@ -447,7 +447,7 @@ function BusanMappingTab() {
                 <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
                   style={{
                     padding: "3px 8px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
-                    border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa",
+                    border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))",
                     display: "inline-flex", alignItems: "center", gap: "4px",
                   }}
                   data-testid="button-refresh-busan-products">
@@ -464,7 +464,7 @@ function BusanMappingTab() {
                     data-testid="input-busan-product-id" />
                   <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>
                   <button onClick={fetchBusanProducts} disabled={!isConfigured}
-                    style={{ marginTop: "6px", padding: "4px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa", cursor: "pointer" }}>
+                    style={{ marginTop: "6px", padding: "4px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))", cursor: "pointer" }}>
                     Retry
                   </button>
                 </div>
@@ -519,7 +519,7 @@ function BusanMappingTab() {
               <thead>
                 <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
                   {["CMS Product", "Busan Product ID", "Actions"].map(h => (
-                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px", whiteSpace: "nowrap" }}>{h}</th>
+                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(var(--muted-foreground))", fontWeight: 600, fontSize: "11px", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -527,13 +527,13 @@ function BusanMappingTab() {
                 {mappings.map((m) => (
                   <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
                     <td style={{ padding: "10px 14px" }}>
-                      <div style={{ fontWeight: 500, color: "hsl(210,40%,85%)" }}>{m.cmsProductName || m.cmsProductId}</div>
+                      <div style={{ fontWeight: 500, color: "hsl(var(--foreground))" }}>{m.cmsProductName || m.cmsProductId}</div>
                     </td>
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258,80%,72%)", background: "rgba(124,58,237,0.08)", padding: "2px 7px", borderRadius: "4px", display: "inline-block" }}>
                         {m.busanProductId}
                       </div>
-                      {m.busanProductName && <div style={{ fontSize: "10px", color: "hsl(220,10%,45%)", marginTop: "2px" }}>{m.busanProductName}</div>}
+                      {m.busanProductName && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>{m.busanProductName}</div>}
                     </td>
                     <td style={{ padding: "10px 14px" }}>
                       <button onClick={() => deleteMappingMut.mutate(m.id)} disabled={deleteMappingMut.isPending}
@@ -724,7 +724,7 @@ function SmileOneConfigTab() {
               </button>
             )}
             {!isDirty && (
-              <span style={{ fontSize: "12px", color: "hsl(220,10%,42%)" }}>No unsaved changes</span>
+              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>
             )}
           </div>
         </div>
@@ -733,28 +733,28 @@ function SmileOneConfigTab() {
       {/* ── Merchant Callback URLs ── */}
       <div style={innerCard}>
         <p style={sectionTitle}>Merchant Callback URLs</p>
-        <p style={{ fontSize: "11px", color: "hsl(220,10%,50%)", marginBottom: "14px", lineHeight: 1.5 }}>
+        <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "14px", lineHeight: 1.5 }}>
           Register these URLs in your Smile.one Merchant Dashboard. Replace domain.com with your own production domain before saving them.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {webhooks.map((wh) => (
             <div key={wh.path} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,80%)" }}>{wh.label}</span>
-                <span style={{ fontSize: "10px", color: "hsl(220,10%,45%)" }}>{wh.desc}</span>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{wh.label}</span>
+                <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>{wh.desc}</span>
               </div>
               <div style={{
                 display: "flex", alignItems: "center", gap: "6px",
                 background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
                 borderRadius: "6px", padding: "6px 10px",
               }}>
-                <code style={{ flex: 1, fontSize: "11px", color: "hsl(210,40%,75%)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <code style={{ flex: 1, fontSize: "11px", color: "hsl(var(--muted-foreground))", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {formatUrl(wh.path)}
                 </code>
                 <button
                   data-testid={`button-copy-${wh.label.replace(/\s+/g, "-").toLowerCase()}`}
                   onClick={() => copyUrl(wh.path)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: copiedKey === wh.path ? "#4ade80" : "hsl(220,10%,55%)", display: "flex", alignItems: "center", flexShrink: 0 }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: copiedKey === wh.path ? "#4ade80" : "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", flexShrink: 0 }}
                 >
                   {copiedKey === wh.path ? <Check size={13} /> : <Copy size={13} />}
                 </button>
@@ -841,7 +841,7 @@ function SmileOneMappingTab() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "start" }}>
           {/* Left – CMS */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>CMS Product</span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--muted-foreground))", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>CMS Product</span>
             <div>
               <label style={labelStyle}>Select Game</label>
               <select data-testid="select-smileone-cms-game" style={selectStyle} value={leftGame}
@@ -852,7 +852,7 @@ function SmileOneMappingTab() {
             </div>
             {leftGame && (
               <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "220px", overflowY: "auto" }}>
-                {loadingServices && <p style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>Loading...</p>}
+                {loadingServices && <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Loading...</p>}
                 {!loadingServices && services.length === 0 && (
                   <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>No services for this game.</p>
                 )}
@@ -863,10 +863,10 @@ function SmileOneMappingTab() {
                       padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
                       background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
                       border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
-                      color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
+                      color: "hsl(var(--foreground))", display: "flex", justifyContent: "space-between",
                     }}>
                     <span>{svc.name}</span>
-                    <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>${svc.finalPrice}</span>
+                    <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>${svc.finalPrice}</span>
                   </div>
                 ))}
               </div>
@@ -887,7 +887,7 @@ function SmileOneMappingTab() {
 
           {/* Right – Smile.one */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,75%)", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>Smile.one Products</span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--muted-foreground))", paddingBottom: "6px", borderBottom: "1px solid hsl(var(--border))", display: "block" }}>Smile.one Products</span>
             <div>
               <label style={labelStyle}>Game Slug</label>
               <input data-testid="input-smileone-game-slug" style={inputStyle} value={rightGame}
@@ -917,10 +917,10 @@ function SmileOneMappingTab() {
                     padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
                     background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
                     border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
-                    color: "hsl(210,40%,88%)", display: "flex", justifyContent: "space-between",
+                    color: "hsl(var(--foreground))", display: "flex", justifyContent: "space-between",
                   }}>
                   <span>{p.name}</span>
-                  <span style={{ color: "hsl(220,10%,55%)", fontSize: "11px" }}>{p.currency} {p.price}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.currency} {p.price}</span>
                 </div>
               ))}
             </div>
@@ -930,7 +930,7 @@ function SmileOneMappingTab() {
 
       {/* Selection summary */}
       {(selectedService || selectedSmile) && (
-        <div style={{ ...innerCard, padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(210,40%,80%)", flexWrap: "wrap" }}>
+        <div style={{ ...innerCard, padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(var(--foreground))", flexWrap: "wrap" }}>
           <span style={{ color: selectedService ? "#4ade80" : "hsl(220,10%,40%)" }}>
             {selectedService ? `CMS: ${selectedService.name}` : "No CMS product selected"}
           </span>
@@ -958,17 +958,17 @@ function SmileOneMappingTab() {
               <thead>
                 <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
                   {["Game", "Region", "CMS Product", "Smile.one Product", "Actions"].map(h => (
-                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(220,10%,50%)", fontWeight: 600, fontSize: "11px" }}>{h}</th>
+                    <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(var(--muted-foreground))", fontWeight: 600, fontSize: "11px" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {mappings.map(m => (
                   <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.gameSlug}</td>
-                    <td style={{ padding: "9px 14px", color: "hsl(220,10%,60%)" }}>{m.region}</td>
-                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.cmsProductName ?? m.cmsProductId}</td>
-                    <td style={{ padding: "9px 14px", color: "hsl(210,40%,85%)" }}>{m.smileProductName ?? m.smileProductId}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(var(--foreground))" }}>{m.gameSlug}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(var(--muted-foreground))" }}>{m.region}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(var(--foreground))" }}>{m.cmsProductName ?? m.cmsProductId}</td>
+                    <td style={{ padding: "9px 14px", color: "hsl(var(--foreground))" }}>{m.smileProductName ?? m.smileProductId}</td>
                     <td style={{ padding: "9px 14px" }}>
                       <button data-testid={`button-delete-smileone-mapping-${m.id}`}
                         onClick={() => deleteMutation.mutate(m.id)} disabled={deleteMutation.isPending}
@@ -1077,7 +1077,7 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
             {icon}
           </div>
           <div>
-            <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>{label}</div>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{label}</div>
             {isConfigured
               ? <div style={{ fontSize: "11px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px", marginTop: "1px" }}>
                   <CheckCircle size={10} /> Configured
@@ -1137,7 +1137,7 @@ function SocialAuthModal({ plugins, onClose }: { plugins: Plugin[]; onClose: () 
   return (
     <Modal title="Social Login Configuration" onClose={onClose}>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", lineHeight: 1.6, margin: 0 }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: 0 }}>
           Configure OAuth credentials for each provider. Sign-in buttons appear on the login page once
           credentials are saved and "Allow Social Login" is enabled in the Control Panel.
         </p>
@@ -1307,7 +1307,7 @@ export default function ApiIntegration() {
           />
         )}
         <button onClick={onConfigure}
-          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "#a78bfa", whiteSpace: "nowrap", flexShrink: 0 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))", whiteSpace: "nowrap", flexShrink: 0 }}
           data-testid={testId}>
           <Settings size={11} /> Configure
         </button>
@@ -1319,7 +1319,7 @@ export default function ApiIntegration() {
     <AdminLayout title="API Integration">
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
-        <div style={{ fontSize: "13px", color: "hsl(220,10%,45%)", lineHeight: 1.6 }}>
+        <div style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
           Configure third-party integrations. Credentials are stored securely in the database.
           Payment gateway settings are managed in the{" "}
           <a href="/admin/payment-method" style={{ color: "hsl(var(--primary))", textDecoration: "none" }}>Payment Method</a> page.
@@ -1329,7 +1329,7 @@ export default function ApiIntegration() {
         <div style={{ ...card, padding: "0" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Service Integrations</span>
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,42%)", margin: "4px 0 0" }}>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
               Click Configure to add your API keys for each service
             </p>
           </div>

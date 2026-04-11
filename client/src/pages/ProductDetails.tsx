@@ -56,10 +56,10 @@ function PackageCard({
           ? "hsl(220,15%,9%)"
           : selected
             ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
-            : "hsl(220,20%,11%)",
-        border: `2px solid ${outOfStock ? "hsl(220,15%,14%)" : selected ? "hsl(258,90%,62%)" : "hsl(220,15%,18%)"}`,
+            : "hsl(var(--card))",
+        border: `2px solid ${outOfStock ? "hsl(var(--border))" : selected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
         cursor: outOfStock ? "not-allowed" : "pointer",
-        color: outOfStock ? "hsl(220,10%,35%)" : selected ? "hsl(210,40%,96%)" : "hsl(210,40%,80%)",
+        color: outOfStock ? "hsl(var(--muted-foreground))" : selected ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
         transition: "all 0.15s ease",
         minHeight: "72px",
         width: "100%",
@@ -71,7 +71,7 @@ function PackageCard({
       {outOfStock && (
         <span style={{
           position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-          background: "hsla(220,20%,7%,0.6)", borderRadius: "8px", zIndex: 1,
+          background: "hsl(var(--foreground) / 0.12)", borderRadius: "8px", zIndex: 1,
         }}>
           <span style={{ fontSize: "10px", fontWeight: 700, color: "hsl(0,60%,50%)", letterSpacing: "0.04em", textTransform: "uppercase" }}>Out of Stock</span>
         </span>
@@ -79,7 +79,7 @@ function PackageCard({
       {!outOfStock && selected && (
         <span style={{
           position: "absolute", top: "5px", right: "5px",
-          color: "hsl(258,90%,66%)", display: "flex",
+          color: "hsl(var(--primary))", display: "flex",
         }}>
           <CheckCircle2 size={13} />
         </span>
@@ -99,13 +99,13 @@ function PackageCard({
       </span>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1px" }}>
         {hasDiscount && originalPrice && (
-          <span style={{ fontSize: "10px", color: "hsl(220,10%,42%)", textDecoration: "line-through" }}>
+          <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", textDecoration: "line-through" }}>
             {currencySymbol} {originalPrice.toFixed(2)}
           </span>
         )}
         <span style={{
           fontSize: "13px", fontWeight: 700,
-          color: outOfStock ? "hsl(220,10%,32%)" : selected ? "hsl(258,80%,78%)" : "hsl(258,90%,70%)",
+          color: outOfStock ? "hsl(var(--muted-foreground))" : selected ? "hsl(var(--primary))" : "hsl(var(--primary))",
         }}>
           {currencySymbol} {price.toFixed(2)}
         </span>
@@ -117,13 +117,13 @@ function PackageCard({
 // ─── Quantity selector ────────────────────────────────────────────────────────
 function QuantitySelector({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0", border: "1px solid hsl(220,15%,20%)", borderRadius: "8px", overflow: "hidden", width: "fit-content" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "0", border: "1px solid hsl(var(--border))", borderRadius: "8px", overflow: "hidden", width: "fit-content" }}>
       <button
         onClick={() => onChange(Math.max(1, value - 1))}
         data-testid="button-qty-minus"
         style={{
           width: "38px", height: "38px", background: "hsl(var(--card))",
-          border: "none", cursor: "pointer", color: "hsl(210,40%,75%)",
+          border: "none", cursor: "pointer", color: "hsl(var(--foreground))",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "16px", transition: "background 0.15s",
         }}
@@ -134,7 +134,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
         minWidth: "44px", height: "38px", background: "hsl(var(--card))",
         display: "flex", alignItems: "center", justifyContent: "center",
         color: "hsl(var(--foreground))", fontSize: "14px", fontWeight: 700,
-        borderLeft: "1px solid hsl(220,15%,18%)", borderRight: "1px solid hsl(220,15%,18%)",
+        borderLeft: "1px solid hsl(var(--border))", borderRight: "1px solid hsl(var(--border))",
       }}>
         {value}
       </span>
@@ -143,7 +143,7 @@ function QuantitySelector({ value, onChange }: { value: number; onChange: (v: nu
         data-testid="button-qty-plus"
         style={{
           width: "38px", height: "38px", background: "hsl(var(--card))",
-          border: "none", cursor: "pointer", color: "hsl(210,40%,75%)",
+          border: "none", cursor: "pointer", color: "hsl(var(--foreground))",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "16px", transition: "background 0.15s",
         }}
@@ -167,10 +167,10 @@ function InfoSection({ items }: { items: { icon?: string; text: string }[] }) {
     }}>
       {items.map((item, i) => (
         <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
-          <span style={{ color: "hsl(258,90%,66%)", marginTop: "1px", flexShrink: 0 }}>
+          <span style={{ color: "hsl(var(--primary))", marginTop: "1px", flexShrink: 0 }}>
             <BoltIcon size={12} />
           </span>
-          <span style={{ fontSize: "12px", color: "hsl(220,10%,60%)", lineHeight: 1.5 }}>
+          <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
             {item.text}
           </span>
         </div>
@@ -373,7 +373,7 @@ function GameDetailView({ game }: { game: Game }) {
           {/* Title + badge (mobile shows here too, desktop shows inside right panel) */}
           <div className="lg:hidden">
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
-              <h1 className="font-orbitron" style={{ fontSize: "1.45rem", fontWeight: 800, color: "hsl(210,40%,96%)", margin: 0 }}>
+              <h1 className="font-orbitron" style={{ fontSize: "1.45rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}>
                 {game.name}
               </h1>
             </div>
@@ -403,7 +403,7 @@ function GameDetailView({ game }: { game: Game }) {
               <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 About
               </p>
-              <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, margin: 0 }}>
                 {game.description}
               </p>
             </div>
@@ -415,7 +415,7 @@ function GameDetailView({ game }: { game: Game }) {
 
           {/* Title + badge (desktop only) */}
           <div className="hidden lg:flex flex-col gap-2">
-            <h1 className="font-orbitron" style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(210,40%,96%)", margin: 0 }}>
+            <h1 className="font-orbitron" style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}>
               {game.name}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -448,7 +448,7 @@ function GameDetailView({ game }: { game: Game }) {
                 ))}
               </div>
             ) : services.length === 0 ? (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "13px", border: "1px dashed hsl(220,15%,18%)", borderRadius: "10px" }}>
+              <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px", border: "1px dashed hsl(var(--border))", borderRadius: "10px" }}>
                 No packages available yet.
               </div>
             ) : (
@@ -548,17 +548,17 @@ function GameDetailView({ game }: { game: Game }) {
                     ? "1px solid rgba(34,197,94,0.4)"
                     : validateStatus === "unavailable"
                       ? "1px solid rgba(100,100,120,0.3)"
-                      : "1px solid rgba(124,58,237,0.4)",
+                      : "1px solid hsl(var(--primary) / 0.4)",
                   background: validateStatus === "success"
                     ? "rgba(34,197,94,0.1)"
                     : validateStatus === "unavailable"
                       ? "rgba(100,100,120,0.06)"
-                      : "rgba(124,58,237,0.1)",
+                      : "hsl(var(--primary) / 0.1)",
                   color: validateStatus === "success"
                     ? "hsl(142,71%,52%)"
                     : validateStatus === "unavailable"
-                      ? "hsl(220,10%,55%)"
-                      : "#a78bfa",
+                      ? "hsl(var(--muted-foreground))"
+                      : "hsl(var(--primary))",
                   opacity: validateStatus === "loading" ? 0.7 : 1,
                   transition: "all 0.2s",
                 }}
@@ -652,7 +652,7 @@ function GameDetailView({ game }: { game: Game }) {
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
-                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
+                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
               </div>
@@ -694,7 +694,7 @@ function GameDetailView({ game }: { game: Game }) {
               <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
-              <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, margin: 0 }}>
                 {game.description}
               </p>
             </div>
@@ -727,11 +727,11 @@ function GameDetailView({ game }: { game: Game }) {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1rem" }}>
               <AlertTriangle size={24} style={{ color: "hsl(38,92%,50%)", flexShrink: 0 }} />
-              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "hsl(210,40%,96%)", margin: 0 }}>
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
                 Registration Required
               </h2>
             </div>
-            <p style={{ color: "hsl(220,10%,60%)", marginBottom: "1rem", lineHeight: 1.6 }}>
+            <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: "1rem", lineHeight: 1.6 }}>
               To purchase products, you must create an account first.
             </p>
             <div style={{
@@ -754,7 +754,7 @@ function GameDetailView({ game }: { game: Game }) {
                   borderRadius: "8px",
                   background: "transparent",
                   border: "1px solid hsl(220,15%,25%)",
-                  color: "hsl(210,40%,80%)",
+                  color: "hsl(var(--foreground))",
                   cursor: "pointer",
                   fontSize: "14px",
                   fontWeight: 600,
@@ -768,7 +768,7 @@ function GameDetailView({ game }: { game: Game }) {
                   flex: 1,
                   padding: "10px",
                   borderRadius: "8px",
-                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
                   color: "white",
                   border: "none",
                   cursor: "pointer",
@@ -902,7 +902,7 @@ function ProductDetailView({ product }: { product: Product }) {
 
           {/* Title + badge mobile */}
           <div className="lg:hidden">
-            <h1 className="font-orbitron" style={{ fontSize: "1.45rem", fontWeight: 800, color: "hsl(210,40%,96%)", marginBottom: "8px" }}>
+            <h1 className="font-orbitron" style={{ fontSize: "1.45rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "8px" }}>
               {product.title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
@@ -931,7 +931,7 @@ function ProductDetailView({ product }: { product: Product }) {
               <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
-              <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, margin: 0 }}>
                 {product.description}
               </p>
             </div>
@@ -943,7 +943,7 @@ function ProductDetailView({ product }: { product: Product }) {
 
           {/* Title + badge desktop */}
           <div className="hidden lg:flex flex-col gap-2">
-            <h1 className="font-orbitron" style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(210,40%,96%)", margin: 0 }}>
+            <h1 className="font-orbitron" style={{ fontSize: "1.6rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}>
               {product.title}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -976,7 +976,7 @@ function ProductDetailView({ product }: { product: Product }) {
                 ))}
               </div>
             ) : activePackages.length === 0 ? (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "13px", border: "1px dashed hsl(220,15%,18%)", borderRadius: "10px" }}>
+              <div style={{ padding: "1.5rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px", border: "1px dashed hsl(var(--border))", borderRadius: "10px" }}>
                 No packages available yet.
               </div>
             ) : (
@@ -1030,7 +1030,7 @@ function ProductDetailView({ product }: { product: Product }) {
             {totalPrice && (
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "2px" }}>Total</p>
-                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(258,90%,72%)", margin: 0 }}>
+                <p style={{ fontSize: "1.35rem", fontWeight: 800, color: "hsl(var(--primary))", margin: 0 }}>
                   {currencySymbol}{totalPrice}
                 </p>
               </div>
@@ -1072,7 +1072,7 @@ function ProductDetailView({ product }: { product: Product }) {
               <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 About
               </p>
-              <p style={{ fontSize: "13px", color: "hsl(220,10%,60%)", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", lineHeight: 1.7, margin: 0 }}>
                 {product.description}
               </p>
             </div>
@@ -1138,8 +1138,8 @@ export default function ProductDetails() {
   if (notFound) {
     return (
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "4rem 1rem", textAlign: "center" }}>
-        <Zap size={48} style={{ color: "hsl(258,90%,66%)", opacity: 0.3, marginBottom: "1rem" }} />
-        <h2 style={{ color: "hsl(210,40%,80%)", marginBottom: "0.5rem" }}>Product not found</h2>
+        <Zap size={48} style={{ color: "hsl(var(--primary))", opacity: 0.3, marginBottom: "1rem" }} />
+        <h2 style={{ color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>Product not found</h2>
         <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "14px", marginBottom: "1.5rem" }}>
           This product may have been removed or the link is incorrect.
         </p>

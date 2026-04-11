@@ -24,7 +24,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   open: { bg: "hsla(213,90%,55%,0.15)", text: "hsl(213,90%,65%)" },
   in_progress: { bg: "hsla(40,90%,55%,0.15)", text: "hsl(40,90%,60%)" },
   resolved: { bg: "hsla(145,70%,50%,0.15)", text: "hsl(145,70%,55%)" },
-  closed: { bg: "hsla(220,10%,40%,0.15)", text: "hsl(220,10%,55%)" },
+  closed: { bg: "hsla(220,10%,40%,0.15)", text: "hsl(var(--muted-foreground))" },
 };
 
 function formatDate(d: string | Date | null | undefined) {
@@ -47,7 +47,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 function TicketStatusPill({ status }: { status: string }) {
-  const c = STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(220,10%,55%)" };
+  const c = STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(var(--muted-foreground))" };
   return (
     <span style={{
       display: "inline-block", fontSize: "11px", fontWeight: 600,
@@ -126,7 +126,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
 
           {/* Status change */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "12px", color: "hsl(220,10%,50%)", fontWeight: 600 }}>Change Status:</span>
+            <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", fontWeight: 600 }}>Change Status:</span>
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {TICKET_STATUS_LIST.map((s) => (
                 <button
@@ -137,7 +137,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                     padding: "3px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: 600,
                     cursor: currentStatus === s ? "default" : "pointer", border: "1px solid",
                     background: currentStatus === s ? (STATUS_COLORS[s]?.bg ?? "transparent") : "transparent",
-                    color: STATUS_COLORS[s]?.text ?? "hsl(220,10%,55%)",
+                    color: STATUS_COLORS[s]?.text ?? "hsl(var(--muted-foreground))",
                     borderColor: STATUS_COLORS[s]?.text ?? "hsl(220,15%,25%)",
                     opacity: currentStatus === s ? 1 : 0.7,
                     textTransform: "capitalize",
@@ -155,7 +155,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
             borderRadius: "8px", overflow: "hidden",
           }}>
             <div style={{ padding: "8px 14px", borderBottom: "1px solid hsl(220,15%,14%)" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,42%)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                 Conversation
               </span>
             </div>
@@ -166,17 +166,17 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                   width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
                   background: "hsl(220,20%,20%)", border: "1px solid hsl(220,15%,28%)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "11px", fontWeight: 700, color: "hsl(210,40%,75%)",
+                  fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))",
                 }}>U</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "4px" }}>
+                  <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}>
                     User · {formatDate(ticket.createdAt)}
                     {ticket.category && <> · <span style={{ color: "hsl(258,90%,65%)" }}>{ticket.category}</span></>}
                   </div>
                   <div style={{
                     background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,22%)",
                     borderRadius: "0 8px 8px 8px", padding: "8px 12px",
-                    fontSize: "13px", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                    fontSize: "13px", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                   }}>
                     {ticket.message}
                   </div>
@@ -198,7 +198,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                       {isAdmin ? "A" : "U"}
                     </div>
                     <div style={{ flex: 1, maxWidth: "85%" }}>
-                      <div style={{ fontSize: "11px", color: "hsl(220,10%,42%)", marginBottom: "4px", textAlign: isAdmin ? "right" : "left" }}>
+                      <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "4px", textAlign: isAdmin ? "right" : "left" }}>
                         {isAdmin ? "Admin" : "User"} · {formatDate(r.createdAt)}
                       </div>
                       <div style={{
@@ -206,7 +206,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                         border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.28)" : "hsl(220,15%,22%)"}`,
                         borderRadius: isAdmin ? "8px 0 8px 8px" : "0 8px 8px 8px",
                         padding: "8px 12px",
-                        fontSize: "13px", color: "hsl(210,40%,85%)", lineHeight: 1.6, whiteSpace: "pre-wrap",
+                        fontSize: "13px", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                       }}>
                         {r.message}
                       </div>
@@ -254,7 +254,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                   display: "inline-flex", alignItems: "center", gap: "4px",
                   background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
                   borderRadius: "6px", padding: "5px 10px",
-                  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", cursor: "pointer",
+                  fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                 }}
               >
                 <Paperclip size={12} />
@@ -332,7 +332,7 @@ export default function SupportTickets() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading tickets…</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading tickets…</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={tickets.length === 0 ? "No support tickets yet." : "No tickets match your filters."} />
           ) : (
@@ -352,7 +352,7 @@ export default function SupportTickets() {
                         {t.ticketNumber ?? t.id.slice(0, 14) + "…"}
                       </span>
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(210, 40%, 70%)", maxWidth: "120px" }}>
+                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", maxWidth: "120px" }}>
                       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
                         {t.userId ?? "Guest"}
                       </span>
@@ -362,7 +362,7 @@ export default function SupportTickets() {
                     </td>
                     <td style={tdStyle}><StatusBadge value={t.priority} /></td>
                     <td style={tdStyle}><StatusBadge value={t.status} /></td>
-                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220, 10%, 46%)", whiteSpace: "nowrap" }}>
+                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
                       {new Date(t.createdAt as any).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td style={tdStyle}>

@@ -22,7 +22,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   open: { bg: "hsla(213,90%,55%,0.15)", text: "hsl(213,90%,65%)" },
   in_progress: { bg: "hsla(40,90%,55%,0.15)", text: "hsl(40,90%,60%)" },
   resolved: { bg: "hsla(145,70%,50%,0.15)", text: "hsl(145,70%,55%)" },
-  closed: { bg: "hsla(220,10%,40%,0.15)", text: "hsl(220,10%,55%)" },
+  closed: { bg: "hsla(220,10%,40%,0.15)", text: "hsl(var(--muted-foreground))" },
 };
 
 function formatDate(d: string | Date | null | undefined) {
@@ -45,7 +45,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 function TicketStatusPill({ status }: { status: string }) {
-  const c = STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(220,10%,55%)" };
+  const c = STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(var(--muted-foreground))" };
   return (
     <span style={{
       display: "inline-block", fontSize: "11px", fontWeight: 600,
@@ -103,7 +103,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
 
   if (isLoading) return (
     <Modal title="Loading..." onClose={onClose}>
-      <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)" }}>Loading submission…</div>
+      <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>Loading submission…</div>
     </Modal>
   );
 
@@ -294,7 +294,7 @@ export default function ContactSubmissions() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading submissions…</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading submissions…</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={tickets.filter((t) => t.category === "contact").length === 0 ? "No contact submissions yet." : "No submissions match your filters."} />
           ) : (
@@ -314,7 +314,7 @@ export default function ContactSubmissions() {
                         {t.ticketNumber ?? t.id.slice(0, 14) + "…"}
                       </span>
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(210, 40%, 70%)", maxWidth: "140px" }}>
+                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", maxWidth: "140px" }}>
                       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
                         {(t as any).email || "—"}
                       </span>
@@ -323,7 +323,7 @@ export default function ContactSubmissions() {
                       <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.subject}</span>
                     </td>
                     <td style={tdStyle}><StatusBadge value={t.status} /></td>
-                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220, 10%, 46%)", whiteSpace: "nowrap" }}>
+                    <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
                       {new Date(t.createdAt as any).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </td>
                     <td style={tdStyle}>

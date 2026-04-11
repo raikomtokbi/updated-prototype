@@ -23,7 +23,7 @@ const inp: React.CSSProperties = {
   borderRadius: "0.5rem",
   border: "1px solid hsl(220,15%,20%)",
   background: "hsl(var(--card))",
-  color: "hsl(210,40%,92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "14px",
   outline: "none",
   boxSizing: "border-box",
@@ -31,7 +31,7 @@ const inp: React.CSSProperties = {
 
 const label: React.CSSProperties = {
   fontSize: "12px",
-  color: "hsl(220,10%,55%)",
+  color: "hsl(var(--muted-foreground))",
   marginBottom: "4px",
   display: "block",
 };
@@ -106,23 +106,23 @@ export default function UpiSettings() {
   return (
     <div style={{ padding: "1.5rem", maxWidth: "760px" }}>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(210,40%,95%)", margin: 0 }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
           UPI / Manual Payment Settings
         </h1>
-        <p style={{ color: "hsl(220,10%,50%)", fontSize: "13px", marginTop: "4px" }}>
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginTop: "4px" }}>
           Configure UPI payment method and email-based auto-verification
         </p>
       </div>
 
       {isLoading ? (
-        <div style={{ color: "hsl(220,10%,50%)", padding: "2rem", textAlign: "center" }}>Loading...</div>
+        <div style={{ color: "hsl(var(--muted-foreground))", padding: "2rem", textAlign: "center" }}>Loading...</div>
       ) : (
         <>
           {/* Status toggle */}
           <div style={{ ...section, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
             <div>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>UPI Payment Status</div>
-              <div style={{ fontSize: "12px", color: "hsl(220,10%,50%)", marginTop: "2px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "hsl(var(--foreground))" }}>UPI Payment Status</div>
+              <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>
                 When enabled, customers can pay via UPI and payment is verified automatically via email
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function UpiSettings() {
                   <CheckCircle size={14} /> Active
                 </span>
               ) : (
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "13px", color: "hsl(220,10%,45%)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "13px", color: "hsl(var(--muted-foreground))" }}>
                   <XCircle size={14} /> Inactive
                 </span>
               )}
@@ -157,7 +157,7 @@ export default function UpiSettings() {
 
           {/* UPI details */}
           <div style={section}>
-            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,90%)", marginTop: 0, marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", marginTop: 0, marginBottom: "1rem" }}>
               UPI Payment Details
             </h3>
 
@@ -182,7 +182,7 @@ export default function UpiSettings() {
 
               {/* Right: Live QR preview */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "11px", color: "hsl(220,10%,50%)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                   QR Preview
                 </span>
                 {upiQrValue ? (
@@ -217,15 +217,15 @@ export default function UpiSettings() {
 
           {/* IMAP settings */}
           <div style={section}>
-            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,90%)", marginTop: 0, marginBottom: "0.5rem" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", marginTop: 0, marginBottom: "0.5rem" }}>
               Email Auto-Verification (IMAP)
             </h3>
             <div style={{ background: "hsl(220,20%,13%)", borderRadius: "0.5rem", padding: "0.65rem 0.85rem", marginBottom: "1rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
               <Info size={14} style={{ color: "hsl(258,90%,68%)", flexShrink: 0, marginTop: "1px" }} />
-              <p style={{ margin: 0, fontSize: "12px", color: "hsl(220,10%,60%)", lineHeight: 1.6 }}>
+              <p style={{ margin: 0, fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
                 Configure IMAP access to the email account where you receive UPI payment notifications. 
                 The system will check for new payment emails every 60 seconds and auto-complete matching orders.
-                For Gmail, use an <strong style={{ color: "hsl(210,40%,80%)" }}>App Password</strong> (not your regular password) 
+                For Gmail, use an <strong style={{ color: "hsl(var(--foreground))" }}>App Password</strong> (not your regular password) 
                 with host <code style={{ color: "hsl(258,90%,72%)" }}>imap.gmail.com</code> port <code style={{ color: "hsl(258,90%,72%)" }}>993</code>.
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function UpiSettings() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
-                  style={{ position: "absolute", right: "0.6rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,50%)", padding: 0 }}
+                  style={{ position: "absolute", right: "0.6rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 0 }}
                   data-testid="button-toggle-password"
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}

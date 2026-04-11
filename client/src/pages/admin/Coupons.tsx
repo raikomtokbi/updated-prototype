@@ -24,7 +24,7 @@ const STATUS_OPTIONS = [
 
 const inputStyle: React.CSSProperties = { ...sharedInput, padding: "7px 10px", fontSize: "13px" };
 const labelStyle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
+  fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "4px",
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
@@ -171,7 +171,7 @@ export default function Coupons() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading coupons...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading coupons...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={coupons.length === 0 ? "No coupons yet. Create your first coupon." : "No coupons match your filters."} />
           ) : (
@@ -199,7 +199,7 @@ export default function Coupons() {
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>
                       {c.usedCount} / {c.maxUses ?? "∞"}
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(c.expiresAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(c.expiresAt)}</td>
                     <td style={tdStyle}><StatusBadge value={c.isActive ? "active" : "inactive"} /></td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", gap: "5px" }}>

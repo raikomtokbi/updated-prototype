@@ -11,7 +11,7 @@ function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
       <div style={{ width: "12px", height: "12px", borderRadius: "3px", background: `hsl(${color})`, flexShrink: 0, border: "1px solid rgba(255,255,255,0.1)" }} />
-      <span style={{ fontSize: "10px", color: "hsl(220,10%,52%)", fontFamily: "monospace" }}>hsl({color})</span>
+      <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", fontFamily: "monospace" }}>hsl({color})</span>
     </div>
   );
 }
@@ -41,7 +41,7 @@ function HslPicker({
     background: "hsl(var(--card))",
     border: "1px solid hsl(var(--border))",
     borderRadius: "4px",
-    color: "hsl(210,40%,85%)",
+    color: "hsl(var(--foreground))",
     fontSize: "11px",
     outline: "none",
   };
@@ -170,7 +170,7 @@ export default function ChooseTheme() {
         <div style={card}>
           <div style={sectionHeader}>
             <Palette size={14} style={{ color: "hsl(var(--primary))" }} />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Preset Themes</span>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Preset Themes</span>
           </div>
           <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
             {PRESET_THEMES.map((theme) => {
@@ -224,7 +224,7 @@ export default function ChooseTheme() {
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,88%)" }}>{theme.name}</span>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{theme.name}</span>
                     {theme.isLight && (
                       <span style={{ fontSize: "9px", padding: "1px 5px", borderRadius: "3px", background: "hsla(217,91%,50%,0.2)", color: "hsl(217,91%,70%)", border: "1px solid hsla(217,91%,50%,0.35)", fontWeight: 700, letterSpacing: "0.04em" }}>LIGHT</span>
                     )}
@@ -248,15 +248,15 @@ export default function ChooseTheme() {
         <div style={card}>
           <div style={sectionHeader}>
             <Palette size={14} style={{ color: "hsl(196,100%,50%)" }} />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)" }}>Custom Colors</span>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Custom Colors</span>
             {activeTheme === "custom" && (
-              <span style={{ marginLeft: "6px", fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.3)", fontWeight: 600 }}>
+              <span style={{ marginLeft: "6px", fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: "rgba(124,58,237,0.15)", color: "hsl(var(--primary))", border: "1px solid rgba(124,58,237,0.3)", fontWeight: 600 }}>
                 Active
               </span>
             )}
           </div>
           <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", margin: 0 }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
               Tune the hue, saturation, and lightness to create a unique look. Changes apply site-wide instantly.
             </p>
             <HslPicker label="Primary Color" value={customPrimary} onChange={setCustomPrimary} />
@@ -293,7 +293,7 @@ export default function ChooseTheme() {
                   padding: "8px 14px",
                   borderRadius: "6px",
                   background: "transparent",
-                  color: "hsl(220,10%,50%)",
+                  color: "hsl(var(--muted-foreground))",
                   fontSize: "12px",
                   fontWeight: 500,
                   cursor: saveMut.isPending ? "not-allowed" : "pointer",

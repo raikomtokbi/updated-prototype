@@ -84,7 +84,7 @@ export default function CookieBanner({ enabled }: { enabled: boolean }) {
             padding: "7px 16px",
             borderRadius: "6px",
             border: "none",
-            background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+            background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
             color: "white",
             fontSize: "12px",
             fontWeight: 600,

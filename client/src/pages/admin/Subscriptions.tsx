@@ -19,7 +19,7 @@ const STATUS_OPTIONS = [
 
 const inputStyle: React.CSSProperties = { ...sharedInput, padding: "7px 10px", fontSize: "13px" };
 const labelStyle: React.CSSProperties = {
-  fontSize: "11px", fontWeight: 600, color: "hsl(220,10%,55%)", marginBottom: "4px",
+  fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "4px",
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
@@ -79,9 +79,9 @@ function PackageManager({ productId }: { productId: string }) {
           const stockVal = editingStock[pkg.id] !== undefined ? editingStock[pkg.id] : ((pkg as any).stock !== null && (pkg as any).stock !== undefined ? String((pkg as any).stock) : "");
           return (
             <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }}>
-              <span style={{ fontSize: "12px", color: "hsl(210,40%,85%)" }}>{pkg.label}</span>
+              <span style={{ fontSize: "12px", color: "hsl(var(--foreground))" }}>{pkg.label}</span>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(220,10%,45%)", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
+                {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                   <span style={{ fontSize: "9px", color: "hsl(220,10%,40%)", textTransform: "uppercase" }}>Stock:</span>
@@ -98,7 +98,7 @@ function PackageManager({ productId }: { productId: string }) {
             </div>
           );
         })}
-        {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(220,10%,38%)", fontStyle: "italic" }}>No tiers yet.</p>}
+        {packages.length === 0 && <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>No tiers yet.</p>}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 70px 60px auto" : "1fr 90px 90px 70px auto", gap: "0.4rem", alignItems: "end" }}>
         <div><label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label><input style={inputStyle} placeholder="Monthly" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} /></div>
@@ -210,7 +210,7 @@ export default function Subscriptions() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading plans...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading plans...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={plans.length === 0 ? "No subscription plans yet. Add your first plan." : "No plans match your filters."} />
           ) : (
@@ -232,8 +232,8 @@ export default function Subscriptions() {
                       </span>
                     </td>
                     <td style={tdStyle}><StatusBadge value={p.isActive ? "active" : "inactive"} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220,10%,46%)" }}>{p.sortOrder}</td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220,10%,45%)" }}>{fmtDate(p.createdAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{p.sortOrder}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{fmtDate(p.createdAt)}</td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", gap: "5px" }}>
                         <button style={btnEdit} onClick={() => setEditItem(p)}><Pencil size={11} /></button>

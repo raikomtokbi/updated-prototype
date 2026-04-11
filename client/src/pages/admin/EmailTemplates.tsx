@@ -288,7 +288,7 @@ const inputStyle: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(var(--border))",
   borderRadius: "6px",
-  color: "hsl(210, 40%, 92%)",
+  color: "hsl(var(--foreground))",
   fontSize: "13px",
   outline: "none",
   boxSizing: "border-box",
@@ -350,10 +350,10 @@ function TemplateListItem({
         <Icon size={16} color={def.color} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,90%)", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {def.name}
         </div>
-        <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {def.description}
         </div>
       </div>
@@ -404,7 +404,7 @@ function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => vo
           }}
         >
           <div style={{ padding: "8px 12px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,45%)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {activeField ? `Insert into: ${activeField}` : "Click a variable to insert"}
             </div>
           </div>
@@ -455,7 +455,7 @@ function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => vo
 function StyleRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
-      <label style={{ fontSize: "12px", color: "hsl(220,10%,55%)", flexShrink: 0, minWidth: 120 }}>{label}</label>
+      <label style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", flexShrink: 0, minWidth: 120 }}>{label}</label>
       <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
     </div>
   );
@@ -542,7 +542,7 @@ function StylesEditor({ styles, onChange }: { styles: EmailStyles; onChange: (s:
   };
 
   const sectionTitle: React.CSSProperties = {
-    fontSize: "11px", fontWeight: 700, color: "hsl(220,10%,45%)",
+    fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))",
     textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12,
   };
 
@@ -676,12 +676,12 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
         <div style={{ padding: "14px 16px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Send size={14} color="#a78bfa" />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,92%)" }}>Send Test Email</span>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Send Test Email</span>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", fontSize: 18, lineHeight: 1, padding: "0 4px", display: "flex" }}><X size={16} /></button>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", fontSize: 18, lineHeight: 1, padding: "0 4px", display: "flex" }}><X size={16} /></button>
         </div>
         <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
-          <p style={{ fontSize: "12px", color: "hsl(220,10%,45%)", margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.6 }}>
             A test email will be sent using your SMTP configuration with sample preview data.
           </p>
           <div>
@@ -711,7 +711,7 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
             <button onClick={onClose} style={{
               flex: 1, padding: "9px 0", borderRadius: 6, fontSize: "13px",
               background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)",
-              color: "hsl(220,10%,55%)", cursor: "pointer",
+              color: "hsl(var(--muted-foreground))", cursor: "pointer",
             }}>Cancel</button>
             <button
               onClick={handleSend}
@@ -756,7 +756,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Eye size={13} color="#a78bfa" />
             <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,86%)" }}>Live Preview</span>
-            <span style={{ fontSize: "10px", color: "hsl(220,10%,35%)" }}>updates in real time</span>
+            <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>updates in real time</span>
           </div>
         )}
         {hideTitle && <div />}
@@ -770,7 +770,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               cursor: "pointer", transition: "all 0.15s",
               background: previewMode === "desktop" ? "rgba(124,58,237,0.15)" : "transparent",
               borderColor: previewMode === "desktop" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
-              color: previewMode === "desktop" ? "#a78bfa" : "hsl(220,10%,45%)",
+              color: previewMode === "desktop" ? "#a78bfa" : "hsl(var(--muted-foreground))",
             }}
           >
             <Monitor size={11} /> Desktop
@@ -784,7 +784,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               cursor: "pointer", transition: "all 0.15s",
               background: previewMode === "mobile" ? "rgba(124,58,237,0.15)" : "transparent",
               borderColor: previewMode === "mobile" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
-              color: previewMode === "mobile" ? "#a78bfa" : "hsl(220,10%,45%)",
+              color: previewMode === "mobile" ? "#a78bfa" : "hsl(var(--muted-foreground))",
             }}
           >
             <Smartphone size={11} /> Mobile
@@ -976,7 +976,7 @@ function TemplateEditor({
         padding: "7px 0", borderRadius: 0, fontSize: "12px", fontWeight: 600,
         background: "transparent", border: "none",
         borderBottom: `2px solid ${activeTab === tab ? "#7c3aed" : "transparent"}`,
-        color: activeTab === tab ? "#a78bfa" : "hsl(220,10%,42%)",
+        color: activeTab === tab ? "#a78bfa" : "hsl(var(--muted-foreground))",
         cursor: "pointer", transition: "color 0.15s",
       }}
     >
@@ -990,7 +990,7 @@ function TemplateEditor({
       <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220,15%,13%)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           {isMobile && onBack && (
-            <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,50%)", padding: "4px 6px 4px 0", display: "flex", flexShrink: 0 }}>
+            <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "4px 6px 4px 0", display: "flex", flexShrink: 0 }}>
               <ArrowLeft size={18} />
             </button>
           )}
@@ -999,7 +999,7 @@ function TemplateEditor({
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: "13px", fontWeight: 700, color: "hsl(210,40%,94%)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{def.name}</div>
-            <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{def.description}</div>
+            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{def.description}</div>
           </div>
 
           {/* Enable toggle */}
@@ -1031,7 +1031,7 @@ function TemplateEditor({
                 flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
                 padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600,
                 background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)",
-                color: "#a78bfa", cursor: "pointer",
+                color: "hsl(var(--primary))", cursor: "pointer",
               }}
             >
               <Eye size={12} /> Preview
@@ -1087,7 +1087,7 @@ function TemplateEditor({
 
             {/* Variable picker */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-              <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>
+              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
                 Click a field, then insert a variable
               </div>
               <VariablePicker onInsert={insertVar} activeField={activeField} />
@@ -1223,9 +1223,9 @@ function TemplateEditor({
           <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Eye size={14} color="#a78bfa" />
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(210,40%,92%)" }}>Live Preview</span>
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Live Preview</span>
             </div>
-            <button onClick={() => setShowPreviewModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(220,10%,45%)", display: "flex" }}>
+            <button onClick={() => setShowPreviewModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex" }}>
               <X size={18} />
             </button>
           </div>
@@ -1310,7 +1310,7 @@ export default function EmailTemplates() {
           </div>
           <div>
             <div style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,94%)" }}>Email Templates</div>
-            <div style={{ fontSize: "11px", color: "hsl(220,10%,38%)" }}>Edit, preview & send test emails</div>
+            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Edit, preview & send test emails</div>
           </div>
         </div>
 
@@ -1326,7 +1326,7 @@ export default function EmailTemplates() {
               background: "hsl(var(--background))",
             }}>
               <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(220,10%,38%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   {TEMPLATE_DEFS.length} Templates
                 </div>
               </div>

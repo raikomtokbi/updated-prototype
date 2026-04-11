@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> =
   processing: { bg: "hsla(196,100%,50%,0.12)", text: "hsl(196,100%,55%)", dot: "hsl(196,100%,55%)" },
   completed: { bg: "hsla(145,70%,50%,0.12)", text: "hsl(145,70%,55%)", dot: "hsl(145,70%,55%)" },
   cancelled: { bg: "hsla(0,72%,55%,0.12)", text: "hsl(0,72%,60%)", dot: "hsl(0,72%,60%)" },
-  refunded: { bg: "hsla(258,90%,66%,0.12)", text: "hsl(258,90%,70%)", dot: "hsl(258,90%,70%)" },
+  refunded: { bg: "hsla(258,90%,66%,0.12)", text: "hsl(var(--primary))", dot: "hsl(var(--primary))" },
 };
 
 // ── Not-logged-in screen ──────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ function NotLoggedIn() {
         background: "hsla(258,90%,66%,0.1)", border: "1px solid hsla(258,90%,66%,0.2)",
         display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem",
       }}>
-        <User size={32} style={{ color: "hsl(258,90%,66%)" }} />
+        <User size={32} style={{ color: "hsl(var(--primary))" }} />
       </div>
       <h2 className="font-orbitron" style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.75rem" }}>
         Not Signed In
@@ -95,7 +95,7 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
 
   const ROLE_LABELS: Record<string, { label: string; color: string }> = {
     super_admin: { label: "Super Admin", color: "hsl(0,72%,65%)" },
-    admin: { label: "Admin", color: "hsl(258,90%,70%)" },
+    admin: { label: "Admin", color: "hsl(var(--primary))" },
     staff: { label: "Staff", color: "hsl(196,100%,55%)" },
     user: { label: "Member", color: "hsl(145,70%,55%)" },
   };
@@ -292,7 +292,7 @@ function OrdersTab({ user }: { user: any }) {
           background: "hsla(258,90%,66%,0.08)", border: "1px solid hsla(258,90%,66%,0.15)",
           display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem",
         }}>
-          <Package size={24} style={{ color: "hsl(258,90%,66%)" }} />
+          <Package size={24} style={{ color: "hsl(var(--primary))" }} />
         </div>
         <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>No orders yet</h3>
         <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1.5rem" }}>
@@ -393,7 +393,7 @@ function OrdersTab({ user }: { user: any }) {
                 ))}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
                   <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
-                  <span className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(258,90%,70%)" }}>
+                  <span className="font-orbitron" style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
                     {formatCurrency(order.totalAmount, order.currency)}
                   </span>
                 </div>
@@ -548,7 +548,7 @@ function SecurityTab({ user }: { user: any }) {
             {/* Strength meter */}
             {strength && (
               <div style={{ marginTop: "0.5rem" }}>
-                <div style={{ height: "3px", background: "hsl(220,15%,18%)", borderRadius: "99px", overflow: "hidden" }}>
+                <div style={{ height: "3px", background: "hsl(var(--border))", borderRadius: "99px", overflow: "hidden" }}>
                   <div style={{
                     height: "100%", width: strength.width, background: strength.color,
                     transition: "width 0.3s, background 0.3s", borderRadius: "99px",
@@ -577,7 +577,7 @@ function SecurityTab({ user }: { user: any }) {
                 data-testid="input-confirm-password"
                 style={{
                   width: "100%", background: "hsl(var(--background))",
-                  border: `1px solid ${form.confirmPassword && form.confirmPassword !== form.newPassword ? "hsla(0,72%,55%,0.5)" : "hsl(220,15%,18%)"}`,
+                  border: `1px solid ${form.confirmPassword && form.confirmPassword !== form.newPassword ? "hsla(0,72%,55%,0.5)" : "hsl(var(--border))"}`,
                   borderRadius: "0.5rem", padding: "0.6rem 2.5rem 0.6rem 0.9rem",
                   fontSize: "0.875rem", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box",
                 }}
@@ -611,10 +611,10 @@ function SecurityTab({ user }: { user: any }) {
               { label: "One special character", met: /[^A-Za-z0-9]/.test(form.newPassword) },
             ].map(({ label, met }) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.3rem" }}>
-                <span style={{ color: met ? "hsl(145,70%,55%)" : "hsl(220,10%,40%)", flexShrink: 0 }}>
+                <span style={{ color: met ? "hsl(145,70%,55%)" : "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                   {met ? <Check size={12} /> : <X size={12} />}
                 </span>
-                <span style={{ fontSize: "0.78rem", color: met ? "hsl(145,70%,55%)" : "hsl(220,10%,45%)" }}>{label}</span>
+                <span style={{ fontSize: "0.78rem", color: met ? "hsl(145,70%,55%)" : "hsl(var(--muted-foreground))" }}>{label}</span>
               </div>
             ))}
           </div>
@@ -753,11 +753,11 @@ const TICKET_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   open: { bg: "hsla(213,90%,55%,0.12)", text: "hsl(213,90%,65%)" },
   in_progress: { bg: "hsla(40,90%,55%,0.12)", text: "hsl(40,90%,60%)" },
   resolved: { bg: "hsla(145,70%,50%,0.12)", text: "hsl(145,70%,55%)" },
-  closed: { bg: "hsla(220,10%,40%,0.12)", text: "hsl(220,10%,55%)" },
+  closed: { bg: "hsla(220,10%,40%,0.12)", text: "hsl(var(--muted-foreground))" },
 };
 
 function TicketStatusBadge({ status }: { status: string }) {
-  const c = TICKET_STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(220,10%,55%)" };
+  const c = TICKET_STATUS_COLORS[status] ?? { bg: "hsla(220,10%,40%,0.1)", text: "hsl(var(--muted-foreground))" };
   return (
     <span style={{
       display: "inline-block", fontSize: "0.72rem", fontWeight: 600,
@@ -838,7 +838,7 @@ function TicketsTab({ user }: { user: any }) {
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <button
           onClick={() => setSelectedTicketId(null)}
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "none", border: "none", cursor: "pointer", color: "hsl(258,90%,70%)", fontSize: "0.85rem", fontWeight: 600, padding: 0 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "0.85rem", fontWeight: 600, padding: 0 }}
         >
           <ArrowLeft size={15} /> Back to tickets
         </button>
@@ -885,7 +885,7 @@ function TicketsTab({ user }: { user: any }) {
                       <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(ticket.createdAt)}</span>
                     </div>
                     <div style={{
-                      background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)",
+                      background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                       borderRadius: "0 0.75rem 0.75rem 0.75rem", padding: "0.75rem 1rem",
                       fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                     }}>
@@ -910,14 +910,14 @@ function TicketsTab({ user }: { user: any }) {
                       </div>
                       <div style={{ flex: 1, maxWidth: "85%" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem", justifyContent: isAdmin ? "flex-end" : "flex-start" }}>
-                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: isAdmin ? "hsl(258,90%,70%)" : "hsl(210,40%,85%)" }}>
+                          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: isAdmin ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>
                             {isAdmin ? "Support" : user.username}
                           </span>
                           <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>{formatDate(r.createdAt)}</span>
                         </div>
                         <div style={{
-                          background: isAdmin ? "hsla(258,90%,55%,0.12)" : "hsl(220,20%,12%)",
-                          border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.25)" : "hsl(220,15%,20%)"}`,
+                          background: isAdmin ? "hsla(258,90%,55%,0.12)" : "hsl(var(--card))",
+                          border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.25)" : "hsl(var(--border))"}`,
                           borderRadius: isAdmin ? "0.75rem 0 0.75rem 0.75rem" : "0 0.75rem 0.75rem 0.75rem",
                           padding: "0.75rem 1rem",
                           fontSize: "0.85rem", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
@@ -927,7 +927,7 @@ function TicketsTab({ user }: { user: any }) {
                         {r.attachmentUrl && (
                           <div style={{ marginTop: "0.35rem", textAlign: isAdmin ? "right" : "left" }}>
                             <a href={r.attachmentUrl} target="_blank" rel="noreferrer"
-                              style={{ fontSize: "0.75rem", color: "hsl(258,90%,70%)", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                              style={{ fontSize: "0.75rem", color: "hsl(var(--primary))", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
                               <Paperclip size={12} /> Attachment
                             </a>
                           </div>
@@ -979,7 +979,7 @@ function TicketsTab({ user }: { user: any }) {
                       onClick={() => fileRef.current?.click()}
                       style={{
                         display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                        background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
+                        background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))",
                         borderRadius: "0.5rem", padding: "0.45rem 0.85rem",
                         fontSize: "0.78rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                       }}
@@ -1026,7 +1026,7 @@ function TicketsTab({ user }: { user: any }) {
           background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <Headphones size={16} style={{ color: "hsl(258,90%,70%)" }} />
+          <Headphones size={16} style={{ color: "hsl(var(--primary))" }} />
         </div>
         <div>
           <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>Support Tickets</div>
@@ -1045,7 +1045,7 @@ function TicketsTab({ user }: { user: any }) {
           <p style={{ fontWeight: 600, marginBottom: "0.4rem" }}>No tickets yet</p>
           <p style={{ fontSize: "0.8rem" }}>
             Visit the{" "}
-            <Link href="/support" style={{ color: "hsl(258,90%,70%)" }}>Support page</Link>
+            <Link href="/support" style={{ color: "hsl(var(--primary))" }}>Support page</Link>
             {" "}to submit a ticket.
           </p>
         </div>
@@ -1062,7 +1062,7 @@ function TicketsTab({ user }: { user: any }) {
                 transition: "background 0.15s",
                 opacity: t.status === "closed" ? 0.6 : 1,
               }}
-              onMouseEnter={(e) => { if (t.status !== "closed") e.currentTarget.style.background = "hsl(220,20%,11%)"; }}
+              onMouseEnter={(e) => { if (t.status !== "closed") e.currentTarget.style.background = "hsl(var(--card))"; }}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -1076,7 +1076,7 @@ function TicketsTab({ user }: { user: any }) {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
                 <TicketStatusBadge status={t.status} />
-                <ChevronRight size={15} style={{ color: "hsl(220,10%,35%)" }} />
+                <ChevronRight size={15} style={{ color: "hsl(var(--muted-foreground))" }} />
               </div>
             </div>
           ))}
@@ -1108,7 +1108,7 @@ export default function Account() {
 
   const ROLE_LABELS: Record<string, { label: string; color: string }> = {
     super_admin: { label: "Super Admin", color: "hsl(0,72%,65%)" },
-    admin: { label: "Admin", color: "hsl(258,90%,70%)" },
+    admin: { label: "Admin", color: "hsl(var(--primary))" },
     staff: { label: "Staff", color: "hsl(196,100%,55%)" },
     user: { label: "Member", color: "hsl(145,70%,55%)" },
   };
@@ -1190,8 +1190,8 @@ export default function Account() {
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
                 gap: "0.5rem", padding: "0.6rem 0.5rem", borderRadius: "0.5rem",
                 fontSize: "0.82rem", fontWeight: active ? 600 : 500, border: "none", cursor: "pointer",
-                background: active ? "hsl(220,20%,14%)" : "none",
-                color: active ? "hsl(210,40%,92%)" : "hsl(220,10%,45%)",
+                background: active ? "hsl(var(--card))" : "none",
+                color: active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
                 transition: "all 0.15s",
               }}
               data-testid={`tab-${id}`}

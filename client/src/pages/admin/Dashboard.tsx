@@ -74,10 +74,10 @@ function DateRangeFilter({ selected, onSelect, customRange, onCustomRange }: {
       )}
       {open && showCal && (
         <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", padding: "8px" }}>
-          <style>{`.rdp{--rdp-accent-color:hsl(var(--primary));--rdp-background-color:hsl(258,90%,20%);color:hsl(210,40%,85%);font-size:12px}.rdp-day_button:hover{background:hsl(220,20%,16%)!important}.rdp-month_caption{color:hsl(210,40%,85%)}.rdp-weekday{color:hsl(220,10%,42%)}.rdp-nav button{color:hsl(220,10%,52%)}`}</style>
+          <style>{`.rdp{--rdp-accent-color:hsl(var(--primary));--rdp-background-color:hsl(258,90%,20%);color:hsl(var(--foreground));font-size:12px}.rdp-day_button:hover{background:hsl(220,20%,16%)!important}.rdp-month_caption{color:hsl(var(--foreground))}.rdp-weekday{color:hsl(var(--muted-foreground))}.rdp-nav button{color:hsl(var(--muted-foreground))}`}</style>
           <DayPicker mode="range" selected={customRange} onSelect={(r) => { onCustomRange(r); if (r?.from && r?.to) { onSelect("custom"); setOpen(false); setShowCal(false); } }} />
           <div style={{ display: "flex", gap: "8px", padding: "0 8px 4px" }}>
-            <button onClick={() => { setShowCal(false); setOpen(false); }} style={{ flex: 1, padding: "6px", background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)", borderRadius: "5px", color: "hsl(220,10%,55%)", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
+            <button onClick={() => { setShowCal(false); setOpen(false); }} style={{ flex: 1, padding: "6px", background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)", borderRadius: "5px", color: "hsl(var(--muted-foreground))", fontSize: "11px", cursor: "pointer" }}>Cancel</button>
             {customRange?.from && <button onClick={() => { onSelect("custom"); setOpen(false); setShowCal(false); }} style={{ flex: 1, padding: "6px", background: "hsl(258,90%,30%)", border: "1px solid hsl(258,90%,40%)", borderRadius: "5px", color: "hsl(258,90%,85%)", fontSize: "11px", cursor: "pointer" }}>Apply</button>}
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function Dashboard() {
               />
             </div>
             {salesLoading ? (
-              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
+              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>
@@ -321,7 +321,7 @@ export default function Dashboard() {
               />
             </div>
             {orderLoading ? (
-              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(220,10%,38%)", gap: "8px" }}>
+              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>

@@ -55,7 +55,7 @@ export default function Refunds() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading refund requests...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading refund requests...</div>
           ) : filtered.length === 0 ? (
             <EmptyState message={refunds.length === 0 ? "No refund requests yet." : "No refunds match your filters."} />
           ) : (
@@ -78,7 +78,7 @@ export default function Refunds() {
                     <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>{r.gatewayRef ?? "—"}</td>
                     <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>${Number(r.amount).toFixed(2)}</td>
                     <td style={tdStyle}><StatusBadge value={r.status} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 46%)" }}>{formatDate(r.createdAt)}</td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(r.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

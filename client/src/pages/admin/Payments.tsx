@@ -144,7 +144,7 @@ export default function Payments() {
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(220,10%,42%)", fontSize: "13px" }}>Loading...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading...</div>
           ) : rows.length === 0 ? (
             <EmptyState message="No payment records yet." />
           ) : (
@@ -167,24 +167,24 @@ export default function Payments() {
                             {o.orderNumber}
                           </span>
                         </td>
-                        <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210,40%,80%)" }}>
+                        <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>
                           {o.userId ? (
                             <span style={{ fontFamily: "monospace", fontSize: "11px" }}>{o.userId.slice(0, 12)}…</span>
                           ) : (
                             <span style={{ color: "hsl(220,10%,40%)", fontSize: "11px" }}>Guest</span>
                           )}
                         </td>
-                        <td style={{ ...tdStyle, color: "hsl(220,10%,60%)", fontSize: "11px", textTransform: "uppercase" }}>
+                        <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))", fontSize: "11px", textTransform: "uppercase" }}>
                           {o.paymentMethod?.replace(/_/g, " ") ?? "—"}
                         </td>
-                        <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(220,10%,50%)" }}>
+                        <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>
                           {o.utr ?? "—"}
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(210,40%,95%)" }}>
+                        <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(var(--foreground))" }}>
                           {formatCurrency(o.totalAmount, o.currency)}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220,10%,46%)" }}>
+                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
                           {formatDate(o.createdAt)}
                         </td>
                         <td style={tdStyle}>
@@ -222,12 +222,12 @@ export default function Payments() {
                               {p.id.slice(0, 12)}…
                             </span>
                           </td>
-                          <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(210,40%,80%)" }}>{p.senderName ?? "—"}</td>
-                          <td style={{ ...tdStyle, color: "hsl(220,10%,60%)", fontSize: "11px" }}>UPI Email</td>
-                          <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(220,10%,50%)" }}>
+                          <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>{p.senderName ?? "—"}</td>
+                          <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>UPI Email</td>
+                          <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>
                             {p.utr ?? "—"}
                           </td>
-                          <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(210,40%,95%)" }}>
+                          <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(var(--foreground))" }}>
                             ₹{parseFloat(p.amount).toFixed(2)}
                           </td>
                           <td style={tdStyle}>
@@ -241,7 +241,7 @@ export default function Payments() {
                               </span>
                             )}
                           </td>
-                          <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(220,10%,46%)" }}>
+                          <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
                             {formatDate(p.detectedAt)}
                           </td>
                           <td style={tdStyle}>
@@ -265,13 +265,13 @@ export default function Payments() {
                           <tr key={`assign-${p.id}`}>
                             <td colSpan={8} style={{ ...tdStyle, background: "hsl(var(--background))", padding: "10px 16px" }}>
                               <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                                <span style={{ fontSize: "12px", color: "hsl(220,10%,50%)" }}>Assign to Order #:</span>
+                                <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Assign to Order #:</span>
                                 <input
                                   type="text"
                                   placeholder="Paste order ID (UUID)..."
                                   value={assignOrderId[p.id] || ""}
                                   onChange={e => setAssignOrderId(prev => ({ ...prev, [p.id]: e.target.value }))}
-                                  style={{ flex: 1, minWidth: "220px", padding: "5px 9px", borderRadius: "5px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(210,40%,92%)", fontSize: "12px", outline: "none" }}
+                                  style={{ flex: 1, minWidth: "220px", padding: "5px 9px", borderRadius: "5px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none" }}
                                   data-testid={`input-assign-order-${p.id}`}
                                 />
                                 <button
@@ -286,7 +286,7 @@ export default function Payments() {
                                   <Link size={12} /> Assign
                                 </button>
                                 {p.emailSubject && (
-                                  <span style={{ fontSize: "11px", color: "hsl(220,10%,42%)", fontStyle: "italic", marginLeft: "4px" }}>
+                                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic", marginLeft: "4px" }}>
                                     {p.emailSubject}
                                   </span>
                                 )}
