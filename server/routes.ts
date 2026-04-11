@@ -495,6 +495,188 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     return res.json({ user: safeUser });
   });
 
+  // ── Social OAuth ──────────────────────────────────────────────────────────
+  const oauthStates = new Map<string, { provider: string; expiresAt: number }>();
+  const socialTokens = new Map<string, { user: Record<string, unknown>; expiresAt: number }>();
+
+  setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of oauthStates) { if (now > v.expiresAt) oauthStates.delete(k); }
+    for (const [k, v] of socialTokens) { if (now > v.expiresAt) socialTokens.delete(k); }
+  }, 60_000);
+
+  async function getSocialPluginConfig(slug: string): Promise<Record<string, string>> {
+    try {
+      const p = await storage.getPlugin(slug);
+      if (!p) return {};
+      return JSON.parse(p.config ?? "{}");
+    } catch { return {}; }
+  }
+
+  function getBaseUrl(req: Request) {
+    const proto = req.headers["x-forwarded-proto"] ?? req.protocol;
+    const host = req.headers["x-forwarded-host"] ?? req.get("host");
+    return `${proto}://${host}`;
+  }
+
+  app.get("/api/auth/social-providers", async (_req, res) => {
+    try {
+      const socialLoginSetting = await storage.getSiteSetting("social_login");
+      const enabled = socialLoginSetting?.value === "true";
+      const [g, fb, dc] = await Promise.all([
+        getSocialPluginConfig("social-auth-google"),
+        getSocialPluginConfig("social-auth-facebook"),
+        getSocialPluginConfig("social-auth-discord"),
+      ]);
+      return res.json({
+        enabled,
+        google: enabled && Boolean(g.GOOGLE_CLIENT_ID),
+        facebook: enabled && Boolean(fb.FACEBOOK_APP_ID),
+        discord: enabled && Boolean(dc.DISCORD_CLIENT_ID),
+      });
+    } catch {
+      return res.json({ enabled: false, google: false, facebook: false, discord: false });
+    }
+  });
+
+  app.get("/api/auth/oauth/:provider", async (req, res) => {
+    const { provider } = req.params;
+    const baseUrl = getBaseUrl(req);
+    const state = randomBytes(16).toString("hex");
+    oauthStates.set(state, { provider, expiresAt: Date.now() + 600_000 });
+
+    let authUrl = "";
+    if (provider === "google") {
+      const cfg = await getSocialPluginConfig("social-auth-google");
+      if (!cfg.GOOGLE_CLIENT_ID) return res.status(400).json({ message: "Google OAuth not configured" });
+      authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` + new URLSearchParams({
+        client_id: cfg.GOOGLE_CLIENT_ID,
+        redirect_uri: `${baseUrl}/api/auth/oauth/google/callback`,
+        response_type: "code",
+        scope: "openid email profile",
+        state,
+      });
+    } else if (provider === "facebook") {
+      const cfg = await getSocialPluginConfig("social-auth-facebook");
+      if (!cfg.FACEBOOK_APP_ID) return res.status(400).json({ message: "Facebook OAuth not configured" });
+      authUrl = `https://www.facebook.com/v18.0/dialog/oauth?` + new URLSearchParams({
+        client_id: cfg.FACEBOOK_APP_ID,
+        redirect_uri: `${baseUrl}/api/auth/oauth/facebook/callback`,
+        scope: "email",
+        state,
+      });
+    } else if (provider === "discord") {
+      const cfg = await getSocialPluginConfig("social-auth-discord");
+      if (!cfg.DISCORD_CLIENT_ID) return res.status(400).json({ message: "Discord OAuth not configured" });
+      authUrl = `https://discord.com/api/oauth2/authorize?` + new URLSearchParams({
+        client_id: cfg.DISCORD_CLIENT_ID,
+        redirect_uri: `${baseUrl}/api/auth/oauth/discord/callback`,
+        response_type: "code",
+        scope: "identify email",
+        state,
+      });
+    } else {
+      return res.status(400).json({ message: "Unknown provider" });
+    }
+    return res.redirect(authUrl);
+  });
+
+  app.get("/api/auth/oauth/:provider/callback", async (req, res) => {
+    const { provider } = req.params;
+    const { code, state, error: oauthError } = req.query as Record<string, string>;
+    const baseUrl = getBaseUrl(req);
+
+    if (oauthError) return res.redirect(`/login?error=${encodeURIComponent("OAuth sign-in was cancelled")}`);
+
+    const stateEntry = oauthStates.get(state);
+    if (!stateEntry || stateEntry.provider !== provider || Date.now() > stateEntry.expiresAt) {
+      return res.redirect(`/login?error=${encodeURIComponent("Invalid or expired OAuth state. Please try again.")}`);
+    }
+    oauthStates.delete(state);
+
+    try {
+      let email = "", name = "";
+
+      if (provider === "google") {
+        const cfg = await getSocialPluginConfig("social-auth-google");
+        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            code, client_id: cfg.GOOGLE_CLIENT_ID, client_secret: cfg.GOOGLE_CLIENT_SECRET,
+            redirect_uri: `${baseUrl}/api/auth/oauth/google/callback`, grant_type: "authorization_code",
+          }),
+        });
+        const td = await tokenRes.json() as any;
+        if (!tokenRes.ok) throw new Error(td.error_description || "Google token exchange failed");
+        const ud = await (await fetch("https://www.googleapis.com/oauth2/v2/userinfo", { headers: { Authorization: `Bearer ${td.access_token}` } })).json() as any;
+        email = ud.email; name = ud.name;
+      } else if (provider === "facebook") {
+        const cfg = await getSocialPluginConfig("social-auth-facebook");
+        const tokenRes = await fetch(`https://graph.facebook.com/v18.0/oauth/access_token?` + new URLSearchParams({ client_id: cfg.FACEBOOK_APP_ID, client_secret: cfg.FACEBOOK_APP_SECRET, redirect_uri: `${baseUrl}/api/auth/oauth/facebook/callback`, code }));
+        const td = await tokenRes.json() as any;
+        if (!tokenRes.ok) throw new Error(td.error?.message || "Facebook token exchange failed");
+        const ud = await (await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${td.access_token}`)).json() as any;
+        email = ud.email; name = ud.name;
+      } else if (provider === "discord") {
+        const cfg = await getSocialPluginConfig("social-auth-discord");
+        const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            code, client_id: cfg.DISCORD_CLIENT_ID, client_secret: cfg.DISCORD_CLIENT_SECRET,
+            redirect_uri: `${baseUrl}/api/auth/oauth/discord/callback`, grant_type: "authorization_code",
+          }),
+        });
+        const td = await tokenRes.json() as any;
+        if (!tokenRes.ok) throw new Error(td.error_description || "Discord token exchange failed");
+        const ud = await (await fetch("https://discord.com/api/users/@me", { headers: { Authorization: `Bearer ${td.access_token}` } })).json() as any;
+        email = ud.email; name = ud.global_name || ud.username;
+      }
+
+      if (!email) throw new Error("No email returned by provider. Make sure your account has an email address.");
+
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        const emailPrefix = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() || "user";
+        let username = emailPrefix;
+        const existingByUsername = await storage.getUserByUsername(username);
+        if (existingByUsername) username = `${emailPrefix}_${randomBytes(3).toString("hex")}`;
+
+        const randomPassword = randomBytes(16).toString("hex");
+        const hashedPassword = await bcrypt.hash(randomPassword, 12);
+        const approvalSetting = await storage.getSiteSetting("account_approval");
+        const isActive = (approvalSetting?.value ?? "auto") !== "manual";
+
+        user = await storage.createUser({
+          username, email, password: hashedPassword,
+          fullName: name || emailPrefix,
+          isActive, isEmailVerified: true, role: "user",
+        } as any);
+      } else if (!user.isActive) {
+        return res.redirect(`/login?error=${encodeURIComponent("Your account is pending approval by an administrator.")}`);
+      }
+
+      const { password: _pw, ...safeUser } = user;
+      const token = randomBytes(32).toString("hex");
+      socialTokens.set(token, { user: safeUser as any, expiresAt: Date.now() + 60_000 });
+      return res.redirect(`/auth/callback?token=${token}`);
+    } catch (err: any) {
+      return res.redirect(`/login?error=${encodeURIComponent(err.message || "OAuth login failed")}`);
+    }
+  });
+
+  app.get("/api/auth/social-token", (req, res) => {
+    const { token } = req.query as { token: string };
+    if (!token) return res.status(400).json({ message: "Token required" });
+    const entry = socialTokens.get(token);
+    if (!entry || Date.now() > entry.expiresAt) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    socialTokens.delete(token);
+    return res.json({ user: entry.user });
+  });
+
   // ── Forgot password / OTP reset ────────────────────────────────────────────
   const resetRequestTimes = new Map<string, number>(); // userId → last request ms
 

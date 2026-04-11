@@ -11,6 +11,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 import Orders from "./pages/Orders";
@@ -100,6 +101,7 @@ function PublicRoutes() {
           <Route path="/orders" component={Orders} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/auth/callback" component={AuthCallback} />
           <Route path="/auth/forgot-password" component={ForgotPassword} />
           <Route path="/auth/verify-reset-otp" component={VerifyResetOtp} />
           <Route path="/auth/reset-password" component={ResetPassword} />

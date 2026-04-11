@@ -111,14 +111,30 @@ const SERVICES: ServiceDef[] = [
     fields: [{ key: "ANALYTICS_ID", label: "Analytics ID", placeholder: "G-XXXXXXXXXX or UA-XXXXXXXX" }],
   },
   {
-    slug: "social-auth",
-    name: "Social Login (Google / Facebook)",
-    note: "Required for Google and Facebook sign-in",
+    slug: "social-auth-google",
+    name: "Social Login — Google",
+    note: "Required for Google OAuth sign-in",
     fields: [
       { key: "GOOGLE_CLIENT_ID", label: "Google Client ID", placeholder: "xxxx.apps.googleusercontent.com" },
       { key: "GOOGLE_CLIENT_SECRET", label: "Google Client Secret", placeholder: "GOCSPX-..." },
+    ],
+  },
+  {
+    slug: "social-auth-facebook",
+    name: "Social Login — Facebook",
+    note: "Required for Facebook OAuth sign-in",
+    fields: [
       { key: "FACEBOOK_APP_ID", label: "Facebook App ID", placeholder: "1234567890" },
       { key: "FACEBOOK_APP_SECRET", label: "Facebook App Secret", placeholder: "abc123..." },
+    ],
+  },
+  {
+    slug: "social-auth-discord",
+    name: "Social Login — Discord",
+    note: "Required for Discord OAuth sign-in",
+    fields: [
+      { key: "DISCORD_CLIENT_ID", label: "Discord Client ID", placeholder: "1234567890123456789" },
+      { key: "DISCORD_CLIENT_SECRET", label: "Discord Client Secret", placeholder: "abcdefghijklmnopqrstuvwxyz" },
     ],
   },
   {

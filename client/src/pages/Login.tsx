@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Zap, Eye, EyeOff, LogIn, KeyRound } from "lucide-react";
+import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
 import { useAuthStore } from "@/lib/store/authstore";
+
+interface SocialProviders {
+  enabled: boolean;
+  google: boolean;
+  facebook: boolean;
+  discord: boolean;
+}
 
 export default function Login() {
   const [, navigate] = useLocation();
@@ -12,6 +20,19 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [socialProviders, setSocialProviders] = useState<SocialProviders>({ enabled: false, google: false, facebook: false, discord: false });
+
+  useEffect(() => {
+    // Check URL error from OAuth redirect
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get("error");
+    if (urlError) setError(urlError);
+
+    fetch("/api/auth/social-providers")
+      .then((r) => r.json())
+      .then((data) => setSocialProviders(data))
+      .catch(() => {});
+  }, []);
 
   if (isAuthenticated) {
     navigate("/account");
@@ -38,6 +59,25 @@ export default function Login() {
       setLoading(false);
     }
   }
+
+  const hasSocial = socialProviders.enabled && (socialProviders.google || socialProviders.facebook || socialProviders.discord);
+
+  const socialBtnStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.6rem",
+    width: "100%",
+    padding: "0.6rem 1rem",
+    borderRadius: "0.5rem",
+    background: "hsl(220,15%,13%)",
+    border: "1px solid hsl(220,15%,20%)",
+    color: "hsl(210,40%,80%)",
+    fontSize: "0.85rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "background 0.15s",
+  };
 
   return (
     <div
@@ -209,6 +249,54 @@ export default function Login() {
             )}
           </button>
         </form>
+
+        {hasSocial && (
+          <div style={{ marginTop: "1.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
+              <span style={{ fontSize: "0.75rem", color: "hsl(220,10%,40%)", whiteSpace: "nowrap" }}>or continue with</span>
+              <div style={{ flex: 1, height: "1px", background: "hsl(220,15%,18%)" }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {socialProviders.google && (
+                <a
+                  href="/api/auth/oauth/google"
+                  style={{ textDecoration: "none" }}
+                  data-testid="button-social-google"
+                >
+                  <div style={socialBtnStyle}>
+                    <SiGoogle size={16} style={{ color: "#EA4335" }} />
+                    Continue with Google
+                  </div>
+                </a>
+              )}
+              {socialProviders.facebook && (
+                <a
+                  href="/api/auth/oauth/facebook"
+                  style={{ textDecoration: "none" }}
+                  data-testid="button-social-facebook"
+                >
+                  <div style={socialBtnStyle}>
+                    <SiFacebook size={16} style={{ color: "#1877F2" }} />
+                    Continue with Facebook
+                  </div>
+                </a>
+              )}
+              {socialProviders.discord && (
+                <a
+                  href="/api/auth/oauth/discord"
+                  style={{ textDecoration: "none" }}
+                  data-testid="button-social-discord"
+                >
+                  <div style={socialBtnStyle}>
+                    <SiDiscord size={16} style={{ color: "#5865F2" }} />
+                    Continue with Discord
+                  </div>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
           <p style={{ fontSize: "0.8rem", color: "hsl(220,10%,45%)" }}>

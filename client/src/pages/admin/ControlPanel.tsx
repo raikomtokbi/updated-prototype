@@ -849,7 +849,7 @@ export default function ControlPanel() {
         <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
           <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
         </SettingRow>
-        <SettingRow label="Allow Social Login" description="Enable Google / Facebook sign-in" note="Sign-in buttons appear once Google / Facebook OAuth credentials are configured." apiSlug="social-auth">
+        <SettingRow label="Allow Social Login" description="Enable Google, Facebook, and Discord sign-in" note="Sign-in buttons appear once OAuth credentials are configured in API Integration." apiSlug="social-auth-google">
           <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
         </SettingRow>
         <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(220, 15%, 12%)" }}>
