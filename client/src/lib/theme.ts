@@ -85,21 +85,26 @@ export function applyThemeVars(
     accent = preset.accent;
   }
 
-  root.style.setProperty("--primary", primary);
-  root.style.setProperty("--ring", primary);
-  root.style.setProperty("--accent", accent);
-
   const bg = preset?.bg ?? "220 20% 8%";
-  root.style.setProperty("--background", bg);
-  root.style.setProperty("--foreground", preset?.foreground ?? DARK_BASE.foreground);
-  root.style.setProperty("--card", preset?.card ?? DARK_BASE.card);
-  root.style.setProperty("--card-foreground", preset?.cardForeground ?? DARK_BASE.cardForeground);
-  root.style.setProperty("--muted", preset?.muted ?? DARK_BASE.muted);
-  root.style.setProperty("--muted-foreground", preset?.mutedForeground ?? DARK_BASE.mutedForeground);
-  root.style.setProperty("--border", preset?.border ?? DARK_BASE.border);
-  root.style.setProperty("--input", preset?.input ?? DARK_BASE.input);
-  root.style.setProperty("--primary-foreground", preset?.primaryForeground ?? DARK_BASE.primaryForeground);
-  root.style.setProperty("--btn-buy", preset?.btnBuy ?? primary);
+  const vars: Record<string, string> = {
+    "--primary": primary,
+    "--ring": primary,
+    "--accent": accent,
+    "--background": bg,
+    "--foreground": preset?.foreground ?? DARK_BASE.foreground,
+    "--card": preset?.card ?? DARK_BASE.card,
+    "--card-foreground": preset?.cardForeground ?? DARK_BASE.cardForeground,
+    "--muted": preset?.muted ?? DARK_BASE.muted,
+    "--muted-foreground": preset?.mutedForeground ?? DARK_BASE.mutedForeground,
+    "--border": preset?.border ?? DARK_BASE.border,
+    "--input": preset?.input ?? DARK_BASE.input,
+    "--primary-foreground": preset?.primaryForeground ?? DARK_BASE.primaryForeground,
+    "--btn-buy": preset?.btnBuy ?? primary,
+  };
+
+  Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+
+  try { localStorage.setItem("nexcoin_theme_vars", JSON.stringify(vars)); } catch (_) {}
 
   if (preset?.isLight) {
     root.setAttribute("data-theme", "light");

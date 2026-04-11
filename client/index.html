@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="theme-color" content="#2563eb" />
 
     <meta property="og:title" content="Nexcoin - Game Top-up Marketplace" />
     <meta property="og:description" content="Instant game top-ups and gift cards for your favorite games." />
@@ -14,6 +14,27 @@
     <meta name="twitter:title" content="Nexcoin" />
     <meta name="twitter:description" content="Instant game top-ups and gift cards for your favorite games." />
     <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png" />
+
+    <!-- Inline theme restore: runs synchronously before first paint to prevent flash -->
+    <script>
+      (function () {
+        try {
+          var cached = localStorage.getItem("nexcoin_theme_vars");
+          if (cached) {
+            var vars = JSON.parse(cached);
+            var root = document.documentElement;
+            Object.keys(vars).forEach(function (k) {
+              root.style.setProperty(k, vars[k]);
+            });
+            if (vars["--background"] && vars["--background"].startsWith("220 20%")) {
+              root.setAttribute("data-theme", "dark");
+            } else {
+              root.setAttribute("data-theme", "light");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">

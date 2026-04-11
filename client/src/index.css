@@ -2,23 +2,23 @@
 
 @layer base {
   :root {
-    --background: 220 20% 8%;
-    --foreground: 210 40% 95%;
-    --card: 220 20% 9%;
-    --card-foreground: 210 40% 95%;
-    --muted: 220 15% 14%;
-    --muted-foreground: 220 10% 55%;
-    --border: 220 15% 16%;
-    --input: 220 15% 14%;
-    --primary: 258 90% 66%;
+    --background: 0 0% 100%;
+    --foreground: 220 20% 8%;
+    --card: 220 13% 94%;
+    --card-foreground: 220 20% 10%;
+    --muted: 220 14% 97%;
+    --muted-foreground: 220 12% 38%;
+    --border: 220 13% 87%;
+    --input: 220 14% 96%;
+    --primary: 217 91% 50%;
     --primary-foreground: 0 0% 100%;
-    --accent: 196 100% 50%;
+    --accent: 142 71% 40%;
     --accent-foreground: 220 20% 6%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 258 90% 66%;
+    --ring: 217 91% 50%;
     --radius: 0.5rem;
-    --btn-buy: 258 90% 66%;
+    --btn-buy: 142 71% 36%;
   }
 }
 
