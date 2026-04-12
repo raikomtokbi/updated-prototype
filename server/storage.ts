@@ -37,7 +37,7 @@ import {
   type UnmatchedPayment, type InsertUnmatchedPayment,
   type RolePermission,
 } from "@shared/schema";
-import { eq, desc, asc, count, sum, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, asc, count, sum, and, gte, lte, lt, sql } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -93,6 +93,7 @@ export interface IStorage {
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   updateOrderAmount(id: string, amount: string): Promise<void>;
   updateOrderDelivery(id: string, deliveryStatus: string, deliveryNote?: string): Promise<void>;
+  expirePendingOrders(olderThanMs: number): Promise<number>;
 
   // Transactions
   getAllTransactions(limit?: number, offset?: number): Promise<Transaction[]>;
@@ -439,6 +440,14 @@ export class DatabaseStorage implements IStorage {
   }
   async updateOrderDelivery(id: string, deliveryStatus: string, deliveryNote?: string): Promise<void> {
     await db.update(orders).set({ deliveryStatus, deliveryNote: deliveryNote ?? null, updatedAt: new Date() }).where(eq(orders.id, id));
+  }
+  async expirePendingOrders(olderThanMs: number): Promise<number> {
+    const cutoff = new Date(Date.now() - olderThanMs);
+    const result = await db
+      .update(orders)
+      .set({ status: "failed", updatedAt: new Date() })
+      .where(and(eq(orders.status, "pending"), lt(orders.createdAt, cutoff)));
+    return (result as any).rowCount ?? (result as any).rowsAffected ?? 0;
   }
 
   // ── Transactions ───────────────────────────────────────────────────────────

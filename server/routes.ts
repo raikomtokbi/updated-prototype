@@ -2996,6 +2996,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // Auto-expire pending orders older than 5 hours
+  const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
+  const TEN_MIN_MS = 10 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      const expired = await storage.expirePendingOrders(FIVE_HOURS_MS);
+      if (expired > 0) console.log(`[auto-expire] Marked ${expired} pending order(s) as failed (>5 h old)`);
+    } catch (err) {
+      console.error("[auto-expire] Error expiring pending orders:", err);
+    }
+  }, TEN_MIN_MS);
+
   // Start UPI email payment poller — pass handleOrderCompleted so auto-matched
   // payments also trigger Busan fulfillment + confirmation email.
   startEmailPaymentPoller((orderId) => handleOrderCompleted(orderId));

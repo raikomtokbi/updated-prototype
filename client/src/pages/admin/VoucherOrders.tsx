@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from "react";
+import { useState, useMemo, useEffect, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
@@ -49,6 +49,7 @@ export default function VoucherOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const highlightId = useMemo(() => new URLSearchParams(window.location.search).get("highlight"), []);
 
   const { data: orders = [], isLoading } = useQuery<AnyOrder[]>({
     queryKey: ["/api/admin/orders"],
@@ -81,6 +82,12 @@ export default function VoucherOrders() {
       return matchSearch && matchStatus;
     });
   }, [orders, search, statusFilter]);
+
+  useEffect(() => {
+    if (!highlightId || isLoading) return;
+    const el = document.getElementById(`order-row-${highlightId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlightId, isLoading, orders]);
 
   return (
     <AdminLayout title="Voucher Orders">
@@ -115,7 +122,13 @@ export default function VoucherOrders() {
 
                   return (
                     <Fragment key={o.id}>
-                      <tr style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                      <tr
+                        id={`order-row-${o.id}`}
+                        style={{
+                          borderBottom: "1px solid hsl(220,15%,11%)",
+                          ...(highlightId === o.id ? { background: "hsl(258,70%,55%,0.15)", outline: "1px solid hsl(258,80%,60%)" } : {}),
+                        }}
+                      >
                         <td style={tdStyle}>
                           <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>{o.orderNumber}</div>
                           {o.utr && (

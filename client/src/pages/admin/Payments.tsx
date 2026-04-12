@@ -41,6 +41,24 @@ function formatCurrency(amount: string | number, currency = "INR") {
   return `${symbol}${Number(amount).toFixed(2)}`;
 }
 
+function parseNotesItems(notes: string | null | undefined): Array<{ productCategory?: string }> {
+  if (!notes) return [];
+  try {
+    const parsed = JSON.parse(notes);
+    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed?.items)) return parsed.items;
+  } catch {}
+  return [];
+}
+
+const VOUCHER_CATEGORIES = ["voucher", "gift_card", "subscription"];
+function getOrderViewUrl(o: Order): string {
+  const items = parseNotesItems(o.notes);
+  const firstCat = items[0]?.productCategory;
+  const page = firstCat && VOUCHER_CATEGORIES.includes(firstCat) ? "voucher-orders" : "topup-orders";
+  return `/admin/${page}?highlight=${o.id}`;
+}
+
 interface Order {
   id: string;
   userId: string | null;
@@ -217,7 +235,7 @@ export default function Payments() {
                               </button>
                             )}
                             <a
-                              href={`/admin/orders`}
+                              href={getOrderViewUrl(o)}
                               style={{ color: "hsl(258,90%,70%)", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "2px", textDecoration: "none" }}
                               data-testid={`link-view-order-${o.id}`}
                             >
