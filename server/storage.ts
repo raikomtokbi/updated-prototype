@@ -784,16 +784,23 @@ export class DatabaseStorage implements IStorage {
     const safeTz = (timezone || "UTC").replace(/[^a-zA-Z0-9/_+\-]/g, "");
     const tz = sql.raw(`'${safeTz}'`);
 
-    // All truncation/grouping is done AT TIME ZONE so buckets align with the admin's local time.
-    // For hourly views, PostgreSQL formats the time directly so no JS conversion is needed.
+    // createdAt is stored as `timestamp without time zone` but contains UTC values.
+    // (col AT TIME ZONE 'UTC') labels it as UTC → returns timestamptz.
+    // Then AT TIME ZONE tz converts from UTC to the target local time → timestamp without tz in local time.
+    const localTs = sql`(${orders.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${tz}`;
+
+    // Truncate to the appropriate bucket in local time (for chronological ORDER BY).
+    const truncTs =
+      groupBy === "hour" ? sql`date_trunc('hour', ${localTs})`
+      : groupBy === "day" ? localTs
+      : groupBy === "week" ? sql`date_trunc('week', ${localTs})`
+      : sql`date_trunc('month', ${localTs})`;
+
+    // Format the truncated local timestamp as a label string.
     const trunc =
       groupBy === "hour"
-        ? sql`to_char(date_trunc('hour', ${orders.createdAt} AT TIME ZONE ${tz}), 'HH12:00 AM')`
-        : groupBy === "day"
-        ? sql`to_char(${orders.createdAt} AT TIME ZONE ${tz}, 'YYYY-MM-DD')`
-        : groupBy === "week"
-        ? sql`to_char(date_trunc('week', ${orders.createdAt} AT TIME ZONE ${tz}), 'YYYY-MM-DD')`
-        : sql`to_char(date_trunc('month', ${orders.createdAt} AT TIME ZONE ${tz}), 'YYYY-MM-DD')`;
+        ? sql`to_char(${truncTs}, 'HH12:00 AM')`
+        : sql`to_char(${truncTs}, 'YYYY-MM-DD')`;
 
     const trendRows = await db
       .select({
@@ -802,8 +809,8 @@ export class DatabaseStorage implements IStorage {
       })
       .from(orders)
       .where(and(gte(orders.createdAt, from), lte(orders.createdAt, to)))
-      .groupBy(trunc)
-      .orderBy(trunc);
+      .groupBy(truncTs)
+      .orderBy(truncTs);
 
     function fmtLabel(period: unknown, gb: string) {
       const raw = (period as string).trim();
