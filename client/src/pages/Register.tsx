@@ -27,6 +27,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -50,6 +51,10 @@ export default function Register() {
     setSuccess("");
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (!agreedToTerms) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
       return;
     }
     setLoading(true);
@@ -318,6 +323,52 @@ export default function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem" }}>
+            <input
+              id="reg-terms"
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              style={{
+                marginTop: "2px",
+                width: "15px",
+                height: "15px",
+                flexShrink: 0,
+                accentColor: "hsl(var(--primary))",
+                cursor: "pointer",
+              }}
+            />
+            <label
+              htmlFor="reg-terms"
+              style={{
+                fontSize: "0.68rem",
+                color: "hsl(var(--muted-foreground))",
+                lineHeight: "1.5",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              I have read and agree to the{" "}
+              <a
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "hsl(var(--primary))", textDecoration: "none", fontWeight: 600 }}
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "hsl(var(--primary))", textDecoration: "none", fontWeight: 600 }}
+              >
+                Privacy Policy
+              </a>
+            </label>
           </div>
 
           {error && (
