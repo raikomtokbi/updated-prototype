@@ -25,6 +25,16 @@ function formatCurrency(amount: string | number | null | undefined, currency = "
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(Number(amount));
 }
 
+function parseOrderNotes(notes: string | null | undefined): Array<{ productTitle?: string; packageName?: string; userId?: string; zoneId?: string; quantity?: number }> {
+  if (!notes) return [];
+  try {
+    const parsed = JSON.parse(notes);
+    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed?.items)) return parsed.items;
+  } catch {}
+  return [];
+}
+
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   pending: { bg: "hsla(40,90%,55%,0.12)", text: "hsl(40,90%,60%)", dot: "hsl(40,90%,60%)" },
   processing: { bg: "hsla(196,100%,50%,0.12)", text: "hsl(196,100%,55%)", dot: "hsl(196,100%,55%)" },
@@ -418,35 +428,72 @@ function OrdersTab({ user }: { user: any }) {
             {/* Expanded section: items + actions */}
             {isExpanded && (
               <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
-                {order.items && order.items.length > 0 && (
-                  <>
-                    <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-                      Order Items
-                    </div>
-                    {order.items.map((item: any) => (
-                      <div key={item.id} style={{
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                        padding: "0.6rem 0", borderBottom: "1px solid hsl(var(--border))", gap: "0.5rem", flexWrap: "wrap",
-                      }} data-testid={`row-order-item-${item.id}`}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
-                          {item.packageLabel && (
-                            <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
-                          )}
-                        </div>
-                        <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
-                          {formatCurrency(item.totalPrice)}
-                        </div>
+                {order.items && order.items.length > 0 && (() => {
+                  const notesItems = parseOrderNotes(order.notes);
+                  return (
+                    <>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                        Order Details
                       </div>
-                    ))}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
-                      <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
-                      <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
-                        {formatCurrency(order.totalAmount, order.currency)}
-                      </span>
-                    </div>
-                  </>
-                )}
+                      {order.items.map((item: any, idx: number) => {
+                        const ni = notesItems[idx] ?? {};
+                        return (
+                          <div key={item.id} style={{
+                            padding: "0.7rem 0", borderBottom: "1px solid hsl(var(--border))",
+                          }} data-testid={`row-order-item-${item.id}`}>
+                            {/* Game + price row */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                                {item.packageLabel && (
+                                  <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+                                    {item.packageLabel}{item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
+                                {formatCurrency(item.totalPrice)}
+                              </div>
+                            </div>
+                            {/* Player info */}
+                            {(ni.userId || ni.zoneId) && (
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.3rem" }}>
+                                {ni.userId && (
+                                  <span style={{
+                                    display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                                    fontSize: "0.65rem", fontFamily: "monospace",
+                                    padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
+                                    background: "hsla(258,80%,60%,0.1)", color: "hsl(258,80%,70%)",
+                                    border: "1px solid hsla(258,80%,60%,0.2)",
+                                  }}>
+                                    <User size={9} /> ID: {ni.userId}
+                                  </span>
+                                )}
+                                {ni.zoneId && (
+                                  <span style={{
+                                    display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                                    fontSize: "0.65rem", fontFamily: "monospace",
+                                    padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
+                                    background: "hsla(196,100%,50%,0.08)", color: "hsl(196,100%,55%)",
+                                    border: "1px solid hsla(196,100%,50%,0.2)",
+                                  }}>
+                                    <Hash size={9} /> Zone: {ni.zoneId}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
+                        <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
+                        <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
+                          {formatCurrency(order.totalAmount, order.currency)}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {/* Request Refund — only when delivery is still pending */}
                 {canRefund && (
