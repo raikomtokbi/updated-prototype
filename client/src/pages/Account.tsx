@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
   User, LogOut, ShoppingBag, Shield, Lock, ChevronRight,
   Package, Settings, Eye, EyeOff, Check, X, Loader2,
   Calendar, Hash, Clock, Headphones, Send, Paperclip, ArrowLeft, ChevronDown,
-  MoreVertical, RotateCcw, ChevronLeft,
+  RotateCcw, ChevronLeft,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -220,9 +220,7 @@ const ORDERS_PAGE_SIZE = 5;
 
 function OrdersTab({ user }: { user: any }) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logout = useAuthStore((s) => s.logout);
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -269,18 +267,6 @@ function OrdersTab({ user }: { user: any }) {
       toast({ title: "Failed to submit", description: "Could not submit your refund request. Please try again.", variant: "destructive" });
     },
   });
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    if (!openDropdown) return;
-    function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpenDropdown(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [openDropdown]);
 
   if (isLoading) {
     return (
@@ -371,158 +357,121 @@ function OrdersTab({ user }: { user: any }) {
       {paged.map((order) => {
         const sc = STATUS_COLORS[order.status] ?? STATUS_COLORS.pending;
         const isExpanded = expandedOrder === order.id;
-        const isDropOpen = openDropdown === order.id;
         const canRefund = !order.deliveryStatus || order.deliveryStatus === "pending";
 
         return (
           <div key={order.id} style={{
             background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
-            borderRadius: "0.75rem", overflow: "visible", position: "relative",
+            borderRadius: "0.75rem", overflow: "hidden",
           }} data-testid={`card-order-${order.id}`}>
+
             {/* Main clickable row */}
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem 1.25rem", flexWrap: "wrap" }}>
-              <button
-                onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                style={{
-                  flex: 1, display: "flex", alignItems: "center", gap: "1rem",
-                  background: "none", border: "none", cursor: "pointer",
-                  textAlign: "left", flexWrap: "wrap", minWidth: 0,
-                }}
-                data-testid={`button-order-expand-${order.id}`}
-              >
-                <div style={{
-                  width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
-                  background: sc.bg, display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <Package size={16} style={{ color: sc.text }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
-                      #{order.orderNumber}
-                    </span>
-                    <span style={{
-                      fontSize: "0.68rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
-                      background: sc.bg, color: sc.text, textTransform: "capitalize",
-                    }}>
-                      {order.status}
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                      <Calendar size={11} /> {formatDate(order.createdAt)}
-                    </span>
-                    {order.items?.length > 0 && (
-                      <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                        <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
-                    {formatCurrency(order.totalAmount, order.currency)}
-                  </div>
-                  <ChevronRight size={14} style={{
-                    color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", float: "right",
-                    transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.2s",
-                  }} />
-                </div>
-              </button>
-
-              {/* Actions dropdown trigger */}
-              <div style={{ position: "relative", flexShrink: 0 }} ref={isDropOpen ? dropdownRef : undefined}>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setOpenDropdown(isDropOpen ? null : order.id); }}
-                  style={{
-                    width: "30px", height: "30px", borderRadius: "0.4rem",
-                    background: isDropOpen ? "hsl(var(--accent))" : "transparent",
-                    border: "1px solid " + (isDropOpen ? "hsl(var(--border))" : "transparent"),
-                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "hsl(var(--muted-foreground))",
-                  }}
-                  data-testid={`button-order-menu-${order.id}`}
-                  aria-label="Order actions"
-                >
-                  <MoreVertical size={14} />
-                </button>
-
-                {isDropOpen && (
-                  <div
-                    ref={dropdownRef}
-                    style={{
-                      position: "absolute", top: "calc(100% + 4px)", right: 0, zIndex: 50,
-                      background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem", minWidth: "160px",
-                      boxShadow: "0 4px 20px hsla(220,20%,4%,0.35)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {canRefund ? (
-                      <button
-                        onClick={() => {
-                          if (refundMutation.isPending) return;
-                          refundMutation.mutate(order);
-                        }}
-                        disabled={refundMutation.isPending}
-                        style={{
-                          width: "100%", display: "flex", alignItems: "center", gap: "0.5rem",
-                          padding: "0.6rem 0.9rem", background: "none", border: "none",
-                          cursor: refundMutation.isPending ? "not-allowed" : "pointer",
-                          fontSize: "0.72rem", color: "hsl(40,90%,60%)",
-                          opacity: refundMutation.isPending ? 0.6 : 1,
-                          textAlign: "left",
-                        }}
-                        data-testid={`button-request-refund-${order.id}`}
-                      >
-                        {refundMutation.isPending
-                          ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
-                          : <RotateCcw size={13} />
-                        }
-                        Request Refund
-                      </button>
-                    ) : (
-                      <div style={{
-                        padding: "0.6rem 0.9rem",
-                        fontSize: "0.72rem", color: "hsl(var(--muted-foreground))",
-                        textAlign: "left",
-                      }}>
-                        No actions available
-                      </div>
-                    )}
-                  </div>
-                )}
+            <button
+              onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: "1rem",
+                padding: "1rem 1.25rem", background: "none", border: "none", cursor: "pointer",
+                textAlign: "left", flexWrap: "wrap",
+              }}
+              data-testid={`button-order-expand-${order.id}`}
+            >
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
+                background: sc.bg, display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Package size={16} style={{ color: sc.text }} />
               </div>
-            </div>
-
-            {/* Expanded items */}
-            {isExpanded && order.items && order.items.length > 0 && (
-              <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
-                <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-                  Order Items
-                </div>
-                {order.items.map((item: any) => (
-                  <div key={item.id} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "0.6rem 0", borderBottom: "1px solid hsl(var(--border))", gap: "0.5rem", flexWrap: "wrap",
-                  }} data-testid={`row-order-item-${item.id}`}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
-                      {item.packageLabel && (
-                        <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
-                      )}
-                    </div>
-                    <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
-                      {formatCurrency(item.totalPrice)}
-                    </div>
-                  </div>
-                ))}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
-                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
-                  <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
-                    {formatCurrency(order.totalAmount, order.currency)}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
+                    #{order.orderNumber}
+                  </span>
+                  <span style={{
+                    fontSize: "0.68rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
+                    background: sc.bg, color: sc.text, textTransform: "capitalize",
+                  }}>
+                    {order.status}
                   </span>
                 </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                    <Calendar size={11} /> {formatDate(order.createdAt)}
+                  </span>
+                  {order.items?.length > 0 && (
+                    <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
+                  {formatCurrency(order.totalAmount, order.currency)}
+                </div>
+                <ChevronRight size={14} style={{
+                  color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", float: "right",
+                  transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.2s",
+                }} />
+              </div>
+            </button>
+
+            {/* Expanded section: items + actions */}
+            {isExpanded && (
+              <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
+                {order.items && order.items.length > 0 && (
+                  <>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                      Order Items
+                    </div>
+                    {order.items.map((item: any) => (
+                      <div key={item.id} style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        padding: "0.6rem 0", borderBottom: "1px solid hsl(var(--border))", gap: "0.5rem", flexWrap: "wrap",
+                      }} data-testid={`row-order-item-${item.id}`}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                          {item.packageLabel && (
+                            <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>{item.packageLabel} × {item.quantity}</div>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
+                          {formatCurrency(item.totalPrice)}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
+                      <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
+                      <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
+                        {formatCurrency(order.totalAmount, order.currency)}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Request Refund — only when delivery is still pending */}
+                {canRefund && (
+                  <div style={{ marginTop: order.items?.length > 0 ? "0.75rem" : 0, paddingTop: order.items?.length > 0 ? "0.75rem" : 0, borderTop: order.items?.length > 0 ? "1px solid hsl(var(--border))" : "none" }}>
+                    <button
+                      onClick={() => { if (!refundMutation.isPending) refundMutation.mutate(order); }}
+                      disabled={refundMutation.isPending}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                        padding: "0.45rem 0.9rem", borderRadius: "0.4rem",
+                        background: "hsla(40,90%,55%,0.1)", border: "1px solid hsla(40,90%,55%,0.25)",
+                        cursor: refundMutation.isPending ? "not-allowed" : "pointer",
+                        fontSize: "0.72rem", fontWeight: 600, color: "hsl(40,90%,60%)",
+                        opacity: refundMutation.isPending ? 0.6 : 1,
+                      }}
+                      data-testid={`button-request-refund-${order.id}`}
+                    >
+                      {refundMutation.isPending
+                        ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                        : <RotateCcw size={12} />
+                      }
+                      Request Refund
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
