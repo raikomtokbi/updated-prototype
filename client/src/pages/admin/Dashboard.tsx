@@ -220,22 +220,20 @@ export default function Dashboard() {
 
   return (
     <AdminLayout title="Dashboard">
-      <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "20px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "10px" : "12px" }}>
 
-        {/* ── Greeting ──────────────────────────────────────────────── */}
-        {!isMobile && (
-          <div style={{ paddingBottom: "4px" }}>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, lineHeight: 1.3 }}>
-              {greeting}, {displayName}
-            </h2>
-            <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
-              Here's what's happening with your store today.
-            </p>
-          </div>
-        )}
-
-        {/* ── Stat cards filter ──────────────────────────────────────── */}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* ── Greeting + filter on same row ─────────────────────────── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+          {!isMobile && (
+            <div>
+              <h2 style={{ fontSize: "16px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, lineHeight: 1.3 }}>
+                {greeting}, {displayName}
+              </h2>
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "2px", margin: 0 }}>
+                Here's what's happening with your store today.
+              </p>
+            </div>
+          )}
           <DateRangeFilter
             selected={statsRangeKey}
             onSelect={setStatsRangeKey}
@@ -249,19 +247,19 @@ export default function Dashboard() {
           style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
-            gap: isMobile ? "12px" : "16px",
+            gap: isMobile ? "8px" : "10px",
           }}
         >
           {statCards.map((sc) => (
-            <div key={sc.label} data-testid={sc.testId} style={{ ...card, padding: isMobile ? "14px" : "20px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
-                <div style={{ width: "32px", height: "32px", borderRadius: "7px", background: `${sc.color}18`, color: sc.color, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${sc.color}28` }}>
+            <div key={sc.label} data-testid={sc.testId} style={{ ...card, padding: isMobile ? "10px" : "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
+                <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: `${sc.color}18`, color: sc.color, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${sc.color}28`, flexShrink: 0 }}>
                   {sc.icon}
                 </div>
               </div>
-              <div style={{ fontSize: isMobile ? "20px" : "24px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "4px", lineHeight: 1.1 }}>{sc.value}</div>
-              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{sc.sub}</div>
+              <div style={{ fontSize: isMobile ? "18px" : "20px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "2px", lineHeight: 1.1 }}>{sc.value}</div>
+              <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>{sc.sub}</div>
             </div>
           ))}
         </div>
@@ -270,14 +268,14 @@ export default function Dashboard() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1fr 340px",
-            gap: isMobile ? "14px" : "16px",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 300px",
+            gap: isMobile ? "10px" : "12px",
           }}
         >
           {/* Sales Trend */}
-          <div style={{ ...card, padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", gap: "8px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Sales Trend</span>
+          <div style={{ ...card, padding: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", gap: "8px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Sales Trend</span>
               <DateRangeFilter
                 selected={salesRangeKey}
                 onSelect={setSalesRangeKey}
@@ -286,12 +284,12 @@ export default function Dashboard() {
               />
             </div>
             {salesLoading ? (
-              <div style={{ height: 240, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
+              <div style={{ height: 170, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={170}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
@@ -299,9 +297,9 @@ export default function Dashboard() {
                       <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 13%)" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${getCurrencySymbol(currency)}${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${getCurrencySymbol(currency)}${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }} formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toLocaleString()}`, "Revenue"]} />
                   <Area type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#salesGrad)" />
                 </AreaChart>
@@ -310,9 +308,9 @@ export default function Dashboard() {
           </div>
 
           {/* Order Status */}
-          <div style={{ ...card, padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "8px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Order Status</span>
+          <div style={{ ...card, padding: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", gap: "8px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Order Status</span>
               <DateRangeFilter
                 selected={orderRangeKey}
                 onSelect={setOrderRangeKey}
@@ -321,29 +319,29 @@ export default function Dashboard() {
               />
             </div>
             {orderLoading ? (
-              <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
+              <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: "8px" }}>
                 <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>
             ) : (
               <>
-                <ResponsiveContainer width="100%" height={190}>
+                <ResponsiveContainer width="100%" height={130}>
                   <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={36} outerRadius={56} paddingAngle={3} dataKey="value">
                       {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }} formatter={(value: number) => [`${value}%`, ""]} />
-                    <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{value}</span>} />
+                    <Legend iconType="circle" iconSize={7} formatter={(value) => <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "7px" }}>
+                <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "5px" }}>
                   {pieData.map((item, i) => (
                     <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
-                        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{item.name}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
+                        <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{item.name}</span>
                       </div>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.value}%</span>
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.value}%</span>
                     </div>
                   ))}
                 </div>

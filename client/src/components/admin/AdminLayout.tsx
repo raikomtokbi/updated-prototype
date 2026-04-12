@@ -954,7 +954,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
           </header>
         )}
 
-        <main style={{ flex: 1, padding: isMobile ? "13px" : "18px", fontSize: "12px", zoom: 0.92 }}>
+        <main style={{ flex: 1, padding: isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92 }}>
           {/* Action buttons strip — mobile and desktop */}
           {actions && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
