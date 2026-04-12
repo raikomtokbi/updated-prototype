@@ -1081,7 +1081,7 @@ export class DatabaseStorage implements IStorage {
       "dashboard","topup_orders","voucher_orders","payments","refunds",
       "contact_submissions","support_tickets","games","gift_cards","vouchers",
       "subscriptions","users","subscribers","campaigns","coupons",
-      "control_panel","payment_method","api_integration","plugins","email_templates",
+      "control_panel","payment_method","api_integration","email_templates",
       "theme","content","roles_permissions"
     ];
     // sortOrder: higher = higher authority (super_admin=4, admin=3, staff=2, user=1)

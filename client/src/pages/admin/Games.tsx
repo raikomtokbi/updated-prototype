@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Plug, Gamepad2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2 } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
-import type { Game, Service, Plugin } from "@shared/schema";
+import type { Game, Service } from "@shared/schema";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
@@ -97,7 +97,6 @@ const EMPTY_GAME = {
   sortOrder: 0,
   requiredFields: "userId",
   instantDelivery: true,
-  pluginSlug: "",
 };
 const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" };
 
@@ -112,114 +111,6 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
         </div>
         {children}
-      </div>
-    </div>
-  );
-}
-
-// ─── Map Plugin Modal (used only for Services now) ────────────────────────────
-type MapTarget = { type: "game" | "service"; id: string; name: string; currentSlug?: string | null };
-
-function MapPluginModal({
-  target,
-  onClose,
-  onMap,
-  loading,
-  description,
-}: {
-  target: MapTarget;
-  onClose: () => void;
-  onMap: (slug: string | null) => void;
-  loading: boolean;
-  description: string;
-}) {
-  const { data: plugins = [], isLoading } = useQuery<Plugin[]>({
-    queryKey: ["/api/admin/plugins"],
-    queryFn: () => adminApi.get("/plugins"),
-  });
-
-  const [selected, setSelected] = useState<string | null>(target.currentSlug ?? null);
-
-  const enabledPlugins = plugins.filter((p) => p.isEnabled);
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "460px", background: "hsl(var(--background))", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "10px", padding: "1.5rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Plug size={15} color="hsl(var(--primary))" />
-            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>Map Plugin</h3>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
-        </div>
-        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginBottom: "16px", marginTop: "4px" }}>
-          <span style={{ color: "hsl(var(--primary))" }}>{target.name}</span> — {description}
-        </p>
-
-        {isLoading ? (
-          <div style={{ textAlign: "center", padding: "1.5rem", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading plugins...</div>
-        ) : enabledPlugins.length === 0 ? (
-          <div style={{ padding: "1.25rem", background: "hsl(var(--card))", borderRadius: "6px", border: "1px dashed hsl(var(--border))", textAlign: "center" }}>
-            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>No enabled plugins found.</p>
-            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "260px", overflowY: "auto" }}>
-            <label
-              style={{
-                display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
-                borderRadius: "6px", cursor: "pointer",
-                background: selected === null ? "rgba(34,211,238,0.07)" : "hsl(var(--card))",
-                border: `1px solid ${selected === null ? "rgba(34,211,238,0.3)" : "hsl(var(--border))"}`,
-              }}
-            >
-              <input type="radio" name="plugin" checked={selected === null} onChange={() => setSelected(null)}
-                style={{ accentColor: "hsl(var(--primary))" }} />
-              <div>
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>No Plugin</div>
-                <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>Remove mapping</div>
-              </div>
-            </label>
-
-            {enabledPlugins.map((p) => (
-              <label
-                key={p.slug}
-                style={{
-                  display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px",
-                  borderRadius: "6px", cursor: "pointer",
-                  background: selected === p.slug ? "rgba(34,211,238,0.07)" : "hsl(var(--card))",
-                  border: `1px solid ${selected === p.slug ? "rgba(34,211,238,0.3)" : "hsl(var(--border))"}`,
-                }}
-              >
-                <input type="radio" name="plugin" checked={selected === p.slug} onChange={() => setSelected(p.slug)}
-                  style={{ accentColor: "hsl(var(--primary))" }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{p.name}</div>
-                  <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", display: "flex", gap: "6px", alignItems: "center" }}>
-                    <code style={{ background: "hsl(var(--card))", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
-                    {p.description && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description}</span>}
-                  </div>
-                </div>
-                {selected === p.slug && <span style={{ color: "hsl(var(--primary))", fontSize: "10px", fontWeight: 600, flexShrink: 0 }}>SELECTED</span>}
-              </label>
-            ))}
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
-          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))", cursor: "pointer" }}>
-            Cancel
-          </button>
-          <button
-            onClick={() => onMap(selected)}
-            disabled={loading}
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 16px", borderRadius: "6px", background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(var(--primary))", fontSize: "12px", fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Plug size={12} />}
-            {loading ? "Saving..." : "Apply Mapping"}
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -295,43 +186,6 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 
-// ─── Plugin Picker (inline, for Edit Game form) ───────────────────────────────
-function PluginPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const { data: plugins = [], isLoading } = useQuery<Plugin[]>({
-    queryKey: ["/api/admin/plugins"],
-    queryFn: () => adminApi.get("/plugins"),
-  });
-  const enabledPlugins = plugins.filter((p) => p.isEnabled);
-
-  return (
-    <div>
-      <label style={labelStyle}>Delivery Plugin</label>
-      <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "8px", marginTop: "2px" }}>
-        Optional: map this game to a plugin for automated top-up delivery.
-      </p>
-      {isLoading ? (
-        <div style={{ ...inputStyle, color: "hsl(var(--muted-foreground))" }}>Loading plugins...</div>
-      ) : (
-        <select
-          style={inputStyle}
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          <option value="">No Plugin</option>
-          {enabledPlugins.map((p) => (
-            <option key={p.slug} value={p.slug}>{p.name} ({p.slug})</option>
-          ))}
-        </select>
-      )}
-      {value && (
-        <p style={{ fontSize: "11px", color: "hsl(var(--primary))", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
-          <Plug size={10} /> Mapped to: {value}
-        </p>
-      )}
-    </div>
-  );
-}
-
 // ─── Game Form ────────────────────────────────────────────────────────────────
 function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; onSubmit: (d: any) => void; loading: boolean }) {
   const isMobile = useMobile(768);
@@ -388,12 +242,6 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
       <FieldMapPicker
         value={form.requiredFields ?? "userId"}
         onChange={(v) => set("requiredFields", v)}
-      />
-
-      {/* ─── Delivery Plugin ───────────────────────────────────────── */}
-      <PluginPicker
-        value={form.pluginSlug ?? ""}
-        onChange={(v) => set("pluginSlug", v)}
       />
 
       {/* ─── Instant Delivery toggle ───────────────────────────────── */}
@@ -511,8 +359,6 @@ function ServicesPanel({ game }: { game: Game }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editSvc, setEditSvc] = useState<Service | null>(null);
-  const [mapTarget, setMapTarget] = useState<MapTarget | null>(null);
-
   const { data: svcs = [], isLoading } = useQuery<Service[]>({
     queryKey: [`/api/admin/services?gameId=${game.id}`],
     queryFn: () => adminApi.get(`/services?gameId=${game.id}`),
@@ -530,15 +376,6 @@ function ServicesPanel({ game }: { game: Game }) {
     mutationFn: (id: string) => adminApi.delete(`/services/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }),
   });
-  const mapMut = useMutation({
-    mutationFn: ({ id, pluginSlug }: { id: string; pluginSlug: string | null }) =>
-      adminApi.patch(`/services/${id}`, { pluginSlug }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
-      setMapTarget(null);
-    },
-  });
-
   return (
     <div style={{ padding: "0 16px 16px", marginTop: "8px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -567,12 +404,6 @@ function ServicesPanel({ game }: { game: Game }) {
                 <tr key={s.id} style={{ borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                   <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(var(--foreground))" }}>
                     <div>{s.name}</div>
-                    {s.pluginSlug && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
-                        <Plug size={9} color="hsl(var(--primary))" />
-                        <span style={{ fontSize: "10px", color: "hsl(var(--primary))" }}>{s.pluginSlug}</span>
-                      </div>
-                    )}
                   </td>
                   <td style={{ padding: "8px 10px", color: "hsl(var(--muted-foreground))" }}>{s.price}</td>
                   <td style={{ padding: "8px 10px", color: "hsl(var(--muted-foreground))" }}>{s.discountPercent}%</td>
@@ -588,20 +419,6 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: "4px",
-                          padding: "5px 10px", borderRadius: "5px", fontSize: "11px", cursor: "pointer",
-                          ...(s.pluginSlug
-                            ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(var(--primary))" }
-                            : { background: "rgba(34,211,238,0.04)", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-                          )
-                        }}
-                        onClick={() => setMapTarget({ type: "service", id: s.id, name: s.name, currentSlug: s.pluginSlug })}
-                        title={s.pluginSlug ? `Mapped to: ${s.pluginSlug}` : "Map to a plugin"}
-                      >
-                        <Plug size={10} /> Map
-                      </button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>
                       <button style={btnDanger} onClick={() => { if (confirm("Delete this service?")) delMut.mutate(s.id); }}><Trash2 size={11} /></button>
                     </div>
@@ -626,15 +443,6 @@ function ServicesPanel({ game }: { game: Game }) {
             loading={editMut.isPending}
           />
         </Modal>
-      )}
-      {mapTarget && (
-        <MapPluginModal
-          target={mapTarget}
-          description="Select a plugin to handle top-up delivery for this service."
-          loading={mapMut.isPending}
-          onClose={() => setMapTarget(null)}
-          onMap={(slug) => mapMut.mutate({ id: mapTarget.id, pluginSlug: slug })}
-        />
       )}
     </div>
   );
@@ -841,9 +649,8 @@ export default function Games() {
               sortOrder: editGame.sortOrder,
               requiredFields: editGame.requiredFields ?? "userId",
               instantDelivery: editGame.instantDelivery !== false,
-              pluginSlug: editGame.pluginSlug ?? "",
             }}
-            onSubmit={(d) => editMut.mutate({ id: editGame.id, data: { ...d, pluginSlug: d.pluginSlug || null } })}
+            onSubmit={(d) => editMut.mutate({ id: editGame.id, data: d })}
             loading={editMut.isPending}
           />
         </Modal>

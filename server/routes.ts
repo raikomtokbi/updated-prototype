@@ -8,20 +8,9 @@ import { generateOrderNumber } from "./lib/idGenerator";
 import { startEmailPaymentPoller } from "./services/emailPaymentService";
 import bcrypt from "bcryptjs";
 import multer from "multer";
-import AdmZip from "adm-zip";
 import Razorpay from "razorpay";
 import { storage } from "./storage";
 import { getGatewayHandler } from "./lib/paymentGateways/index";
-import {
-  activatePlugin,
-  deactivatePlugin,
-  getInstalledPluginDir,
-  readPluginManifest,
-  validateManifest,
-  validatePluginFiles,
-  loadAllActivePlugins,
-  PLUGINS_BASE,
-} from "./lib/pluginManager";
 import {
   sendTemplatedEmail,
   buildEmailHtml,
@@ -88,28 +77,6 @@ const attachmentUpload = multer({
       "text/plain"];
     const ok = allowed.some((t) => file.mimetype.startsWith(t) || file.mimetype === t);
     if (!ok) return cb(new Error("File type not allowed"));
-    cb(null, true);
-  },
-});
-
-// ─── Plugin Upload Multer ─────────────────────────────────────────────────────
-const pluginUploadsDir = path.resolve(process.cwd(), "uploads/plugins");
-if (!fs.existsSync(pluginUploadsDir)) fs.mkdirSync(pluginUploadsDir, { recursive: true });
-if (!fs.existsSync(PLUGINS_BASE)) fs.mkdirSync(PLUGINS_BASE, { recursive: true });
-
-const pluginUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, pluginUploadsDir),
-    filename: (_req, file, cb) => {
-      const name = path.basename(file.originalname, ".zip").replace(/[^a-zA-Z0-9-_]/g, "_");
-      cb(null, `${name}-${Date.now()}.zip`);
-    },
-  }),
-  limits: { fileSize: 50 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    if (!file.originalname.endsWith(".zip")) {
-      return cb(new Error("Only .zip files are allowed"));
-    }
     cb(null, true);
   },
 });
@@ -193,17 +160,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   } catch (err) {
     console.warn("[Seed] Could not seed default admin:", err);
-  }
-
-  // ── Initialize active plugins on startup ─────────────────────────────────
-  try {
-    const allPlugins = await storage.getAllPlugins();
-    const activePlugins = allPlugins.filter((p) => p.isEnabled);
-    if (activePlugins.length > 0) {
-      await loadAllActivePlugins(app, activePlugins);
-    }
-  } catch (err) {
-    console.warn("[PluginManager] Could not load plugins on startup:", err);
   }
 
   // ── Public site settings (read-only for storefront) ───────────────────────
@@ -297,31 +253,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!userId) return res.status(400).json({ message: "userId is required" });
     if (gameNeedsZone && !zoneId) return res.status(400).json({ message: "Zone / Server ID is required for this game" });
 
-    // ── 1. Plugin-based validation ────────────────────────────────────────────
-    if (g.pluginSlug) {
-      const plugin = await storage.getPlugin(g.pluginSlug);
-      if (plugin?.isEnabled) {
-        let config: Record<string, any> = {};
-        try { config = plugin.config ? JSON.parse(plugin.config) : {}; } catch {}
-        const validationUrl: string | undefined = config.validationUrl;
-        if (validationUrl) {
-          try {
-            const params = new URLSearchParams({ userId });
-            if (zoneId) params.append("zoneId", zoneId);
-            const response = await fetch(`${validationUrl}?${params}`, { signal: AbortSignal.timeout(8000) });
-            const data = await response.json();
-            if (!response.ok) return res.status(400).json({ message: data.message ?? "Validation failed" });
-            const playerName: string = data.playerName ?? data.username ?? data.name ?? data.nickname ?? "";
-            if (!playerName) return res.status(400).json({ message: "Player not found" });
-            return res.json({ playerName });
-          } catch {
-            return res.status(502).json({ message: "Could not reach validation service. Please try again." });
-          }
-        }
-      }
-    }
-
-    // ── 2. Smile One validation (DB config or env vars) ───────────────────────
+    // ── 1. Smile One validation (DB config or env vars) ───────────────────────
     {
       const smileConfig = await storage.getSmileOneConfig();
       const credentials: { uid: string; key: string; email: string; defaultRegion: string } | undefined =
@@ -1598,260 +1530,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(await storage.getAllPlugins());
   });
 
-  // Upload & validate plugin ZIP - returns manifest preview before install
-  app.post("/api/admin/plugins/upload", requireAdmin, (req, res, next) => {
-    pluginUpload.single("plugin")(req, res, (err) => {
-      if (err) return res.status(400).json({ message: err.message });
-      next();
-    });
-  }, async (req: Request, res: Response) => {
-    const file = (req as any).file as Express.Multer.File | undefined;
-    if (!file) return res.status(400).json({ message: "No file uploaded" });
-
-    const tmpZipPath = file.path;
-    try {
-      // Extract to a temp directory for validation
-      const tempExtractDir = path.join(pluginUploadsDir, `temp-${Date.now()}`);
-      fs.mkdirSync(tempExtractDir, { recursive: true });
-
-      const zip = new AdmZip(tmpZipPath);
-      const entries = zip.getEntries();
-
-      // Security: check for path traversal in zip entries
-      for (const entry of entries) {
-        const entryPath = path.resolve(tempExtractDir, entry.entryName);
-        if (!entryPath.startsWith(path.resolve(tempExtractDir))) {
-          fs.rmSync(tempExtractDir, { recursive: true, force: true });
-          fs.unlinkSync(tmpZipPath);
-          return res.status(400).json({ message: "Invalid plugin: path traversal detected in zip" });
-        }
-      }
-
-      zip.extractAllTo(tempExtractDir, true);
-
-      // Detect plugin root (might be inside a subdirectory)
-      let pluginRoot = tempExtractDir;
-      const rootItems = fs.readdirSync(tempExtractDir);
-      if (rootItems.length === 1) {
-        const single = path.join(tempExtractDir, rootItems[0]);
-        if (fs.statSync(single).isDirectory()) {
-          pluginRoot = single;
-        }
-      }
-
-      // Read and validate manifest
-      const manifestPath = path.join(pluginRoot, "plugin.json");
-      if (!fs.existsSync(manifestPath)) {
-        fs.rmSync(tempExtractDir, { recursive: true, force: true });
-        fs.unlinkSync(tmpZipPath);
-        return res.status(400).json({ message: "Invalid plugin: plugin.json not found in archive" });
-      }
-
-      let manifest: unknown;
-      try {
-        manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
-      } catch {
-        fs.rmSync(tempExtractDir, { recursive: true, force: true });
-        fs.unlinkSync(tmpZipPath);
-        return res.status(400).json({ message: "Invalid plugin: plugin.json is not valid JSON" });
-      }
-
-      const validation = validateManifest(manifest);
-      if (!validation.valid) {
-        fs.rmSync(tempExtractDir, { recursive: true, force: true });
-        fs.unlinkSync(tmpZipPath);
-        return res.status(400).json({ message: `Invalid plugin manifest: ${validation.errors.join(", ")}` });
-      }
-
-      const m = manifest as { slug: string; [key: string]: unknown };
-      const fileValidation = validatePluginFiles(pluginRoot, m as any);
-      if (!fileValidation.valid) {
-        fs.rmSync(tempExtractDir, { recursive: true, force: true });
-        fs.unlinkSync(tmpZipPath);
-        return res.status(400).json({ message: `Invalid plugin files: ${fileValidation.errors.join(", ")}` });
-      }
-
-      // Check if plugin already installed
-      const existing = await storage.getPlugin(m.slug);
-      if (existing) {
-        fs.rmSync(tempExtractDir, { recursive: true, force: true });
-        fs.unlinkSync(tmpZipPath);
-        return res.status(409).json({
-          message: `Plugin '${m.slug}' is already installed. Uninstall it first before reinstalling.`,
-        });
-      }
-
-      // Store temp dir path for install step
-      const uploadId = path.basename(tempExtractDir);
-      // Store zip file path and temp dir in a metadata file for install step
-      const metaPath = path.join(pluginUploadsDir, `${uploadId}.meta.json`);
-      fs.writeFileSync(metaPath, JSON.stringify({
-        uploadId,
-        tempDir: tempExtractDir,
-        pluginRoot,
-        zipPath: tmpZipPath,
-        fileSize: file.size,
-      }));
-
-      return res.json({
-        uploadId,
-        manifest,
-        fileSize: file.size,
-        fileName: file.originalname,
-      });
-    } catch (err) {
-      try { fs.unlinkSync(tmpZipPath); } catch {}
-      console.error("[Plugins] Upload error:", err);
-      return res.status(500).json({ message: "Failed to process plugin archive" });
-    }
-  });
-
-  // Install plugin from uploaded ZIP
-  app.post("/api/admin/plugins/install", requireAdmin, async (req: Request, res: Response) => {
-    const { uploadId } = req.body as { uploadId: string };
-    if (!uploadId || typeof uploadId !== "string" || !/^[a-zA-Z0-9-]+$/.test(uploadId)) {
-      return res.status(400).json({ message: "Invalid uploadId" });
-    }
-
-    const metaPath = path.join(pluginUploadsDir, `${uploadId}.meta.json`);
-    if (!fs.existsSync(metaPath)) {
-      return res.status(400).json({ message: "Upload session not found or expired. Please upload again." });
-    }
-
-    let meta: { uploadId: string; tempDir: string; pluginRoot: string; zipPath: string; fileSize: number };
-    try {
-      meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-    } catch {
-      return res.status(400).json({ message: "Invalid upload session" });
-    }
-
-    const { tempDir, pluginRoot, zipPath, fileSize } = meta;
-
-    if (!fs.existsSync(pluginRoot)) {
-      return res.status(400).json({ message: "Upload session expired. Please upload again." });
-    }
-
-    const manifest = readPluginManifest(pluginRoot);
-    if (!manifest) {
-      return res.status(400).json({ message: "plugin.json not found or invalid" });
-    }
-
-    // Final duplicate check
-    const existing = await storage.getPlugin(manifest.slug);
-    if (existing) {
-      return res.status(409).json({ message: `Plugin '${manifest.slug}' is already installed.` });
-    }
-
-    // Move plugin to installed directory
-    const installDir = getInstalledPluginDir(manifest.slug);
-    try {
-      if (fs.existsSync(installDir)) {
-        fs.rmSync(installDir, { recursive: true, force: true });
-      }
-      fs.cpSync(pluginRoot, installDir, { recursive: true });
-    } catch (err) {
-      return res.status(500).json({ message: "Failed to install plugin files" });
-    }
-
-    // Cleanup temp files
-    try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-      fs.unlinkSync(zipPath);
-      fs.unlinkSync(metaPath);
-    } catch {}
-
-    // Register in database
-    const plugin = await storage.upsertPlugin(manifest.slug, {
-      name: manifest.name,
-      slug: manifest.slug,
-      description: manifest.description ?? null,
-      category: manifest.pluginType ?? "integration",
-      pluginType: manifest.pluginType ?? "integration",
-      version: manifest.version ?? "1.0.0",
-      author: manifest.author ?? null,
-      isEnabled: false,
-      status: "inactive",
-      installPath: installDir,
-      installedAt: new Date(),
-      fileSize: fileSize ?? null,
-      settingsSchema: manifest.settings ? JSON.stringify(manifest.settings) : null,
-      hooks: manifest.hooks ? JSON.stringify(manifest.hooks) : null,
-      config: "{}",
-    });
-
-    return res.json({ ok: true, plugin });
-  });
-
-  // Toggle plugin enabled/disabled
-  app.patch("/api/admin/plugins/:slug/toggle", requireAdmin, async (req: Request, res: Response) => {
-    const existing = await storage.getPlugin(req.params.slug);
-    if (!existing) return res.status(404).json({ message: "Plugin not found" });
-
-    const willEnable = !existing.isEnabled;
-
-    if (willEnable) {
-      const installDir = existing.installPath ?? getInstalledPluginDir(existing.slug);
-      const getConfig = () => {
-        try { return existing.config ? JSON.parse(existing.config) : {}; } catch { return {}; }
-      };
-      const result = await activatePlugin(app, existing.slug, installDir, getConfig);
-      if (!result.success) {
-        return res.status(500).json({ message: `Failed to activate plugin: ${result.error}` });
-      }
-    } else {
-      deactivatePlugin(existing.slug);
-    }
-
-    const p = await storage.upsertPlugin(existing.slug, {
-      isEnabled: willEnable,
-      status: willEnable ? "active" : "inactive",
-    });
-    res.json(p);
-  });
-
-  // Update plugin settings/config
-  app.patch("/api/admin/plugins/:slug/settings", requireAdmin, async (req: Request, res: Response) => {
-    const existing = await storage.getPlugin(req.params.slug);
-    if (!existing) return res.status(404).json({ message: "Plugin not found" });
-    const config = JSON.stringify(req.body.config ?? {});
-    const p = await storage.upsertPlugin(existing.slug, { config });
-    res.json(p);
-  });
-
-  // Get plugin by slug
-  app.get("/api/admin/plugins/:slug", requireAdmin, async (req: Request, res: Response) => {
-    const p = await storage.getPlugin(req.params.slug);
-    if (!p) return res.status(404).json({ message: "Plugin not found" });
-    res.json(p);
-  });
-
-  // Update plugin metadata (upsert)
+  // Update plugin metadata (upsert) — used by ControlPanel/ApiIntegration for SMTP/social auth config
   app.put("/api/admin/plugins/:slug", requireAdmin, async (req, res) => {
     const p = await storage.upsertPlugin(req.params.slug, req.body);
     res.json(p);
-  });
-
-  // Uninstall plugin
-  app.delete("/api/admin/plugins/:slug", requireAdmin, async (req: Request, res: Response) => {
-    const existing = await storage.getPlugin(req.params.slug);
-    if (!existing) return res.status(404).json({ message: "Plugin not found" });
-
-    // Deactivate first
-    deactivatePlugin(existing.slug);
-
-    // Remove plugin files
-    const installDir = existing.installPath ?? getInstalledPluginDir(existing.slug);
-    try {
-      if (fs.existsSync(installDir)) {
-        fs.rmSync(installDir, { recursive: true, force: true });
-      }
-    } catch (err) {
-      console.warn(`[Plugins] Could not remove plugin files for '${existing.slug}':`, err);
-    }
-
-    // Remove from database
-    await storage.deletePlugin(existing.slug);
-    res.json({ ok: true });
   });
 
   // ── Admin Games trending toggle ────────────────────────────────────────────

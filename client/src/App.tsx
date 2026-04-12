@@ -48,7 +48,6 @@ import Coupons from "./pages/admin/Coupons";
 import ControlPanel from "./pages/admin/ControlPanel";
 import PaymentMethod from "./pages/admin/PaymentMethod";
 import ApiIntegration from "./pages/admin/ApiIntegration";
-import Plugins from "./pages/admin/Plugins";
 import EmailTemplates from "./pages/admin/EmailTemplates";
 import ChooseTheme from "./pages/admin/ChooseTheme";
 import EditContent from "./pages/admin/EditContent";
@@ -75,7 +74,6 @@ function AdminRoutes() {
       <Route path="/admin/control-panel" component={ControlPanel} />
       <Route path="/admin/payment-method" component={PaymentMethod} />
       <Route path="/admin/api-integration" component={ApiIntegration} />
-      <Route path="/admin/plugins" component={Plugins} />
       <Route path="/admin/email-templates" component={EmailTemplates} />
       <Route path="/admin/choose-theme" component={ChooseTheme} />
       <Route path="/admin/edit-content" component={EditContent} />
