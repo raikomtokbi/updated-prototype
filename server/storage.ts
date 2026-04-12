@@ -780,11 +780,20 @@ export class DatabaseStorage implements IStorage {
 
   // ── Analytics ──────────────────────────────────────────────────────────────
   async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone = "UTC") {
+    // Sanitize timezone name (IANA names only contain A-Z, a-z, 0-9, /, _, +, -)
+    const safeTz = (timezone || "UTC").replace(/[^a-zA-Z0-9/_+\-]/g, "");
+    const tz = sql.raw(`'${safeTz}'`);
+
+    // All truncation/grouping is done AT TIME ZONE so buckets align with the admin's local time.
+    // For hourly views, PostgreSQL formats the time directly so no JS conversion is needed.
     const trunc =
-      groupBy === "hour" ? sql`to_char(${orders.createdAt}, 'YYYY-MM-DD HH24:00:00')`
-      : groupBy === "day" ? sql`to_char(${orders.createdAt}, 'YYYY-MM-DD')`
-      : groupBy === "week" ? sql`to_char(date_trunc('week', ${orders.createdAt}), 'YYYY-MM-DD')`
-      : sql`to_char(date_trunc('month', ${orders.createdAt}), 'YYYY-MM-DD')`;
+      groupBy === "hour"
+        ? sql`to_char(date_trunc('hour', ${orders.createdAt} AT TIME ZONE ${tz}), 'HH12:00 AM')`
+        : groupBy === "day"
+        ? sql`to_char(${orders.createdAt} AT TIME ZONE ${tz}, 'YYYY-MM-DD')`
+        : groupBy === "week"
+        ? sql`to_char(date_trunc('week', ${orders.createdAt} AT TIME ZONE ${tz}), 'YYYY-MM-DD')`
+        : sql`to_char(date_trunc('month', ${orders.createdAt} AT TIME ZONE ${tz}), 'YYYY-MM-DD')`;
 
     const trendRows = await db
       .select({
@@ -797,21 +806,19 @@ export class DatabaseStorage implements IStorage {
       .orderBy(trunc);
 
     function fmtLabel(period: unknown, gb: string) {
-      // PostgreSQL to_char returns plain strings like "2026-04-08 14:00:00" (no timezone marker).
-      // Append "Z" so JavaScript parses them as UTC, then format using the site timezone
-      // so hourly labels appear in the admin's local time, not UTC.
       const raw = (period as string).trim();
-      const iso = raw.includes("T") ? raw : raw.replace(" ", "T") + "Z";
-      const d = new Date(iso);
-      const tz = timezone || "UTC";
-      if (gb === "hour") return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: tz });
-      if (gb === "day") return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: tz });
+      // For hourly data: PostgreSQL already returned the time formatted in the target timezone
+      // (e.g. "01:00 AM") — return it directly, no JS conversion needed.
+      if (gb === "hour") return raw;
+      // For day/week/month: raw is "YYYY-MM-DD" already adjusted to the target timezone.
+      // Treat it as a plain calendar date (append T12:00:00Z to avoid any local-TZ shifting).
+      const d = new Date(raw + "T12:00:00Z");
+      if (gb === "day") return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
       if (gb === "week") {
-        // Compute the day-of-month in the target timezone to derive week number
-        const dayInTz = parseInt(d.toLocaleDateString("en-US", { day: "numeric", timeZone: tz }), 10);
-        return `W${Math.ceil(dayInTz / 7)} ${d.toLocaleDateString("en-US", { month: "short", timeZone: tz })}`;
+        const dayNum = parseInt(d.toLocaleDateString("en-US", { day: "numeric", timeZone: "UTC" }), 10);
+        return `W${Math.ceil(dayNum / 7)} ${d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })}`;
       }
-      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit", timeZone: tz });
+      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit", timeZone: "UTC" });
     }
 
     const salesTrend = trendRows.map((r) => ({

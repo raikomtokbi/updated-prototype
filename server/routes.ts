@@ -987,6 +987,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     allSettings.forEach(s => { settingsMap[s.key] = s.value ?? ""; });
     const siteTimezone = settingsMap.site_timezone || "UTC";
 
+    // Returns the start of today (midnight) in the given IANA timezone, as a UTC Date
+    function startOfDayInTz(tz: string): Date {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+      }).formatToParts(now);
+      const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
+      const y = get("year"), mo = get("month") - 1, d = get("day");
+      const h = get("hour") % 24, mi = get("minute"), s = get("second");
+      // tzOffsetMs = how much the TZ is ahead of UTC (e.g. IST = +19800000)
+      const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
+      // midnight UTC that corresponds to midnight in the target TZ
+      return new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
+    }
+
     if (range === "custom" && req.query.from && req.query.to) {
       from = new Date(req.query.from as string);
       const to = new Date(req.query.to as string);
@@ -998,7 +1013,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
 
     if (range === "today") {
-      from = new Date(now); from.setHours(0, 0, 0, 0); groupBy = "hour";
+      from = startOfDayInTz(siteTimezone); groupBy = "hour";
     } else if (range === "7days") {
       from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0); groupBy = "day";
     } else if (range === "30days") {
