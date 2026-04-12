@@ -98,7 +98,7 @@ const EMPTY_GAME = {
   requiredFields: "userId",
   instantDelivery: true,
 };
-const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" };
+const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "", busanProductId: "" };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -346,6 +346,10 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
           <input style={inputStyle} type="number" min="0" value={form.stock} onChange={(e) => set("stock", e.target.value)} placeholder="Unlimited" />
         </div>
       </div>
+      <div>
+        <label style={labelStyle}>Busan Product ID <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(optional — for auto-fulfillment)</span></label>
+        <input style={inputStyle} type="text" value={form.busanProductId} onChange={(e) => set("busanProductId", e.target.value)} placeholder="e.g. MLBB_86_DIAMONDS" />
+      </div>
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
         {loading ? "Saving..." : "Save Service"}
@@ -359,18 +363,56 @@ function ServicesPanel({ game }: { game: Game }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editSvc, setEditSvc] = useState<Service | null>(null);
+
   const { data: svcs = [], isLoading } = useQuery<Service[]>({
     queryKey: [`/api/admin/services?gameId=${game.id}`],
     queryFn: () => adminApi.get(`/services?gameId=${game.id}`),
   });
 
+  const { data: allMappings = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/busan/mappings"],
+    queryFn: () => adminApi.get("/busan/mappings"),
+  });
+
+  const mappingByServiceId = Object.fromEntries(allMappings.map((m: any) => [m.cmsProductId, m]));
+
+  async function upsertMapping(serviceId: string, serviceName: string, busanProductId: string) {
+    const existing = mappingByServiceId[serviceId];
+    if (existing) await adminApi.delete(`/busan/mappings/${existing.id}`);
+    if (busanProductId.trim()) {
+      await adminApi.post("/busan/mappings", {
+        cmsProductId: serviceId,
+        cmsProductName: serviceName,
+        busanProductId: busanProductId.trim(),
+        busanProductName: "",
+      });
+    }
+    qc.invalidateQueries({ queryKey: ["/api/admin/busan/mappings"] });
+  }
+
   const addMut = useMutation({
-    mutationFn: (d: any) => adminApi.post("/services", { ...d, gameId: game.id }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }); setShowAdd(false); },
+    mutationFn: (d: any) => {
+      const { busanProductId: _bpid, ...serviceData } = d;
+      return adminApi.post("/services", { ...serviceData, gameId: game.id });
+    },
+    onSuccess: async (data: any, variables: any) => {
+      if (variables.busanProductId && data?.id) {
+        await upsertMapping(data.id, variables.name, variables.busanProductId);
+      }
+      qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
+      setShowAdd(false);
+    },
   });
   const editMut = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.patch(`/services/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }); setEditSvc(null); },
+    mutationFn: ({ id, data }: any) => {
+      const { busanProductId: _bpid, ...serviceData } = data;
+      return adminApi.patch(`/services/${id}`, serviceData);
+    },
+    onSuccess: async (_: any, variables: any) => {
+      await upsertMapping(variables.id, variables.data.name, variables.data.busanProductId || "");
+      qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
+      setEditSvc(null);
+    },
   });
   const delMut = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/services/${id}`),
@@ -438,7 +480,7 @@ function ServicesPanel({ game }: { game: Game }) {
       {editSvc && (
         <Modal title="Edit Service" onClose={() => setEditSvc(null)}>
           <ServiceForm
-            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder, stock: (editSvc as any).stock !== null && (editSvc as any).stock !== undefined ? String((editSvc as any).stock) : "" }}
+            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder, stock: (editSvc as any).stock !== null && (editSvc as any).stock !== undefined ? String((editSvc as any).stock) : "", busanProductId: mappingByServiceId[editSvc.id]?.busanProductId ?? "" }}
             onSubmit={(d) => editMut.mutate({ id: editSvc.id, data: d })}
             loading={editMut.isPending}
           />

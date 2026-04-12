@@ -555,23 +555,10 @@ function BusanMappingTab() {
 
 // ─── Busan Modal ──────────────────────────────────────────────────────────────
 function BusanModal({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<"config" | "mapping">("config");
   return (
     <Modal title="Busan Integration" onClose={onClose} wide>
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Tab bar */}
-        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(var(--border))" }}>
-          <button data-testid="tab-busan-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>
-            Configuration
-          </button>
-          <button data-testid="tab-busan-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>
-            Product Mapping
-          </button>
-        </div>
-        {tab === "config" && <BusanConfigTab />}
-        {tab === "mapping" && <BusanMappingTab />}
-      </div>
+      <BusanConfigTab />
     </Modal>
   );
 }
