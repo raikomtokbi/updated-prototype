@@ -240,6 +240,7 @@ export interface IStorage {
   getRolePermission(role: string): Promise<RolePermission | undefined>;
   upsertRolePermission(role: string, label: string, permissions: string[], isSystem?: boolean): Promise<RolePermission>;
   deleteRolePermission(role: string): Promise<void>;
+  updateRolePermissionOrders(orders: { role: string; sortOrder: number }[]): Promise<void>;
   seedDefaultRolePermissions(): Promise<void>;
 }
 
@@ -1067,6 +1068,14 @@ export class DatabaseStorage implements IStorage {
     await db.delete(rolePermissions).where(eq(rolePermissions.role, role));
   }
 
+  async updateRolePermissionOrders(orders: { role: string; sortOrder: number }[]): Promise<void> {
+    for (const { role, sortOrder } of orders) {
+      await db.update(rolePermissions)
+        .set({ sortOrder, updatedAt: new Date() })
+        .where(eq(rolePermissions.role, role));
+    }
+  }
+
   async seedDefaultRolePermissions(): Promise<void> {
     const ALL_PERMS = [
       "dashboard","topup_orders","voucher_orders","payments","refunds",
@@ -1075,17 +1084,23 @@ export class DatabaseStorage implements IStorage {
       "control_panel","payment_method","api_integration","plugins","email_templates",
       "theme","content","roles_permissions"
     ];
-    const defaults: Array<{ role: string; label: string; isSystem: boolean; permissions: string[] }> = [
-      { role: "super_admin", label: "Super Admin", isSystem: true, permissions: ALL_PERMS },
-      { role: "admin", label: "Admin", isSystem: true, permissions: ALL_PERMS.filter(p => p !== "roles_permissions") },
-      { role: "staff", label: "Staff", isSystem: true, permissions: ["dashboard","topup_orders","voucher_orders","contact_submissions","support_tickets","users"] },
-      { role: "user", label: "User", isSystem: true, permissions: [] },
+    // sortOrder: higher = higher authority (super_admin=4, admin=3, staff=2, user=1)
+    const defaults: Array<{ role: string; label: string; isSystem: boolean; permissions: string[]; sortOrder: number }> = [
+      { role: "super_admin", label: "Super Admin", isSystem: true, sortOrder: 4, permissions: ALL_PERMS },
+      { role: "admin", label: "Admin", isSystem: true, sortOrder: 3, permissions: ALL_PERMS.filter(p => p !== "roles_permissions") },
+      { role: "staff", label: "Staff", isSystem: true, sortOrder: 2, permissions: ["dashboard","topup_orders","voucher_orders","contact_submissions","support_tickets","users"] },
+      { role: "user", label: "User", isSystem: true, sortOrder: 1, permissions: [] },
     ];
     for (const d of defaults) {
       const existing = await this.getRolePermission(d.role);
       if (!existing) {
         const id = randomUUID();
-        await db.insert(rolePermissions).values({ id, role: d.role, label: d.label, isSystem: d.isSystem, permissions: JSON.stringify(d.permissions) });
+        await db.insert(rolePermissions).values({ id, role: d.role, label: d.label, isSystem: d.isSystem, sortOrder: d.sortOrder, permissions: JSON.stringify(d.permissions) });
+      } else {
+        // Update sortOrder if it's still 0 (first time migration)
+        if (existing.sortOrder === 0) {
+          await db.update(rolePermissions).set({ sortOrder: d.sortOrder }).where(eq(rolePermissions.role, d.role));
+        }
       }
     }
   }

@@ -487,6 +487,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    if ((user as any).isBanned) {
+      return res.status(403).json({ message: "Your account has been banned. Please contact support." });
+    }
+
     if (!user.isActive) {
       return res.status(403).json({ message: "Your account is pending approval. Please wait for an administrator to approve it." });
     }
@@ -3209,6 +3213,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!Array.isArray(permissions)) return res.status(400).json({ error: "permissions must be an array" });
       const row = await storage.upsertRolePermission(role, label, permissions, !!isSystem);
       res.json({ ...row, permissions: JSON.parse(row.permissions as string || "[]") });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // POST /api/admin/role-permissions/order — update hierarchy sort order
+  app.post("/api/admin/role-permissions/order", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = (req as any).adminRole as string;
+      if (adminRole !== "super_admin") return res.status(403).json({ error: "Forbidden" });
+      const { orders } = req.body;
+      if (!Array.isArray(orders)) return res.status(400).json({ error: "orders must be an array" });
+      await storage.updateRolePermissionOrders(orders);
+      res.json({ success: true });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 

@@ -25,6 +25,7 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 50 }),
   avatarUrl: text("avatar_url"),
   isActive: boolean("is_active").notNull().default(true),
+  isBanned: boolean("is_banned").notNull().default(false),
   isEmailVerified: boolean("is_email_verified").notNull().default(false),
   isSubscribed: boolean("is_subscribed").notNull().default(false),
   lastLoginAt: timestamp("last_login_at"),
@@ -536,6 +537,7 @@ export const rolePermissions = pgTable("role_permissions", {
   label: varchar("label", { length: 120 }).notNull(),
   isSystem: boolean("is_system").notNull().default(false),
   permissions: text("permissions").notNull().default("[]"),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

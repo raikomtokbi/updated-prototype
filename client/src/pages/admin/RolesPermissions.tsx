@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Shield, Plus, Trash2, Save, ChevronDown, ChevronRight,
@@ -6,6 +6,7 @@ import {
   RotateCcw, Mail, LifeBuoy, Gamepad2, Package, Ticket,
   RefreshCcw, Users, UserCheck, Megaphone, BadgePercent,
   Settings, Wallet, Plug, Palette, FileEdit, Key, X, Check,
+  GripVertical, ArrowUpDown,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
@@ -99,6 +100,7 @@ interface RoleRow {
   label: string;
   isSystem: boolean;
   permissions: string[];
+  sortOrder: number;
 }
 
 // ── Mini toggle switch ────────────────────────────────────────────────────────
@@ -121,6 +123,175 @@ function Toggle({ on, disabled }: { on: boolean; disabled?: boolean }) {
           boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
         }}
       />
+    </div>
+  );
+}
+
+// ── Hierarchy drag-and-drop panel ─────────────────────────────────────────────
+function HierarchyPanel({
+  roles,
+  onSave,
+  saving,
+}: {
+  roles: RoleRow[];
+  onSave: (orders: { role: string; sortOrder: number }[]) => void;
+  saving: boolean;
+}) {
+  // highest sortOrder = most authority. Displayed top-to-bottom: most privileged first
+  const sorted = useMemo(
+    () => [...roles].sort((a, b) => b.sortOrder - a.sortOrder),
+    [roles],
+  );
+  const [order, setOrder] = useState<RoleRow[]>(sorted);
+  const [dirty, setDirty] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  // Reset when roles change from server
+  const prevRoleStr = useRef("");
+  const roleStr = sorted.map(r => r.role + r.sortOrder).join(",");
+  if (prevRoleStr.current !== roleStr) {
+    prevRoleStr.current = roleStr;
+    setOrder(sorted);
+    setDirty(false);
+  }
+
+  const dragIdx = useRef<number | null>(null);
+  const dragOverIdx = useRef<number | null>(null);
+
+  const handleDragStart = (idx: number) => { dragIdx.current = idx; };
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    dragOverIdx.current = idx;
+  };
+  const handleDrop = () => {
+    const from = dragIdx.current;
+    const to = dragOverIdx.current;
+    if (from === null || to === null || from === to) return;
+    const next = [...order];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setOrder(next);
+    setDirty(true);
+    dragIdx.current = null;
+    dragOverIdx.current = null;
+  };
+
+  const handleSave = () => {
+    // Top of list = highest authority = highest sortOrder
+    const total = order.length;
+    const orders = order.map((r, i) => ({ role: r.role, sortOrder: total - i }));
+    onSave(orders);
+    setDirty(false);
+  };
+
+  return (
+    <div style={{ ...card, marginBottom: "18px", overflow: "hidden", padding: 0 }}>
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          padding: "13px 16px", cursor: "pointer", userSelect: "none",
+        }}
+        data-testid="hierarchy-panel-header"
+      >
+        <div style={{
+          width: "36px", height: "36px", borderRadius: "8px", flexShrink: 0,
+          background: "hsl(var(--primary) / 0.12)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <ArrowUpDown size={15} style={{ color: "hsl(var(--primary))" }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))" }}>
+            Role Hierarchy
+          </div>
+          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+            Drag to reorder — higher position means more authority (can manage roles below)
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          {dirty && (
+            <span style={{
+              fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
+              background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))",
+            }}>UNSAVED</span>
+          )}
+          {expanded ? <ChevronDown size={14} style={{ color: "hsl(var(--muted-foreground))" }} /> : <ChevronRight size={14} style={{ color: "hsl(var(--muted-foreground))" }} />}
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{ borderTop: "1px solid hsl(var(--border) / 0.5)", padding: "16px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "12px", marginTop: 0 }}>
+            Top = highest authority. A role can only manage users with a role below theirs in this hierarchy.
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "14px" }}>
+            {order.map((role, idx) => (
+              <div
+                key={role.role}
+                draggable
+                onDragStart={() => handleDragStart(idx)}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDrop={handleDrop}
+                data-testid={`hierarchy-item-${role.role}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "10px 12px",
+                  background: "hsl(var(--background))",
+                  border: "1px solid hsl(var(--border) / 0.7)",
+                  borderRadius: "7px",
+                  cursor: "grab",
+                  userSelect: "none",
+                }}
+              >
+                <GripVertical size={14} style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+                <div style={{
+                  width: "24px", height: "24px", borderRadius: "6px", flexShrink: 0,
+                  background: idx === 0 ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "11px", fontWeight: 700, color: idx === 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                }}>
+                  {idx + 1}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>
+                    {role.label}
+                  </span>
+                  <code style={{ marginLeft: "8px", fontSize: "10px", background: "hsl(var(--muted) / 0.5)", padding: "1px 5px", borderRadius: "3px", color: "hsl(var(--muted-foreground))" }}>
+                    {role.role}
+                  </code>
+                </div>
+                {role.isSystem && (
+                  <span style={{
+                    fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
+                    background: "hsl(var(--muted) / 0.8)", color: "hsl(var(--muted-foreground))",
+                    letterSpacing: "0.04em",
+                  }}>SYSTEM</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={handleSave}
+              disabled={!dirty || saving}
+              data-testid="btn-save-hierarchy"
+              style={{
+                ...btnPrimary, fontSize: "12px",
+                display: "flex", alignItems: "center", gap: "5px",
+                opacity: (!dirty || saving) ? 0.6 : 1,
+                cursor: (!dirty || saving) ? "not-allowed" : "pointer",
+              }}
+            >
+              <Save size={12} /> Save Hierarchy
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -417,6 +588,17 @@ export default function RolesPermissions() {
     onError: (e: any) => showMsg(e.message ?? "Failed to create.", false),
   });
 
+  const orderMutation = useMutation({
+    mutationFn: (orders: { role: string; sortOrder: number }[]) =>
+      adminApi.post("/role-permissions/order", { orders }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/role-permissions"] });
+      qc.invalidateQueries({ queryKey: ["/api/admin/my-permissions"] });
+      showMsg("Hierarchy saved.");
+    },
+    onError: (e: any) => showMsg(e.message ?? "Failed to save hierarchy.", false),
+  });
+
   const handleLabelChange = (val: string) => {
     setNewLabel(val);
     setNewSlug(val.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
@@ -479,6 +661,15 @@ export default function RolesPermissions() {
             </div>
           ))}
         </div>
+
+        {/* Hierarchy panel */}
+        {!isLoading && roles.length > 0 && (
+          <HierarchyPanel
+            roles={roles}
+            onSave={(orders) => orderMutation.mutate(orders)}
+            saving={orderMutation.isPending}
+          />
+        )}
 
         {/* Search */}
         <div style={{ marginBottom: "14px" }}>

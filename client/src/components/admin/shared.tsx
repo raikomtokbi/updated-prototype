@@ -117,6 +117,7 @@ const statusColors: Record<string, string> = {
   resolved: "hsl(142, 71%, 45%)",
   closed: "hsl(var(--muted-foreground))",
   inactive: "hsl(0, 72%, 51%)",
+  banned: "hsl(315, 80%, 45%)",
   maintenance: "hsl(38, 92%, 50%)",
   high: "hsl(0, 72%, 51%)",
   medium: "hsl(38, 92%, 50%)",

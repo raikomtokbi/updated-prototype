@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, Ban, UserCheck, Trash2, PowerOff } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { useAuthStore } from "@/lib/store/authstore";
@@ -21,10 +21,9 @@ const ROLE_OPTIONS = [
 const STATUS_OPTIONS = [
   { value: "", label: "All Status" },
   { value: "active", label: "Active" },
-  { value: "disabled", label: "Disabled" },
+  { value: "inactive", label: "Inactive" },
+  { value: "banned", label: "Banned" },
 ];
-
-const ROLE_ORDER = ["user", "staff", "admin", "super_admin"];
 
 const btnPrimary: React.CSSProperties = {
   display: "inline-flex",
@@ -139,130 +138,167 @@ function AddUserForm({ onSubmit, loading }: { onSubmit: (d: any) => void; loadin
   );
 }
 
-function UserActionsMenu({ user, onUpdate, disabled }: {
-  user: Omit<User, "password">;
-  onUpdate: (data: Partial<User>) => void;
+interface RoleWithOrder { role: string; sortOrder: number; }
+
+function UserActionButtons({
+  user,
+  myRoleOrder,
+  roleOrderMap,
+  onUpdate,
+  onDelete,
+  disabled,
+}: {
+  user: Omit<User, "password"> & { isBanned?: boolean };
+  myRoleOrder: number;
+  roleOrderMap: Record<string, number>;
+  onUpdate: (data: Partial<User & { isBanned: boolean }>) => void;
+  onDelete: () => void;
   disabled: boolean;
 }) {
   const { user: me } = useAuthStore();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const confirmRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    if (!confirmDelete) return;
+    const h = (e: MouseEvent) => {
+      if (confirmRef.current && !confirmRef.current.contains(e.target as Node)) setConfirmDelete(false);
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
-  }, []);
+  }, [confirmDelete]);
 
   const isSelf = me?.id === user.id;
-  const roleIdx = ROLE_ORDER.indexOf(user.role);
-  const canPromote = roleIdx < ROLE_ORDER.length - 1;
-  const canDemote = roleIdx > 0;
+  const targetOrder = roleOrderMap[user.role] ?? 0;
+  const canAct = !isSelf && myRoleOrder > targetOrder;
 
-  const menuBtn: React.CSSProperties = {
-    display: "flex",
+  const isBanned = (user as any).isBanned ?? false;
+
+  const actionBtn = (color: string, extra?: React.CSSProperties): React.CSSProperties => ({
+    display: "inline-flex",
     alignItems: "center",
-    width: "100%",
-    padding: "8px 14px",
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "12px",
-    textAlign: "left",
-    gap: "8px",
+    justifyContent: "center",
+    gap: "4px",
+    padding: "4px 9px",
+    borderRadius: "5px",
+    border: `1px solid ${color}22`,
+    background: `${color}12`,
+    color: color,
+    fontSize: "11px",
+    fontWeight: 600,
+    cursor: canAct ? "pointer" : "not-allowed",
+    opacity: canAct ? 1 : 0.35,
     whiteSpace: "nowrap",
-  };
+    ...extra,
+  });
 
-  const actions = [
-    canPromote && !isSelf && {
-      label: `Promote → ${ROLE_ORDER[roleIdx + 1].replace("_", " ")}`,
-      color: "hsl(196, 100%, 60%)",
-      onClick: () => onUpdate({ role: ROLE_ORDER[roleIdx + 1] as User["role"] }),
-    },
-    canDemote && !isSelf && {
-      label: `Demote → ${ROLE_ORDER[roleIdx - 1].replace("_", " ")}`,
-      color: "hsl(38, 92%, 60%)",
-      onClick: () => onUpdate({ role: ROLE_ORDER[roleIdx - 1] as User["role"] }),
-    },
-    !isSelf && {
-      label: user.isActive ? "Ban User" : "Unban User",
-      color: user.isActive ? "hsl(0, 72%, 62%)" : "hsl(142, 71%, 48%)",
-      onClick: () => onUpdate({ isActive: !user.isActive }),
-    },
-    ...["user", "staff", "admin"].filter((r) => r !== user.role).map((r) => ({
-      label: `Set Role: ${r.replace("_", " ")}`,
-      color: "hsl(var(--muted-foreground))",
-      onClick: () => onUpdate({ role: r as User["role"] }),
-    })),
-  ].filter(Boolean) as { label: string; color: string; onClick: () => void }[];
+  if (isSelf) {
+    return (
+      <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>
+        (self)
+      </span>
+    );
+  }
+
+  if (!canAct) {
+    return (
+      <span
+        title={`Cannot manage users with equal or higher role (${user.role})`}
+        style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}
+      >
+        Restricted
+      </span>
+    );
+  }
+
+  if (confirmDelete) {
+    return (
+      <div ref={confirmRef} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <span style={{ fontSize: "11px", color: "hsl(0,72%,62%)", fontWeight: 600 }}>Delete?</span>
+        <button
+          onClick={() => { onDelete(); setConfirmDelete(false); }}
+          disabled={disabled}
+          data-testid={`btn-confirm-delete-${user.id}`}
+          style={{ ...actionBtn("hsl(0,72%,58%)"), background: "hsl(0,72%,58%)", color: "white", border: "none" }}
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => setConfirmDelete(false)}
+          style={{ ...actionBtn("hsl(var(--muted-foreground))") }}
+        >
+          No
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+      {/* Ban / Unban */}
       <button
-        disabled={disabled || isSelf}
-        onClick={() => setOpen(!open)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "5px",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          background: "hsl(var(--card))",
-          border: "1px solid hsl(var(--border))",
-          color: isSelf ? "hsl(var(--muted-foreground))" : "hsl(220, 10%, 65%)",
-          fontSize: "11px",
-          cursor: isSelf ? "not-allowed" : "pointer",
-          whiteSpace: "nowrap",
-        }}
-        title={isSelf ? "Cannot modify your own account" : "Actions"}
+        disabled={disabled}
+        onClick={() => onUpdate({ isBanned: !isBanned } as any)}
+        data-testid={`btn-${isBanned ? "unban" : "ban"}-${user.id}`}
+        title={isBanned ? "Unban this user" : "Ban this user"}
+        style={actionBtn(isBanned ? "hsl(142,70%,45%)" : "hsl(0,72%,58%)")}
       >
-        Actions <ChevronDown size={11} />
+        {isBanned ? <UserCheck size={11} /> : <Ban size={11} />}
+        {isBanned ? "Unban" : "Ban"}
       </button>
 
-      {open && (
-        <div style={{
-          position: "absolute",
-          top: "calc(100% + 4px)",
-          right: 0,
-          minWidth: "180px",
-          background: "hsl(var(--card))",
-          border: "1px solid hsl(var(--border))",
-          borderRadius: "8px",
-          overflow: "hidden",
-          zIndex: 100,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-        }}>
-          {actions.length === 0 ? (
-            <div style={{ padding: "10px 14px", fontSize: "12px", color: "hsl(220,10%,40%)" }}>No actions available</div>
-          ) : (
-            actions.map((a) => (
-              <button
-                key={a.label}
-                style={{ ...menuBtn, color: a.color }}
-                onClick={() => { a.onClick(); setOpen(false); }}
-              >
-                {a.label}
-              </button>
-            ))
-          )}
-        </div>
-      )}
+      {/* Active / Deactivate */}
+      <button
+        disabled={disabled}
+        onClick={() => onUpdate({ isActive: !user.isActive })}
+        data-testid={`btn-${user.isActive ? "deactivate" : "activate"}-${user.id}`}
+        title={user.isActive ? "Deactivate this account" : "Activate this account"}
+        style={actionBtn(user.isActive ? "hsl(38,92%,50%)" : "hsl(196,100%,50%)")}
+      >
+        <PowerOff size={11} />
+        {user.isActive ? "Deactivate" : "Activate"}
+      </button>
+
+      {/* Delete */}
+      <button
+        disabled={disabled}
+        onClick={() => setConfirmDelete(true)}
+        data-testid={`btn-delete-${user.id}`}
+        title="Permanently delete this user"
+        style={actionBtn("hsl(0,72%,58%)")}
+      >
+        <Trash2 size={11} />
+      </button>
     </div>
   );
 }
 
 export default function Users() {
   const qc = useQueryClient();
+  const { user: me } = useAuthStore();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showAdd, setShowAdd] = useState(false);
 
-  const { data: users = [], isLoading } = useQuery<Omit<User, "password">[]>({
+  const { data: users = [], isLoading } = useQuery<(Omit<User, "password"> & { isBanned?: boolean })[]>({
     queryKey: ["/api/admin/users"],
     queryFn: () => adminApi.get("/users?limit=200"),
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   });
+
+  const { data: allRoles = [] } = useQuery<RoleWithOrder[]>({
+    queryKey: ["/api/admin/role-permissions"],
+    queryFn: () => adminApi.get("/role-permissions"),
+  });
+
+  const roleOrderMap = useMemo(() => {
+    const m: Record<string, number> = {};
+    allRoles.forEach((r) => { m[r.role] = r.sortOrder; });
+    return m;
+  }, [allRoles]);
+
+  const myRoleOrder = me ? (roleOrderMap[me.role] ?? 0) : 0;
 
   const addMut = useMutation({
     mutationFn: (d: any) => adminApi.post("/users", d),
@@ -270,8 +306,13 @@ export default function Users() {
   });
 
   const updateMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<User & { isBanned: boolean }> }) =>
       adminApi.patch(`/users/${id}`, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/users"] }),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => adminApi.delete(`/users/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/users"] }),
   });
 
@@ -280,7 +321,11 @@ export default function Users() {
     return users.filter((u) => {
       const matchSearch = !q || (u.username ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q) || (u.fullName ?? "").toLowerCase().includes(q);
       const matchRole = !roleFilter || u.role === roleFilter;
-      const matchStatus = !statusFilter || (statusFilter === "active" ? u.isActive : !u.isActive);
+      const isBanned = (u as any).isBanned;
+      const matchStatus = !statusFilter ||
+        (statusFilter === "active" && u.isActive && !isBanned) ||
+        (statusFilter === "inactive" && !u.isActive && !isBanned) ||
+        (statusFilter === "banned" && isBanned);
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, search, roleFilter, statusFilter]);
@@ -308,33 +353,41 @@ export default function Users() {
           ) : filtered.length === 0 ? (
             <EmptyState message={users.length === 0 ? "No users yet. Create the first user." : "No users match your filters."} />
           ) : (
-            <table style={{ width: "100%", minWidth: "640px", borderCollapse: "collapse", fontSize: "13px" }}>
+            <table style={{ width: "100%", minWidth: "760px", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
-                  {["ID", "Username", "Full Name", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (
+                  {["Username", "Full Name", "Email", "Role", "Joined", "Status", "Actions"].map((h) => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((u) => (
-                  <tr key={u.id}>
-                    <td style={{ ...tdStyle, fontSize: "11px", fontFamily: "monospace", color: "hsl(196,100%,55%)", letterSpacing: "0.05em" }}>{u.id}</td>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{u.username}</td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 70%)" }}>{u.fullName ?? "—"}</td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>
-                    <td style={tdStyle}><StatusBadge value={u.role} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(u.createdAt)}</td>
-                    <td style={tdStyle}><StatusBadge value={u.isActive ? "active" : "inactive"} /></td>
-                    <td style={tdStyle}>
-                      <UserActionsMenu
-                        user={u}
-                        onUpdate={(data) => updateMut.mutate({ id: u.id, data })}
-                        disabled={updateMut.isPending}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {filtered.map((u) => {
+                  const isBanned = (u as any).isBanned;
+                  const statusVal = isBanned ? "banned" : (u.isActive ? "active" : "inactive");
+                  return (
+                    <tr key={u.id}>
+                      <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--foreground))" }}>{u.username}</td>
+                      <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 70%)" }}>{u.fullName ?? "—"}</td>
+                      <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(220, 10%, 58%)" }}>{u.email ?? "—"}</td>
+                      <td style={tdStyle}><StatusBadge value={u.role} /></td>
+                      <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(u.createdAt)}</td>
+                      <td style={tdStyle}>
+                        <StatusBadge value={statusVal} />
+                      </td>
+                      <td style={{ ...tdStyle, minWidth: "200px" }}>
+                        <UserActionButtons
+                          user={u}
+                          myRoleOrder={myRoleOrder}
+                          roleOrderMap={roleOrderMap}
+                          onUpdate={(data) => updateMut.mutate({ id: u.id, data })}
+                          onDelete={() => deleteMut.mutate(u.id)}
+                          disabled={updateMut.isPending || deleteMut.isPending}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
