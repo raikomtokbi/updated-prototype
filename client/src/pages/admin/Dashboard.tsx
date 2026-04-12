@@ -124,7 +124,7 @@ export default function Dashboard() {
     : `/analytics?range=${salesRangeKey}`;
 
   const { data: salesAnalytics, isLoading: salesLoading } = useQuery<{
-    salesTrend: { label: string; sales: number }[];
+    salesTrend: { label: string; sales: number; successSales: number }[];
     orderStatus: { name: string; value: number }[];
   }>({
     queryKey: salesQueryKey,
@@ -155,16 +155,16 @@ export default function Dashboard() {
     ? Array.from({ length: 24 }, (_, i) => {
         const h = i % 12 === 0 ? 12 : i % 12;
         const ampm = i < 12 ? "AM" : "PM";
-        return { label: `${String(h).padStart(2, "0")}:00 ${ampm}`, sales: 0 };
+        return { label: `${String(h).padStart(2, "0")}:00 ${ampm}`, sales: 0, successSales: 0 };
       })
     : salesRangeKey === "7days" || salesRangeKey === "30days"
     ? Array.from({ length: salesRangeKey === "7days" ? 7 : 10 }, (_, i) => {
         const d = new Date(); d.setDate(d.getDate() - (salesRangeKey === "7days" ? 6 : 29) + i);
-        return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), sales: 0 };
+        return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), sales: 0, successSales: 0 };
       })
     : [
-        { label: "Jan", sales: 0 }, { label: "Feb", sales: 0 }, { label: "Mar", sales: 0 },
-        { label: "Apr", sales: 0 }, { label: "May", sales: 0 }, { label: "Jun", sales: 0 },
+        { label: "Jan", sales: 0, successSales: 0 }, { label: "Feb", sales: 0, successSales: 0 }, { label: "Mar", sales: 0, successSales: 0 },
+        { label: "Apr", sales: 0, successSales: 0 }, { label: "May", sales: 0, successSales: 0 }, { label: "Jun", sales: 0, successSales: 0 },
       ];
 
   const placeholderPieData = [
@@ -208,11 +208,11 @@ export default function Dashboard() {
       testId: "stat-total-orders",
     },
     {
-      label: "Open Tickets",
+      label: "New Tickets",
       value: stats ? stats.openTickets.toLocaleString() : "—",
       icon: <LifeBuoy size={18} />,
       color: "hsl(38, 92%, 55%)",
-      sub: "All time",
+      sub: statsLabel,
       testId: "stat-open-tickets",
     },
     {
@@ -298,19 +298,31 @@ export default function Dashboard() {
                 <span style={{ fontSize: "13px" }}>Loading...</span>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={170}>
+              <ResponsiveContainer width="100%" height={180}>
                 <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -28, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
                       <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="successGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${getCurrencySymbol(currency)}${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }} formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toLocaleString()}`, "Revenue"]} />
-                  <Area type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#salesGrad)" />
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px" }}
+                    formatter={(value: number, name: string) => [`${getCurrencySymbol(currency)}${value.toLocaleString()}`, name === "sales" ? "Total" : "Successful"]}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }}
+                    formatter={(value) => value === "sales" ? "Total" : "Successful"}
+                  />
+                  <Area type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#salesGrad)" dot={false} />
+                  <Area type="monotone" dataKey="successSales" stroke="hsl(142, 71%, 45%)" strokeWidth={2} fill="url(#successGrad)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             )}

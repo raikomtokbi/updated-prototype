@@ -231,7 +231,7 @@ export interface IStorage {
     openTickets: number;
   }>;
   getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone?: string): Promise<{
-    salesTrend: { label: string; sales: number }[];
+    salesTrend: { label: string; sales: number; successSales: number }[];
     orderStatus: { name: string; value: number }[];
   }>;
 
@@ -768,12 +768,13 @@ export class DatabaseStorage implements IStorage {
   async getDashboardStats(from?: Date, to?: Date) {
     const rangeFilter = from && to ? and(gte(orders.createdAt, from), lte(orders.createdAt, to)) : undefined;
     const userRangeFilter = from && to ? and(gte(users.createdAt, from), lte(users.createdAt, to)) : undefined;
+    const ticketRangeFilter = from && to ? and(gte(tickets.createdAt, from), lte(tickets.createdAt, to)) : undefined;
 
     const [userCount] = await db.select({ count: count() }).from(users).where(userRangeFilter);
     const [orderCount] = await db.select({ count: count() }).from(orders).where(rangeFilter);
     const [revenueRow] = await db.select({ total: sum(orders.totalAmount) }).from(orders)
       .where(rangeFilter ? and(eq(orders.status, "completed"), rangeFilter) : eq(orders.status, "completed"));
-    const [ticketCount] = await db.select({ count: count() }).from(tickets).where(eq(tickets.status, "open"));
+    const [ticketCount] = await db.select({ count: count() }).from(tickets).where(ticketRangeFilter);
     return {
       totalUsers: userCount.count,
       totalOrders: orderCount.count,
@@ -810,6 +811,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         period: trunc.as("period"),
         revenue: sql<string>`COALESCE(SUM(${orders.totalAmount}), 0)`.as("revenue"),
+        successRevenue: sql<string>`COALESCE(SUM(CASE WHEN ${orders.status} = 'completed' THEN ${orders.totalAmount} ELSE 0 END), 0)`.as("success_revenue"),
       })
       .from(orders)
       .where(and(gte(orders.createdAt, from), lte(orders.createdAt, to)))
@@ -835,6 +837,7 @@ export class DatabaseStorage implements IStorage {
     const salesTrend = trendRows.map((r) => ({
       label: fmtLabel(r.period, groupBy),
       sales: parseFloat(String(r.revenue)),
+      successSales: parseFloat(String(r.successRevenue)),
     }));
 
     const statusRows = await db
