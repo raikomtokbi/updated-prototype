@@ -922,10 +922,11 @@ function Footer() {
                     width: "30px",
                     height: "30px",
                     borderRadius: "7px",
-                    background: "hsl(var(--primary))",
+                    background: "linear-gradient(135deg, #7c3aed, #9333ea)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    boxShadow: "0 0 10px hsl(var(--primary) / 0.5)",
                     flexShrink: 0,
                   }}
                 >
@@ -937,7 +938,11 @@ function Footer() {
                 style={{
                   fontSize: "0.9rem",
                   fontWeight: 800,
-                  color: "hsl(var(--primary))",
+                  letterSpacing: "0.05em",
+                  background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >
                 {siteName}
