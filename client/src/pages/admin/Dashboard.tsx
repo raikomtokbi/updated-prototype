@@ -151,14 +151,21 @@ export default function Dashboard() {
     refetchInterval: 2000,
   });
 
-  const placeholderSalesData = [
-    { label: "Jan", sales: 0 },
-    { label: "Feb", sales: 0 },
-    { label: "Mar", sales: 0 },
-    { label: "Apr", sales: 0 },
-    { label: "May", sales: 0 },
-    { label: "Jun", sales: 0 },
-  ];
+  const placeholderSalesData = salesRangeKey === "today"
+    ? Array.from({ length: 24 }, (_, i) => {
+        const h = i % 12 === 0 ? 12 : i % 12;
+        const ampm = i < 12 ? "AM" : "PM";
+        return { label: `${String(h).padStart(2, "0")}:00 ${ampm}`, sales: 0 };
+      })
+    : salesRangeKey === "7days" || salesRangeKey === "30days"
+    ? Array.from({ length: salesRangeKey === "7days" ? 7 : 10 }, (_, i) => {
+        const d = new Date(); d.setDate(d.getDate() - (salesRangeKey === "7days" ? 6 : 29) + i);
+        return { label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }), sales: 0 };
+      })
+    : [
+        { label: "Jan", sales: 0 }, { label: "Feb", sales: 0 }, { label: "Mar", sales: 0 },
+        { label: "Apr", sales: 0 }, { label: "May", sales: 0 }, { label: "Jun", sales: 0 },
+      ];
 
   const placeholderPieData = [
     { name: "Pending", value: 0 },
@@ -234,12 +241,14 @@ export default function Dashboard() {
               </p>
             </div>
           )}
-          <DateRangeFilter
-            selected={statsRangeKey}
-            onSelect={setStatsRangeKey}
-            customRange={statsCustomRange}
-            onCustomRange={setStatsCustomRange}
-          />
+          <div style={{ marginLeft: "auto" }}>
+            <DateRangeFilter
+              selected={statsRangeKey}
+              onSelect={setStatsRangeKey}
+              customRange={statsCustomRange}
+              onCustomRange={setStatsCustomRange}
+            />
+          </div>
         </div>
 
         {/* ── Stat cards ─────────────────────────────────────────────── */}
@@ -290,7 +299,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={170}>
-                <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -28, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
