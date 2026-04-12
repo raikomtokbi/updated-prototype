@@ -208,15 +208,15 @@ export default function Dashboard() {
       testId: "stat-total-orders",
     },
     {
-      label: "Tickets",
+      label: "Open Tickets",
       value: stats ? stats.openTickets.toLocaleString() : "—",
       icon: <LifeBuoy size={18} />,
       color: "hsl(38, 92%, 55%)",
-      sub: statsLabel,
+      sub: "All time",
       testId: "stat-open-tickets",
     },
     {
-      label: "Users",
+      label: "New Users",
       value: stats ? stats.totalUsers.toLocaleString() : "—",
       icon: <Users size={18} />,
       color: "hsl(142, 71%, 45%)",

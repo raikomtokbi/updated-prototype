@@ -224,7 +224,7 @@ export interface IStorage {
   deletePasswordResetTokensByUserId(userId: string): Promise<void>;
 
   // Dashboard
-  getDashboardStats(): Promise<{
+  getDashboardStats(from?: Date, to?: Date): Promise<{
     totalUsers: number;
     totalOrders: number;
     totalRevenue: number;
@@ -765,10 +765,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ── Dashboard Stats ────────────────────────────────────────────────────────
-  async getDashboardStats() {
-    const [userCount] = await db.select({ count: count() }).from(users);
-    const [orderCount] = await db.select({ count: count() }).from(orders);
-    const [revenueRow] = await db.select({ total: sum(orders.totalAmount) }).from(orders).where(eq(orders.status, "completed"));
+  async getDashboardStats(from?: Date, to?: Date) {
+    const rangeFilter = from && to ? and(gte(orders.createdAt, from), lte(orders.createdAt, to)) : undefined;
+    const userRangeFilter = from && to ? and(gte(users.createdAt, from), lte(users.createdAt, to)) : undefined;
+
+    const [userCount] = await db.select({ count: count() }).from(users).where(userRangeFilter);
+    const [orderCount] = await db.select({ count: count() }).from(orders).where(rangeFilter);
+    const [revenueRow] = await db.select({ total: sum(orders.totalAmount) }).from(orders)
+      .where(rangeFilter ? and(eq(orders.status, "completed"), rangeFilter) : eq(orders.status, "completed"));
     const [ticketCount] = await db.select({ count: count() }).from(tickets).where(eq(tickets.status, "open"));
     return {
       totalUsers: userCount.count,

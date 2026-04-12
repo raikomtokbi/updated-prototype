@@ -969,8 +969,48 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ── Dashboard stats ────────────────────────────────────────────────────────
-  app.get("/api/admin/stats", requireAdmin, async (_req, res) => {
-    const stats = await storage.getDashboardStats();
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    const range = (req.query.range as string) || "all";
+    const now = new Date();
+    let from: Date | undefined;
+    let to: Date | undefined;
+
+    if (range !== "all") {
+      // Get site timezone for accurate "today" boundary
+      const allSettings = await storage.getAllSiteSettings();
+      const tz = (allSettings.find(s => s.key === "site_timezone")?.value) || "UTC";
+
+      function startOfDayInTz(timezone: string): Date {
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+        }).formatToParts(now);
+        const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
+        const y = get("year"), mo = get("month") - 1, d = get("day");
+        const h = get("hour") % 24, mi = get("minute"), s = get("second");
+        const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
+        return new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
+      }
+
+      to = new Date(now); to.setHours(23, 59, 59, 999);
+
+      if (range === "today") {
+        from = startOfDayInTz(tz);
+      } else if (range === "7days") {
+        from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0);
+      } else if (range === "30days") {
+        from = new Date(now); from.setDate(now.getDate() - 29); from.setHours(0, 0, 0, 0);
+      } else if (range === "6months") {
+        from = new Date(now); from.setMonth(now.getMonth() - 5); from.setDate(1); from.setHours(0, 0, 0, 0);
+      } else if (range === "12months") {
+        from = new Date(now); from.setFullYear(now.getFullYear() - 1); from.setDate(1); from.setHours(0, 0, 0, 0);
+      } else if (range === "custom" && req.query.from && req.query.to) {
+        from = new Date(req.query.from as string);
+        to = new Date(req.query.to as string); to.setHours(23, 59, 59, 999);
+      }
+    }
+
+    const stats = await storage.getDashboardStats(from, to);
     res.json(stats);
   });
 
