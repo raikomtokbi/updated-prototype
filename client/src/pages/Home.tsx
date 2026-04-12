@@ -9,6 +9,7 @@ import {
 import { FaDiscord } from "react-icons/fa";
 
 import { useSiteStore } from "@/lib/store/siteStore";
+import { useIsLight } from "@/hooks/useIsLight";
 
 
 // ─── Features ─────────────────────────────────────────────────────────────────
@@ -862,6 +863,7 @@ function BonusBanner() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
+  const isLight = useIsLight();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
     staleTime: 0,
@@ -939,10 +941,14 @@ function Footer() {
                   fontSize: "0.9rem",
                   fontWeight: 800,
                   letterSpacing: "0.05em",
-                  background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
+                  ...(isLight
+                    ? { color: "hsl(var(--foreground))" }
+                    : {
+                        background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }),
                 }}
               >
                 {siteName}

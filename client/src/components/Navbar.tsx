@@ -331,10 +331,14 @@ export default function Navbar() {
                 fontSize: "0.9rem",
                 fontWeight: 800,
                 letterSpacing: "0.05em",
-                background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                ...(isLight
+                  ? { color: "hsl(var(--foreground))" }
+                  : {
+                      background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }),
               }}
             >
               {siteName}
@@ -778,10 +782,14 @@ export default function Navbar() {
               style={{
                 fontSize: "0.9rem",
                 fontWeight: 800,
-                background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                ...(isLight
+                  ? { color: "hsl(var(--foreground))" }
+                  : {
+                      background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }),
               }}
             >
               {siteName}
