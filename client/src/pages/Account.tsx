@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   User, LogOut, ShoppingBag, Shield, Lock, ChevronRight,
   Package, Settings, Eye, EyeOff, Check, X, Loader2,
-  Calendar, Hash, Clock, Headphones, Send, Paperclip, ArrowLeft, ChevronDown
+  Calendar, Hash, Clock, Headphones, Send, Paperclip, ArrowLeft, ChevronDown,
+  MoreVertical, RotateCcw, ChevronLeft,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -215,10 +216,16 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
 }
 
 // ── Orders Tab ────────────────────────────────────────────────────────────────
+const ORDERS_PAGE_SIZE = 5;
+
 function OrdersTab({ user }: { user: any }) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logout = useAuthStore((s) => s.logout);
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   const { data: orders, isLoading, error } = useQuery<any[]>({
     queryKey: ["/api/user/orders"],
@@ -237,6 +244,43 @@ function OrdersTab({ user }: { user: any }) {
       return res.json();
     },
   });
+
+  const refundMutation = useMutation({
+    mutationFn: async (order: any) => {
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          subject: `Refund Request — Order #${order.orderNumber}`,
+          message: `I would like to request a refund for order #${order.orderNumber} (placed on ${formatDate(order.createdAt)}, total: ${formatCurrency(order.totalAmount, order.currency)}). Please review and process the refund at your earliest convenience.`,
+          category: "billing",
+          priority: "medium",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to submit refund request");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Refund request submitted", description: "We've opened a support ticket for your refund. Our team will be in touch shortly." });
+      setOpenDropdown(null);
+    },
+    onError: () => {
+      toast({ title: "Failed to submit", description: "Could not submit your refund request. Please try again.", variant: "destructive" });
+    },
+  });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!openDropdown) return;
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [openDropdown]);
 
   if (isLoading) {
     return (
@@ -306,70 +350,152 @@ function OrdersTab({ user }: { user: any }) {
     );
   }
 
+  const totalPages = Math.ceil(orders.length / ORDERS_PAGE_SIZE);
+  const paged = orders.slice((page - 1) * ORDERS_PAGE_SIZE, page * ORDERS_PAGE_SIZE);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+      {/* Header row */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
         <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>
           {orders.length} order{orders.length !== 1 ? "s" : ""} total
         </span>
+        {totalPages > 1 && (
+          <span style={{ fontSize: "0.72rem", color: "hsl(var(--muted-foreground))" }}>
+            Page {page} of {totalPages}
+          </span>
+        )}
       </div>
-      {orders.map((order) => {
+
+      {/* Order cards */}
+      {paged.map((order) => {
         const sc = STATUS_COLORS[order.status] ?? STATUS_COLORS.pending;
         const isExpanded = expandedOrder === order.id;
+        const isDropOpen = openDropdown === order.id;
+        const canRefund = !order.deliveryStatus || order.deliveryStatus === "pending";
+
         return (
           <div key={order.id} style={{
             background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
-            borderRadius: "0.75rem", overflow: "hidden",
+            borderRadius: "0.75rem", overflow: "visible", position: "relative",
           }} data-testid={`card-order-${order.id}`}>
-            <button
-              onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", gap: "1rem",
-                padding: "1rem 1.25rem", background: "none", border: "none", cursor: "pointer",
-                textAlign: "left", flexWrap: "wrap",
-              }}
-              data-testid={`button-order-expand-${order.id}`}
-            >
-              <div style={{
-                width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
-                background: sc.bg, display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <Package size={16} style={{ color: sc.text }} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
-                    #{order.orderNumber}
-                  </span>
-                  <span style={{
-                    fontSize: "0.68rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
-                    background: sc.bg, color: sc.text, textTransform: "capitalize",
-                  }}>
-                    {order.status}
-                  </span>
+            {/* Main clickable row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem 1.25rem", flexWrap: "wrap" }}>
+              <button
+                onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                style={{
+                  flex: 1, display: "flex", alignItems: "center", gap: "1rem",
+                  background: "none", border: "none", cursor: "pointer",
+                  textAlign: "left", flexWrap: "wrap", minWidth: 0,
+                }}
+                data-testid={`button-order-expand-${order.id}`}
+              >
+                <div style={{
+                  width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
+                  background: sc.bg, display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <Package size={16} style={{ color: sc.text }} />
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                    <Calendar size={11} /> {formatDate(order.createdAt)}
-                  </span>
-                  {order.items?.length > 0 && (
-                    <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                      <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>
+                      #{order.orderNumber}
                     </span>
-                  )}
+                    <span style={{
+                      fontSize: "0.68rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "99px",
+                      background: sc.bg, color: sc.text, textTransform: "capitalize",
+                    }}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <Calendar size={11} /> {formatDate(order.createdAt)}
+                    </span>
+                    {order.items?.length > 0 && (
+                      <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                        <Hash size={11} /> {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <div className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
-                  {formatCurrency(order.totalAmount, order.currency)}
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
+                    {formatCurrency(order.totalAmount, order.currency)}
+                  </div>
+                  <ChevronRight size={14} style={{
+                    color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", float: "right",
+                    transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.2s",
+                  }} />
                 </div>
-                <ChevronRight size={14} style={{
-                  color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", float: "right",
-                  transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.2s",
-                }} />
-              </div>
-            </button>
+              </button>
 
+              {/* Actions dropdown trigger */}
+              <div style={{ position: "relative", flexShrink: 0 }} ref={isDropOpen ? dropdownRef : undefined}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setOpenDropdown(isDropOpen ? null : order.id); }}
+                  style={{
+                    width: "30px", height: "30px", borderRadius: "0.4rem",
+                    background: isDropOpen ? "hsl(var(--accent))" : "transparent",
+                    border: "1px solid " + (isDropOpen ? "hsl(var(--border))" : "transparent"),
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "hsl(var(--muted-foreground))",
+                  }}
+                  data-testid={`button-order-menu-${order.id}`}
+                  aria-label="Order actions"
+                >
+                  <MoreVertical size={14} />
+                </button>
+
+                {isDropOpen && (
+                  <div
+                    ref={dropdownRef}
+                    style={{
+                      position: "absolute", top: "calc(100% + 4px)", right: 0, zIndex: 50,
+                      background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem", minWidth: "160px",
+                      boxShadow: "0 4px 20px hsla(220,20%,4%,0.35)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {canRefund ? (
+                      <button
+                        onClick={() => {
+                          if (refundMutation.isPending) return;
+                          refundMutation.mutate(order);
+                        }}
+                        disabled={refundMutation.isPending}
+                        style={{
+                          width: "100%", display: "flex", alignItems: "center", gap: "0.5rem",
+                          padding: "0.6rem 0.9rem", background: "none", border: "none",
+                          cursor: refundMutation.isPending ? "not-allowed" : "pointer",
+                          fontSize: "0.72rem", color: "hsl(40,90%,60%)",
+                          opacity: refundMutation.isPending ? 0.6 : 1,
+                          textAlign: "left",
+                        }}
+                        data-testid={`button-request-refund-${order.id}`}
+                      >
+                        {refundMutation.isPending
+                          ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
+                          : <RotateCcw size={13} />
+                        }
+                        Request Refund
+                      </button>
+                    ) : (
+                      <div style={{
+                        padding: "0.6rem 0.9rem",
+                        fontSize: "0.72rem", color: "hsl(var(--muted-foreground))",
+                        textAlign: "left",
+                      }}>
+                        No actions available
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Expanded items */}
             {isExpanded && order.items && order.items.length > 0 && (
               <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
                 <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
@@ -402,6 +528,62 @@ function OrdersTab({ user }: { user: any }) {
           </div>
         );
       })}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", paddingTop: "0.5rem" }}>
+          <button
+            onClick={() => { setPage((p) => Math.max(1, p - 1)); setExpandedOrder(null); }}
+            disabled={page === 1}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: "32px", height: "32px", borderRadius: "0.4rem",
+              background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+              cursor: page === 1 ? "not-allowed" : "pointer",
+              color: page === 1 ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+              opacity: page === 1 ? 0.4 : 1,
+            }}
+            data-testid="button-orders-prev"
+          >
+            <ChevronLeft size={15} />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => { setPage(p); setExpandedOrder(null); }}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: "32px", height: "32px", borderRadius: "0.4rem",
+                background: page === p ? "hsl(var(--primary))" : "hsl(var(--card))",
+                border: "1px solid " + (page === p ? "hsl(var(--primary))" : "hsl(var(--border))"),
+                cursor: "pointer",
+                color: page === p ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))",
+                fontSize: "0.72rem", fontWeight: page === p ? 700 : 400,
+              }}
+              data-testid={`button-orders-page-${p}`}
+            >
+              {p}
+            </button>
+          ))}
+
+          <button
+            onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setExpandedOrder(null); }}
+            disabled={page === totalPages}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: "32px", height: "32px", borderRadius: "0.4rem",
+              background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+              cursor: page === totalPages ? "not-allowed" : "pointer",
+              color: page === totalPages ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+              opacity: page === totalPages ? 0.4 : 1,
+            }}
+            data-testid="button-orders-next"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
