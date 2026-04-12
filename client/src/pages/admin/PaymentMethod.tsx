@@ -8,7 +8,7 @@ import type { PaymentMethod } from "@shared/schema";
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "8px",
 };
 const inputStyle: React.CSSProperties = {
@@ -70,9 +70,9 @@ const btnEdit: React.CSSProperties = {
 };
 const sectionBox: React.CSSProperties = {
   padding: "0.75rem",
-  background: "hsl(220,20%,7%)",
+  background: "hsl(var(--background))",
   borderRadius: "6px",
-  border: "1px solid hsl(220,15%,14%)",
+  border: "1px solid hsl(var(--card))",
 };
 
 // ─── Gateway Types Config ─────────────────────────────────────────────────────
@@ -474,7 +474,7 @@ export default function PaymentMethodPage() {
     }>
 
       {/* Info banner */}
-      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
         <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: 0 }}>
           Supported gateways: <span style={{ color: "hsl(258,70%,65%)" }}>Razorpay, PayU, Cashfree, Instamojo, CCAvenue, PhonePe, Paytm, EasyBuzz, BharatPe, Stripe, PayPal, XYZPay, Manual UPI, Manual</span>.
           Set a lower priority number to make a gateway take precedence over others when multiple gateways are active.

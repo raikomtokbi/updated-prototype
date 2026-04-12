@@ -39,7 +39,7 @@ const tabBtn = (active: boolean): React.CSSProperties => ({
 });
 const innerCard: React.CSSProperties = {
   background: "hsl(var(--background))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "8px",
   padding: "16px",
 };
@@ -93,7 +93,7 @@ function ToggleSwitch({ checked, onChange, disabled, testId }: {
       style={{
         position: "relative", width: "34px", height: "19px", borderRadius: "10px",
         border: "none", cursor: disabled ? "not-allowed" : "pointer", flexShrink: 0,
-        background: checked ? "hsl(258,90%,58%)" : "hsl(220,15%,22%)",
+        background: checked ? "hsl(258,90%,58%)" : "hsl(var(--border))",
         transition: "background 0.2s", opacity: disabled ? 0.45 : 1, padding: 0,
       }}
     >
@@ -145,7 +145,7 @@ function ConfigureModal({
         ))}
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
           <button onClick={onClose}
-            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(220,15%,14%)", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+            style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
             Cancel
           </button>
           <button onClick={() => saveMut.mutate()} style={{ ...btnPrimary, opacity: saveMut.isPending ? 0.7 : 1 }} disabled={saveMut.isPending}>
@@ -503,21 +503,21 @@ function BusanMappingTab() {
 
       {/* Mapped Products Table */}
       <div style={{ ...innerCard, padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
           <p style={{ ...sectionTitle, marginBottom: 0 }}>
             Mapped Products{mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}> ({mappings.length})</span>}
           </p>
         </div>
         {mappings.length === 0 ? (
-          <div style={{ padding: "32px 16px", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "12px" }}>
-            <Package size={28} style={{ display: "block", margin: "0 auto 10px", color: "hsl(220,10%,28%)" }} />
+          <div style={{ padding: "32px 16px", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
+            <Package size={28} style={{ display: "block", margin: "0 auto 10px", color: "hsl(var(--muted-foreground) / 0.5)" }} />
             No mappings yet. Use the form above to add your first product mapping.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
+                <tr style={{ borderBottom: "1px solid hsl(var(--border))" }}>
                   {["CMS Product", "Busan Product ID", "Actions"].map(h => (
                     <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(var(--muted-foreground))", fontWeight: 600, fontSize: "11px", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
@@ -525,7 +525,7 @@ function BusanMappingTab() {
               </thead>
               <tbody>
                 {mappings.map((m) => (
-                  <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                  <tr key={m.id} style={{ borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ fontWeight: 500, color: "hsl(var(--foreground))" }}>{m.cmsProductName || m.cmsProductId}</div>
                     </td>
@@ -561,7 +561,7 @@ function BusanModal({ onClose }: { onClose: () => void }) {
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {/* Tab bar */}
-        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(var(--border))" }}>
           <button data-testid="tab-busan-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>
             Configuration
           </button>
@@ -711,7 +711,7 @@ function SmileOneConfigTab() {
           )}
           <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <button data-testid="button-test-smileone-connection"
-              style={{ ...btnPrimary, background: "hsl(220,20%,16%)", border: "1px solid hsl(220,15%,22%)" }}
+              style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
               onClick={testConnection} disabled={testing}>
               {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
               Test Connection
@@ -854,7 +854,7 @@ function SmileOneMappingTab() {
               <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "220px", overflowY: "auto" }}>
                 {loadingServices && <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Loading...</p>}
                 {!loadingServices && services.length === 0 && (
-                  <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>No services for this game.</p>
+                  <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No services for this game.</p>
                 )}
                 {services.map(svc => (
                   <div key={svc.id} data-testid={`smileone-cms-product-${svc.id}`}
@@ -871,12 +871,12 @@ function SmileOneMappingTab() {
                 ))}
               </div>
             )}
-            {!leftGame && <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>Select a game to see its products.</p>}
+            {!leftGame && <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Select a game to see its products.</p>}
           </div>
 
           {/* Arrow + Map */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", paddingTop: "50px" }}>
-            <ArrowRight size={18} color="hsl(220,10%,40%)" />
+            <ArrowRight size={18} color="hsl(var(--muted-foreground))" />
             <button data-testid="button-smileone-map"
               style={{ ...btnPrimary, opacity: canMap ? 1 : 0.4, cursor: canMap ? "pointer" : "not-allowed", flexDirection: "column", gap: "3px" }}
               onClick={() => canMap && createMutation.mutate()} disabled={!canMap || createMutation.isPending}>
@@ -901,14 +901,14 @@ function SmileOneMappingTab() {
               </select>
             </div>
             <button data-testid="button-fetch-smileone-products"
-              style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(220,15%,20%)" }}
+              style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
               onClick={fetchSmileProducts} disabled={!rightGame || fetchingSmile}>
               {fetchingSmile ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={12} />}
               Fetch Products
             </button>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "160px", overflowY: "auto" }}>
               {smileProducts.length === 0 && !fetchingSmile && (
-                <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)" }}>Enter game slug and fetch to see products.</p>
+                <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>Enter game slug and fetch to see products.</p>
               )}
               {smileProducts.map(p => (
                 <div key={p.product_id} data-testid={`smileone-product-${p.product_id}`}
@@ -931,11 +931,11 @@ function SmileOneMappingTab() {
       {/* Selection summary */}
       {(selectedService || selectedSmile) && (
         <div style={{ ...innerCard, padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "hsl(var(--foreground))", flexWrap: "wrap" }}>
-          <span style={{ color: selectedService ? "#4ade80" : "hsl(220,10%,40%)" }}>
+          <span style={{ color: selectedService ? "#4ade80" : "hsl(var(--muted-foreground))" }}>
             {selectedService ? `CMS: ${selectedService.name}` : "No CMS product selected"}
           </span>
-          <ArrowRight size={12} color="hsl(220,10%,40%)" />
-          <span style={{ color: selectedSmile ? "#4ade80" : "hsl(220,10%,40%)" }}>
+          <ArrowRight size={12} color="hsl(var(--muted-foreground))" />
+          <span style={{ color: selectedSmile ? "#4ade80" : "hsl(var(--muted-foreground))" }}>
             {selectedSmile ? `Smile: ${selectedSmile.name}` : "No Smile.one product selected"}
           </span>
         </div>
@@ -943,20 +943,20 @@ function SmileOneMappingTab() {
 
       {/* Mappings table */}
       <div style={{ ...innerCard, padding: 0, overflow: "hidden" }}>
-        <div style={{ padding: "10px 16px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
           <p style={{ ...sectionTitle, marginBottom: 0 }}>
             Mapped Products{mappings.length > 0 && <span style={{ color: "hsl(258,80%,70%)" }}> ({mappings.length})</span>}
           </p>
         </div>
         {mappings.length === 0 ? (
-          <div style={{ padding: "24px 16px", textAlign: "center", color: "hsl(220,10%,40%)", fontSize: "12px" }}>
+          <div style={{ padding: "24px 16px", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
             No mappings yet. Use the form above to create your first mapping.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid hsl(220,15%,13%)" }}>
+                <tr style={{ borderBottom: "1px solid hsl(var(--border))" }}>
                   {["Game", "Region", "CMS Product", "Smile.one Product", "Actions"].map(h => (
                     <th key={h} style={{ padding: "8px 14px", textAlign: "left", color: "hsl(var(--muted-foreground))", fontWeight: 600, fontSize: "11px" }}>{h}</th>
                   ))}
@@ -964,7 +964,7 @@ function SmileOneMappingTab() {
               </thead>
               <tbody>
                 {mappings.map(m => (
-                  <tr key={m.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                  <tr key={m.id} style={{ borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                     <td style={{ padding: "9px 14px", color: "hsl(var(--foreground))" }}>{m.gameSlug}</td>
                     <td style={{ padding: "9px 14px", color: "hsl(var(--muted-foreground))" }}>{m.region}</td>
                     <td style={{ padding: "9px 14px", color: "hsl(var(--foreground))" }}>{m.cmsProductName ?? m.cmsProductId}</td>
@@ -993,7 +993,7 @@ function SmileOneModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Smile.one Integration" onClose={onClose} wide>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(220,15%,13%)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(var(--border))" }}>
           <button data-testid="tab-smileone-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
           <button data-testid="tab-smileone-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
         </div>
@@ -1062,7 +1062,7 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
   const isConfigured = fields.every((f) => Boolean(values[f.key]));
 
   return (
-    <div style={{ border: "1px solid hsl(220,15%,15%)", borderRadius: "8px", overflow: "hidden" }}>
+    <div style={{ border: "1px solid hsl(var(--border))", borderRadius: "8px", overflow: "hidden" }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "12px 16px", background: "hsl(var(--background))", gap: "10px",
@@ -1070,7 +1070,7 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div style={{
             width: "30px", height: "30px", borderRadius: "6px", flexShrink: 0,
-            background: isConfigured ? "rgba(74,222,128,0.08)" : "hsl(220,15%,13%)",
+            background: isConfigured ? "rgba(74,222,128,0.08)" : "hsl(var(--border))",
             display: "flex", alignItems: "center", justifyContent: "center",
             color: accentColor,
           }}>
@@ -1082,12 +1082,12 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
               ? <div style={{ fontSize: "11px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px", marginTop: "1px" }}>
                   <CheckCircle size={10} /> Configured
                 </div>
-              : <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>Not configured</div>
+              : <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>Not configured</div>
             }
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "11px", color: enabled && isConfigured ? "hsl(142,71%,48%)" : "hsl(220,10%,40%)" }}>
+          <span style={{ fontSize: "11px", color: enabled && isConfigured ? "hsl(142,71%,48%)" : "hsl(var(--muted-foreground))" }}>
             {enabled && isConfigured ? "Enabled" : "Disabled"}
           </span>
           <ToggleSwitch
@@ -1098,7 +1098,7 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
           />
         </div>
       </div>
-      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px", background: "hsl(220,20%,7%)" }}>
+      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px", background: "hsl(var(--background))" }}>
         {fields.map((f) => (
           <div key={f.key}>
             <label style={labelStyle}>{f.label}</label>
@@ -1281,7 +1281,7 @@ export default function ApiIntegration() {
       }}>
       <div style={{
         width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0,
-        background: configured ? "rgba(74,222,128,0.08)" : "hsl(220, 15%, 13%)",
+        background: configured ? "rgba(74,222,128,0.08)" : "hsl(var(--border))",
         color: configured ? "hsl(142,71%,48%)" : "hsl(var(--muted-foreground))",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
@@ -1327,7 +1327,7 @@ export default function ApiIntegration() {
 
         {/* ── All Integrations ── */}
         <div style={{ ...card, padding: "0" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(220, 15%, 13%)" }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid hsl(var(--border))" }}>
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Service Integrations</span>
             <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
               Click Configure to add your API keys for each service

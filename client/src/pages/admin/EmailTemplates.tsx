@@ -278,7 +278,7 @@ function buildEmailHtmlClient(form: FormState, siteName = "Nexcoin"): string {
 
 const card: React.CSSProperties = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "8px",
 };
 
@@ -335,7 +335,7 @@ function TemplateListItem({
         cursor: "pointer",
         background: isSelected ? "rgba(124,58,237,0.08)" : "transparent",
         borderLeft: `3px solid ${isSelected ? "#7c3aed" : "transparent"}`,
-        borderBottom: "1px solid hsl(220,15%,11%)",
+        borderBottom: "1px solid hsl(var(--border) / 0.5)",
         transition: "background 0.15s",
         display: "flex",
         alignItems: "center",
@@ -359,7 +359,7 @@ function TemplateListItem({
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         {saved && <CheckCircle size={11} color="#10b981" />}
-        <ChevronRight size={13} color="hsl(220,10%,32%)" />
+        <ChevronRight size={13} color="hsl(var(--muted-foreground) / 0.7)" />
       </div>
     </div>
   );
@@ -398,12 +398,12 @@ function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => vo
         <div
           style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 100,
-            background: "hsl(var(--card))", border: "1px solid hsl(220,15%,17%)",
+            background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
             borderRadius: 8, width: 280, maxHeight: 380, overflow: "auto",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
           }}
         >
-          <div style={{ padding: "8px 12px", borderBottom: "1px solid hsl(220,15%,13%)" }}>
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid hsl(var(--border))" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {activeField ? `Insert into: ${activeField}` : "Click a variable to insert"}
             </div>
@@ -416,7 +416,7 @@ function VariablePicker({ onInsert, activeField }: { onInsert: (v: string) => vo
                 style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "8px 12px", background: "transparent", border: "none",
-                  borderBottom: "1px solid hsl(220,15%,11%)", cursor: "pointer",
+                  borderBottom: "1px solid hsl(var(--border) / 0.5)", cursor: "pointer",
                   color: group.color, fontSize: "11px", fontWeight: 700,
                   textTransform: "uppercase", letterSpacing: "0.05em",
                 }}
@@ -538,7 +538,7 @@ function StylesEditor({ styles, onChange }: { styles: EmailStyles; onChange: (s:
   ];
 
   const section: React.CSSProperties = {
-    marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid hsl(220,15%,11%)",
+    marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid hsl(var(--border) / 0.5)",
   };
 
   const sectionTitle: React.CSSProperties = {
@@ -670,10 +670,10 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
       onClick={onClose}
     >
       <div
-        style={{ background: "hsl(var(--card))", border: "1px solid hsl(220,15%,17%)", borderRadius: 12, width: "100%", maxWidth: 440 }}
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, width: "100%", maxWidth: 440 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: "14px 16px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ padding: "14px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Send size={14} color="#a78bfa" />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Send Test Email</span>
@@ -710,7 +710,7 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={onClose} style={{
               flex: 1, padding: "9px 0", borderRadius: 6, fontSize: "13px",
-              background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)",
+              background: "hsl(var(--border))", border: "1px solid hsl(var(--border))",
               color: "hsl(var(--muted-foreground))", cursor: "pointer",
             }}>Cancel</button>
             <button
@@ -748,7 +748,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
       {/* Preview toolbar */}
       <div style={{
         padding: "8px 14px",
-        borderBottom: "1px solid hsl(220,15%,13%)",
+        borderBottom: "1px solid hsl(var(--border))",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "hsl(var(--background))", flexShrink: 0,
       }}>
@@ -793,7 +793,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
       </div>
 
       {/* Preview frame */}
-      <div style={{ flex: 1, overflow: "auto", background: "#0d0f14", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px 16px" }}>
+      <div style={{ flex: 1, overflow: "auto", background: "hsl(var(--muted) / 0.5)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px 16px" }}>
         <div style={{
           width: previewMode === "mobile" ? 375 : "100%",
           maxWidth: previewMode === "mobile" ? 375 : undefined,
@@ -987,7 +987,7 @@ function TemplateEditor({
   const editorPanel = (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Editor header */}
-      <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220,15%,13%)", flexShrink: 0 }}>
+      <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(var(--border))", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           {isMobile && onBack && (
             <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "4px 6px 4px 0", display: "flex", flexShrink: 0 }}>
@@ -1009,7 +1009,7 @@ function TemplateEditor({
             onClick={() => setField("isEnabled", !form.isEnabled)}
             style={{
               position: "relative", width: 38, height: 22, borderRadius: 11, border: "none",
-              background: form.isEnabled ? "#7c3aed" : "hsl(220,15%,20%)",
+              background: form.isEnabled ? "#7c3aed" : "hsl(var(--border))",
               cursor: "pointer", flexShrink: 0, padding: 0,
             }}
           >
@@ -1030,7 +1030,7 @@ function TemplateEditor({
               style={{
                 flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
                 padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600,
-                background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)",
+                background: "hsl(var(--border))", border: "1px solid hsl(var(--border))",
                 color: "hsl(var(--primary))", cursor: "pointer",
               }}
             >
@@ -1042,7 +1042,7 @@ function TemplateEditor({
             style={{
               flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
               padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600,
-              background: "hsl(220,15%,13%)", border: "1px solid hsl(220,15%,20%)",
+              background: "hsl(var(--border))", border: "1px solid hsl(var(--border))",
               color: "#60a5fa", cursor: "pointer",
             }}
           >
@@ -1054,8 +1054,8 @@ function TemplateEditor({
             style={{
               flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
               padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600,
-              background: saved ? "#16a34a" : (isDirty ? "linear-gradient(135deg,#7c3aed,#6d28d9)" : "hsl(220,15%,13%)"),
-              color: (saved || isDirty) ? "#fff" : "hsl(220,10%,40%)",
+              background: saved ? "#16a34a" : (isDirty ? "linear-gradient(135deg,#7c3aed,#6d28d9)" : "hsl(var(--border))"),
+              color: (saved || isDirty) ? "#fff" : "hsl(var(--muted-foreground))",
               border: "none", cursor: saveMut.isPending ? "wait" : "pointer",
               opacity: (!isDirty && !saved) ? 0.5 : 1,
             }}
@@ -1067,7 +1067,7 @@ function TemplateEditor({
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", borderBottom: "1px solid hsl(220,15%,13%)", flexShrink: 0 }}>
+      <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", flexShrink: 0 }}>
         {tabBtn("content", "Content", <Type size={11} />)}
         {tabBtn("styles", "Styles", <Palette size={11} />)}
       </div>
@@ -1129,7 +1129,7 @@ function TemplateEditor({
                 style={textareaStyle}
                 {...trackFocus("body", "Body")}
               />
-              <div style={{ fontSize: "10px", color: "hsl(220,10%,32%)", marginTop: 4 }}>
+              <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground) / 0.7)", marginTop: 4 }}>
                 Double blank line = new paragraph. Single line break = line break within paragraph.
               </div>
             </div>
@@ -1208,7 +1208,7 @@ function TemplateEditor({
         <div style={{ height: "100%" }}>{editorPanel}</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", height: "100%", gap: 0 }}>
-          <div style={{ borderRight: "1px solid hsl(220,15%,13%)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ borderRight: "1px solid hsl(var(--border))", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {editorPanel}
           </div>
           <div style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -1219,8 +1219,8 @@ function TemplateEditor({
 
       {/* Mobile preview modal */}
       {showPreviewModal && isMobile && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "hsl(220,20%,7%)", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(220,15%,13%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "hsl(var(--background))", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Eye size={14} color="#a78bfa" />
               <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Live Preview</span>
@@ -1296,12 +1296,12 @@ export default function EmailTemplates() {
 
   return (
     <AdminLayout>
-      <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "hsl(220,20%,7%)" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "hsl(var(--background))" }}>
 
         {/* Page header */}
         <div style={{
           padding: "10px 16px",
-          borderBottom: "1px solid hsl(220,15%,11%)",
+          borderBottom: "1px solid hsl(var(--border) / 0.5)",
           display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
           background: "hsl(var(--background))",
         }}>
@@ -1321,11 +1321,11 @@ export default function EmailTemplates() {
           {(!isMobile || !showEditor) && (
             <div style={{
               width: sidebarWidth, flexShrink: 0,
-              borderRight: "1px solid hsl(220,15%,11%)",
+              borderRight: "1px solid hsl(var(--border) / 0.5)",
               display: "flex", flexDirection: "column", overflow: "hidden",
               background: "hsl(var(--background))",
             }}>
-              <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid hsl(220,15%,11%)" }}>
+              <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                 <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   {TEMPLATE_DEFS.length} Templates
                 </div>

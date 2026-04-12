@@ -10,7 +10,7 @@ import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 const card: React.CSSProperties = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "8px",
   marginBottom: "16px",
 };
@@ -20,7 +20,7 @@ const sectionHeader: React.CSSProperties = {
   alignItems: "center",
   gap: "10px",
   padding: "14px 20px",
-  borderBottom: "1px solid hsl(220, 15%, 13%)",
+  borderBottom: "1px solid hsl(var(--border))",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -323,7 +323,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                 <CardIcon size={16} />
               </button>
               <input
-                style={{ flex: 1, padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none" }}
+                style={{ flex: 1, padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none" }}
                 value={card.title}
                 onChange={(e) => update(idx, "title", e.target.value)}
                 placeholder="Card title"
@@ -339,7 +339,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
               </button>
             </div>
             <textarea
-              style={{ width: "100%", padding: "6px 10px", background: "hsl(220,20%,13%)", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
               value={card.desc}
               onChange={(e) => update(idx, "desc", e.target.value)}
               placeholder="Short description for this feature card"
@@ -361,7 +361,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                         onClick={() => { update(idx, "icon", name); setOpenPickerIdx(null); }}
                         style={{
                           padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
-                          background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
+                          background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(var(--card))",
                           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                           color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
                           transition: "all 0.1s",
@@ -974,7 +974,7 @@ export default function ControlPanel() {
             />
           </div>
         </div>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
             <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>About Page Stats</span>
             <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
@@ -1007,10 +1007,10 @@ export default function ControlPanel() {
             ))}
           </div>
         </div>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(220,15%,13%)", display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", gap: "12px" }}>
           <div>
             <label style={{ ...labelStyle, marginBottom: "2px" }}>Why {local.site_name || "Nexcoin"} — Feature Cards</label>
-            <p style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginBottom: "10px" }}>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "10px" }}>
               Click the icon button on each card to open the icon picker. Changes are saved with the rest of the settings.
             </p>
             <ValueCardsEditor
@@ -1088,7 +1088,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
 
   const card: React.CSSProperties = {
     background: "hsl(var(--card))",
-    border: "1px solid hsl(220, 15%, 13%)",
+    border: "1px solid hsl(var(--border))",
     borderRadius: "8px",
     marginBottom: "16px",
   };
@@ -1098,7 +1098,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
     alignItems: "center",
     gap: "10px",
     padding: "14px 20px",
-    borderBottom: "1px solid hsl(220, 15%, 13%)",
+    borderBottom: "1px solid hsl(var(--border))",
   };
 
   const inputStyle: React.CSSProperties = {
@@ -1200,7 +1200,7 @@ function FeesAndTaxesManager({ local, set, bool, toggle, isMobile }: any) {
               <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>No additional fees configured. All charges will be free.</p>
             ) : (
               fees.map((fee) => (
-                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(220, 15%, 11%)", borderRadius: "4px", border: "1px solid hsl(var(--border))" }}>
+                <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "hsl(var(--border) / 0.5)", borderRadius: "4px", border: "1px solid hsl(var(--border))" }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{fee.name}</div>
                     <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>

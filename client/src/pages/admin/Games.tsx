@@ -9,7 +9,7 @@ import type { Game, Service, Plugin } from "@shared/schema";
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  border: "1px solid hsl(var(--border))",
   borderRadius: "8px",
 };
 const inputStyle: React.CSSProperties = {
@@ -158,10 +158,10 @@ function MapPluginModal({
         </p>
 
         {isLoading ? (
-          <div style={{ textAlign: "center", padding: "1.5rem", color: "hsl(220,10%,40%)", fontSize: "13px" }}>Loading plugins...</div>
+          <div style={{ textAlign: "center", padding: "1.5rem", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading plugins...</div>
         ) : enabledPlugins.length === 0 ? (
-          <div style={{ padding: "1.25rem", background: "hsl(var(--card))", borderRadius: "6px", border: "1px dashed hsl(220,15%,20%)", textAlign: "center" }}>
-            <p style={{ fontSize: "12px", color: "hsl(220,10%,40%)", margin: 0 }}>No enabled plugins found.</p>
+          <div style={{ padding: "1.25rem", background: "hsl(var(--card))", borderRadius: "6px", border: "1px dashed hsl(var(--border))", textAlign: "center" }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>No enabled plugins found.</p>
             <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>Enable plugins in the Plugins page first.</p>
           </div>
         ) : (
@@ -196,7 +196,7 @@ function MapPluginModal({
                   style={{ accentColor: "hsl(var(--primary))" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{p.name}</div>
-                  <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", display: "flex", gap: "6px", alignItems: "center" }}>
+                  <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", display: "flex", gap: "6px", alignItems: "center" }}>
                     <code style={{ background: "hsl(var(--card))", padding: "1px 5px", borderRadius: "3px", fontSize: "10px" }}>{p.slug}</code>
                     {p.description && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description}</span>}
                   </div>
@@ -208,7 +208,7 @@ function MapPluginModal({
         )}
 
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
-          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(220,15%,22%)", cursor: "pointer" }}>
+          <button onClick={onClose} style={{ padding: "7px 14px", borderRadius: "6px", fontSize: "12px", background: "hsl(var(--border))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))", cursor: "pointer" }}>
             Cancel
           </button>
           <button
@@ -260,7 +260,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
                 gap: "10px",
                 padding: "8px 12px",
                 borderRadius: "7px",
-                border: `1px solid ${on ? "hsl(258,90%,60%)" : "hsl(220,15%,20%)"}`,
+                border: `1px solid ${on ? "hsl(258,90%,60%)" : "hsl(var(--border))"}`,
                 background: on ? "hsla(258,90%,66%,0.12)" : "hsl(var(--card))",
                 cursor: "pointer",
                 textAlign: "left",
@@ -270,17 +270,17 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
             >
               <span style={{
                 width: "18px", height: "18px", borderRadius: "4px", flexShrink: 0,
-                border: `2px solid ${on ? "hsl(258,90%,60%)" : "hsl(220,15%,25%)"}`,
+                border: `2px solid ${on ? "hsl(258,90%,60%)" : "hsl(var(--border))"}`,
                 background: on ? "hsl(258,90%,60%)" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {on && <span style={{ color: "white", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </span>
               <span>
-                <span style={{ display: "block", fontSize: "12px", fontWeight: 600, color: on ? "hsl(var(--foreground))" : "hsl(220,10%,65%)" }}>
+                <span style={{ display: "block", fontSize: "12px", fontWeight: 600, color: on ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>
                   {opt.label}
                 </span>
-                <span style={{ display: "block", fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "1px" }}>
+                <span style={{ display: "block", fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
                   {opt.hint}
                 </span>
               </span>
@@ -310,7 +310,7 @@ function PluginPicker({ value, onChange }: { value: string; onChange: (v: string
         Optional: map this game to a plugin for automated top-up delivery.
       </p>
       {isLoading ? (
-        <div style={{ ...inputStyle, color: "hsl(220,10%,40%)" }}>Loading plugins...</div>
+        <div style={{ ...inputStyle, color: "hsl(var(--muted-foreground))" }}>Loading plugins...</div>
       ) : (
         <select
           style={inputStyle}
@@ -558,13 +558,13 @@ function ServicesPanel({ game }: { game: Game }) {
             <thead>
               <tr>
                 {["Name", "Price", "Discount", "Final", "Stock", "Status", ""].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(var(--muted-foreground))", borderBottom: "1px solid hsl(220,15%,13%)" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em", color: "hsl(var(--muted-foreground))", borderBottom: "1px solid hsl(var(--border))" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {svcs.map((s) => (
-                <tr key={s.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                <tr key={s.id} style={{ borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                   <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(var(--foreground))" }}>
                     <div>{s.name}</div>
                     {s.pluginSlug && (
@@ -579,7 +579,7 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px", color: "hsl(var(--primary))", fontWeight: 600 }}>{s.finalPrice}</td>
                   <td style={{ padding: "8px 10px" }}>
                     {(s as any).stock === null || (s as any).stock === undefined
-                      ? <span style={{ color: "hsl(220,10%,40%)", fontSize: "11px" }}>∞</span>
+                      ? <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>∞</span>
                       : (s as any).stock === 0
                         ? <span style={{ color: "hsl(0,72%,55%)", fontWeight: 700, fontSize: "11px" }}>Out</span>
                         : <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600, fontSize: "11px" }}>{(s as any).stock}</span>
@@ -594,7 +594,7 @@ function ServicesPanel({ game }: { game: Game }) {
                           padding: "5px 10px", borderRadius: "5px", fontSize: "11px", cursor: "pointer",
                           ...(s.pluginSlug
                             ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)", color: "hsl(var(--primary))" }
-                            : { background: "rgba(34,211,238,0.04)", color: "hsl(220,10%,40%)", border: "1px solid hsl(var(--border))" }
+                            : { background: "rgba(34,211,238,0.04)", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
                           )
                         }}
                         onClick={() => setMapTarget({ type: "service", id: s.id, name: s.name, currentSlug: s.pluginSlug })}
@@ -702,7 +702,7 @@ export default function Games() {
         ) : (
           <div>
             {gameList.map((g, idx) => (
-              <div key={g.id} style={{ borderBottom: idx < gameList.length - 1 ? "1px solid hsl(220,15%,11%)" : "none" }}>
+              <div key={g.id} style={{ borderBottom: idx < gameList.length - 1 ? "1px solid hsl(var(--border) / 0.5)" : "none" }}>
 
                 {isMobile ? (
                   /* ── Mobile card layout ── */
@@ -812,7 +812,7 @@ export default function Games() {
 
                 {/* Services panel */}
                 {expandedId === g.id && (
-                  <div style={{ background: "hsl(220,20%,7%)", borderTop: "1px solid hsl(220,15%,11%)" }}>
+                  <div style={{ background: "hsl(var(--background))", borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
                     <ServicesPanel game={g} />
                   </div>
                 )}
