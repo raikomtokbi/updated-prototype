@@ -428,63 +428,85 @@ function OrdersTab({ user }: { user: any }) {
             {/* Expanded section: items + actions */}
             {isExpanded && (
               <div style={{ borderTop: "1px solid hsl(var(--border))", padding: "0.75rem 1.25rem 1rem" }}>
-                {order.items && order.items.length > 0 && (() => {
+                {(() => {
+                  // Notes items are the primary source — order_items table may be empty for older orders
                   const notesItems = parseOrderNotes(order.notes);
+                  // Fall back to DB items if notes is empty (future-proofing)
+                  const dbItems: any[] = order.items ?? [];
+                  const displayItems = notesItems.length > 0
+                    ? notesItems.map((ni, idx) => ({
+                        key: idx,
+                        productTitle: ni.productTitle ?? dbItems[idx]?.productTitle ?? "—",
+                        packageLabel: ni.packageName ?? dbItems[idx]?.packageLabel,
+                        quantity: ni.quantity ?? dbItems[idx]?.quantity ?? 1,
+                        price: ni.price != null ? ni.price : dbItems[idx]?.totalPrice,
+                        userId: ni.userId,
+                        zoneId: ni.zoneId,
+                      }))
+                    : dbItems.map((item, idx) => ({
+                        key: item.id ?? idx,
+                        productTitle: item.productTitle,
+                        packageLabel: item.packageLabel,
+                        quantity: item.quantity,
+                        price: item.totalPrice,
+                        userId: undefined,
+                        zoneId: undefined,
+                      }));
+
+                  if (displayItems.length === 0) return null;
                   return (
                     <>
                       <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
                         Order Details
                       </div>
-                      {order.items.map((item: any, idx: number) => {
-                        const ni = notesItems[idx] ?? {};
-                        return (
-                          <div key={item.id} style={{
-                            padding: "0.7rem 0", borderBottom: "1px solid hsl(var(--border))",
-                          }} data-testid={`row-order-item-${item.id}`}>
-                            {/* Game + price row */}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
-                                {item.packageLabel && (
-                                  <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
-                                    {item.packageLabel}{item.quantity > 1 ? ` × ${item.quantity}` : ""}
-                                  </div>
-                                )}
-                              </div>
-                              <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
-                                {formatCurrency(item.totalPrice)}
-                              </div>
+                      {displayItems.map((item) => (
+                        <div key={item.key} style={{ padding: "0.7rem 0", borderBottom: "1px solid hsl(var(--border))" }}
+                          data-testid={`row-order-item-${item.key}`}>
+                          {/* Game + price */}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))" }}>{item.productTitle}</div>
+                              {item.packageLabel && (
+                                <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+                                  {item.packageLabel}{item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                                </div>
+                              )}
                             </div>
-                            {/* Player info */}
-                            {(ni.userId || ni.zoneId) && (
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.3rem" }}>
-                                {ni.userId && (
-                                  <span style={{
-                                    display: "inline-flex", alignItems: "center", gap: "0.3rem",
-                                    fontSize: "0.65rem", fontFamily: "monospace",
-                                    padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
-                                    background: "hsla(258,80%,60%,0.1)", color: "hsl(258,80%,70%)",
-                                    border: "1px solid hsla(258,80%,60%,0.2)",
-                                  }}>
-                                    <User size={9} /> ID: {ni.userId}
-                                  </span>
-                                )}
-                                {ni.zoneId && (
-                                  <span style={{
-                                    display: "inline-flex", alignItems: "center", gap: "0.3rem",
-                                    fontSize: "0.65rem", fontFamily: "monospace",
-                                    padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
-                                    background: "hsla(196,100%,50%,0.08)", color: "hsl(196,100%,55%)",
-                                    border: "1px solid hsla(196,100%,50%,0.2)",
-                                  }}>
-                                    <Hash size={9} /> Zone: {ni.zoneId}
-                                  </span>
-                                )}
+                            {item.price != null && (
+                              <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "hsl(var(--foreground))", flexShrink: 0 }}>
+                                {formatCurrency(item.price, order.currency)}
                               </div>
                             )}
                           </div>
-                        );
-                      })}
+                          {/* Player info badges */}
+                          {(item.userId || item.zoneId) && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.3rem" }}>
+                              {item.userId && (
+                                <span style={{
+                                  display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                                  fontSize: "0.65rem", fontFamily: "monospace",
+                                  padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
+                                  background: "hsla(258,80%,60%,0.1)", color: "hsl(258,80%,70%)",
+                                  border: "1px solid hsla(258,80%,60%,0.2)",
+                                }}>
+                                  <User size={9} /> ID: {item.userId}
+                                </span>
+                              )}
+                              {item.zoneId && (
+                                <span style={{
+                                  display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                                  fontSize: "0.65rem", fontFamily: "monospace",
+                                  padding: "0.2rem 0.5rem", borderRadius: "0.3rem",
+                                  background: "hsla(196,100%,50%,0.08)", color: "hsl(196,100%,55%)",
+                                  border: "1px solid hsla(196,100%,50%,0.2)",
+                                }}>
+                                  <Hash size={9} /> Zone: {item.zoneId}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.75rem" }}>
                         <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>Order Total</span>
                         <span className="font-orbitron" style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--primary))" }}>
