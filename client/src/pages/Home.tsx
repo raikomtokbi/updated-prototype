@@ -40,7 +40,7 @@ function HeroSlider() {
     bg: siteSettings.hero_bg_image || "",
     title: (siteSettings.hero_title || "Welcome to Game Marketplace").trim(),
     sub: (siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.").trim(),
-    btnLabel: "Browse Games",
+    btnLabel: "",
     btnHref: "/products",
   };
 
