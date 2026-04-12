@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Shield, Plus, Trash2, Save, ChevronDown, ChevronRight,
@@ -6,7 +6,7 @@ import {
   RotateCcw, Mail, LifeBuoy, Gamepad2, Package, Ticket,
   RefreshCcw, Users, UserCheck, Megaphone, BadgePercent,
   Settings, Wallet, Plug, Palette, FileEdit, Key, X, Check,
-  GripVertical, ArrowUpDown,
+  GripVertical,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
@@ -127,183 +127,17 @@ function Toggle({ on, disabled }: { on: boolean; disabled?: boolean }) {
   );
 }
 
-// ── Hierarchy drag-and-drop panel ─────────────────────────────────────────────
-function HierarchyPanel({
-  roles,
-  onSave,
-  saving,
-}: {
-  roles: RoleRow[];
-  onSave: (orders: { role: string; sortOrder: number }[]) => void;
-  saving: boolean;
-}) {
-  // highest sortOrder = most authority. Displayed top-to-bottom: most privileged first
-  const sorted = useMemo(
-    () => [...roles].sort((a, b) => b.sortOrder - a.sortOrder),
-    [roles],
-  );
-  const [order, setOrder] = useState<RoleRow[]>(sorted);
-  const [dirty, setDirty] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-
-  // Reset when roles change from server
-  const prevRoleStr = useRef("");
-  const roleStr = sorted.map(r => r.role + r.sortOrder).join(",");
-  if (prevRoleStr.current !== roleStr) {
-    prevRoleStr.current = roleStr;
-    setOrder(sorted);
-    setDirty(false);
-  }
-
-  const dragIdx = useRef<number | null>(null);
-  const dragOverIdx = useRef<number | null>(null);
-
-  const handleDragStart = (idx: number) => { dragIdx.current = idx; };
-  const handleDragOver = (e: React.DragEvent, idx: number) => {
-    e.preventDefault();
-    dragOverIdx.current = idx;
-  };
-  const handleDrop = () => {
-    const from = dragIdx.current;
-    const to = dragOverIdx.current;
-    if (from === null || to === null || from === to) return;
-    const next = [...order];
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    setOrder(next);
-    setDirty(true);
-    dragIdx.current = null;
-    dragOverIdx.current = null;
-  };
-
-  const handleSave = () => {
-    // Top of list = highest authority = highest sortOrder
-    const total = order.length;
-    const orders = order.map((r, i) => ({ role: r.role, sortOrder: total - i }));
-    onSave(orders);
-    setDirty(false);
-  };
-
-  return (
-    <div style={{ ...card, marginBottom: "18px", overflow: "hidden", padding: 0 }}>
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{
-          display: "flex", alignItems: "center", gap: "10px",
-          padding: "13px 16px", cursor: "pointer", userSelect: "none",
-        }}
-        data-testid="hierarchy-panel-header"
-      >
-        <div style={{
-          width: "36px", height: "36px", borderRadius: "8px", flexShrink: 0,
-          background: "hsl(var(--primary) / 0.12)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <ArrowUpDown size={15} style={{ color: "hsl(var(--primary))" }} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))" }}>
-            Role Hierarchy
-          </div>
-          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
-            Drag to reorder — higher position means more authority (can manage roles below)
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-          {dirty && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
-              background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))",
-            }}>UNSAVED</span>
-          )}
-          {expanded ? <ChevronDown size={14} style={{ color: "hsl(var(--muted-foreground))" }} /> : <ChevronRight size={14} style={{ color: "hsl(var(--muted-foreground))" }} />}
-        </div>
-      </div>
-
-      {expanded && (
-        <div style={{ borderTop: "1px solid hsl(var(--border) / 0.5)", padding: "16px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "12px", marginTop: 0 }}>
-            Top = highest authority. A role can only manage users with a role below theirs in this hierarchy.
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "14px" }}>
-            {order.map((role, idx) => (
-              <div
-                key={role.role}
-                draggable
-                onDragStart={() => handleDragStart(idx)}
-                onDragOver={(e) => handleDragOver(e, idx)}
-                onDrop={handleDrop}
-                data-testid={`hierarchy-item-${role.role}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "10px 12px",
-                  background: "hsl(var(--background))",
-                  border: "1px solid hsl(var(--border) / 0.7)",
-                  borderRadius: "7px",
-                  cursor: "grab",
-                  userSelect: "none",
-                }}
-              >
-                <GripVertical size={14} style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
-                <div style={{
-                  width: "24px", height: "24px", borderRadius: "6px", flexShrink: 0,
-                  background: idx === 0 ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "11px", fontWeight: 700, color: idx === 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-                }}>
-                  {idx + 1}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>
-                    {role.label}
-                  </span>
-                  <code style={{ marginLeft: "8px", fontSize: "10px", background: "hsl(var(--muted) / 0.5)", padding: "1px 5px", borderRadius: "3px", color: "hsl(var(--muted-foreground))" }}>
-                    {role.role}
-                  </code>
-                </div>
-                {role.isSystem && (
-                  <span style={{
-                    fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
-                    background: "hsl(var(--muted) / 0.8)", color: "hsl(var(--muted-foreground))",
-                    letterSpacing: "0.04em",
-                  }}>SYSTEM</span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <button
-              onClick={handleSave}
-              disabled={!dirty || saving}
-              data-testid="btn-save-hierarchy"
-              style={{
-                ...btnPrimary, fontSize: "12px",
-                display: "flex", alignItems: "center", gap: "5px",
-                opacity: (!dirty || saving) ? 0.6 : 1,
-                cursor: (!dirty || saving) ? "not-allowed" : "pointer",
-              }}
-            >
-              <Save size={12} /> Save Hierarchy
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── RoleCard ─────────────────────────────────────────────────────────────────
 function RoleCard({
   row, onSave, onDelete, saving,
+  isDragOver, dragHandleProps,
 }: {
   row: RoleRow;
   onSave: (role: string, label: string, permissions: string[]) => void;
   onDelete: (role: string) => void;
   saving: boolean;
+  isDragOver: boolean;
+  dragHandleProps: React.HTMLAttributes<HTMLDivElement>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [perms, setPerms] = useState<Set<string>>(new Set(row.permissions));
@@ -349,55 +183,94 @@ function RoleCard({
   const grantedCount = isSuperAdmin ? ALL_PERMISSION_KEYS.length : perms.size;
 
   return (
-    <div style={{ ...card, marginBottom: "10px", overflow: "hidden", padding: 0 }}>
+    <div
+      style={{
+        ...card,
+        marginBottom: "10px",
+        overflow: "hidden",
+        padding: 0,
+        outline: isDragOver ? "2px dashed hsl(var(--primary) / 0.6)" : "2px solid transparent",
+        transition: "outline-color 0.15s",
+      }}
+    >
       {/* Header */}
       <div
-        onClick={() => setExpanded(e => !e)}
-        data-testid={`role-card-${row.role}`}
         style={{
-          display: "flex", alignItems: "center", gap: "12px",
-          padding: "13px 16px", cursor: "pointer", userSelect: "none",
+          display: "flex", alignItems: "center",
         }}
       >
+        {/* Drag handle — separate from expand click */}
         <div
+          {...dragHandleProps}
+          title="Drag to reorder"
+          data-testid={`drag-handle-${row.role}`}
           style={{
-            width: "36px", height: "36px", borderRadius: "8px", flexShrink: 0,
-            background: isSuperAdmin ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0 4px 0 12px",
+            alignSelf: "stretch",
+            display: "flex",
+            alignItems: "center",
+            cursor: "grab",
+            color: "hsl(var(--muted-foreground) / 0.5)",
+            flexShrink: 0,
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <GripVertical size={14} />
+        </div>
+
+        {/* Expand / collapse area */}
+        <div
+          onClick={() => setExpanded(e => !e)}
+          data-testid={`role-card-${row.role}`}
+          style={{
+            flex: 1,
+            display: "flex", alignItems: "center", gap: "12px",
+            padding: "13px 16px 13px 8px", cursor: "pointer", userSelect: "none",
           }}
         >
-          {isSuperAdmin
-            ? <Lock size={15} style={{ color: "hsl(var(--primary))" }} />
-            : <Shield size={15} style={{ color: "hsl(var(--muted-foreground))" }} />
-          }
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))" }}>
-            {row.label}
+          <div
+            style={{
+              width: "36px", height: "36px", borderRadius: "8px", flexShrink: 0,
+              background: isSuperAdmin ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {isSuperAdmin
+              ? <Lock size={15} style={{ color: "hsl(var(--primary))" }} />
+              : <Shield size={15} style={{ color: "hsl(var(--muted-foreground))" }} />
+            }
           </div>
-          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
-            <code style={{ fontSize: "10px", background: "hsl(var(--muted) / 0.5)", padding: "1px 4px", borderRadius: "3px" }}>{row.role}</code>
-            {"  ·  "}
-            {isSuperAdmin ? "Full access" : `${grantedCount} / ${ALL_PERMISSION_KEYS.length} permissions granted`}
-          </div>
-        </div>
 
-        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
-          {row.isSystem && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
-              background: "hsl(var(--muted) / 0.8)", color: "hsl(var(--muted-foreground))",
-              letterSpacing: "0.04em",
-            }}>SYSTEM</span>
-          )}
-          {dirty && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
-              background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))",
-            }}>UNSAVED</span>
-          )}
-          {expanded ? <ChevronDown size={14} style={{ color: "hsl(var(--muted-foreground))" }} /> : <ChevronRight size={14} style={{ color: "hsl(var(--muted-foreground))" }} />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))" }}>
+              {row.label}
+            </div>
+            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>
+              <code style={{ fontSize: "10px", background: "hsl(var(--muted) / 0.5)", padding: "1px 4px", borderRadius: "3px" }}>{row.role}</code>
+              {"  ·  "}
+              {isSuperAdmin ? "Full access" : `${grantedCount} / ${ALL_PERMISSION_KEYS.length} permissions granted`}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
+            {row.isSystem && (
+              <span style={{
+                fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
+                background: "hsl(var(--muted) / 0.8)", color: "hsl(var(--muted-foreground))",
+                letterSpacing: "0.04em",
+              }}>SYSTEM</span>
+            )}
+            {dirty && (
+              <span style={{
+                fontSize: "10px", fontWeight: 600, padding: "2px 7px", borderRadius: "10px",
+                background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))",
+              }}>UNSAVED</span>
+            )}
+            {expanded
+              ? <ChevronDown size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
+              : <ChevronRight size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
+            }
+          </div>
         </div>
       </div>
 
@@ -451,7 +324,6 @@ function RoleCard({
                     overflow: "hidden",
                   }}
                 >
-                  {/* Group header */}
                   <div style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "7px 10px", borderBottom: "1px solid hsl(var(--border) / 0.5)",
@@ -471,7 +343,6 @@ function RoleCard({
                     )}
                   </div>
 
-                  {/* Permission rows */}
                   {group.permissions.map((perm, idx) => {
                     const granted = isSuperAdmin || perms.has(perm.key);
                     const { Icon } = perm;
@@ -545,10 +416,25 @@ export default function RolesPermissions() {
   const [search, setSearch] = useState("");
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
+  // Drag state
+  const [orderedRoles, setOrderedRoles] = useState<RoleRow[]>([]);
+  const [hierarchyDirty, setHierarchyDirty] = useState(false);
+  const [dragOverRole, setDragOverRole] = useState<string | null>(null);
+  const dragIdx = useRef<number | null>(null);
+
   const { data: roles = [], isLoading } = useQuery<RoleRow[]>({
     queryKey: ["/api/admin/role-permissions"],
     queryFn: () => adminApi.get("/role-permissions") as Promise<RoleRow[]>,
   });
+
+  // Sync ordered list when server data arrives (only if not dirty)
+  const prevRoleKey = useRef("");
+  const roleKey = roles.map(r => r.role + r.sortOrder).join(",");
+  if (!hierarchyDirty && prevRoleKey.current !== roleKey) {
+    prevRoleKey.current = roleKey;
+    const sorted = [...roles].sort((a, b) => b.sortOrder - a.sortOrder);
+    setOrderedRoles(sorted);
+  }
 
   const showMsg = (text: string, ok = true) => {
     setMsg({ text, ok });
@@ -594,6 +480,7 @@ export default function RolesPermissions() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/role-permissions"] });
       qc.invalidateQueries({ queryKey: ["/api/admin/my-permissions"] });
+      setHierarchyDirty(false);
       showMsg("Hierarchy saved.");
     },
     onError: (e: any) => showMsg(e.message ?? "Failed to save hierarchy.", false),
@@ -604,11 +491,43 @@ export default function RolesPermissions() {
     setNewSlug(val.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
   };
 
+  // Drag handlers
+  const handleDragStart = (idx: number) => {
+    dragIdx.current = idx;
+  };
+
+  const handleDragOver = (e: React.DragEvent, role: string, toIdx: number) => {
+    e.preventDefault();
+    setDragOverRole(role);
+    const from = dragIdx.current;
+    if (from === null || from === toIdx) return;
+    setOrderedRoles(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+    dragIdx.current = toIdx;
+    setHierarchyDirty(true);
+  };
+
+  const handleDragEnd = () => {
+    setDragOverRole(null);
+    dragIdx.current = null;
+  };
+
+  const handleSaveHierarchy = () => {
+    const total = orderedRoles.length;
+    const orders = orderedRoles.map((r, i) => ({ role: r.role, sortOrder: total - i }));
+    orderMutation.mutate(orders);
+  };
+
+  // Displayed list — apply search filter but keep drag order
   const filtered = useMemo(() => {
-    if (!search.trim()) return roles;
+    if (!search.trim()) return orderedRoles;
     const q = search.toLowerCase();
-    return roles.filter(r => r.label.toLowerCase().includes(q) || r.role.toLowerCase().includes(q));
-  }, [roles, search]);
+    return orderedRoles.filter(r => r.label.toLowerCase().includes(q) || r.role.toLowerCase().includes(q));
+  }, [orderedRoles, search]);
 
   return (
     <AdminLayout>
@@ -635,16 +554,32 @@ export default function RolesPermissions() {
               Roles &amp; Permissions
             </h1>
             <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
-              Control what each role can access in the admin panel. Super Admin always has full access and cannot be edited.
+              Control what each role can access. Drag cards to set hierarchy — higher position = more authority.
             </p>
           </div>
-          <button
-            onClick={() => setAddOpen(true)}
-            data-testid="btn-add-role"
-            style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: "6px", fontSize: "12px" }}
-          >
-            <Plus size={13} /> Add role
-          </button>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            {hierarchyDirty && (
+              <button
+                onClick={handleSaveHierarchy}
+                disabled={orderMutation.isPending}
+                data-testid="btn-save-hierarchy"
+                style={{
+                  ...btnPrimary, fontSize: "12px",
+                  display: "flex", alignItems: "center", gap: "5px",
+                  opacity: orderMutation.isPending ? 0.6 : 1,
+                }}
+              >
+                <Save size={12} /> Save hierarchy
+              </button>
+            )}
+            <button
+              onClick={() => setAddOpen(true)}
+              data-testid="btn-add-role"
+              style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: "6px", fontSize: "12px" }}
+            >
+              <Plus size={13} /> Add role
+            </button>
+          </div>
         </div>
 
         {/* Summary stats */}
@@ -662,25 +597,12 @@ export default function RolesPermissions() {
           ))}
         </div>
 
-        {/* Hierarchy panel */}
-        {!isLoading && roles.length > 0 && (
-          <HierarchyPanel
-            roles={roles}
-            onSave={(orders) => orderMutation.mutate(orders)}
-            saving={orderMutation.isPending}
-          />
-        )}
-
         {/* Search */}
         <div style={{ marginBottom: "14px" }}>
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search roles..."
-          />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search roles..." />
         </div>
 
-        {/* Roles list */}
+        {/* Roles list — draggable */}
         {isLoading ? (
           <div style={{ textAlign: "center", padding: "48px", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>
             Loading roles...
@@ -690,15 +612,27 @@ export default function RolesPermissions() {
             No roles found.
           </div>
         ) : (
-          filtered.map(row => (
-            <RoleCard
-              key={row.role}
-              row={row}
-              onSave={(role, label, permissions) => saveMutation.mutate({ role, label, permissions })}
-              onDelete={(role) => deleteMutation.mutate(role)}
-              saving={saveMutation.isPending}
-            />
-          ))
+          <div>
+            {filtered.map((row, idx) => (
+              <div
+                key={row.role}
+                draggable
+                onDragStart={() => handleDragStart(idx)}
+                onDragOver={(e) => handleDragOver(e, row.role, idx)}
+                onDragEnd={handleDragEnd}
+                style={{ userSelect: "none" }}
+              >
+                <RoleCard
+                  row={row}
+                  onSave={(role, label, permissions) => saveMutation.mutate({ role, label, permissions })}
+                  onDelete={(role) => deleteMutation.mutate(role)}
+                  saving={saveMutation.isPending}
+                  isDragOver={dragOverRole === row.role}
+                  dragHandleProps={{}}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Add role modal */}
