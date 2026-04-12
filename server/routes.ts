@@ -52,7 +52,11 @@ const upload = multer({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
       const ext = path.extname(file.originalname);
-      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+      const base = path.basename(file.originalname, ext)
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "");
+      cb(null, `${base || "file"}${ext}`);
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -70,7 +74,11 @@ const attachmentUpload = multer({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
       const ext = path.extname(file.originalname);
-      cb(null, `attach-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+      const base = path.basename(file.originalname, ext)
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "");
+      cb(null, `${base || "attach"}${ext}`);
     },
   }),
   limits: { fileSize: 2 * 1024 * 1024 },
