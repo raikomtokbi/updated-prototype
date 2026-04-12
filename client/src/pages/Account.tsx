@@ -1148,7 +1148,7 @@ export default function Account() {
                 {roleInfo.label}
               </span>
               <span style={{ fontFamily: "monospace", fontSize: "0.68rem", fontWeight: 700, color: "hsl(196,100%,55%)", background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.18)", borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.06em" }}>
-                #{user.id.slice(0, 12)}…
+                #{user.id}
               </span>
             </div>
           </div>

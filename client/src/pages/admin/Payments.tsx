@@ -186,7 +186,7 @@ export default function Payments() {
                         </td>
                         <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>
                           {o.userId ? (
-                            <span style={{ fontFamily: "monospace", fontSize: "11px" }}>{o.userId.slice(0, 12)}…</span>
+                            <span style={{ fontFamily: "monospace", fontSize: "11px" }}>{o.userId}</span>
                           ) : (
                             <span style={{ color: "hsl(220,10%,40%)", fontSize: "11px" }}>Guest</span>
                           )}

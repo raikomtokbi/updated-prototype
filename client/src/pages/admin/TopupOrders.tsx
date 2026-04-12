@@ -170,10 +170,10 @@ export default function TopupOrders() {
                             <div>
                               {firstItem.userId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>ID: {firstItem.userId}</div>}
                               {firstItem.zoneId && <div style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>Zone: {firstItem.zoneId}</div>}
-                              {o.userId && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>User: {o.userId.slice(0, 12)}…</div>}
+                              {o.userId && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>User: {o.userId}</div>}
                             </div>
                           ) : (
-                            <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>{o.userId ? o.userId.slice(0, 12) + "…" : "Guest"}</span>
+                            <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>{o.userId ?? "Guest"}</span>
                           )}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
