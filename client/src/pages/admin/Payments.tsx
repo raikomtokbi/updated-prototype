@@ -18,12 +18,22 @@ const STATUS_OPTIONS = [
   { value: "unmatched", label: "Unmatched UPI" },
 ];
 
-function formatDate(d: string | Date | null | undefined) {
-  if (!d) return "—";
-  return new Date(d).toLocaleString("en-US", {
-    year: "numeric", month: "short", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
+function formatDateParts(d: string | Date | null | undefined, tz = "UTC") {
+  if (!d) return { date: "—", time: "" };
+  const dt = new Date(d);
+  const date = dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: tz });
+  const time = dt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: tz });
+  return { date, time };
+}
+
+function DateCell({ value, tz }: { value: string | null | undefined; tz: string }) {
+  const { date, time } = formatDateParts(value, tz);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      <span style={{ fontSize: "12px", color: "hsl(var(--foreground))", fontWeight: 500, whiteSpace: "nowrap" }}>{date}</span>
+      {time && <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{time}</span>}
+    </div>
+  );
 }
 
 function formatCurrency(amount: string | number, currency = "INR") {
@@ -66,6 +76,13 @@ export default function Payments() {
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedAssign, setExpandedAssign] = useState<string | null>(null);
   const [assignOrderId, setAssignOrderId] = useState<Record<string, string>>({});
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    queryFn: () => apiRequest("GET", "/api/site-settings").then(r => r.json()),
+    staleTime: 300000,
+  });
+  const siteTimezone = siteSettings?.site_timezone ?? "UTC";
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
@@ -184,8 +201,8 @@ export default function Payments() {
                           {formatCurrency(o.totalAmount, o.currency)}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
-                          {formatDate(o.createdAt)}
+                        <td style={tdStyle}>
+                          <DateCell value={o.createdAt} tz={siteTimezone} />
                         </td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
@@ -241,8 +258,8 @@ export default function Payments() {
                               </span>
                             )}
                           </td>
-                          <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
-                            {formatDate(p.detectedAt)}
+                          <td style={tdStyle}>
+                            <DateCell value={p.detectedAt} tz={siteTimezone} />
                           </td>
                           <td style={tdStyle}>
                             {!isAssigned && (
