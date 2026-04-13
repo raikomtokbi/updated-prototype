@@ -770,92 +770,84 @@ function BonusBanner() {
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
   return (
-    <section style={{ padding: "2rem 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
+    <section style={{ padding: "0 10px", maxWidth: "1320px", margin: "12px auto 0" }}>
       <div
         style={{
           borderRadius: "16px",
-          overflow: "hidden",
-          position: "relative",
           background: "hsl(var(--card))",
-          border: "1px solid hsl(var(--primary) / 0.25)",
-          boxShadow: "0 0 40px hsl(var(--primary) / 0.15)",
+          border: "1px solid hsl(var(--border))",
+          padding: "1.5rem 2rem",
           display: "flex",
           alignItems: "center",
-          minHeight: "180px",
+          gap: "2rem",
+          flexWrap: "wrap",
         }}
       >
-        {/* Glow */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse 60% 80% at 30% 50%, hsl(var(--primary) / 0.12) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Content */}
-        <div style={{ position: "relative", zIndex: 1, padding: "2rem 2.5rem", flex: 1 }}>
-          <span
-            style={{
-              display: "inline-block",
-              padding: "0.2rem 0.65rem",
-              borderRadius: "9999px",
-              background: "hsl(var(--primary) / 0.2)",
-              border: "1px solid hsl(var(--primary) / 0.45)",
-              fontSize: "0.65rem",
-              fontWeight: 700,
-              color: "hsl(var(--primary))",
-              letterSpacing: "0.1em",
-              marginBottom: "0.75rem",
-            }}
-          >
-            {badgeText}
-          </span>
-          <h2
-            className="font-orbitron"
-            style={{
-              fontSize: "clamp(1.3rem, 2.6vw, 2rem)",
-              fontWeight: 900,
-              color: "hsl(var(--foreground))",
-              lineHeight: 1.1,
-              marginBottom: "0.75rem",
-            }}
-          >
-            {mainTitle}{" "}
-            <span style={{ color: "hsl(var(--primary))" }}>
-              {bonusText} BONUS
-            </span>{" "}
-            {mainTitleSuffix}
-          </h2>
-          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, maxWidth: "440px", marginBottom: "1.25rem" }}>
-            {description}
-          </p>
-          <Link
-            href="/offers"
-            data-testid="link-claim-bonus"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.6rem 1.25rem",
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.75))",
-              color: "white",
-              fontSize: "0.68rem",
-              fontWeight: 700,
-              textDecoration: "none",
-              boxShadow: "0 0 16px hsl(var(--primary) / 0.4)",
-              transition: "box-shadow 0.2s",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 28px hsl(var(--primary) / 0.65)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 16px hsl(var(--primary) / 0.4)"; }}
-          >
-            {buttonText} <ArrowRight size={14} />
-          </Link>
+        {/* Icon box */}
+        <div style={{
+          width: "52px",
+          height: "52px",
+          borderRadius: "12px",
+          background: "hsl(var(--primary) / 0.12)",
+          border: "1px solid hsl(var(--primary) / 0.25)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <Zap size={24} color="hsl(var(--primary))" />
         </div>
 
+        {/* Text */}
+        <div style={{ flex: 1, minWidth: "180px" }}>
+          <span style={{
+            display: "inline-block",
+            padding: "0.15rem 0.55rem",
+            borderRadius: "9999px",
+            background: "hsl(var(--primary) / 0.12)",
+            border: "1px solid hsl(var(--primary) / 0.25)",
+            fontSize: "0.62rem",
+            fontWeight: 700,
+            color: "hsl(var(--primary))",
+            letterSpacing: "0.1em",
+            marginBottom: "0.4rem",
+          }}>
+            {badgeText}
+          </span>
+          <h2 className="font-orbitron" style={{ fontSize: "0.95rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.3rem", lineHeight: 1.2 }}>
+            {mainTitle}{" "}
+            <span style={{ color: "hsl(var(--primary))" }}>{bonusText} BONUS</span>{" "}
+            {mainTitleSuffix}
+          </h2>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>
+            {description}
+          </p>
+        </div>
+
+        {/* CTA */}
+        <Link
+          href="/offers"
+          data-testid="link-claim-bonus"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            padding: "0.55rem 1.15rem",
+            borderRadius: "8px",
+            background: "hsl(var(--primary) / 0.12)",
+            border: "1px solid hsl(var(--primary) / 0.25)",
+            color: "hsl(var(--primary))",
+            fontSize: "0.68rem",
+            fontWeight: 700,
+            textDecoration: "none",
+            flexShrink: 0,
+            transition: "background 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(var(--primary) / 0.2)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "hsl(var(--primary) / 0.12)"; }}
+        >
+          {buttonText} <ArrowRight size={13} />
+        </Link>
       </div>
     </section>
   );
