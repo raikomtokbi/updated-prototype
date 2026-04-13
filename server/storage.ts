@@ -25,6 +25,7 @@ import {
   type SmileOneMapping, type InsertSmileOneMapping,
   type BusanConfig,
   type BusanMapping, type InsertBusanMapping,
+  type PageView, pageViews,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
   campaigns, heroSliders, reviews, paymentMethods, plugins,
@@ -94,6 +95,12 @@ export interface IStorage {
   updateOrderAmount(id: string, amount: string): Promise<void>;
   updateOrderDelivery(id: string, deliveryStatus: string, deliveryNote?: string): Promise<void>;
   expirePendingOrders(olderThanMs: number): Promise<number>;
+
+  // Analytics
+  trackPageView(data: { id: string; sessionId: string; path: string; referrer?: string; deviceType?: string }): Promise<void>;
+  updatePageViewDuration(id: string, durationMs: number, isBounce: boolean): Promise<void>;
+  getAnalyticsOverview(fromDate: Date, toDate: Date): Promise<any>;
+  getLiveTraffic(): Promise<any>;
 
   // Transactions
   getAllTransactions(limit?: number, offset?: number): Promise<Transaction[]>;
@@ -461,6 +468,108 @@ export class DatabaseStorage implements IStorage {
   async getRefundedOrders() {
     return db.select().from(orders).where(eq(orders.status, "refunded")).orderBy(desc(orders.updatedAt));
   }
+
+  // ── Analytics ─────────────────────────────────────────────────────────────────
+  async trackPageView(data: { id: string; sessionId: string; path: string; referrer?: string; deviceType?: string }) {
+    await db.insert(pageViews).values({
+      id: data.id,
+      sessionId: data.sessionId,
+      path: data.path,
+      referrer: data.referrer ?? null,
+      deviceType: data.deviceType ?? "desktop",
+    });
+  }
+  async updatePageViewDuration(id: string, durationMs: number, isBounce: boolean) {
+    await db.update(pageViews).set({ durationMs, isBounce }).where(eq(pageViews.id, id));
+  }
+  async getAnalyticsOverview(fromDate: Date, toDate: Date) {
+    const views = await db.select().from(pageViews)
+      .where(and(gte(pageViews.createdAt, fromDate), lte(pageViews.createdAt, toDate)))
+      .orderBy(asc(pageViews.createdAt));
+
+    const totalViews = views.length;
+    const uniqueSessions = new Set(views.map(v => v.sessionId)).size;
+    const bounces = views.filter(v => v.isBounce).length;
+    const bounceRate = uniqueSessions > 0 ? Math.round((bounces / uniqueSessions) * 100) : 0;
+    const durViews = views.filter(v => v.durationMs != null && v.durationMs > 0);
+    const avgDuration = durViews.length > 0
+      ? Math.round(durViews.reduce((s, v) => s + (v.durationMs ?? 0), 0) / durViews.length / 1000)
+      : 0;
+
+    // Hourly traffic (last 24h from toDate)
+    const hourMap: Record<string, number> = {};
+    const now = toDate;
+    for (let h = 23; h >= 0; h--) {
+      const d = new Date(now); d.setHours(now.getHours() - h, 0, 0, 0);
+      const key = `${String(d.getHours()).padStart(2, "0")}:00`;
+      hourMap[key] = 0;
+    }
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    views.filter(v => v.createdAt >= dayAgo).forEach(v => {
+      const key = `${String(v.createdAt.getHours()).padStart(2, "0")}:00`;
+      if (hourMap[key] !== undefined) hourMap[key]++;
+    });
+    const liveTraffic = Object.entries(hourMap).map(([hour, views]) => ({ hour, views }));
+
+    // Traffic sources
+    const sourceCount: Record<string, number> = { Direct: 0, Organic: 0, Referral: 0, Social: 0 };
+    views.forEach(v => {
+      if (!v.referrer) { sourceCount.Direct++; return; }
+      const ref = v.referrer.toLowerCase();
+      if (ref.includes("google") || ref.includes("bing") || ref.includes("yahoo")) sourceCount.Organic++;
+      else if (ref.includes("facebook") || ref.includes("twitter") || ref.includes("instagram") || ref.includes("tiktok")) sourceCount.Social++;
+      else sourceCount.Referral++;
+    });
+    const trafficSources = Object.entries(sourceCount).map(([name, value]) => ({ name, value }));
+
+    // Top pages
+    const pathCount: Record<string, number> = {};
+    views.forEach(v => { pathCount[v.path] = (pathCount[v.path] ?? 0) + 1; });
+    const topPages = Object.entries(pathCount)
+      .sort((a, b) => b[1] - a[1]).slice(0, 8)
+      .map(([path, views]) => ({ path, views }));
+
+    // Device breakdown
+    const deviceCount: Record<string, number> = { desktop: 0, mobile: 0, tablet: 0 };
+    views.forEach(v => { const d = v.deviceType ?? "desktop"; deviceCount[d] = (deviceCount[d] ?? 0) + 1; });
+    const devices = Object.entries(deviceCount).map(([name, value]) => ({ name, value }));
+
+    // Engagement by day
+    const dayDur: Record<string, number[]> = {};
+    durViews.forEach(v => {
+      const key = v.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (!dayDur[key]) dayDur[key] = [];
+      dayDur[key].push(v.durationMs ?? 0);
+    });
+    const engagementByDay = Object.entries(dayDur).map(([day, times]) => ({
+      day,
+      avgSec: Math.round(times.reduce((s, t) => s + t, 0) / times.length / 1000),
+    }));
+
+    // Bounce rate by day
+    const dayBounce: Record<string, { bounces: number; sessions: number }> = {};
+    views.forEach(v => {
+      const key = v.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (!dayBounce[key]) dayBounce[key] = { bounces: 0, sessions: 0 };
+      dayBounce[key].sessions++;
+      if (v.isBounce) dayBounce[key].bounces++;
+    });
+    const bounceByDay = Object.entries(dayBounce).map(([day, d]) => ({
+      day,
+      rate: Math.round((d.bounces / d.sessions) * 100),
+    }));
+
+    return {
+      totalViews, uniqueSessions, bounceRate, avgDurationSec: avgDuration,
+      liveTraffic, trafficSources, topPages, devices, engagementByDay, bounceByDay,
+    };
+  }
+  async getLiveTraffic() {
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const recent = await db.select().from(pageViews).where(gte(pageViews.createdAt, fiveMinAgo));
+    return { activeNow: new Set(recent.map(v => v.sessionId)).size };
+  }
+
   async createRefundTransaction(order: Order) {
     const id = randomUUID();
     const transactionNumber = await generateTransactionNumber();

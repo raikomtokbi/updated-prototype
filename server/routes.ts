@@ -1027,6 +1027,33 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(stats);
   });
 
+  // ── Page View Tracking ─────────────────────────────────────────────────────
+  app.post("/api/analytics/track", async (req: any, res) => {
+    const { id, sessionId, path: pagePath, referrer, deviceType } = req.body;
+    if (!id || !sessionId || !pagePath) return res.status(400).json({ ok: false });
+    await storage.trackPageView({ id, sessionId, path: pagePath, referrer, deviceType }).catch(() => {});
+    res.json({ ok: true });
+  });
+
+  app.post("/api/analytics/duration", async (req: any, res) => {
+    const { id, durationMs, isBounce } = req.body;
+    if (!id || durationMs == null) return res.status(400).json({ ok: false });
+    await storage.updatePageViewDuration(id, durationMs, !!isBounce).catch(() => {});
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/analytics/site", requireAdmin, async (req, res) => {
+    const range = (req.query.range as string) || "30days";
+    const now = new Date();
+    let fromDate: Date;
+    if (range === "7days") fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    else if (range === "90days") fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    else fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const data = await storage.getAnalyticsOverview(fromDate, now);
+    const live = await storage.getLiveTraffic();
+    res.json({ ...data, ...live });
+  });
+
   // ── Analytics (time-series for charts) ────────────────────────────────────
   app.get("/api/admin/analytics", requireAdmin, async (req, res) => {
     const range = (req.query.range as string) || "12months";

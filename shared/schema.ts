@@ -127,6 +127,20 @@ export const orderItems = pgTable("order_items", {
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
 });
 
+// ─── Page Views (Analytics) ───────────────────────────────────────────────────
+export const pageViews = pgTable("page_views", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  sessionId: varchar("session_id", { length: 64 }).notNull(),
+  path: varchar("path", { length: 500 }).notNull(),
+  referrer: varchar("referrer", { length: 500 }),
+  deviceType: varchar("device_type", { length: 20 }),
+  durationMs: integer("duration_ms"),
+  isBounce: boolean("is_bounce").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type PageView = typeof pageViews.$inferSelect;
+
 // ─── Transactions ─────────────────────────────────────────────────────────────
 export const transactions = pgTable("transactions", {
   id: varchar("id", { length: 36 }).primaryKey(),

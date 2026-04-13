@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
 import { applyThemeVars } from "@/lib/theme";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import Navbar from "./components/Navbar";
 import CookieBanner from "./components/CookieBanner";
 import Home from "./pages/Home";
@@ -31,6 +32,7 @@ import PaymentReturn from "./pages/PaymentReturn";
 import UpiPayment from "./pages/UpiPayment";
 
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminAnalytics from "./pages/admin/Analytics";
 import TopupOrders from "./pages/admin/TopupOrders";
 import VoucherOrders from "./pages/admin/VoucherOrders";
 import Payments from "./pages/admin/Payments";
@@ -57,6 +59,7 @@ function AdminRoutes() {
   return (
     <Switch>
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
       <Route path="/admin/topup-orders" component={TopupOrders} />
       <Route path="/admin/voucher-orders" component={VoucherOrders} />
       <Route path="/admin/payments" component={Payments} />
@@ -218,6 +221,7 @@ function MaintenancePage({ siteName }: { siteName?: string }) {
 export default function App() {
   const [location] = useLocation();
   const isAdmin = location === "/admin" || location.startsWith("/admin/");
+  usePageTracking();
 
   const { data: siteSettings, isLoading: settingsLoading } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
