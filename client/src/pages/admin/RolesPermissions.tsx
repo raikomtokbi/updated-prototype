@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Shield, Plus, Trash2, Save, ChevronDown, ChevronRight,
-  Lock, LayoutDashboard, ShoppingCart, Tag, CreditCard,
+  Lock, LayoutDashboard, BarChart2, ShoppingCart, Tag, CreditCard,
   RotateCcw, Mail, LifeBuoy, Gamepad2, Package, Ticket,
   RefreshCcw, Users, UserCheck, Megaphone, BadgePercent,
   Settings, Wallet, Plug, Palette, FileEdit, Key, X, Check,
@@ -21,6 +21,7 @@ const PERMISSION_GROUPS = [
     group: "Overview",
     permissions: [
       { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+      { key: "analytics", label: "Analytics", Icon: BarChart2 },
     ],
   },
   {

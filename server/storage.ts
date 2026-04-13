@@ -1252,7 +1252,7 @@ export class DatabaseStorage implements IStorage {
 
   async seedDefaultRolePermissions(): Promise<void> {
     const ALL_PERMS = [
-      "dashboard","topup_orders","voucher_orders","payments","refunds",
+      "dashboard","analytics","topup_orders","voucher_orders","payments","refunds",
       "contact_submissions","support_tickets","games","gift_cards","vouchers",
       "subscriptions","users","subscribers","campaigns","coupons",
       "control_panel","payment_method","api_integration","email_templates",
@@ -1271,9 +1271,22 @@ export class DatabaseStorage implements IStorage {
         const id = randomUUID();
         await db.insert(rolePermissions).values({ id, role: d.role, label: d.label, isSystem: d.isSystem, sortOrder: d.sortOrder, permissions: JSON.stringify(d.permissions) });
       } else {
+        let needsUpdate = false;
+        const updates: Record<string, any> = {};
         // Update sortOrder if it's still 0 (first time migration)
         if (existing.sortOrder === 0) {
-          await db.update(rolePermissions).set({ sortOrder: d.sortOrder }).where(eq(rolePermissions.role, d.role));
+          updates.sortOrder = d.sortOrder;
+          needsUpdate = true;
+        }
+        // Backfill analytics permission for roles that previously had dashboard access
+        const existingPerms: string[] = JSON.parse(existing.permissions as string || "[]");
+        if (!existingPerms.includes("analytics") && existingPerms.includes("dashboard")) {
+          const newPerms = [...existingPerms, "analytics"];
+          updates.permissions = JSON.stringify(newPerms);
+          needsUpdate = true;
+        }
+        if (needsUpdate) {
+          await db.update(rolePermissions).set(updates).where(eq(rolePermissions.role, d.role));
         }
       }
     }

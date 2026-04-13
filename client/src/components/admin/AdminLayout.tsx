@@ -69,7 +69,7 @@ const navSections: NavSection[] = [
     title: "",
     items: [
       { label: "Dashboard", icon: <LayoutDashboard size={15} />, path: "/admin", permKey: "dashboard" },
-      { label: "Analytics", icon: <BarChart2 size={15} />, path: "/admin/analytics", permKey: "dashboard" },
+      { label: "Analytics", icon: <BarChart2 size={15} />, path: "/admin/analytics", permKey: "analytics" },
     ],
   },
   {
