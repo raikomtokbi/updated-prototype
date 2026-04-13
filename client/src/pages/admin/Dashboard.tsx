@@ -100,6 +100,26 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [emailForm, setEmailForm] = useState({ fromName: "", replyTo: "", to: "", subject: "", body: "" });
   const [emailSent, setEmailSent] = useState(false);
+
+  const { data: smtpPlugins } = useQuery<any[]>({
+    queryKey: ["/api/admin/plugins"],
+    queryFn: () => adminApi.get("/plugins"),
+  });
+  const smtpConfig: Record<string, string> = (() => {
+    const plugin = smtpPlugins?.find((p: any) => p.slug === "smtp-email");
+    try { return plugin?.config ? JSON.parse(plugin.config) : {}; } catch { return {}; }
+  })();
+
+  useEffect(() => {
+    if (smtpConfig.SMTP_DEFAULT_TO || smtpConfig.SMTP_FROM_NAME) {
+      setEmailForm((f) => ({
+        ...f,
+        to: f.to || smtpConfig.SMTP_DEFAULT_TO || "",
+        fromName: f.fromName || smtpConfig.SMTP_FROM_NAME || "",
+      }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [smtpPlugins]);
   const sendEmailMutation = useMutation({
     mutationFn: async (data: typeof emailForm) => {
       const res = await apiRequest("POST", "/api/admin/send-email", data);

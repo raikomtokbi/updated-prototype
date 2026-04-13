@@ -76,6 +76,7 @@ const SERVICES: ServiceDef[] = [
       { key: "SMTP_PASS", label: "SMTP Password", placeholder: "••••••••" },
       { key: "SMTP_FROM_EMAIL", label: "From Email Address", placeholder: "noreply@example.com" },
       { key: "SMTP_FROM_NAME", label: "From Name", placeholder: "Nexcoin Support" },
+      { key: "SMTP_DEFAULT_TO", label: "Default Recipient Email", placeholder: "admin@example.com" },
     ],
   },
 ];
