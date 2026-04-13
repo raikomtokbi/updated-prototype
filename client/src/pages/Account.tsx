@@ -115,16 +115,59 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
 
-      {/* Edit form */}
-      {editing && (
-        <div style={{
-          background: "hsl(var(--card))", border: "1px solid hsla(258,90%,66%,0.25)",
-          borderRadius: "0.75rem", padding: "1.5rem",
-        }}>
-          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "1.25rem" }}>
-            Edit Profile
+      {/* Single card — switches between view and edit */}
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            Account Details
           </h3>
-          <div style={{ display: "grid", gap: "1rem" }}>
+          <button
+            onClick={() => { setEditing(!editing); if (!editing) setForm({ fullName: user.fullName ?? "", email: user.email ?? "", phone: "" }); }}
+            className="btn-secondary"
+            style={{ fontSize: "0.68rem" }}
+            data-testid="button-edit-profile"
+          >
+            <Settings size={13} />
+            {editing ? "Cancel" : "Edit"}
+          </button>
+        </div>
+
+        {/* View mode */}
+        {!editing && (
+          <>
+            {fields.map(({ key, label, value }) => (
+              <div key={key} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "0.9rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", gap: "1rem", flexWrap: "wrap",
+              }}>
+                <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>{label}</span>
+                {key === "id" ? (
+                  <span
+                    data-testid="text-member-id"
+                    style={{
+                      fontFamily: "monospace", fontSize: "0.9rem", fontWeight: 700,
+                      color: "hsl(196,100%,60%)", letterSpacing: "0.08em",
+                      background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.2)",
+                      borderRadius: "4px", padding: "2px 8px",
+                    }}
+                  >
+                    #{value}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: "0.68rem", color: "hsl(var(--foreground))", fontWeight: 500, wordBreak: "break-all" }}
+                    data-testid={`text-${key}`}>
+                    {value}
+                  </span>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Edit mode */}
+        {editing && (
+          <div style={{ padding: "1.25rem", display: "grid", gap: "1rem" }}>
             {[
               { key: "fullName", label: "Full Name", placeholder: "John Doe" },
               { key: "email", label: "Email Address", placeholder: "you@example.com", type: "email" },
@@ -148,78 +191,36 @@ function AccountInfoTab({ user, setUser }: { user: any; setUser: (u: any) => voi
                 />
               </div>
             ))}
-          </div>
-          <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem" }}>
-            <button
-              onClick={() => updateMutation.mutate(form)}
-              disabled={updateMutation.isPending}
-              className="btn-primary"
-              style={{ fontSize: "0.68rem" }}
-              data-testid="button-save-profile"
-            >
-              {updateMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-              Save Changes
-            </button>
-            <button onClick={() => setEditing(false)} className="btn-secondary" style={{ fontSize: "0.68rem" }} data-testid="button-cancel-edit">
-              <X size={14} />
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Info fields */}
-      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Account Details
-          </h3>
-          <button
-            onClick={() => { setEditing(!editing); if (!editing) setForm({ fullName: user.fullName ?? "", email: user.email ?? "", phone: "" }); }}
-            className="btn-secondary"
-            style={{ fontSize: "0.68rem" }}
-            data-testid="button-edit-profile"
-          >
-            <Settings size={13} />
-            {editing ? "Cancel" : "Edit"}
-          </button>
-        </div>
-        {fields.map(({ key, label, value }) => (
-          <div key={key} style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            padding: "0.9rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", gap: "1rem", flexWrap: "wrap",
-          }}>
-            <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>{label}</span>
-            {key === "id" ? (
-              <span
-                data-testid="text-member-id"
-                style={{
-                  fontFamily: "monospace", fontSize: "0.9rem", fontWeight: 700,
-                  color: "hsl(196,100%,60%)", letterSpacing: "0.08em",
-                  background: "hsla(196,100%,50%,0.08)", border: "1px solid hsla(196,100%,50%,0.2)",
-                  borderRadius: "4px", padding: "2px 8px",
-                }}
+            <div style={{ display: "flex", gap: "0.75rem", paddingTop: "0.25rem" }}>
+              <button
+                onClick={() => updateMutation.mutate(form)}
+                disabled={updateMutation.isPending}
+                className="btn-primary"
+                style={{ fontSize: "0.68rem" }}
+                data-testid="button-save-profile"
               >
-                #{value}
-              </span>
-            ) : (
-              <span style={{ fontSize: "0.68rem", color: "hsl(var(--foreground))", fontWeight: 500, wordBreak: "break-all" }}
-                data-testid={`text-${key}`}>
-                {value}
-              </span>
-            )}
+                {updateMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                Save Changes
+              </button>
+              <button onClick={() => setEditing(false)} className="btn-secondary" style={{ fontSize: "0.68rem" }} data-testid="button-cancel-edit">
+                <X size={14} />
+                Cancel
+              </button>
+            </div>
           </div>
-        ))}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "0.9rem 1.5rem", gap: "1rem", flexWrap: "wrap",
-        }}>
-          <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>Account Status</span>
-          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.68rem", color: "hsl(145,70%,55%)", fontWeight: 500 }}>
-            <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "hsl(145,70%,55%)", flexShrink: 0 }} />
-            Active
-          </span>
-        </div>
+        )}
+        {!editing && (
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            padding: "0.9rem 1.5rem", gap: "1rem", flexWrap: "wrap",
+          }}>
+            <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", minWidth: "120px" }}>Account Status</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.68rem", color: "hsl(145,70%,55%)", fontWeight: 500 }}>
+              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "hsl(145,70%,55%)", flexShrink: 0 }} />
+              Active
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
