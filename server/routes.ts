@@ -1032,6 +1032,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/analytics/track", async (req: any, res) => {
     const { id, sessionId, path: pagePath, referrer, deviceType } = req.body;
     if (!id || !sessionId || !pagePath) return res.status(400).json({ ok: false });
+    if (pagePath.startsWith("/admin")) return res.json({ ok: true });
     await storage.trackPageView({ id, sessionId, path: pagePath, referrer, deviceType }).catch(() => {});
     res.json({ ok: true });
   });

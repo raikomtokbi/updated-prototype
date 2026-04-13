@@ -55,7 +55,7 @@ export function usePageTracking() {
     startRef.current = Date.now();
     isFirstViewRef.current = false;
 
-    const skipPaths = ["/api", "/uploads", "/__"];
+    const skipPaths = ["/api", "/uploads", "/__", "/admin"];
     if (skipPaths.some(p => location.startsWith(p))) return;
 
     fetch("/api/analytics/track", {

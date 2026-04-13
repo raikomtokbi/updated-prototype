@@ -38,7 +38,7 @@ import {
   type UnmatchedPayment, type InsertUnmatchedPayment,
   type RolePermission,
 } from "@shared/schema";
-import { eq, desc, asc, count, sum, and, gte, lte, lt, sql } from "drizzle-orm";
+import { eq, desc, asc, count, sum, and, gte, lte, lt, sql, not, like } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -484,7 +484,11 @@ export class DatabaseStorage implements IStorage {
   }
   async getAnalyticsOverview(fromDate: Date, toDate: Date) {
     const views = await db.select().from(pageViews)
-      .where(and(gte(pageViews.createdAt, fromDate), lte(pageViews.createdAt, toDate)))
+      .where(and(
+        gte(pageViews.createdAt, fromDate),
+        lte(pageViews.createdAt, toDate),
+        not(like(pageViews.path, "/admin%")),
+      ))
       .orderBy(asc(pageViews.createdAt));
 
     const totalViews = views.length;
@@ -566,7 +570,9 @@ export class DatabaseStorage implements IStorage {
   }
   async getLiveTraffic() {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const recent = await db.select().from(pageViews).where(gte(pageViews.createdAt, fiveMinAgo));
+    const recent = await db.select().from(pageViews).where(
+      and(gte(pageViews.createdAt, fiveMinAgo), not(like(pageViews.path, "/admin%"))),
+    );
     return { activeNow: new Set(recent.map(v => v.sessionId)).size };
   }
 
