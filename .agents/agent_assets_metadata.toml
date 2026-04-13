@@ -1,14 +1,3 @@
 uploads = []
 generated = []
-
-[[outputs]]
-id = "G_GCljzT0wh60NsjcHKiZ"
-uri = "file://nexcoin-deploy.zip"
-type = "unspecified"
-title = "nexcoin-deploy.zip — cPanel Deployment Package"
-
-[[outputs]]
-id = "5-pYDL0YoaCJMjGdq50RI"
-uri = "file://nexcoin-cpanel.zip"
-type = "unspecified"
-title = "nexcoin-cpanel.zip — cPanel Deployment Bundle"
+outputs = []
