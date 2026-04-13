@@ -170,7 +170,7 @@ function InfoPopover({ id }: { id: string; alignLeft?: boolean }) {
             zIndex: 9999,
             width: POPOVER_W,
             maxWidth: "calc(100vw - 16px)",
-            background: "hsl(var(--popover))",
+            background: "hsl(var(--card))",
             border: "1px solid hsl(var(--border))",
             borderRadius: "10px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
