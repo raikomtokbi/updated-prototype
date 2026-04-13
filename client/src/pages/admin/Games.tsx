@@ -99,7 +99,7 @@ const EMPTY_GAME = {
   requiredFields: "userId",
   instantDelivery: true,
 };
-const EMPTY_SERVICE = { name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" };
+const EMPTY_SERVICE = { id: "", name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -348,16 +348,22 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
           <input style={inputStyle} type="number" min="0" value={form.stock} onChange={(e) => set("stock", e.target.value)} placeholder="Unlimited" />
         </div>
       </div>
-      <button type="button" onClick={() => setMappingOpen(true)} style={{ ...btnEdit, justifyContent: "center", color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}>
-        <Link2 size={14} /> Map to Provider
-      </button>
+      {form.id ? (
+        <button type="button" onClick={() => setMappingOpen(true)} style={{ ...btnEdit, justifyContent: "center", color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}>
+          <Link2 size={14} /> Map to Provider
+        </button>
+      ) : (
+        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textAlign: "center", padding: "6px 0", fontStyle: "italic" }}>
+          Save this service first to map it to a provider.
+        </div>
+      )}
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
         {loading ? "Saving..." : "Save Service"}
       </button>
-      {mappingOpen && (
+      {mappingOpen && form.id && (
         <ProductMappingModal
-          cmsProductId={String((form as any).id || "")}
+          cmsProductId={form.id}
           cmsProductName={form.name}
           onClose={() => setMappingOpen(false)}
         />
@@ -377,14 +383,14 @@ function ServicesPanel({ game }: { game: Game }) {
   });
 
   const addMut = useMutation({
-    mutationFn: (d: any) => adminApi.post("/services", { ...d, gameId: game.id }),
+    mutationFn: (d: any) => { const { id: _id, ...rest } = d; return adminApi.post("/services", { ...rest, gameId: game.id }); },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
       setShowAdd(false);
     },
   });
   const editMut = useMutation({
-    mutationFn: ({ id, data }: any) => adminApi.patch(`/services/${id}`, data),
+    mutationFn: ({ id, data }: any) => { const { id: _id, ...rest } = data; return adminApi.patch(`/services/${id}`, rest); },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
       setEditSvc(null);
@@ -456,7 +462,7 @@ function ServicesPanel({ game }: { game: Game }) {
       {editSvc && (
         <Modal title="Edit Service" onClose={() => setEditSvc(null)}>
           <ServiceForm
-            initial={{ name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder, stock: (editSvc as any).stock !== null && (editSvc as any).stock !== undefined ? String((editSvc as any).stock) : "" }}
+            initial={{ id: editSvc.id, name: editSvc.name, description: editSvc.description ?? "", imageUrl: editSvc.imageUrl ?? "", price: String(editSvc.price), discountPercent: String(editSvc.discountPercent), finalPrice: String(editSvc.finalPrice), status: editSvc.status, sortOrder: editSvc.sortOrder, stock: (editSvc as any).stock !== null && (editSvc as any).stock !== undefined ? String((editSvc as any).stock) : "" }}
             onSubmit={(d) => editMut.mutate({ id: editSvc.id, data: d })}
             loading={editMut.isPending}
           />
