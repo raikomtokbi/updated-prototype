@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2, AlertTriangle, Lock } from "lucide-react";
+import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2, AlertTriangle } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -69,16 +69,6 @@ function PackageCard({
         filter: outOfStock ? "grayscale(1)" : "none",
       }}
     >
-      {outOfStock && (
-        <span style={{
-          position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", gap: "4px",
-          background: "rgba(0,0,0,0.45)", borderRadius: "8px", zIndex: 1,
-        }}>
-          <Lock size={14} style={{ color: "hsl(var(--muted-foreground))", opacity: 0.8 }} />
-          <span style={{ fontSize: "9px", fontWeight: 600, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sold Out</span>
-        </span>
-      )}
       {!outOfStock && selected && (
         <span style={{
           position: "absolute", top: "5px", right: "5px",
