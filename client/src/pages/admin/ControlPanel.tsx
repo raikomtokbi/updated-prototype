@@ -505,181 +505,6 @@ export default function ControlPanel() {
         </p>
       </div>
 
-      {/* ── Site Identity ───────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Site Identity</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
-            <div>
-              <label style={labelStyle}>Site Name</label>
-              <input
-                data-testid="input-site-name"
-                style={inputStyle}
-                value={local.site_name ?? ""}
-                onChange={(e) => set("site_name", e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Tagline</label>
-              <input
-                data-testid="input-tagline"
-                style={inputStyle}
-                value={local.site_tagline ?? ""}
-                onChange={(e) => set("site_tagline", e.target.value)}
-              />
-            </div>
-          </div>
-          <div>
-            <label style={labelStyle}>Short Description</label>
-            <textarea
-              data-testid="input-site-description"
-              style={textareaStyle as React.CSSProperties}
-              value={local.site_description ?? ""}
-              onChange={(e) => set("site_description", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>
-              <Mail size={11} style={{ display: "inline", marginRight: "5px", verticalAlign: "middle" }} />
-              Footer Support Email
-            </label>
-            <input
-              data-testid="input-support-email"
-              type="email"
-              style={inputStyle}
-              value={local.footer_support_email ?? ""}
-              onChange={(e) => set("footer_support_email", e.target.value)}
-              placeholder="support@yourdomain.com"
-              autoComplete="off"
-            />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
-            <ImageUploadField
-              label="Site Logo"
-              value={local.site_logo ?? ""}
-              onChange={(url) => set("site_logo", url)}
-              inputStyle={inputStyle}
-              labelStyle={labelStyle}
-              ratio="square"
-            />
-            <ImageUploadField
-              label="Favicon"
-              value={local.site_favicon ?? ""}
-              onChange={(url) => set("site_favicon", url)}
-              inputStyle={inputStyle}
-              labelStyle={labelStyle}
-              ratio="square"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Contact & Social ────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Phone size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Contact & Social</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
-            <div>
-              <label style={labelStyle}>Support Email</label>
-              <input
-                data-testid="input-contact-email"
-                type="email"
-                style={inputStyle}
-                value={local.contact_email ?? ""}
-                onChange={(e) => set("contact_email", e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Phone Number</label>
-              <input
-                data-testid="input-contact-phone"
-                style={inputStyle}
-                value={local.contact_phone ?? ""}
-                onChange={(e) => set("contact_phone", e.target.value)}
-              />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Address</label>
-              <input
-                data-testid="input-contact-address"
-                style={inputStyle}
-                value={local.contact_address ?? ""}
-                onChange={(e) => set("contact_address", e.target.value)}
-              />
-            </div>
-          </div>
-          <div style={{ borderTop: "1px solid hsl(var(--input))", paddingTop: "14px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Social Links
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "10px" }}>
-              {[
-                { key: "social_whatsapp", label: "WhatsApp" },
-                { key: "social_facebook", label: "Facebook" },
-                { key: "social_instagram", label: "Instagram" },
-                { key: "social_discord", label: "Discord" },
-              ].map((item) => (
-                <div key={item.key}>
-                  <label style={labelStyle}>{item.label}</label>
-                  <input
-                    data-testid={`input-${item.key}`}
-                    style={inputStyle}
-                    value={local[item.key] ?? ""}
-                    onChange={(e) => set(item.key, e.target.value)}
-                    placeholder="https://…"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── SEO ─────────────────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Search size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>SEO Settings</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div>
-            <label style={labelStyle}>Meta Title</label>
-            <input
-              data-testid="input-seo-title"
-              style={inputStyle}
-              value={local.seo_title ?? ""}
-              onChange={(e) => set("seo_title", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Meta Description</label>
-            <textarea
-              data-testid="input-seo-description"
-              style={{ ...textareaStyle, minHeight: "250px" } as React.CSSProperties}
-              value={local.seo_description ?? ""}
-              onChange={(e) => set("seo_description", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Keywords (comma-separated)</label>
-            <input
-              data-testid="input-seo-keywords"
-              style={inputStyle}
-              value={local.seo_keywords ?? ""}
-              onChange={(e) => set("seo_keywords", e.target.value)}
-              placeholder="game top-up, game credits, voucher…"
-            />
-          </div>
-        </div>
-      </div>
-
       {/* ── General ─────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
@@ -787,6 +612,212 @@ export default function ControlPanel() {
         ))}
       </div>
 
+      {/* ── User & Access ───────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Users size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>User Management</span>
+        </div>
+        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
+          <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
+        </SettingRow>
+        <SettingRow label="Allow Social Login" description="Enable Google, Facebook, and Discord sign-in" note="Sign-in buttons appear once OAuth credentials are configured in API Integration." apiSlug="social-auth-google">
+          <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
+        </SettingRow>
+        <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(var(--input))" }}>
+          <label style={labelStyle}>New Account Approval</label>
+          <select
+            data-testid="select-account-approval"
+            style={{ ...selectStyle, maxWidth: "260px" }}
+            value={local.account_approval ?? "auto"}
+            onChange={(e) => set("account_approval", e.target.value)}
+          >
+            <option value="auto">Automatic (approved instantly)</option>
+            <option value="manual">Manual review required — new accounts start inactive until an admin approves</option>
+            <option value="invite">Invite only</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── Fees & Taxes ────────────────────────────────────────────────────── */}
+      <FeesAndTaxesManager local={local} set={set} bool={bool} toggle={toggle} isMobile={isMobile} />
+
+
+      {/* ── Contact & Social ────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Phone size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Contact & Social</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>Support Email</label>
+              <input
+                data-testid="input-contact-email"
+                type="email"
+                style={inputStyle}
+                value={local.contact_email ?? ""}
+                onChange={(e) => set("contact_email", e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Phone Number</label>
+              <input
+                data-testid="input-contact-phone"
+                style={inputStyle}
+                value={local.contact_phone ?? ""}
+                onChange={(e) => set("contact_phone", e.target.value)}
+              />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={labelStyle}>Address</label>
+              <input
+                data-testid="input-contact-address"
+                style={inputStyle}
+                value={local.contact_address ?? ""}
+                onChange={(e) => set("contact_address", e.target.value)}
+              />
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid hsl(var(--input))", paddingTop: "14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Social Links
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "10px" }}>
+              {[
+                { key: "social_whatsapp", label: "WhatsApp" },
+                { key: "social_facebook", label: "Facebook" },
+                { key: "social_instagram", label: "Instagram" },
+                { key: "social_discord", label: "Discord" },
+              ].map((item) => (
+                <div key={item.key}>
+                  <label style={labelStyle}>{item.label}</label>
+                  <input
+                    data-testid={`input-${item.key}`}
+                    style={inputStyle}
+                    value={local[item.key] ?? ""}
+                    onChange={(e) => set(item.key, e.target.value)}
+                    placeholder="https://…"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Site Identity ───────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Globe size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Site Identity</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>Site Name</label>
+              <input
+                data-testid="input-site-name"
+                style={inputStyle}
+                value={local.site_name ?? ""}
+                onChange={(e) => set("site_name", e.target.value)}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Tagline</label>
+              <input
+                data-testid="input-tagline"
+                style={inputStyle}
+                value={local.site_tagline ?? ""}
+                onChange={(e) => set("site_tagline", e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Short Description</label>
+            <textarea
+              data-testid="input-site-description"
+              style={textareaStyle as React.CSSProperties}
+              value={local.site_description ?? ""}
+              onChange={(e) => set("site_description", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>
+              <Mail size={11} style={{ display: "inline", marginRight: "5px", verticalAlign: "middle" }} />
+              Footer Support Email
+            </label>
+            <input
+              data-testid="input-support-email"
+              type="email"
+              style={inputStyle}
+              value={local.footer_support_email ?? ""}
+              onChange={(e) => set("footer_support_email", e.target.value)}
+              placeholder="support@yourdomain.com"
+              autoComplete="off"
+            />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
+            <ImageUploadField
+              label="Site Logo"
+              value={local.site_logo ?? ""}
+              onChange={(url) => set("site_logo", url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="square"
+            />
+            <ImageUploadField
+              label="Favicon"
+              value={local.site_favicon ?? ""}
+              onChange={(url) => set("site_favicon", url)}
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+              ratio="square"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── SEO ─────────────────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Search size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>SEO Settings</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Meta Title</label>
+            <input
+              data-testid="input-seo-title"
+              style={inputStyle}
+              value={local.seo_title ?? ""}
+              onChange={(e) => set("seo_title", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Meta Description</label>
+            <textarea
+              data-testid="input-seo-description"
+              style={{ ...textareaStyle, minHeight: "250px" } as React.CSSProperties}
+              value={local.seo_description ?? ""}
+              onChange={(e) => set("seo_description", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Keywords (comma-separated)</label>
+            <input
+              data-testid="input-seo-keywords"
+              style={inputStyle}
+              value={local.seo_keywords ?? ""}
+              onChange={(e) => set("seo_keywords", e.target.value)}
+              placeholder="game top-up, game credits, voucher…"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* ── Security ────────────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={sectionHeader}>
@@ -838,98 +869,6 @@ export default function ControlPanel() {
           <SettingRow label="Audit Log" description="Record admin actions for security auditing" note="Saved to config. A full audit log system (logging all admin write actions to a dedicated table) can be enabled when the audit middleware is implemented.">
             <Toggle checked={bool("audit_log_enabled")} onChange={() => toggle("audit_log_enabled")} />
           </SettingRow>
-        </div>
-      </div>
-
-      {/* ── User & Access ───────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Users size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>User Management</span>
-        </div>
-        <SettingRow label="Require Email Verification" description="Users must verify their email before ordering" note="Requires SMTP for sending verification emails and an OTP flow to validate." apiSlug="smtp-email">
-          <Toggle checked={bool("require_email_verify")} onChange={() => toggle("require_email_verify")} />
-        </SettingRow>
-        <SettingRow label="Allow Social Login" description="Enable Google, Facebook, and Discord sign-in" note="Sign-in buttons appear once OAuth credentials are configured in API Integration." apiSlug="social-auth-google">
-          <Toggle checked={bool("social_login")} onChange={() => toggle("social_login")} />
-        </SettingRow>
-        <div style={{ padding: "14px 20px", borderTop: "1px solid hsl(var(--input))" }}>
-          <label style={labelStyle}>New Account Approval</label>
-          <select
-            data-testid="select-account-approval"
-            style={{ ...selectStyle, maxWidth: "260px" }}
-            value={local.account_approval ?? "auto"}
-            onChange={(e) => set("account_approval", e.target.value)}
-          >
-            <option value="auto">Automatic (approved instantly)</option>
-            <option value="manual">Manual review required — new accounts start inactive until an admin approves</option>
-            <option value="invite">Invite only</option>
-          </select>
-        </div>
-      </div>
-
-      {/* ── Fees & Taxes ────────────────────────────────────────────────────── */}
-      <FeesAndTaxesManager local={local} set={set} bool={bool} toggle={toggle} isMobile={isMobile} />
-
-
-      {/* ── Legal & Footer ──────────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Footer & Legal</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div>
-            <label style={labelStyle}>Footer Copyright Text</label>
-            <input
-              data-testid="input-footer-copyright"
-              style={inputStyle}
-              value={local.footer_copyright ?? ""}
-              onChange={(e) => set("footer_copyright", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Footer Button Label</label>
-            <input
-              data-testid="input-footer-button-name"
-              style={inputStyle}
-              placeholder="e.g. Contact Us (leave blank to hide)"
-              value={local.footer_button_name ?? ""}
-              onChange={(e) => set("footer_button_name", e.target.value)}
-            />
-          </div>
-          <div>
-            <label style={labelStyle}>Footer Button Link</label>
-            <input
-              data-testid="input-footer-button-link"
-              style={inputStyle}
-              placeholder="e.g. /contact or https://..."
-              value={local.footer_button_link ?? ""}
-              onChange={(e) => set("footer_button_link", e.target.value)}
-            />
-          </div>
-        </div>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(var(--input))", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
-            Override the default content for each legal page. Leave blank to use the built-in defaults.
-          </p>
-          {[
-            { key: "terms_content", label: "Terms of Service" },
-            { key: "privacy_content", label: "Privacy Policy" },
-            { key: "refund_content", label: "Refund Policy" },
-            { key: "delivery_cancellation_content", label: "Delivery & Cancellation Policy" },
-          ].map((item) => (
-            <div key={item.key}>
-              <label style={labelStyle}>{item.label}</label>
-              <textarea
-                data-testid={`input-${item.key}`}
-                style={{ ...textareaStyle, minHeight: "250px" }}
-                value={local[item.key] ?? ""}
-                onChange={(e) => set(item.key, e.target.value)}
-                placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
-              />
-            </div>
-          ))}
         </div>
       </div>
 
@@ -1018,6 +957,67 @@ export default function ControlPanel() {
               onChange={(v) => set("why_nexcoin_cards", v)}
             />
           </div>
+        </div>
+      </div>
+
+      {/* ── Legal & Footer ──────────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <FileText size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Footer & Legal</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Footer Copyright Text</label>
+            <input
+              data-testid="input-footer-copyright"
+              style={inputStyle}
+              value={local.footer_copyright ?? ""}
+              onChange={(e) => set("footer_copyright", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Footer Button Label</label>
+            <input
+              data-testid="input-footer-button-name"
+              style={inputStyle}
+              placeholder="e.g. Contact Us (leave blank to hide)"
+              value={local.footer_button_name ?? ""}
+              onChange={(e) => set("footer_button_name", e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Footer Button Link</label>
+            <input
+              data-testid="input-footer-button-link"
+              style={inputStyle}
+              placeholder="e.g. /contact or https://..."
+              value={local.footer_button_link ?? ""}
+              onChange={(e) => set("footer_button_link", e.target.value)}
+            />
+          </div>
+        </div>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid hsl(var(--input))", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+            Override the default content for each legal page. Leave blank to use the built-in defaults.
+          </p>
+          {[
+            { key: "terms_content", label: "Terms of Service" },
+            { key: "privacy_content", label: "Privacy Policy" },
+            { key: "refund_content", label: "Refund Policy" },
+            { key: "delivery_cancellation_content", label: "Delivery & Cancellation Policy" },
+          ].map((item) => (
+            <div key={item.key}>
+              <label style={labelStyle}>{item.label}</label>
+              <textarea
+                data-testid={`input-${item.key}`}
+                style={{ ...textareaStyle, minHeight: "250px" }}
+                value={local[item.key] ?? ""}
+                onChange={(e) => set(item.key, e.target.value)}
+                placeholder={`Custom ${item.label} content (plain text or Markdown)…`}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
