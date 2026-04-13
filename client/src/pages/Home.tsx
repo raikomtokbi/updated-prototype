@@ -38,8 +38,8 @@ function HeroSlider() {
   const defaultSlide = {
     id: "default",
     bg: siteSettings.hero_bg_image || "",
-    title: (siteSettings.hero_title || "Welcome to Game Marketplace").trim(),
-    sub: (siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly.").trim(),
+    title: (siteSettings.hero_title || "Level Up Your Gaming Experience").trim(),
+    sub: (siteSettings.hero_subtitle || "Buy game credits, vouchers & subscriptions instantly — safe, fast, and affordable.").trim(),
     btnLabel: "",
     btnHref: "/products",
   };
