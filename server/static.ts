@@ -12,7 +12,7 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(clientPath));
+  app.use(express.static(clientPath, { index: false }));
 
   app.use("/{*path}", async (_req, res) => {
     try {

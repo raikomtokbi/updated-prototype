@@ -33,7 +33,7 @@ async function getSeoValues(): Promise<Record<string, string>> {
     "Buy game credits, vouchers, and subscriptions instantly. Fast, secure & affordable.";
   const seoKeywords =
     map.seo_keywords || "game top-up, game credits, voucher, gift card";
-  const ogImage = map.site_logo || "";
+  const ogImage = map.og_image || map.site_logo || "";
 
   const values: Record<string, string> = {
     __SEO_TITLE__: seoTitle,
