@@ -310,6 +310,7 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
   const [usdInrRate, setUsdInrRate] = useState<number | null>(null);
   const [rateLoading, setRateLoading] = useState(false);
   const [mappingInfo, setMappingInfo] = useState<{ provider: string; productName: string } | null>(null);
+  const [lioRateCurrency, setLioRateCurrency] = useState<string>("USD");
   const set = (k: string, v: string | number) => setForm((p) => ({ ...p, [k]: v }));
 
   function computeFinal(price: string, disc: string) {
@@ -370,6 +371,17 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         const lMap = Array.isArray(lioMappings) ? lioMappings.find((m: any) => m.cmsProductId === form.id) : null;
         if (lMap) {
           setMappingInfo({ provider: "Liogames", productName: lMap.lioProductName ?? `Product #${lMap.lioProductId}` });
+          try {
+            const varRes = await adminApi.get(`/liogames/product-variations?product_id=${lMap.lioProductId}`);
+            const variations: any[] = varRes?.data?.variations ?? [];
+            const matched = lMap.lioVariationId
+              ? variations.find((v: any) => String(v.variation_id) === String(lMap.lioVariationId))
+              : variations[0];
+            if (matched?.price != null) {
+              setRate(String(matched.price));
+              setLioRateCurrency(matched.currency ?? "USD");
+            }
+          } catch { /* ignore */ }
         }
       } catch (e) { console.error(e); }
       setRateLoading(false);
@@ -408,20 +420,29 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
               <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))", padding: "8px 0" }}>
                 <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Fetching provider rate…
               </div>
-            ) : rate ? (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
-                  <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>$</span>
-                  <input style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed", margin: 0 }} type="number" step="0.01" value={rate} readOnly disabled />
+            ) : rate ? (() => {
+              const isLio = mappingInfo?.provider === "Liogames";
+              const currSymbol = isLio
+                ? (lioRateCurrency === "USD" ? "$" : lioRateCurrency)
+                : "$";
+              const showInr = !isLio || lioRateCurrency === "USD";
+              return (
+                <div style={{ display: "grid", gridTemplateColumns: showInr ? "1fr 1fr" : "1fr", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                    <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>{currSymbol}</span>
+                    <input style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed", margin: 0 }} type="number" step="0.01" value={rate} readOnly disabled />
+                  </div>
+                  {showInr && (
+                    <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                      <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>₹</span>
+                      <span style={{ flex: 1, padding: "0 10px", fontSize: "13px", color: "hsl(var(--foreground))", display: "flex", alignItems: "center", height: "100%" }}>
+                        {usdInrRate ? ((parseFloat(rate) || 0) * usdInrRate).toFixed(2) : "—"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
-                  <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>₹</span>
-                  <span style={{ flex: 1, padding: "0 10px", fontSize: "13px", color: "hsl(var(--foreground))", display: "flex", alignItems: "center", height: "100%" }}>
-                    {usdInrRate ? ((parseFloat(rate) || 0) * usdInrRate).toFixed(2) : "—"}
-                  </span>
-                </div>
-              </div>
-            ) : null}
+              );
+            })() : null}
           </div>
         </div>
       )}
