@@ -1,11 +1,10 @@
 import { build } from "esbuild";
 import { execSync } from "child_process";
-import * as fs from "fs";
 import * as path from "path";
 
 async function main() {
   console.log("Building frontend...");
-  execSync("npx vite build", { stdio: "inherit" });
+  execSync("npx vite build --config vite.config.prod.ts", { stdio: "inherit" });
 
   console.log("Building backend...");
   await build({
@@ -26,11 +25,12 @@ async function main() {
     },
   });
 
-  console.log("Done! Deploy the following to cPanel:");
-  console.log("  dist/index.cjs  (server bundle)");
-  console.log("  client/dist/    (frontend static files)");
+  console.log("\nBuild complete!");
+  console.log("Deploy the following to cPanel:");
+  console.log("  dist/index.cjs      (server bundle)");
+  console.log("  client/dist/        (frontend static files)");
   console.log("  package.json");
-  console.log("  node_modules/   (or run npm install on server)");
+  console.log("  node_modules/       (or run: npm install --production)");
   console.log("\ncPanel startup file: dist/index.cjs");
 }
 
