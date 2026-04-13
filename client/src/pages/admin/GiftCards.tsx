@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, PlusCircle, X } from "lucide-react";
+import { Plus, Pencil, Trash2, PlusCircle, X, Link2 } from "lucide-react";
+import { ProductMappingModal } from "@/components/admin/ProductMappingModal";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Product, ProductPackage } from "@shared/schema";
@@ -42,33 +43,12 @@ function PackageManager({ productId }: { productId: string }) {
   const [newOrigPrice, setNewOrigPrice] = useState("");
   const [newStock, setNewStock] = useState("");
   const [editingStock, setEditingStock] = useState<Record<string, string>>({});
-  const [editingBusanId, setEditingBusanId] = useState<Record<string, string>>({});
+  const [mappingPkg, setMappingPkg] = useState<ProductPackage | null>(null);
 
   const { data: packages = [] } = useQuery<ProductPackage[]>({
     queryKey: ["/api/admin/products", productId, "packages"],
     queryFn: () => adminApi.get(`/products/${productId}/packages`),
   });
-
-  const { data: allMappings = [] } = useQuery<any[]>({
-    queryKey: ["/api/admin/busan/mappings"],
-    queryFn: () => adminApi.get("/busan/mappings"),
-  });
-
-  const mappingByPkgId = Object.fromEntries(allMappings.map((m: any) => [m.cmsProductId, m]));
-
-  async function saveBusanId(pkgId: string, pkgLabel: string, busanProductId: string) {
-    const existing = mappingByPkgId[pkgId];
-    if (existing) await adminApi.delete(`/busan/mappings/${existing.id}`);
-    if (busanProductId.trim()) {
-      await adminApi.post("/busan/mappings", {
-        cmsProductId: pkgId,
-        cmsProductName: pkgLabel,
-        busanProductId: busanProductId.trim(),
-        busanProductName: "",
-      });
-    }
-    qc.invalidateQueries({ queryKey: ["/api/admin/busan/mappings"] });
-  }
 
   const addPkg = useMutation({
     mutationFn: () => adminApi.post(`/products/${productId}/packages`, {
@@ -101,45 +81,32 @@ function PackageManager({ productId }: { productId: string }) {
       <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.6rem" }}>
         {packages.map((pkg) => {
           const stockVal = editingStock[pkg.id] !== undefined ? editingStock[pkg.id] : ((pkg as any).stock !== null && (pkg as any).stock !== undefined ? String((pkg as any).stock) : "");
-          const busanVal = editingBusanId[pkg.id] !== undefined ? editingBusanId[pkg.id] : (mappingByPkgId[pkg.id]?.busanProductId ?? "");
           return (
-            <div key={pkg.id} style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px" }}>
-                <span style={{ fontSize: "12px", color: "hsl(var(--foreground))" }}>{pkg.label}</span>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  {pkg.originalPrice && (
-                    <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textDecoration: "line-through" }}>${pkg.originalPrice}</span>
-                  )}
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                    <span style={{ fontSize: "9px", color: "hsl(220,10%,40%)", textTransform: "uppercase" }}>Stock:</span>
-                    <input
-                      type="number" min="0"
-                      value={stockVal}
-                      placeholder="∞"
-                      onChange={(e) => setEditingStock((p) => ({ ...p, [pkg.id]: e.target.value }))}
-                      onBlur={() => { patchStock(pkg.id, stockVal); setEditingStock((p) => { const n = { ...p }; delete n[pkg.id]; return n; }); }}
-                      style={{ ...inputStyle, width: "52px", padding: "2px 5px", fontSize: "11px", textAlign: "center" }}
-                      title="Stock (blank = unlimited)"
-                    />
-                  </div>
-                  <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+            <div key={pkg.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }}>
+              <span style={{ fontSize: "12px", color: "hsl(var(--foreground))" }}>{pkg.label}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {pkg.originalPrice && (
+                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textDecoration: "line-through" }}>${pkg.originalPrice}</span>
+                )}
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                  <span style={{ fontSize: "9px", color: "hsl(220,10%,40%)", textTransform: "uppercase" }}>Stock:</span>
+                  <input
+                    type="number" min="0"
+                    value={stockVal}
+                    placeholder="∞"
+                    onChange={(e) => setEditingStock((p) => ({ ...p, [pkg.id]: e.target.value }))}
+                    onBlur={() => { patchStock(pkg.id, stockVal); setEditingStock((p) => { const n = { ...p }; delete n[pkg.id]; return n; }); }}
+                    style={{ ...inputStyle, width: "52px", padding: "2px 5px", fontSize: "11px", textAlign: "center" }}
+                    title="Stock (blank = unlimited)"
+                  />
                 </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px 6px", borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
-                <span style={{ fontSize: "9px", color: "hsl(258,80%,65%)", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600, flexShrink: 0 }}>Busan ID:</span>
-                <input
-                  type="text"
-                  value={busanVal}
-                  placeholder="Busan Product ID (optional)"
-                  onChange={(e) => setEditingBusanId((p) => ({ ...p, [pkg.id]: e.target.value }))}
-                  onBlur={() => {
-                    saveBusanId(pkg.id, pkg.label, busanVal);
-                    setEditingBusanId((p) => { const n = { ...p }; delete n[pkg.id]; return n; });
-                  }}
-                  style={{ ...inputStyle, flex: 1, padding: "2px 7px", fontSize: "11px" }}
-                  title="Busan Product ID for auto-fulfillment"
-                />
+                <button
+                  title="Map to API provider"
+                  onClick={() => setMappingPkg(pkg)}
+                  style={{ background: "none", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "4px", cursor: "pointer", padding: "2px 5px", display: "flex", alignItems: "center", color: "hsl(258,90%,62%)" }}
+                ><Link2 size={10} /></button>
+                <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
               </div>
             </div>
           );
@@ -174,6 +141,13 @@ function PackageManager({ productId }: { productId: string }) {
           <PlusCircle size={14} />
         </button>
       </div>
+      {mappingPkg && (
+        <ProductMappingModal
+          cmsProductId={mappingPkg.id}
+          cmsProductName={mappingPkg.label}
+          onClose={() => setMappingPkg(null)}
+        />
+      )}
     </div>
   );
 }
