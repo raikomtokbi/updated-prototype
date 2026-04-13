@@ -177,7 +177,7 @@ export function ProductMappingModal({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {provider && (
-              <button onClick={goBack} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "2px", display: "flex" }}>
+              <button type="button" onClick={goBack} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: "2px", display: "flex" }}>
                 <ArrowLeft size={15} />
               </button>
             )}
@@ -185,7 +185,7 @@ export function ProductMappingModal({
               {provider === "busan" ? "Busan — Select Product" : provider === "smileone" ? "Smile.one — Select Product" : "Map to Provider"}
             </h3>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", display: "flex" }}>
+          <button type="button" onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", display: "flex" }}>
             <X size={16} />
           </button>
         </div>
@@ -204,6 +204,7 @@ export function ProductMappingModal({
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               <button
+                type="button"
                 onClick={() => { setProvider("busan"); fetchBusanProducts(); }}
                 style={{
                   padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
@@ -222,6 +223,7 @@ export function ProductMappingModal({
               </button>
 
               <button
+                type="button"
                 onClick={() => setProvider("smileone")}
                 style={{
                   padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
@@ -248,7 +250,7 @@ export function ProductMappingModal({
                 {existingBusan && (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
                     <span style={{ color: "hsl(var(--foreground))" }}><strong>Busan:</strong> {existingBusan.busanProductId}</span>
-                    <button onClick={removeBusan} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
+                    <button type="button" onClick={removeBusan} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
                       <Trash2 size={11} />
                     </button>
                   </div>
@@ -256,7 +258,7 @@ export function ProductMappingModal({
                 {existingSmile && (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
                     <span style={{ color: "hsl(var(--foreground))" }}><strong>Smile.one:</strong> {existingSmile.smileProductName ?? existingSmile.smileProductId}</span>
-                    <button onClick={removeSmile} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
+                    <button type="button" onClick={removeSmile} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
                       <Trash2 size={11} />
                     </button>
                   </div>
@@ -277,14 +279,14 @@ export function ProductMappingModal({
             {busanError && (
               <div style={{ padding: "8px 12px", background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", fontSize: "12px", color: "#f87171", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span>{busanError}</span>
-                <button onClick={fetchBusanProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer", fontSize: "11px" }}>Retry</button>
+                <button type="button" onClick={fetchBusanProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer", fontSize: "11px" }}>Retry</button>
               </div>
             )}
             {!busanLoading && busanProducts.length > 0 && (
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>{busanProducts.length} products loaded</span>
-                  <button onClick={fetchBusanProducts} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <button type="button" onClick={fetchBusanProducts} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px" }}>
                     <RefreshCw size={10} /> Refresh
                   </button>
                 </div>
@@ -310,15 +312,16 @@ export function ProductMappingModal({
             {!busanLoading && busanProducts.length === 0 && !busanError && (
               <div style={{ textAlign: "center", padding: "24px", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
                 No products loaded.{" "}
-                <button onClick={fetchBusanProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer" }}>Try again</button>
+                <button type="button" onClick={fetchBusanProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer" }}>Try again</button>
               </div>
             )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "10px", borderTop: "1px solid hsl(var(--border))" }}>
-              <button onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+              <button type="button" onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={mapBusan}
                 disabled={!selectedBusan || saving}
                 style={{ ...btnPrimary, opacity: (!selectedBusan || saving) ? 0.5 : 1, cursor: !selectedBusan || saving ? "not-allowed" : "pointer" }}
@@ -346,6 +349,7 @@ export function ProductMappingModal({
               </div>
             </div>
             <button
+              type="button"
               onClick={fetchSmileProducts}
               disabled={!gameSlug || smileLoading}
               style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", opacity: (!gameSlug || smileLoading) ? 0.5 : 1 }}
@@ -377,10 +381,11 @@ export function ProductMappingModal({
             )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "10px", borderTop: "1px solid hsl(var(--border))" }}>
-              <button onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+              <button type="button" onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={mapSmile}
                 disabled={!selectedSmile || saving}
                 style={{ ...btnPrimary, opacity: (!selectedSmile || saving) ? 0.5 : 1, cursor: !selectedSmile || saving ? "not-allowed" : "pointer" }}
