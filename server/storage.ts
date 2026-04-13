@@ -25,6 +25,8 @@ import {
   type SmileOneMapping, type InsertSmileOneMapping,
   type BusanConfig,
   type BusanMapping, type InsertBusanMapping,
+  type LioGamesConfig,
+  type LioGamesMapping, type InsertLioGamesMapping,
   type PageView, pageViews,
   users, games, services, products, productPackages, orders, orderItems,
   transactions, coupons, tickets, ticketReplies,
@@ -32,6 +34,7 @@ import {
   notifications, siteSettings, emailTemplates, passwordResetTokens, fees,
   smileOneConfigs, smileOneMappings,
   busanConfigs, busanMappings,
+  lioGamesConfigs, lioGamesMappings,
   upiPaymentSettings, unmatchedPayments,
   rolePermissions,
   type UpiPaymentSettings, type InsertUpiPaymentSettings,
@@ -206,6 +209,16 @@ export interface IStorage {
   getBusanMappingByCmsProductId(cmsProductId: string): Promise<BusanMapping | undefined>;
   createBusanMapping(data: InsertBusanMapping): Promise<BusanMapping>;
   deleteBusanMapping(id: string): Promise<void>;
+
+  // LioGames Config
+  getLioGamesConfig(): Promise<LioGamesConfig | undefined>;
+  upsertLioGamesConfig(data: Partial<LioGamesConfig>): Promise<LioGamesConfig>;
+
+  // LioGames Mappings
+  getAllLioGamesMappings(): Promise<LioGamesMapping[]>;
+  getLioGamesMappingByCmsProductId(cmsProductId: string): Promise<LioGamesMapping | undefined>;
+  createLioGamesMapping(data: InsertLioGamesMapping): Promise<LioGamesMapping>;
+  deleteLioGamesMapping(id: string): Promise<void>;
 
   // Orders (create)
   createOrder(data: { id: string; orderNumber: string; userId?: string; totalAmount: string; currency: string; notes?: string; status?: string; paymentMethod?: string }): Promise<Order>;
@@ -1109,6 +1122,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBusanMapping(id: string): Promise<void> {
     await db.delete(busanMappings).where(eq(busanMappings.id, id));
+  }
+
+  // ── LioGames Config ───────────────────────────────────────────────────────────
+  async getLioGamesConfig(): Promise<LioGamesConfig | undefined> {
+    const rows = await db.select().from(lioGamesConfigs).limit(1);
+    return rows[0];
+  }
+
+  async upsertLioGamesConfig(data: Partial<LioGamesConfig>): Promise<LioGamesConfig> {
+    const existing = await this.getLioGamesConfig();
+    if (existing) {
+      await db
+        .update(lioGamesConfigs)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(lioGamesConfigs.id, existing.id));
+      return (await this.getLioGamesConfig())!;
+    }
+    const id = randomUUID();
+    await db.insert(lioGamesConfigs).values({ id, ...data, updatedAt: new Date() } as LioGamesConfig);
+    const [created] = await db.select().from(lioGamesConfigs).where(eq(lioGamesConfigs.id, id));
+    return created;
+  }
+
+  // ── LioGames Mappings ─────────────────────────────────────────────────────────
+  async getAllLioGamesMappings(): Promise<LioGamesMapping[]> {
+    return db.select().from(lioGamesMappings).orderBy(desc(lioGamesMappings.createdAt));
+  }
+
+  async getLioGamesMappingByCmsProductId(cmsProductId: string): Promise<LioGamesMapping | undefined> {
+    const [row] = await db.select().from(lioGamesMappings).where(eq(lioGamesMappings.cmsProductId, cmsProductId));
+    return row;
+  }
+
+  async createLioGamesMapping(data: InsertLioGamesMapping): Promise<LioGamesMapping> {
+    const id = randomUUID();
+    await db.insert(lioGamesMappings).values({ id, ...data });
+    const [created] = await db.select().from(lioGamesMappings).where(eq(lioGamesMappings.id, id));
+    return created;
+  }
+
+  async deleteLioGamesMapping(id: string): Promise<void> {
+    await db.delete(lioGamesMappings).where(eq(lioGamesMappings.id, id));
   }
 
   // ── Orders (create) ──────────────────────────────────────────────────────────

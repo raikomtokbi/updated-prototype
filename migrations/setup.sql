@@ -501,6 +501,30 @@ CREATE TABLE IF NOT EXISTS `smile_one_mappings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── Liogames Config ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `liogames_configs` (
+  `id`          VARCHAR(36)  NOT NULL,
+  `member_code` VARCHAR(191) DEFAULT NULL,
+  `secret`      VARCHAR(255) DEFAULT NULL,
+  `base_url`    VARCHAR(500) NOT NULL DEFAULT 'https://api.liogames.com/wp-json/liogames/v1',
+  `is_active`   TINYINT(1)   NOT NULL DEFAULT 1,
+  `updated_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Liogames Mappings ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `liogames_mappings` (
+  `id`               VARCHAR(36)  NOT NULL,
+  `cms_product_id`   VARCHAR(36)  NOT NULL,
+  `cms_product_name` VARCHAR(191) DEFAULT NULL,
+  `lio_product_id`   INT          NOT NULL,
+  `lio_variation_id` INT          DEFAULT NULL,
+  `lio_product_name` VARCHAR(191) DEFAULT NULL,
+  `created_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── UPI Payment Settings ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `upi_payment_settings` (
   `id`             VARCHAR(36)  NOT NULL,
