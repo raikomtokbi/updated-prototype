@@ -329,7 +329,6 @@ textarea {
 
 @media (max-width: 767px) {
   .hero-badge    { display: none !important; }
-  .hero-sub      { display: none !important; }
   .hero-cta-row  { gap: 0.4rem !important; flex-wrap: nowrap !important; }
   .hero-cta-row a {
     padding: 0.28rem 0.55rem !important;
