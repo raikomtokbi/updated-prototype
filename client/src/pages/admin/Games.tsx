@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2, Link2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2, Link2, Zap, Smile, ArrowLeft, RefreshCw, CheckCircle } from "lucide-react";
 import { ProductMappingModal } from "@/components/admin/ProductMappingModal";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
+import { useAuthStore } from "@/lib/store/authstore";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import type { Game, Service } from "@shared/schema";
+
+const REGIONS_SVC = [
+  { value: "global", label: "Global" },
+  { value: "ph", label: "Philippines" },
+  { value: "sg", label: "Singapore" },
+  { value: "my", label: "Malaysia" },
+  { value: "id", label: "Indonesia" },
+  { value: "th", label: "Thailand" },
+  { value: "br", label: "Brazil" },
+  { value: "vn", label: "Vietnam" },
+  { value: "tw", label: "Taiwan" },
+  { value: "hk", label: "Hong Kong" },
+  { value: "sa", label: "Saudi Arabia" },
+];
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
@@ -372,6 +387,271 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
   );
 }
 
+// ─── Add-Service Wizard ───────────────────────────────────────────────────────
+function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { user } = useAuthStore();
+  const isMobile = useMobile(768);
+
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [provider, setProvider] = useState<"busan" | "smileone" | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+
+  const [busanProducts, setBusanProducts] = useState<any[]>([]);
+  const [busanLoading, setBusanLoading] = useState(false);
+  const [busanError, setBusanError] = useState("");
+  const [highlightBusan, setHighlightBusan] = useState<any | null>(null);
+
+  const [gameSlug, setGameSlug] = useState("");
+  const [region, setRegion] = useState("global");
+  const [smileProducts, setSmileProducts] = useState<any[]>([]);
+  const [smileLoading, setSmileLoading] = useState(false);
+  const [highlightSmile, setHighlightSmile] = useState<any | null>(null);
+
+  const [form, setForm] = useState({ name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" });
+  const [saving, setSaving] = useState(false);
+
+  function setField(k: string, v: string | number) { setForm((p) => ({ ...p, [k]: v })); }
+  function computeFinal(price: string, disc: string) {
+    return ((parseFloat(price) || 0) * (1 - (parseFloat(disc) || 0) / 100)).toFixed(2);
+  }
+
+  async function fetchBusanProducts() {
+    setBusanLoading(true); setBusanError(""); setBusanProducts([]);
+    try {
+      const data = await adminApi.get("/busan/products");
+      setBusanProducts(Array.isArray(data) ? data : []);
+    }
+    catch (e: any) { setBusanError(e.message || "Failed to fetch products"); }
+    finally { setBusanLoading(false); }
+  }
+
+  async function fetchSmileProducts() {
+    if (!gameSlug) return;
+    setSmileLoading(true); setSmileProducts([]);
+    try {
+      const res = await fetch(`/api/smileone/products?game=${encodeURIComponent(gameSlug)}&region=${region}`, {
+        headers: { "X-Username": user?.username ?? "", "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setSmileProducts(data.success && Array.isArray(data.products) ? data.products : []);
+    } catch { setSmileProducts([]); }
+    finally { setSmileLoading(false); }
+  }
+
+  function pickBusan(p: any) {
+    setHighlightBusan(p);
+    setSelectedProduct(p);
+    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, price: p.price ? String(p.price) : prev.price, finalPrice: p.price ? String(p.price) : prev.finalPrice }));
+    setStep(3);
+  }
+
+  function pickSmile(p: any) {
+    setHighlightSmile(p);
+    setSelectedProduct(p);
+    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, price: p.price ? String(p.price) : prev.price, finalPrice: p.price ? String(p.price) : prev.finalPrice }));
+    setStep(3);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const created = await adminApi.post("/services", {
+        ...form, gameId: game.id,
+        finalPrice: form.finalPrice || computeFinal(form.price, form.discountPercent),
+        stock: form.stock !== "" ? parseInt(form.stock) : null,
+      });
+      if (selectedProduct && created?.id) {
+        if (provider === "busan") {
+          await adminApi.post("/busan/mappings", { cmsProductId: created.id, cmsProductName: form.name, busanProductId: selectedProduct.id, busanProductName: selectedProduct.name });
+          qc.invalidateQueries({ queryKey: ["/api/admin/busan/mappings"] });
+        } else if (provider === "smileone") {
+          await adminApi.post("/smileone/mappings", { cmsProductId: created.id, cmsProductName: form.name, smileProductId: selectedProduct.product_id, smileProductName: selectedProduct.name, gameSlug, region });
+          qc.invalidateQueries({ queryKey: ["/api/admin/smileone/mappings"] });
+        }
+      }
+      qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
+      onClose();
+    } catch (e: any) { console.error(e); }
+    finally { setSaving(false); }
+  }
+
+  const stepTitles = ["Choose Provider", provider === "busan" ? "Select Busan Product" : "Select Smile.one Product", "Service Details"];
+  const stepTitle = stepTitles[step - 1];
+
+  return (
+    <Modal title={`Add Service — ${stepTitle}`} onClose={onClose}>
+      {/* Progress bar */}
+      <div style={{ display: "flex", gap: "4px", marginBottom: "1.2rem" }}>
+        {[1, 2, 3].map((s) => (
+          <div key={s} style={{ flex: 1, height: "3px", borderRadius: "2px", background: step >= s ? "hsl(258,90%,62%)" : "hsl(var(--border))", transition: "background 0.25s" }} />
+        ))}
+      </div>
+
+      {/* ── Step 1: Provider ── */}
+      {step === 1 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+            Choose a provider to browse its product list, or skip to fill in details manually.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <button
+              type="button"
+              onClick={() => { setProvider("busan"); setStep(2); fetchBusanProducts(); }}
+              style={{ padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <Zap size={20} color="hsl(258,90%,62%)" />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse &amp; select a product</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setProvider("smileone"); setStep(2); }}
+              style={{ padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <Smile size={20} color="#f59e0b" />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Smile.one</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse &amp; select a product</span>
+            </button>
+          </div>
+          <button type="button" onClick={() => { setProvider(null); setSelectedProduct(null); setStep(3); }} style={{ padding: "9px", borderRadius: "6px", border: "1px dashed hsl(var(--border))", background: "transparent", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+            Skip — Fill in manually
+          </button>
+        </div>
+      )}
+
+      {/* ── Step 2a: Busan ── */}
+      {step === 2 && provider === "busan" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <button type="button" onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}>
+              <ArrowLeft size={13} /> Back
+            </button>
+            <button type="button" onClick={fetchBusanProducts} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <RefreshCw size={10} /> Refresh
+            </button>
+          </div>
+          {busanLoading && <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "hsl(var(--muted-foreground))", padding: "16px 0" }}><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Loading products...</div>}
+          {busanError && <div style={{ padding: "8px 12px", background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", fontSize: "12px", color: "#f87171" }}>{busanError}</div>}
+          {!busanLoading && busanProducts.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "280px", overflowY: "auto" }}>
+              {busanProducts.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => pickBusan(p)}
+                  style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightBusan?.id === p.id ? "rgba(124,58,237,0.12)" : "hsl(var(--card))", border: highlightBusan?.id === p.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <span style={{ color: "hsl(var(--foreground))" }}>{p.name}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.priceRaw ?? `${p.currency} ${p.price}`}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {!busanLoading && busanProducts.length === 0 && !busanError && (
+            <div style={{ textAlign: "center", padding: "20px", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>No products loaded yet.</div>
+          )}
+        </div>
+      )}
+
+      {/* ── Step 2b: Smile.one ── */}
+      {step === 2 && provider === "smileone" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <button type="button" onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", alignSelf: "flex-start" }}>
+            <ArrowLeft size={13} /> Back
+          </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 130px", gap: "8px", alignItems: "end" }}>
+            <div>
+              <label style={labelStyle}>Game Slug</label>
+              <input style={inputStyle} value={gameSlug} onChange={(e) => setGameSlug(e.target.value)} placeholder="e.g. mobile-legends" />
+            </div>
+            <div>
+              <label style={labelStyle}>Region</label>
+              <select style={inputStyle} value={region} onChange={(e) => setRegion(e.target.value)}>
+                {REGIONS_SVC.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <button type="button" onClick={fetchSmileProducts} disabled={!gameSlug || smileLoading} style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", justifyContent: "center", opacity: (!gameSlug || smileLoading) ? 0.5 : 1 }}>
+            {smileLoading ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={12} />} Fetch Products
+          </button>
+          {smileProducts.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "230px", overflowY: "auto" }}>
+              {smileProducts.map((p) => (
+                <div key={p.product_id} onClick={() => pickSmile(p)} style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightSmile?.product_id === p.product_id ? "rgba(124,58,237,0.12)" : "hsl(var(--card))", border: highlightSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "hsl(var(--foreground))" }}>{p.name}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.currency} {p.price}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Step 3: Service details ── */}
+      {step === 3 && (
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+          {selectedProduct && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
+              <CheckCircle size={12} color="hsl(142,71%,48%)" />
+              <span style={{ color: "hsl(var(--foreground))" }}>
+                <strong>{provider === "busan" ? "Busan" : "Smile.one"}</strong>: {selectedProduct.name} — mapping will be saved automatically
+              </span>
+              <button type="button" onClick={() => setStep(2)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", fontSize: "10px", display: "flex", alignItems: "center", gap: "2px" }}>
+                <ArrowLeft size={10} /> Change
+              </button>
+            </div>
+          )}
+          {!selectedProduct && (
+            <button type="button" onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", alignSelf: "flex-start" }}>
+              <ArrowLeft size={13} /> Back
+            </button>
+          )}
+          <div>
+            <label style={labelStyle}>Name *</label>
+            <input style={inputStyle} required value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="100 UC" />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
+            <div>
+              <label style={labelStyle}>Price *</label>
+              <input style={inputStyle} required type="number" step="0.01" value={form.price} onChange={(e) => { setField("price", e.target.value); setField("finalPrice", computeFinal(e.target.value, form.discountPercent)); }} placeholder="9.99" />
+            </div>
+            <div>
+              <label style={labelStyle}>Discount %</label>
+              <input style={inputStyle} type="number" step="0.01" min="0" max="100" value={form.discountPercent} onChange={(e) => { setField("discountPercent", e.target.value); setField("finalPrice", computeFinal(form.price, e.target.value)); }} placeholder="0" />
+            </div>
+            <div>
+              <label style={labelStyle}>Final Price</label>
+              <input style={inputStyle} type="number" step="0.01" value={form.finalPrice} onChange={(e) => setField("finalPrice", e.target.value)} placeholder="auto" />
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
+            <div>
+              <label style={labelStyle}>Status</label>
+              <select style={inputStyle} value={form.status} onChange={(e) => setField("status", e.target.value)}>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Sort Order</label>
+              <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => setField("sortOrder", parseInt(e.target.value) || 0)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Stock <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(blank = unlimited)</span></label>
+              <input style={inputStyle} type="number" min="0" value={form.stock} onChange={(e) => setField("stock", e.target.value)} placeholder="Unlimited" />
+            </div>
+          </div>
+          <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={saving}>
+            {saving ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
+            {saving ? "Saving..." : selectedProduct ? "Save Service & Map Provider" : "Save Service"}
+          </button>
+        </form>
+      )}
+    </Modal>
+  );
+}
+
 // ─── Services sub-panel ───────────────────────────────────────────────────────
 function ServicesPanel({ game }: { game: Game }) {
   const qc = useQueryClient();
@@ -455,9 +735,7 @@ function ServicesPanel({ game }: { game: Game }) {
       )}
 
       {showAdd && (
-        <Modal title="Add Service" onClose={() => setShowAdd(false)}>
-          <ServiceForm initial={EMPTY_SERVICE} onSubmit={(d) => addMut.mutate(d)} loading={addMut.isPending} />
-        </Modal>
+        <AddServiceWizard game={game} onClose={() => setShowAdd(false)} />
       )}
       {editSvc && (
         <Modal title="Edit Service" onClose={() => setEditSvc(null)}>
