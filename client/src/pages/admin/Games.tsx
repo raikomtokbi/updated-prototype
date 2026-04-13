@@ -430,7 +430,7 @@ function ServicesPanel({ game }: { game: Game }) {
                     <div style={{ display: "flex", gap: "6px" }}>
                       <button
                         style={{ ...btnEdit, color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}
-                        title="Map to API provider"
+                        title="Map to Provider"
                         onClick={() => setMappingSvc(s)}
                       ><Link2 size={11} /></button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>

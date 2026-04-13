@@ -102,7 +102,7 @@ function PackageManager({ productId }: { productId: string }) {
                   />
                 </div>
                 <button
-                  title="Map to API provider"
+                  title="Map to Provider"
                   onClick={() => setMappingPkg(pkg)}
                   style={{ background: "none", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "4px", cursor: "pointer", padding: "2px 5px", display: "flex", alignItems: "center", color: "hsl(258,90%,62%)" }}
                 ><Link2 size={10} /></button>
