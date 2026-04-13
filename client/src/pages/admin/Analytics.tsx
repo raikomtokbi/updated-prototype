@@ -103,56 +103,81 @@ const INFO: Record<string, { title: string; desc: string; formula?: string }> = 
 };
 
 // ─── InfoPopover ─────────────────────────────────────────────────────────────
-function InfoPopover({ id, alignLeft = false }: { id: string; alignLeft?: boolean }) {
+function InfoPopover({ id }: { id: string; alignLeft?: boolean }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
   const info = INFO[id];
+
+  const POPOVER_W = 270;
+
+  const recalc = () => {
+    if (!btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const gap = 8;
+    // start aligned to right edge of button, clamped so it doesn't overflow viewport
+    let left = r.right - POPOVER_W;
+    left = Math.max(8, Math.min(left, vw - POPOVER_W - 8));
+    setPos({ top: r.bottom + gap, left });
+  };
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    recalc();
+    const close = (e: MouseEvent) => {
+      if (
+        btnRef.current && !btnRef.current.contains(e.target as Node) &&
+        popRef.current && !popRef.current.contains(e.target as Node)
+      ) setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    window.addEventListener("mousedown", close);
+    window.addEventListener("resize", recalc);
+    window.addEventListener("scroll", recalc, true);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("resize", recalc);
+      window.removeEventListener("scroll", recalc, true);
+    };
   }, [open]);
 
   if (!info) return null;
 
   return (
-    <div ref={ref} style={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
+    <>
       <button
+        ref={btnRef}
         onClick={() => setOpen(v => !v)}
-        title="More info"
+        aria-label="More info"
         style={{
           background: "none", border: "none", cursor: "pointer", padding: "2px",
           color: open ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-          display: "flex", alignItems: "center",
+          display: "inline-flex", alignItems: "center", flexShrink: 0,
           transition: "color 0.15s",
         }}
       >
         <Info size={14} />
       </button>
 
-      {open && (
-        <div style={{
-          position: "absolute", top: "calc(100% + 6px)",
-          ...(alignLeft ? { left: 0 } : { right: 0 }),
-          zIndex: 9999,
-          width: "min(270px, 80vw)",
-          background: "hsl(var(--card))",
-          border: "1px solid hsl(220,15%,18%)",
-          borderRadius: "10px", boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
-          padding: "14px 16px",
-        }}>
-          <div style={{
-            position: "absolute", top: -6,
-            ...(alignLeft ? { left: 10 } : { right: 10 }),
-            width: 12, height: 12, background: "hsl(var(--card))",
-            border: "1px solid hsl(220,15%,18%)", borderBottom: "none", borderRight: "none",
-            transform: "rotate(45deg)",
-          }} />
-          <div style={{ fontSize: "13px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>
+      {open && pos && (
+        <div
+          ref={popRef}
+          style={{
+            position: "fixed",
+            top: pos.top,
+            left: pos.left,
+            zIndex: 9999,
+            width: POPOVER_W,
+            maxWidth: "calc(100vw - 16px)",
+            background: "hsl(var(--popover))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "10px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            padding: "14px 16px",
+          }}
+        >
+          <div style={{ fontSize: "13px", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 6 }}>
             {info.title}
           </div>
           <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.65, whiteSpace: "pre-line" }}>
@@ -161,16 +186,16 @@ function InfoPopover({ id, alignLeft = false }: { id: string; alignLeft?: boolea
           {info.formula && (
             <div style={{
               marginTop: 10, padding: "7px 10px",
-              background: "hsl(220,15%,10%)", borderRadius: "6px",
+              background: "hsl(var(--muted))", borderRadius: "6px",
               fontSize: "11px", fontFamily: "monospace",
-              color: "hsl(var(--primary))", lineHeight: 1.5,
+              color: "hsl(var(--foreground))", lineHeight: 1.5,
             }}>
               {info.formula}
             </div>
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
