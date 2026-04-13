@@ -1238,6 +1238,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.patch("/api/admin/orders/:id/status", requireAdmin, async (req, res) => {
     const newStatus: string = req.body.status;
+    const existing = await storage.getOrderById(req.params.id);
     const o = await storage.updateOrderStatus(req.params.id, newStatus);
     if (!o) return res.status(404).json({ message: "Not found" });
     res.json(o);
@@ -1246,6 +1247,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (newStatus === "completed") {
       handleOrderCompleted(req.params.id).catch((err) =>
         console.error("[admin/orders/status] handleOrderCompleted error:", err)
+      );
+    }
+
+    // Record a refund transaction when order is marked as refunded
+    if (newStatus === "refunded" && existing) {
+      storage.createRefundTransaction(existing).catch((err) =>
+        console.error("[admin/orders/status] createRefundTransaction error:", err)
       );
     }
   });
@@ -1267,13 +1275,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(await storage.getRefunds());
   });
 
-  app.get("/api/admin/refund-requests", requireAdmin, async (_req, res) => {
-    const all = await storage.getAllTickets(500, 0);
-    const refundTickets = all.filter((t: any) =>
-      t.subject?.toLowerCase().includes("refund") || t.category === "billing"
-    );
-    res.json(refundTickets);
-  });
 
   // ── Coupons ────────────────────────────────────────────────────────────────
   app.get("/api/admin/coupons", requireAdmin, async (_req, res) => {

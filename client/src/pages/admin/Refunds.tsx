@@ -1,132 +1,85 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import {
   card, thStyle, tdStyle,
-  SearchInput, FilterSelect, StatusBadge, EmptyState, Toolbar,
+  SearchInput, EmptyState, Toolbar,
 } from "@/components/admin/shared";
-
-const STATUS_OPTIONS = [
-  { value: "", label: "All Status" },
-  { value: "open", label: "Open" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "closed", label: "Closed" },
-];
 
 function formatDate(d: string | Date | null | undefined) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-function extractOrderNumber(subject: string): string {
-  const match = subject.match(/#([A-Z0-9-]+)/i);
-  return match ? `#${match[1]}` : "—";
+function formatCurrency(amount: string | number | null | undefined, currency = "USD") {
+  if (amount == null) return "—";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(Number(amount));
 }
 
 export default function Refunds() {
-  const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
 
-  const { data: tickets = [], isLoading } = useQuery<any[]>({
-    queryKey: ["/api/admin/refund-requests"],
-    queryFn: () => adminApi.get("/refund-requests"),
-  });
-
-  const updateStatus = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
-      adminApi.patch(`/tickets/${id}/status`, { status }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/refund-requests"] }),
+  const { data: refunds = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/transactions/refunds"],
+    queryFn: () => adminApi.get("/transactions/refunds"),
   });
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return tickets.filter((t) => {
-      const matchSearch =
-        !q ||
-        t.subject?.toLowerCase().includes(q) ||
-        (t.userId ?? "").toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q);
-      const matchStatus = !statusFilter || t.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [tickets, search, statusFilter]);
+    if (!q) return refunds;
+    return refunds.filter((r) =>
+      r.transactionNumber?.toLowerCase().includes(q) ||
+      (r.orderId ?? "").toLowerCase().includes(q) ||
+      (r.userId ?? "").toLowerCase().includes(q) ||
+      (r.paymentMethod ?? "").toLowerCase().includes(q)
+    );
+  }, [refunds, search]);
 
   return (
-    <AdminLayout title="Refund Requests">
+    <AdminLayout title="Refund Records">
       <div style={card}>
         <Toolbar>
-          <SearchInput value={search} onChange={setSearch} placeholder="Search order, user ID..." />
-          <FilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search transaction #, order, user..." />
           <span style={{ marginLeft: "auto", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
-            {filtered.length} request{filtered.length !== 1 ? "s" : ""}
+            {filtered.length} record{filtered.length !== 1 ? "s" : ""}
           </span>
         </Toolbar>
 
         <div style={{ overflowX: "auto" }}>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading refund requests...</div>
+            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading refund records...</div>
           ) : filtered.length === 0 ? (
-            <EmptyState message={tickets.length === 0 ? "No refund requests yet." : "No requests match your filters."} />
+            <EmptyState message={refunds.length === 0 ? "No refunds have been processed yet." : "No records match your search."} />
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
-                  {["Order", "User ID", "Subject", "Priority", "Status", "Date", "Action"].map((h) => (
+                  {["Transaction #", "Order ID", "User ID", "Method", "Amount", "Date"].map((h) => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((t) => (
-                  <tr key={t.id}>
-                    <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(var(--primary))", fontFamily: "monospace", fontSize: "12px" }}>
-                      {extractOrderNumber(t.subject ?? "")}
+                {filtered.map((r) => (
+                  <tr key={r.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
+                    <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>
+                      {r.transactionNumber}
                     </td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>{t.userId ?? "Guest"}</td>
-                    <td style={{ ...tdStyle, maxWidth: "240px" }}>
-                      <span style={{ fontSize: "12px", color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
-                        {t.subject}
-                      </span>
-                      {t.message && (
-                        <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {t.message}
-                        </span>
-                      )}
+                    <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
+                      {r.orderId ?? "—"}
                     </td>
-                    <td style={tdStyle}><StatusBadge value={t.priority ?? "medium"} /></td>
-                    <td style={tdStyle}><StatusBadge value={t.status} /></td>
-                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(t.createdAt)}</td>
-                    <td style={tdStyle}>
-                      <div style={{ display: "flex", gap: "5px" }}>
-                        {t.status !== "closed" && (
-                          <button
-                            onClick={() => updateStatus.mutate({ id: t.id, status: "closed" })}
-                            disabled={updateStatus.isPending}
-                            style={{
-                              fontSize: "11px", padding: "4px 10px", borderRadius: "4px",
-                              background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.25)",
-                              color: "hsl(142,71%,48%)", cursor: "pointer", fontWeight: 600,
-                            }}
-                          >
-                            Mark Resolved
-                          </button>
-                        )}
-                        {t.status === "open" && (
-                          <button
-                            onClick={() => updateStatus.mutate({ id: t.id, status: "in_progress" })}
-                            disabled={updateStatus.isPending}
-                            style={{
-                              fontSize: "11px", padding: "4px 10px", borderRadius: "4px",
-                              background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",
-                              color: "hsl(var(--primary))", cursor: "pointer", fontWeight: 600,
-                            }}
-                          >
-                            In Progress
-                          </button>
-                        )}
-                      </div>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>
+                      {r.userId ?? <span style={{ color: "hsl(220,10%,40%)" }}>Guest</span>}
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "11px", textTransform: "uppercase", color: "hsl(var(--muted-foreground))" }}>
+                      {r.paymentMethod?.replace(/_/g, " ") ?? "—"}
+                    </td>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: "hsl(0,72%,60%)" }}>
+                      -{formatCurrency(r.amount, r.currency)}
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
+                      {formatDate(r.createdAt)}
                     </td>
                   </tr>
                 ))}

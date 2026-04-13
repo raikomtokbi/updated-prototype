@@ -457,6 +457,24 @@ export class DatabaseStorage implements IStorage {
   async getRefunds() {
     return db.select().from(transactions).where(eq(transactions.isRefund, true)).orderBy(desc(transactions.createdAt));
   }
+  async createRefundTransaction(order: Order) {
+    const id = randomUUID();
+    const transactionNumber = await generateTransactionNumber();
+    await db.insert(transactions).values({
+      id,
+      transactionNumber,
+      orderId: order.id,
+      userId: order.userId ?? null,
+      paymentMethod: (order as any).paymentMethod ?? "manual",
+      amount: String(order.totalAmount),
+      currency: (order as any).currency ?? "USD",
+      status: "completed" as any,
+      isRefund: true,
+      completedAt: new Date(),
+    });
+    const [row] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return row;
+  }
 
   // ── Coupons ────────────────────────────────────────────────────────────────
   async getAllCoupons() {
