@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 import Razorpay from "razorpay";
 import { storage } from "./storage";
+import { invalidateSeoCache } from "./lib/seoInjector";
 import { getGatewayHandler } from "./lib/paymentGateways/index";
 import {
   sendTemplatedEmail,
@@ -1853,6 +1854,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.put("/api/admin/settings", requireAdmin, async (req, res) => {
     await storage.upsertSiteSettings(req.body);
+    invalidateSeoCache();
     res.json({ ok: true });
   });
 

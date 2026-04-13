@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
+import { injectSeo } from "./lib/seoInjector";
 
 export function serveStatic(app: Express) {
   const clientPath = path.resolve(process.cwd(), "client/dist");
@@ -13,7 +14,14 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(clientPath));
 
-  app.use("/{*path}", (_req, res) => {
-    res.sendFile(path.join(clientPath, "index.html"));
+  app.use("/{*path}", async (_req, res) => {
+    try {
+      const htmlPath = path.join(clientPath, "index.html");
+      let html = await fs.promises.readFile(htmlPath, "utf-8");
+      html = await injectSeo(html);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } catch (err) {
+      res.status(500).send("Internal Server Error");
+    }
   });
 }
