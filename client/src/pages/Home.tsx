@@ -783,21 +783,6 @@ function BonusBanner() {
           flexWrap: "wrap",
         }}
       >
-        {/* Icon box */}
-        <div style={{
-          width: "52px",
-          height: "52px",
-          borderRadius: "12px",
-          background: "hsl(var(--primary) / 0.12)",
-          border: "1px solid hsl(var(--primary) / 0.25)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}>
-          <Zap size={24} color="hsl(var(--primary))" />
-        </div>
-
         {/* Text */}
         <div style={{ flex: 1, minWidth: "180px" }}>
           <span style={{
