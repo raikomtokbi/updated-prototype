@@ -509,7 +509,7 @@ export default function EditContent() {
     }
   }, [remoteSettings]);
 
-  const dirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] || DEFAULTS[k])));
+  const dirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k])));
   const { leaveDialog, cancelLeave, doLeave } = useNavGuard(dirty);
 
   const save = useMutation({
