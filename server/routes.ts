@@ -1267,6 +1267,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(await storage.getRefunds());
   });
 
+  app.get("/api/admin/refund-requests", requireAdmin, async (_req, res) => {
+    const all = await storage.getAllTickets(500, 0);
+    const refundTickets = all.filter((t: any) =>
+      t.subject?.toLowerCase().includes("refund") || t.category === "billing"
+    );
+    res.json(refundTickets);
+  });
+
   // ── Coupons ────────────────────────────────────────────────────────────────
   app.get("/api/admin/coupons", requireAdmin, async (_req, res) => {
     res.json(await storage.getAllCoupons());
