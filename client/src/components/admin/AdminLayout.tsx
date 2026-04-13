@@ -769,7 +769,7 @@ function AdminAccountButton({ compact = false }: { compact?: boolean }) {
             <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>{user?.role?.replace("_", " ")}</div>
           </div>
           {[
-            { icon: <User size={13} />, label: "Profile", action: () => { navigate("/account"); setOpen(false); } },
+            { icon: <User size={13} />, label: "Profile", action: () => { navigate("/admin/profile"); setOpen(false); } },
             { icon: <ShoppingBag size={13} />, label: "Go back to store", action: () => { navigate("/"); setOpen(false); } },
           ].map((item) => (
             <button

@@ -54,6 +54,7 @@ import EmailTemplates from "./pages/admin/EmailTemplates";
 import ChooseTheme from "./pages/admin/ChooseTheme";
 import EditContent from "./pages/admin/EditContent";
 import RolesPermissions from "./pages/admin/RolesPermissions";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 function AdminRoutes() {
   return (
@@ -81,6 +82,7 @@ function AdminRoutes() {
       <Route path="/admin/choose-theme" component={ChooseTheme} />
       <Route path="/admin/edit-content" component={EditContent} />
       <Route path="/admin/roles-permissions" component={RolesPermissions} />
+      <Route path="/admin/profile" component={AdminProfile} />
       <Route component={NotFound} />
     </Switch>
   );
