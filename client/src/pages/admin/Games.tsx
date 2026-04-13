@@ -289,6 +289,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
 function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SERVICE; onSubmit: (d: any) => void; loading: boolean }) {
   const isMobile = useMobile(768);
   const [form, setForm] = useState(initial);
+  const [mappingOpen, setMappingOpen] = useState(false);
   const set = (k: string, v: string | number) => setForm((p) => ({ ...p, [k]: v }));
 
   function computeFinal(price: string, disc: string) {
@@ -347,10 +348,20 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
           <input style={inputStyle} type="number" min="0" value={form.stock} onChange={(e) => set("stock", e.target.value)} placeholder="Unlimited" />
         </div>
       </div>
+      <button type="button" onClick={() => setMappingOpen(true)} style={{ ...btnEdit, justifyContent: "center", color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}>
+        <Link2 size={14} /> Map to Provider
+      </button>
       <button type="submit" style={{ ...btnPrimary, justifyContent: "center" }} disabled={loading}>
         {loading ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : null}
         {loading ? "Saving..." : "Save Service"}
       </button>
+      {mappingOpen && (
+        <ProductMappingModal
+          cmsProductId={String((form as any).id || "")}
+          cmsProductName={form.name}
+          onClose={() => setMappingOpen(false)}
+        />
+      )}
     </form>
   );
 }
@@ -360,8 +371,6 @@ function ServicesPanel({ game }: { game: Game }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editSvc, setEditSvc] = useState<Service | null>(null);
-  const [mappingSvc, setMappingSvc] = useState<Service | null>(null);
-
   const { data: svcs = [], isLoading } = useQuery<Service[]>({
     queryKey: [`/api/admin/services?gameId=${game.id}`],
     queryFn: () => adminApi.get(`/services?gameId=${game.id}`),
@@ -428,11 +437,6 @@ function ServicesPanel({ game }: { game: Game }) {
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        style={{ ...btnEdit, color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}
-                        title="Map to Provider"
-                        onClick={() => setMappingSvc(s)}
-                      ><Link2 size={11} /></button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>
                       <button style={btnDanger} onClick={() => { if (confirm("Delete this service?")) delMut.mutate(s.id); }}><Trash2 size={11} /></button>
                     </div>
@@ -457,13 +461,6 @@ function ServicesPanel({ game }: { game: Game }) {
             loading={editMut.isPending}
           />
         </Modal>
-      )}
-      {mappingSvc && (
-        <ProductMappingModal
-          cmsProductId={mappingSvc.id}
-          cmsProductName={mappingSvc.name}
-          onClose={() => setMappingSvc(null)}
-        />
       )}
     </div>
   );
