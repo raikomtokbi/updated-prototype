@@ -3056,7 +3056,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ── Admin: Compose & send email ───────────────────────────────────────────
   app.post("/api/admin/send-email", requireAdmin, async (req, res) => {
     try {
-      const { fromName, replyTo, to, subject, body } = req.body;
+      const { fromName, replyTo, cc, to, subject, body } = req.body;
       if (!to || !subject || !body) {
         return res.status(400).json({ error: "to, subject, and body are required" });
       }
@@ -3067,7 +3067,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return res.status(400).json({ error: "SMTP is not configured. Please set it up in API Integrations → SMTP Email." });
       }
 
-      const result = await sendRawEmail({ fromName, replyTo, to, subject, body, smtpConfig });
+      const result = await sendRawEmail({ fromName, replyTo, cc, to, subject, body, smtpConfig });
       if (!result.ok) return res.status(500).json({ error: result.error });
       res.json({ ok: true });
     } catch (err: any) {

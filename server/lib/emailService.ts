@@ -220,13 +220,14 @@ export interface SendRawEmailOptions {
   to: string;
   fromName?: string;
   replyTo?: string;
+  cc?: string;
   subject: string;
   body: string;
   smtpConfig: SmtpConfig;
 }
 
 export async function sendRawEmail(opts: SendRawEmailOptions): Promise<{ ok: boolean; error?: string }> {
-  const { to, fromName, replyTo, subject, body, smtpConfig } = opts;
+  const { to, fromName, replyTo, cc, subject, body, smtpConfig } = opts;
 
   if (!smtpConfig.SMTP_HOST || !smtpConfig.SMTP_USER || !smtpConfig.SMTP_PASS) {
     return { ok: false, error: "SMTP not configured" };
@@ -238,14 +239,16 @@ export async function sendRawEmail(opts: SendRawEmailOptions): Promise<{ ok: boo
     const fromNameFinal = fromName || "Admin";
     const htmlBody = body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
 
-    await transporter.sendMail({
+    const mailOptions: Record<string, unknown> = {
       from: `${fromNameFinal} <${fromEmail}>`,
       to,
       replyTo: replyTo || fromEmail,
       subject,
       html: `<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#333;">${htmlBody}</div>`,
       text: body,
-    });
+    };
+    if (cc && cc.trim()) mailOptions.cc = cc.trim();
+    await transporter.sendMail(mailOptions);
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

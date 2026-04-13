@@ -98,8 +98,10 @@ export default function Dashboard() {
 
   // ── Email composer state ───────────────────────────────────────────────────
   const { toast } = useToast();
-  const [emailForm, setEmailForm] = useState({ fromName: "", replyTo: "", to: "", subject: "", body: "" });
+  const [emailForm, setEmailForm] = useState({ fromName: "", replyTo: "", cc: "", to: "", subject: "", body: "" });
   const [emailSent, setEmailSent] = useState(false);
+  const [showReplyTo, setShowReplyTo] = useState(false);
+  const [showCC, setShowCC] = useState(false);
 
   const sendEmailMutation = useMutation({
     mutationFn: async (data: typeof emailForm) => {
@@ -405,31 +407,18 @@ export default function Dashboard() {
             <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginLeft: "4px" }}>Send a message to any recipient via SMTP</span>
           </div>
 
-          <div style={{ padding: "20px", display: "grid", gap: "14px" }}>
-            {/* Row 1: From Name + Reply-To */}
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>From Name</label>
-                <input
-                  type="text"
-                  value={emailForm.fromName}
-                  onChange={(e) => setEmailForm((f) => ({ ...f, fromName: e.target.value }))}
-                  placeholder="e.g. Nexcoin Support"
-                  data-testid="input-email-from-name"
-                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>Reply-To Email <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
-                <input
-                  type="email"
-                  value={emailForm.replyTo}
-                  onChange={(e) => setEmailForm((f) => ({ ...f, replyTo: e.target.value }))}
-                  placeholder="replies@yourdomain.com"
-                  data-testid="input-email-reply-to"
-                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
+          <div style={{ padding: "20px", display: "grid", gap: "12px" }}>
+            {/* Row 1: From Name */}
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>From Name</label>
+              <input
+                type="text"
+                value={emailForm.fromName}
+                onChange={(e) => setEmailForm((f) => ({ ...f, fromName: e.target.value }))}
+                placeholder="e.g. Nexcoin Support"
+                data-testid="input-email-from-name"
+                style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+              />
             </div>
 
             {/* Row 2: To + Subject */}
@@ -458,6 +447,70 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Optional field toggles */}
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              {!showCC && (
+                <button
+                  type="button"
+                  onClick={() => setShowCC(true)}
+                  data-testid="button-add-cc"
+                  style={{ background: "none", border: "none", padding: 0, fontSize: "11px", color: "hsl(var(--primary))", cursor: "pointer", fontWeight: 500 }}
+                >
+                  + Add CC
+                </button>
+              )}
+              {!showReplyTo && (
+                <button
+                  type="button"
+                  onClick={() => setShowReplyTo(true)}
+                  data-testid="button-add-reply-to"
+                  style={{ background: "none", border: "none", padding: 0, fontSize: "11px", color: "hsl(var(--primary))", cursor: "pointer", fontWeight: 500 }}
+                >
+                  + Add Reply-To
+                </button>
+              )}
+            </div>
+
+            {/* CC (conditionally shown) */}
+            {showCC && (
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>CC</label>
+                    <button type="button" onClick={() => { setShowCC(false); setEmailForm((f) => ({ ...f, cc: "" })); }} style={{ background: "none", border: "none", padding: 0, fontSize: "10px", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}>Remove</button>
+                  </div>
+                  <input
+                    type="email"
+                    value={emailForm.cc}
+                    onChange={(e) => setEmailForm((f) => ({ ...f, cc: e.target.value }))}
+                    placeholder="cc@example.com"
+                    data-testid="input-email-cc"
+                    style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Reply-To (conditionally shown) */}
+            {showReplyTo && (
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>Reply-To</label>
+                    <button type="button" onClick={() => { setShowReplyTo(false); setEmailForm((f) => ({ ...f, replyTo: "" })); }} style={{ background: "none", border: "none", padding: 0, fontSize: "10px", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}>Remove</button>
+                  </div>
+                  <input
+                    type="email"
+                    value={emailForm.replyTo}
+                    onChange={(e) => setEmailForm((f) => ({ ...f, replyTo: e.target.value }))}
+                    placeholder="replies@yourdomain.com"
+                    data-testid="input-email-reply-to"
+                    style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Body */}
             <div>
               <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>Message <span style={{ color: "hsl(0,72%,60%)" }}>*</span></label>
@@ -473,18 +526,9 @@ export default function Dashboard() {
 
             {/* Actions */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <button
-                onClick={() => sendEmailMutation.mutate(emailForm)}
-                disabled={sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body}
-                data-testid="button-send-email"
-                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? "not-allowed" : "pointer", opacity: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? 0.55 : 1, transition: "opacity 0.15s" }}
-              >
-                {sendEmailMutation.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={13} />}
-                {sendEmailMutation.isPending ? "Sending…" : "Send Email"}
-              </button>
-              {(emailForm.fromName || emailForm.replyTo || emailForm.to || emailForm.subject || emailForm.body) && (
+              {(emailForm.fromName || emailForm.replyTo || emailForm.cc || emailForm.to || emailForm.subject || emailForm.body) && (
                 <button
-                  onClick={() => setEmailForm({ fromName: "", replyTo: "", to: "", subject: "", body: "" })}
+                  onClick={() => { setEmailForm({ fromName: "", replyTo: "", cc: "", to: "", subject: "", body: "" }); setShowReplyTo(false); setShowCC(false); }}
                   data-testid="button-clear-email"
                   style={{ display: "flex", alignItems: "center", gap: "5px", padding: "8px 12px", background: "transparent", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}
                 >
@@ -495,6 +539,15 @@ export default function Dashboard() {
               {emailSent && (
                 <span style={{ fontSize: "12px", color: "hsl(142,71%,45%)", fontWeight: 500 }}>Email sent successfully!</span>
               )}
+              <button
+                onClick={() => sendEmailMutation.mutate(emailForm)}
+                disabled={sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body}
+                data-testid="button-send-email"
+                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? "not-allowed" : "pointer", opacity: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? 0.55 : 1, transition: "opacity 0.15s", marginLeft: "auto" }}
+              >
+                {sendEmailMutation.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={13} />}
+                {sendEmailMutation.isPending ? "Sending…" : "Send Email"}
+              </button>
             </div>
           </div>
         </div>
