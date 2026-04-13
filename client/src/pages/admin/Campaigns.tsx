@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
@@ -159,14 +159,36 @@ export default function Campaigns() {
 
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
-  const [bonusBadgeText, setBonusBadgeText] = useState("");
-  const [bonusPercent, setBonusPercent] = useState("");
-  const [bonusMainTitle, setBonusMainTitle] = useState("");
-  const [bonusMainSuffix, setBonusMainSuffix] = useState("");
-  const [bonusButtonText, setBonusButtonText] = useState("");
-  const [bonusDescription, setBonusDescription] = useState("");
+  const [bonus, setBonus] = useState({
+    badge_text: "",
+    percent: "",
+    main_title: "",
+    main_suffix: "",
+    button_text: "",
+    description: "",
+  });
+
+  useEffect(() => {
+    if (!settingsLoading && Object.keys(settings).length > 0) {
+      setBonus({
+        badge_text: settings.bonus_badge_text ?? "",
+        percent: settings.bonus_percent ?? "",
+        main_title: settings.bonus_main_title ?? "",
+        main_suffix: settings.bonus_main_suffix ?? "",
+        button_text: settings.bonus_button_text ?? "",
+        description: settings.bonus_description ?? "",
+      });
+    }
+  }, [settingsLoading, settings]);
+
+  const setB = (k: string, v: string) => setBonus((p) => ({ ...p, [k]: v }));
 
   const saveAnnouncement = useMutation({
+    mutationFn: (data: any) => adminApi.put("/settings", data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/settings"] }); },
+  });
+
+  const saveBonus = useMutation({
     mutationFn: (data: any) => adminApi.put("/settings", data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["/api/admin/settings"] }); },
   });
@@ -224,75 +246,61 @@ export default function Campaigns() {
       </div>
 
       {/* ── Bonus Banner ──────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ borderBottom: "1px solid hsl(var(--border))", paddingBottom: "12px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Bonus Banner</label>
-            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
-              Edit the "Get X% Bonus Credits" banner displayed below Trending Now
-            </p>
-          </div>
+      <div style={{ ...card, marginTop: "16px" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))" }}>
+          <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", margin: 0 }}>Bonus Banner</p>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "3px 0 0" }}>
+            Controls the promotional banner on the homepage
+          </p>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
               <label style={labelStyle}>Badge Text</label>
-              <input
-                data-testid="input-bonus-badge"
-                style={inputStyle}
-                value={bonusBadgeText || (settings.bonus_badge_text ?? "")}
-                onChange={(e) => { setBonusBadgeText(e.target.value); saveAnnouncement.mutate({ bonus_badge_text: e.target.value }); }}
-                placeholder="WEEKEND SPECIAL"
-              />
+              <input data-testid="input-bonus-badge" style={inputStyle} value={bonus.badge_text} onChange={(e) => setB("badge_text", e.target.value)} placeholder="WEEKEND SPECIAL" />
             </div>
             <div>
-              <label style={labelStyle}>Bonus Percent</label>
-              <input
-                data-testid="input-bonus-percent"
-                style={inputStyle}
-                value={bonusPercent || (settings.bonus_percent ?? "")}
-                onChange={(e) => { setBonusPercent(e.target.value); saveAnnouncement.mutate({ bonus_percent: e.target.value }); }}
-                placeholder="20%"
-              />
+              <label style={labelStyle}>Bonus %</label>
+              <input data-testid="input-bonus-percent" style={inputStyle} value={bonus.percent} onChange={(e) => setB("percent", e.target.value)} placeholder="20%" />
             </div>
             <div>
-              <label style={labelStyle}>Main Title</label>
-              <input
-                data-testid="input-bonus-title"
-                style={inputStyle}
-                value={bonusMainTitle || (settings.bonus_main_title ?? "")}
-                onChange={(e) => { setBonusMainTitle(e.target.value); saveAnnouncement.mutate({ bonus_main_title: e.target.value }); }}
-                placeholder="GET"
-              />
+              <label style={labelStyle}>Title Prefix</label>
+              <input data-testid="input-bonus-title" style={inputStyle} value={bonus.main_title} onChange={(e) => setB("main_title", e.target.value)} placeholder="GET" />
             </div>
             <div>
               <label style={labelStyle}>Title Suffix</label>
-              <input
-                data-testid="input-bonus-suffix"
-                style={inputStyle}
-                value={bonusMainSuffix || (settings.bonus_main_suffix ?? "")}
-                onChange={(e) => { setBonusMainSuffix(e.target.value); saveAnnouncement.mutate({ bonus_main_suffix: e.target.value }); }}
-                placeholder="CREDITS"
-              />
+              <input data-testid="input-bonus-suffix" style={inputStyle} value={bonus.main_suffix} onChange={(e) => setB("main_suffix", e.target.value)} placeholder="CREDITS" />
             </div>
             <div>
               <label style={labelStyle}>Button Text</label>
-              <input
-                data-testid="input-bonus-button"
-                style={inputStyle}
-                value={bonusButtonText || (settings.bonus_button_text ?? "")}
-                onChange={(e) => { setBonusButtonText(e.target.value); saveAnnouncement.mutate({ bonus_button_text: e.target.value }); }}
-                placeholder="Claim Now"
-              />
+              <input data-testid="input-bonus-button" style={inputStyle} value={bonus.button_text} onChange={(e) => setB("button_text", e.target.value)} placeholder="Claim Now" />
             </div>
           </div>
           <div>
             <label style={labelStyle}>Description</label>
             <textarea
               data-testid="input-bonus-desc"
-              style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "250px", resize: "none" }}
-              value={bonusDescription || (settings.bonus_description ?? "")}
-              onChange={(e) => { setBonusDescription(e.target.value); saveAnnouncement.mutate({ bonus_description: e.target.value }); }}
-              placeholder="Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday."
+              style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "80px", resize: "vertical" } as any}
+              value={bonus.description}
+              onChange={(e) => setB("description", e.target.value)}
+              placeholder="Top up using any supported payment method this weekend and receive bonus credits on all top-ups."
             />
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={() => saveBonus.mutate({
+                bonus_badge_text: bonus.badge_text,
+                bonus_percent: bonus.percent,
+                bonus_main_title: bonus.main_title,
+                bonus_main_suffix: bonus.main_suffix,
+                bonus_button_text: bonus.button_text,
+                bonus_description: bonus.description,
+              })}
+              disabled={saveBonus.isPending}
+              style={{ ...btnPrimary, padding: "7px 18px", fontSize: "12px" }}
+            >
+              {saveBonus.isPending ? "Saving..." : "Save Bonus Banner"}
+            </button>
           </div>
         </div>
       </div>
