@@ -690,118 +690,6 @@ export default function EditContent() {
         </div>
       </div>
 
-      {/* ── Features Strip ───────────────────────────────────────────────── */}
-      <div style={card}>
-        <div style={sectionHeader}>
-          <Zap size={15} style={{ color: "hsl(var(--primary))" }} />
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Features Strip</span>
-        </div>
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
-            Edit the three features displayed below the hero section including titles, descriptions, and icons
-          </p>
-          {[
-            { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds", defaultIcon: "Zap" },
-            { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions", defaultIcon: "Shield" },
-            { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups", defaultIcon: "Tag" },
-          ].map((feat, featIdx) => {
-            const currentIcon = local[`${feat.key}_icon`] ?? feat.defaultIcon;
-            const IconComponent = ICON_MAP[currentIcon] || ICON_MAP["Zap"];
-            return (
-              <div key={feat.key} style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                  <div>
-                    <label style={labelStyle}>Title</label>
-                    <input
-                      type="text"
-                      data-testid={`input-${feat.key}-title`}
-                      style={{
-                        width: "100%",
-                        padding: "8px 12px",
-                        background: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "6px",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "13px",
-                        outline: "none",
-                        boxSizing: "border-box",
-                        fontFamily: "inherit",
-                      }}
-                      value={local[`${feat.key}_title`] ?? feat.title}
-                      onChange={(e) => set(`${feat.key}_title`, e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Icon</label>
-                    <button
-                      data-testid={`button-icon-picker-${feat.key}`}
-                      onClick={() => set(`${feat.key}_picker_open`, local[`${feat.key}_picker_open`] ? "" : "1")}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "8px 12px",
-                        borderRadius: "6px",
-                        border: "1px solid hsl(var(--border))",
-                        background: "hsl(var(--card))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        width: "100%",
-                      }}
-                    >
-                      <IconComponent size={16} />
-                      {currentIcon}
-                    </button>
-                  </div>
-                </div>
-                <label style={labelStyle}>Description</label>
-                <textarea
-                  data-testid={`input-${feat.key}-desc`}
-                  style={{ ...textareaStyle, minHeight: "60px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
-                  value={local[`${feat.key}_desc`] ?? feat.desc}
-                  onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
-                />
-                {local[`${feat.key}_picker_open`] && (
-                  <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px", marginTop: "12px" }}>
-                    <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
-                      {ICON_LIST.map((iconName) => {
-                        const Icon = ICON_MAP[iconName];
-                        const selected = currentIcon === iconName;
-                        return (
-                          <button
-                            key={iconName}
-                            type="button"
-                            data-testid={`button-icon-${iconName}-${feat.key}`}
-                            onClick={() => { set(`${feat.key}_icon`, iconName); set(`${feat.key}_picker_open`, ""); }}
-                            title={iconName}
-                            style={{
-                              padding: "8px",
-                              borderRadius: "6px",
-                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
-                              background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
-                              transition: "all 0.1s",
-                            }}
-                          >
-                            <Icon size={14} />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* ── Hero Sliders ──────────────────────────────────────────────────── */}
       <div style={card}>
         <div style={{ ...sectionHeader, justifyContent: "space-between" }}>
@@ -915,6 +803,118 @@ export default function EditContent() {
               )
             )
           )}
+        </div>
+      </div>
+
+      {/* ── Features Strip ───────────────────────────────────────────────── */}
+      <div style={card}>
+        <div style={sectionHeader}>
+          <Zap size={15} style={{ color: "hsl(var(--primary))" }} />
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Features Strip</span>
+        </div>
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+            Edit the three features displayed below the hero section including titles, descriptions, and icons
+          </p>
+          {[
+            { key: "feature_1", title: "Lightning Fast", desc: "Instant delivery to your account within seconds", defaultIcon: "Zap" },
+            { key: "feature_2", title: "Secure Payments", desc: "256-bit encryption on all transactions", defaultIcon: "Shield" },
+            { key: "feature_3", title: "Best Deals", desc: "Lowest prices guaranteed on all top-ups", defaultIcon: "Tag" },
+          ].map((feat, featIdx) => {
+            const currentIcon = local[`${feat.key}_icon`] ?? feat.defaultIcon;
+            const IconComponent = ICON_MAP[currentIcon] || ICON_MAP["Zap"];
+            return (
+              <div key={feat.key} style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                  <div>
+                    <label style={labelStyle}>Title</label>
+                    <input
+                      type="text"
+                      data-testid={`input-${feat.key}-title`}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "6px",
+                        color: "hsl(var(--foreground))",
+                        fontSize: "13px",
+                        outline: "none",
+                        boxSizing: "border-box",
+                        fontFamily: "inherit",
+                      }}
+                      value={local[`${feat.key}_title`] ?? feat.title}
+                      onChange={(e) => set(`${feat.key}_title`, e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Icon</label>
+                    <button
+                      data-testid={`button-icon-picker-${feat.key}`}
+                      onClick={() => set(`${feat.key}_picker_open`, local[`${feat.key}_picker_open`] ? "" : "1")}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid hsl(var(--border))",
+                        background: "hsl(var(--card))",
+                        color: "hsl(var(--foreground))",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        width: "100%",
+                      }}
+                    >
+                      <IconComponent size={16} />
+                      {currentIcon}
+                    </button>
+                  </div>
+                </div>
+                <label style={labelStyle}>Description</label>
+                <textarea
+                  data-testid={`input-${feat.key}-desc`}
+                  style={{ ...textareaStyle, minHeight: "60px", marginBottom: local[`${feat.key}_picker_open`] ? "12px" : "0" }}
+                  value={local[`${feat.key}_desc`] ?? feat.desc}
+                  onChange={(e) => set(`${feat.key}_desc`, e.target.value)}
+                />
+                {local[`${feat.key}_picker_open`] && (
+                  <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "12px", marginTop: "12px" }}>
+                    <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Choose Icon</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px" }}>
+                      {ICON_LIST.map((iconName) => {
+                        const Icon = ICON_MAP[iconName];
+                        const selected = currentIcon === iconName;
+                        return (
+                          <button
+                            key={iconName}
+                            type="button"
+                            data-testid={`button-icon-${iconName}-${feat.key}`}
+                            onClick={() => { set(`${feat.key}_icon`, iconName); set(`${feat.key}_picker_open`, ""); }}
+                            title={iconName}
+                            style={{
+                              padding: "8px",
+                              borderRadius: "6px",
+                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
+                              background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
+                              transition: "all 0.1s",
+                            }}
+                          >
+                            <Icon size={14} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
