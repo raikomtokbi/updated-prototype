@@ -407,6 +407,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
   const [smileProducts, setSmileProducts] = useState<any[]>([]);
   const [smileLoading, setSmileLoading] = useState(false);
   const [highlightSmile, setHighlightSmile] = useState<any | null>(null);
+  const [usdInrRate, setUsdInrRate] = useState<number | null>(null);
 
   const [form, setForm] = useState({ name: "", description: "", imageUrl: "", price: "", rate: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" });
   const [saving, setSaving] = useState(false);
@@ -439,17 +440,30 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
     finally { setSmileLoading(false); }
   }
 
+  async function fetchUsdInrRate() {
+    try {
+      const res = await fetch("https://api.frankfurter.dev/latest?from=USD&to=INR");
+      const data = await res.json();
+      const rate = data?.rates?.INR;
+      setUsdInrRate(typeof rate === "number" ? rate : null);
+    } catch {
+      setUsdInrRate(null);
+    }
+  }
+
   function pickBusan(p: any) {
     setHighlightBusan(p);
     setSelectedProduct(p);
-    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, rate: p.price ? String(p.price) : prev.rate }));
+    setForm((prev) => ({ ...prev, rate: p.price ? String(p.price) : prev.rate }));
+    fetchUsdInrRate();
     setStep(3);
   }
 
   function pickSmile(p: any) {
     setHighlightSmile(p);
     setSelectedProduct(p);
-    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, rate: p.price ? String(p.price) : prev.rate }));
+    setForm((prev) => ({ ...prev, rate: p.price ? String(p.price) : prev.rate }));
+    fetchUsdInrRate();
     setStep(3);
   }
 
@@ -612,8 +626,13 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
             <input style={inputStyle} required value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="100 UC" />
           </div>
           <div>
-            <label style={labelStyle}>Rate <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(provider value, admin only)</span></label>
-            <input style={inputStyle} type="number" step="0.01" value={form.rate} readOnly disabled placeholder="Fetched from provider" />
+            <label style={labelStyle}>Rate</label>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <input style={{ ...inputStyle, flex: 1 }} type="number" step="0.01" value={form.rate} readOnly disabled placeholder="Fetched from provider" />
+              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
+                {usdInrRate && form.rate ? `₹${(parseFloat(form.rate) || 0) * usdInrRate}` : "₹—"}
+              </span>
+            </div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
             <div>
