@@ -74,9 +74,11 @@ export function ProductMappingModal({
   const [selectedSmile, setSelectedSmile] = useState<SmileProduct | null>(null);
   const [smileLoading, setSmileLoading] = useState(false);
 
-  const [lioProductId, setLioProductId] = useState("");
+  const [lioProducts, setLioProducts] = useState<{ id: number; name: string; price: string }[]>([]);
+  const [lioProductsLoading, setLioProductsLoading] = useState(false);
+  const [lioProductsError, setLioProductsError] = useState("");
+  const [lioSelectedProduct, setLioSelectedProduct] = useState<{ id: number; name: string } | null>(null);
   const [lioVariationId, setLioVariationId] = useState("");
-  const [lioProductName, setLioProductName] = useState("");
   const [lioVariations, setLioVariations] = useState<{ variation_id: number; name: string }[]>([]);
   const [lioVarLoading, setLioVarLoading] = useState(false);
 
@@ -121,9 +123,23 @@ export function ProductMappingModal({
     finally { setSmileLoading(false); }
   }
 
-  async function fetchLioVariations(productId: string) {
-    if (!productId || isNaN(parseInt(productId, 10))) { setLioVariations([]); return; }
-    setLioVarLoading(true);
+  async function fetchLioProducts() {
+    setLioProductsLoading(true); setLioProductsError(""); setLioProducts([]);
+    try {
+      const res = await fetch("/api/admin/liogames/products", {
+        headers: { "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setLioProducts(Array.isArray(data?.products) ? data.products : []);
+      if (!data?.success && !Array.isArray(data?.products)) {
+        setLioProductsError(data?.message || "Failed to fetch products");
+      }
+    } catch (e: any) { setLioProductsError(e.message || "Failed to fetch products"); }
+    finally { setLioProductsLoading(false); }
+  }
+
+  async function fetchLioVariations(productId: number) {
+    setLioVarLoading(true); setLioVariationId(""); setLioVariations([]);
     try {
       const res = await fetch(`/api/admin/liogames/product-variations?product_id=${productId}`, {
         headers: { "x-admin-role": user?.role ?? "super_admin" },
@@ -168,15 +184,15 @@ export function ProductMappingModal({
   }
 
   async function mapLio() {
-    if (!lioProductId) return;
+    if (!lioSelectedProduct) return;
     setSaving(true);
     try {
       if (existingLio) await adminApi.delete(`/liogames/mappings/${existingLio.id}`);
       await adminApi.post("/liogames/mappings", {
         cmsProductId, cmsProductName,
-        lioProductId: parseInt(lioProductId, 10),
+        lioProductId: lioSelectedProduct.id,
         lioVariationId: lioVariationId ? parseInt(lioVariationId, 10) : undefined,
-        lioProductName: lioProductName || undefined,
+        lioProductName: lioSelectedProduct.name,
       });
       qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] });
       onClose();
@@ -209,9 +225,10 @@ export function ProductMappingModal({
     setBusanProducts([]);
     setBusanError("");
     setSmileProducts([]);
-    setLioProductId("");
+    setLioProducts([]);
+    setLioProductsError("");
+    setLioSelectedProduct(null);
     setLioVariationId("");
-    setLioProductName("");
     setLioVariations([]);
   }
 
@@ -296,7 +313,7 @@ export function ProductMappingModal({
 
               <button
                 type="button"
-                onClick={() => setProvider("liogames")}
+                onClick={() => { setProvider("liogames"); fetchLioProducts(); }}
                 style={{
                   padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
                   border: existingLio ? "2px solid rgba(74,222,128,0.45)" : "1px solid hsl(var(--border))",
@@ -477,41 +494,63 @@ export function ProductMappingModal({
 
         {/* ── Liogames ── */}
         {provider === "liogames" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div>
-              <label style={labelStyle}>Liogames Product ID</label>
-              <input
-                style={inputStyle}
-                type="number"
-                value={lioProductId}
-                onChange={(e) => {
-                  setLioProductId(e.target.value);
-                  setLioVariationId("");
-                  fetchLioVariations(e.target.value);
-                }}
-                placeholder="e.g. 123"
-                data-testid="input-lio-product-id"
-              />
-              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
-                WooCommerce product ID from Liogames. Variations load automatically.
-              </p>
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {lioProductsLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "hsl(var(--muted-foreground))", fontSize: "12px", padding: "16px 0" }}>
+                <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Loading Liogames products...
+              </div>
+            )}
+            {lioProductsError && (
+              <div style={{ padding: "8px 12px", background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "6px", fontSize: "12px", color: "#f87171", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span>{lioProductsError}</span>
+                <button type="button" onClick={fetchLioProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer", fontSize: "11px" }}>Retry</button>
+              </div>
+            )}
+            {!lioProductsLoading && lioProducts.length > 0 && (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
+                    {lioSelectedProduct ? `Selected: ${lioSelectedProduct.name}` : `${lioProducts.length} products — click to select`}
+                  </span>
+                  <button type="button" onClick={() => { fetchLioProducts(); setLioSelectedProduct(null); setLioVariations([]); setLioVariationId(""); }} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <RefreshCw size={10} /> Refresh
+                  </button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "220px", overflowY: "auto" }}>
+                  {lioProducts.map((p) => (
+                    <div
+                      key={p.id}
+                      onClick={() => { setLioSelectedProduct({ id: p.id, name: p.name }); fetchLioVariations(p.id); }}
+                      style={{
+                        padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
+                        background: lioSelectedProduct?.id === p.id ? "rgba(6,182,212,0.15)" : "hsl(var(--card))",
+                        border: lioSelectedProduct?.id === p.id ? "1px solid rgba(6,182,212,0.4)" : "1px solid hsl(var(--border))",
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                      }}
+                    >
+                      <span style={{ color: "hsl(var(--foreground))" }}>{p.name}</span>
+                      <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>#{p.id}{p.price ? ` · ${p.price}` : ""}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            {!lioProductsLoading && lioProducts.length === 0 && !lioProductsError && (
+              <div style={{ textAlign: "center", padding: "24px", color: "hsl(var(--muted-foreground))", fontSize: "12px" }}>
+                No products found.{" "}
+                <button type="button" onClick={fetchLioProducts} style={{ color: "hsl(var(--primary))", background: "none", border: "none", cursor: "pointer" }}>Try again</button>
+              </div>
+            )}
 
             {lioVarLoading && (
               <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
                 <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Loading variations...
               </div>
             )}
-
-            {lioVariations.length > 0 && (
+            {!lioVarLoading && lioVariations.length > 0 && lioSelectedProduct && (
               <div>
                 <label style={labelStyle}>Variation <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
-                <select
-                  style={selectStyle}
-                  value={lioVariationId}
-                  onChange={(e) => setLioVariationId(e.target.value)}
-                  data-testid="select-lio-variation"
-                >
+                <select style={selectStyle} value={lioVariationId} onChange={(e) => setLioVariationId(e.target.value)} data-testid="select-lio-variation">
                   <option value="">— No specific variation —</option>
                   {lioVariations.map((v) => (
                     <option key={v.variation_id} value={String(v.variation_id)}>{v.name} (#{v.variation_id})</option>
@@ -520,17 +559,6 @@ export function ProductMappingModal({
               </div>
             )}
 
-            <div>
-              <label style={labelStyle}>Product Label <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
-              <input
-                style={inputStyle}
-                value={lioProductName}
-                onChange={(e) => setLioProductName(e.target.value)}
-                placeholder="e.g. Mobile Legends Diamonds"
-                data-testid="input-lio-product-name"
-              />
-            </div>
-
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "10px", borderTop: "1px solid hsl(var(--border))" }}>
               <button type="button" onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
                 Cancel
@@ -538,8 +566,8 @@ export function ProductMappingModal({
               <button
                 type="button"
                 onClick={mapLio}
-                disabled={!lioProductId || saving}
-                style={{ ...btnPrimary, opacity: (!lioProductId || saving) ? 0.5 : 1, cursor: !lioProductId || saving ? "not-allowed" : "pointer" }}
+                disabled={!lioSelectedProduct || saving}
+                style={{ ...btnPrimary, opacity: (!lioSelectedProduct || saving) ? 0.5 : 1, cursor: !lioSelectedProduct || saving ? "not-allowed" : "pointer" }}
                 data-testid="button-map-liogames"
               >
                 {saving ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Link2 size={12} />}

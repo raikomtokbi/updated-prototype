@@ -142,6 +142,23 @@ export async function getLiogamesInputProfiles(baseUrl = DEFAULT_BASE_URL) {
   return res.json();
 }
 
+export type LiogamesWcProduct = {
+  id: number;
+  name: string;
+  price: string;
+  type: string;
+  status: string;
+};
+
+export async function getLiogamesProducts(baseUrl = DEFAULT_BASE_URL, page = 1, perPage = 100): Promise<LiogamesWcProduct[]> {
+  const origin = new URL(baseUrl).origin;
+  const url = `${origin}/wp-json/wc/v3/products?per_page=${perPage}&page=${page}&status=publish&type=variable,simple`;
+  const res = await fetch(url, { headers: { "Accept": "application/json" } });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
 export async function createLiogamesOrder(payload: Record<string, unknown>, config: LiogamesConfig) {
   return liogamesRequest<LiogamesCreateOrderData>("/order-create", payload, config);
 }

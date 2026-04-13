@@ -25,6 +25,7 @@ import {
   getLiogamesProductVariations,
   getLiogamesProductSchema,
   getLiogamesInputProfiles,
+  getLiogamesProducts,
   createLiogamesOrder,
   getLiogamesOrderStatus,
 } from "./lib/liogamesApi";
@@ -2592,6 +2593,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.json(result);
     } catch (err: unknown) {
       return res.status(502).json({ success: false, message: err instanceof Error ? err.message : "Error fetching profiles" });
+    }
+  });
+
+  app.get("/api/admin/liogames/products", requireAdmin, async (_req, res) => {
+    try {
+      const config = await storage.getLioGamesConfig();
+      const products = await getLiogamesProducts(config?.baseUrl ?? undefined);
+      return res.json({ success: true, products });
+    } catch (err: unknown) {
+      return res.status(502).json({ success: false, message: err instanceof Error ? err.message : "Error fetching products" });
     }
   });
 
