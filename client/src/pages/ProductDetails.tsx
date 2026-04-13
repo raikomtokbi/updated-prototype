@@ -52,21 +52,18 @@ function PackageCard({
         gap: "4px",
         padding: "12px 8px",
         borderRadius: "10px",
-        background: outOfStock
-          ? "hsl(220,13%,11%)"
-          : selected
-            ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
-            : "hsl(var(--card))",
-        border: `2px solid ${outOfStock ? "hsl(220,10%,20%)" : selected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
+        background: selected
+          ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
+          : "hsl(var(--card))",
+        border: `2px solid ${selected && !outOfStock ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
         cursor: outOfStock ? "not-allowed" : "pointer",
-        color: outOfStock ? "hsl(var(--muted-foreground))" : selected ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
+        color: selected ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
         transition: "all 0.15s ease",
         minHeight: "72px",
         width: "100%",
         textAlign: "center",
         overflow: "hidden",
-        opacity: outOfStock ? 0.5 : 1,
-        filter: outOfStock ? "grayscale(1)" : "none",
+        opacity: outOfStock ? 0.35 : 1,
       }}
     >
       {!outOfStock && selected && (
