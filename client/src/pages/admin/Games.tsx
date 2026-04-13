@@ -611,6 +611,10 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
             <label style={labelStyle}>Name *</label>
             <input style={inputStyle} required value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="100 UC" />
           </div>
+          <div>
+            <label style={labelStyle}>Rate <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(provider value, admin only)</span></label>
+            <input style={inputStyle} type="number" step="0.01" value={form.rate} readOnly disabled placeholder="Fetched from provider" />
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
             <div>
               <label style={labelStyle}>Price *</label>
@@ -624,10 +628,6 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
               <label style={labelStyle}>Final Price</label>
               <input style={inputStyle} type="number" step="0.01" value={form.finalPrice} onChange={(e) => setField("finalPrice", e.target.value)} placeholder="auto" />
             </div>
-          </div>
-          <div>
-            <label style={labelStyle}>Rate <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(provider value, admin only)</span></label>
-            <input style={inputStyle} type="number" step="0.01" value={form.rate} readOnly placeholder="Fetched from provider" />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
             <div>
