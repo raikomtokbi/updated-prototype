@@ -99,7 +99,7 @@ export interface IStorage {
   // Analytics
   trackPageView(data: { id: string; sessionId: string; path: string; referrer?: string; deviceType?: string }): Promise<void>;
   updatePageViewDuration(id: string, durationMs: number, isBounce: boolean): Promise<void>;
-  getAnalyticsOverview(fromDate: Date, toDate: Date): Promise<any>;
+  getAnalyticsOverview(fromDate: Date, toDate: Date, timezone?: string): Promise<any>;
   getLiveTraffic(): Promise<any>;
 
   // Transactions
@@ -482,7 +482,7 @@ export class DatabaseStorage implements IStorage {
   async updatePageViewDuration(id: string, durationMs: number, isBounce: boolean) {
     await db.update(pageViews).set({ durationMs, isBounce }).where(eq(pageViews.id, id));
   }
-  async getAnalyticsOverview(fromDate: Date, toDate: Date) {
+  async getAnalyticsOverview(fromDate: Date, toDate: Date, timezone = "UTC") {
     const views = await db.select().from(pageViews)
       .where(and(
         gte(pageViews.createdAt, fromDate),
@@ -500,20 +500,27 @@ export class DatabaseStorage implements IStorage {
       ? Math.round(durViews.reduce((s, v) => s + (v.durationMs ?? 0), 0) / durViews.length / 1000)
       : 0;
 
-    // Hourly traffic (last 24h from toDate)
-    const hourMap: Record<string, number> = {};
+    // Hourly traffic (last 24h from toDate) – labels in site timezone
+    const safeTz = (timezone || "UTC").replace(/[^a-zA-Z0-9/_+\-]/g, "");
+    const tzHour = (d: Date) =>
+      new Intl.DateTimeFormat("en-US", { hour: "2-digit", hour12: false, timeZone: safeTz })
+        .format(d)
+        .replace("24", "00");          // Intl sometimes returns "24" for midnight
+
     const now = toDate;
+    const hourKeys: string[] = [];
+    const hourMap: Record<string, number> = {};
     for (let h = 23; h >= 0; h--) {
-      const d = new Date(now); d.setHours(now.getHours() - h, 0, 0, 0);
-      const key = `${String(d.getHours()).padStart(2, "0")}:00`;
-      hourMap[key] = 0;
+      const d = new Date(now.getTime() - h * 60 * 60 * 1000);
+      const key = `${tzHour(d)}:00`;
+      if (!hourMap[key]) { hourMap[key] = 0; hourKeys.push(key); }
     }
     const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     views.filter(v => v.createdAt >= dayAgo).forEach(v => {
-      const key = `${String(v.createdAt.getHours()).padStart(2, "0")}:00`;
+      const key = `${tzHour(v.createdAt)}:00`;
       if (hourMap[key] !== undefined) hourMap[key]++;
     });
-    const liveTraffic = Object.entries(hourMap).map(([hour, views]) => ({ hour, views }));
+    const liveTraffic = hourKeys.map(h => ({ hour: h, views: hourMap[h] }));
 
     // Traffic sources
     const sourceCount: Record<string, number> = { Direct: 0, Organic: 0, Referral: 0, Social: 0 };

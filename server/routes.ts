@@ -1051,8 +1051,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (range === "7days") fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     else if (range === "90days") fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     else fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const data = await storage.getAnalyticsOverview(fromDate, now);
-    const live = await storage.getLiveTraffic();
+    const allSettings = await storage.getAllSiteSettings();
+    const siteTimezone = allSettings.find(s => s.key === "site_timezone")?.value || "UTC";
+    const [data, live] = await Promise.all([
+      storage.getAnalyticsOverview(fromDate, now, siteTimezone),
+      storage.getLiveTraffic(),
+    ]);
     res.json({ ...data, ...live });
   });
 
