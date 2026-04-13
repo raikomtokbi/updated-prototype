@@ -182,7 +182,7 @@ export function ProductMappingModal({
               </button>
             )}
             <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
-              {provider === "busan" ? "Busan — Select Product" : provider === "smileone" ? "Smile.one — Select Product" : "Map to API Provider"}
+              {provider === "busan" ? "Busan — Select Product" : provider === "smileone" ? "Smile.one — Select Product" : "Map to Provider"}
             </h3>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", display: "flex" }}>
