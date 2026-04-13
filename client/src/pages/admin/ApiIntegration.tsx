@@ -1287,17 +1287,9 @@ function LioGamesMappingTab() {
 }
 
 function LioGamesModal({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<"config" | "mapping">("config");
   return (
     <Modal title="Liogames Integration" onClose={onClose} wide>
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(var(--border))" }}>
-          <button data-testid="tab-liogames-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
-          <button data-testid="tab-liogames-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
-        </div>
-        {tab === "config" && <LioGamesConfigTab />}
-        {tab === "mapping" && <LioGamesMappingTab />}
-      </div>
+      <LioGamesConfigTab />
     </Modal>
   );
 }

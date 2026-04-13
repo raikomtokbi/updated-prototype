@@ -323,9 +323,10 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
     async function loadRate() {
       setRateLoading(true);
       try {
-        const [busanMappings, smileMappings] = await Promise.all([
+        const [busanMappings, smileMappings, lioMappings] = await Promise.all([
           adminApi.get("/busan/mappings"),
           adminApi.get("/smileone/mappings"),
+          adminApi.get("/liogames/mappings"),
         ]);
 
         // Fetch INR rate separately so a failure doesn't block product lookup
@@ -363,6 +364,12 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
               if (prod?.price) { setRate(String(prod.price)); setRateLoading(false); return; }
             } catch { /* ignore */ }
           }
+        }
+
+        // Try Liogames mapping
+        const lMap = Array.isArray(lioMappings) ? lioMappings.find((m: any) => m.cmsProductId === form.id) : null;
+        if (lMap) {
+          setMappingInfo({ provider: "Liogames", productName: lMap.lioProductName ?? `Product #${lMap.lioProductId}` });
         }
       } catch (e) { console.error(e); }
       setRateLoading(false);
@@ -486,7 +493,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
   const isMobile = useMobile(768);
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [provider, setProvider] = useState<"busan" | "smileone" | null>(null);
+  const [provider, setProvider] = useState<"busan" | "smileone" | "liogames" | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
 
   const [busanProducts, setBusanProducts] = useState<any[]>([]);
@@ -500,6 +507,12 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
   const [smileLoading, setSmileLoading] = useState(false);
   const [highlightSmile, setHighlightSmile] = useState<any | null>(null);
   const [usdInrRate, setUsdInrRate] = useState<number | null>(null);
+
+  const [lioProductId, setLioProductId] = useState("");
+  const [lioVariationId, setLioVariationId] = useState("");
+  const [lioProductName, setLioProductName] = useState("");
+  const [lioVariations, setLioVariations] = useState<{ variation_id: number; name: string }[]>([]);
+  const [lioVarLoading, setLioVarLoading] = useState(false);
 
   const [form, setForm] = useState({ name: "", description: "", imageUrl: "", price: "", rate: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" });
   const [saving, setSaving] = useState(false);
@@ -530,6 +543,19 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
       setSmileProducts(data.success && Array.isArray(data.products) ? data.products : []);
     } catch { setSmileProducts([]); }
     finally { setSmileLoading(false); }
+  }
+
+  async function fetchLioVariations(productId: string) {
+    if (!productId || isNaN(parseInt(productId, 10))) { setLioVariations([]); return; }
+    setLioVarLoading(true);
+    try {
+      const res = await fetch(`/api/admin/liogames/product-variations?product_id=${productId}`, {
+        headers: { "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setLioVariations(data?.data?.variations ?? []);
+    } catch { setLioVariations([]); }
+    finally { setLioVarLoading(false); }
   }
 
   async function fetchUsdInrRate() {
@@ -578,13 +604,23 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
           qc.invalidateQueries({ queryKey: ["/api/admin/smileone/mappings"] });
         }
       }
+      if (provider === "liogames" && lioProductId && created?.id) {
+        await adminApi.post("/liogames/mappings", {
+          cmsProductId: created.id, cmsProductName: form.name,
+          lioProductId: parseInt(lioProductId, 10),
+          lioVariationId: lioVariationId ? parseInt(lioVariationId, 10) : undefined,
+          lioProductName: lioProductName || undefined,
+        });
+        qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] });
+      }
       qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] });
       onClose();
     } catch (e: any) { console.error(e); }
     finally { setSaving(false); }
   }
 
-  const stepTitles = ["Choose Provider", provider === "busan" ? "Select Busan Product" : "Select Smile.one Product", "Service Details"];
+  const providerLabel = provider === "busan" ? "Select Busan Product" : provider === "smileone" ? "Select Smile.one Product" : provider === "liogames" ? "Enter Liogames Product" : "Select Product";
+  const stepTitles = ["Choose Provider", providerLabel, "Service Details"];
   const stepTitle = stepTitles[step - 1];
 
   return (
@@ -602,24 +638,33 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
           <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
             Choose a provider to browse its product list, or skip to fill in details manually.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
             <button
               type="button"
               onClick={() => { setProvider("busan"); setStep(2); fetchBusanProducts(); }}
-              style={{ padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
+              style={{ padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
             >
-              <Zap size={20} color="hsl(258,90%,62%)" />
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
-              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse &amp; select a product</span>
+              <Zap size={18} color="hsl(258,90%,62%)" />
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse products</span>
             </button>
             <button
               type="button"
               onClick={() => { setProvider("smileone"); setStep(2); }}
-              style={{ padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
+              style={{ padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
             >
-              <Smile size={20} color="#f59e0b" />
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Smile.one</span>
-              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse &amp; select a product</span>
+              <Smile size={18} color="#f59e0b" />
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Smile.one</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse products</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setProvider("liogames"); setStep(2); }}
+              style={{ padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <Zap size={18} color="#06b6d4" />
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Liogames</span>
+              <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Enter product ID</span>
             </button>
           </div>
           <button type="button" onClick={() => { setProvider(null); setSelectedProduct(null); setStep(3); }} style={{ padding: "9px", borderRadius: "6px", border: "1px dashed hsl(var(--border))", background: "transparent", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
@@ -695,9 +740,56 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
         </div>
       )}
 
+      {/* ── Step 2c: Liogames ── */}
+      {step === 2 && provider === "liogames" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <button type="button" onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", alignSelf: "flex-start" }}>
+            <ArrowLeft size={13} /> Back
+          </button>
+          <div>
+            <label style={labelStyle}>Liogames Product ID</label>
+            <input style={inputStyle} type="number" value={lioProductId} onChange={(e) => { setLioProductId(e.target.value); setLioVariationId(""); fetchLioVariations(e.target.value); }} placeholder="e.g. 123" />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>WooCommerce product ID from Liogames. Variations load automatically.</p>
+          </div>
+          {lioVarLoading && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
+              <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Loading variations...
+            </div>
+          )}
+          {lioVariations.length > 0 && (
+            <div>
+              <label style={labelStyle}>Variation <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+              <select style={inputStyle} value={lioVariationId} onChange={(e) => setLioVariationId(e.target.value)}>
+                <option value="">— No specific variation —</option>
+                {lioVariations.map((v) => <option key={v.variation_id} value={String(v.variation_id)}>{v.name} (#{v.variation_id})</option>)}
+              </select>
+            </div>
+          )}
+          <div>
+            <label style={labelStyle}>Product Label <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+            <input style={inputStyle} value={lioProductName} onChange={(e) => setLioProductName(e.target.value)} placeholder="e.g. Mobile Legends Diamonds" />
+          </div>
+          <button type="button" onClick={() => setStep(3)} disabled={!lioProductId}
+            style={{ ...btnPrimary, justifyContent: "center", opacity: !lioProductId ? 0.5 : 1 }}>
+            Continue to Service Details
+          </button>
+        </div>
+      )}
+
       {/* ── Step 3: Service details ── */}
       {step === 3 && (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+          {provider === "liogames" && lioProductId && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
+              <CheckCircle size={12} color="hsl(142,71%,48%)" />
+              <span style={{ color: "hsl(var(--foreground))" }}>
+                <strong>Liogames</strong>: Product #{lioProductId}{lioVariationId ? ` / Var #${lioVariationId}` : ""} — mapping will be saved automatically
+              </span>
+              <button type="button" onClick={() => setStep(2)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", fontSize: "10px", display: "flex", alignItems: "center", gap: "2px" }}>
+                <ArrowLeft size={10} /> Change
+              </button>
+            </div>
+          )}
           {selectedProduct && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
               <CheckCircle size={12} color="hsl(142,71%,48%)" />

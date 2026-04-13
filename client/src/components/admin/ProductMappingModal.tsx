@@ -60,7 +60,7 @@ export function ProductMappingModal({
 }) {
   const qc = useQueryClient();
   const { user } = useAuthStore();
-  const [provider, setProvider] = useState<"busan" | "smileone" | null>(null);
+  const [provider, setProvider] = useState<"busan" | "smileone" | "liogames" | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [busanProducts, setBusanProducts] = useState<BusanProduct[]>([]);
@@ -74,6 +74,12 @@ export function ProductMappingModal({
   const [selectedSmile, setSelectedSmile] = useState<SmileProduct | null>(null);
   const [smileLoading, setSmileLoading] = useState(false);
 
+  const [lioProductId, setLioProductId] = useState("");
+  const [lioVariationId, setLioVariationId] = useState("");
+  const [lioProductName, setLioProductName] = useState("");
+  const [lioVariations, setLioVariations] = useState<{ variation_id: number; name: string }[]>([]);
+  const [lioVarLoading, setLioVarLoading] = useState(false);
+
   const { data: busanMappings = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/busan/mappings"],
     queryFn: () => adminApi.get("/busan/mappings"),
@@ -82,9 +88,14 @@ export function ProductMappingModal({
     queryKey: ["/api/admin/smileone/mappings"],
     queryFn: () => adminApi.get("/smileone/mappings"),
   });
+  const { data: lioMappings = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/liogames/mappings"],
+    queryFn: () => adminApi.get("/liogames/mappings"),
+  });
 
   const existingBusan = busanMappings.find((m: any) => m.cmsProductId === cmsProductId);
   const existingSmile = smileMappings.find((m: any) => m.cmsProductId === cmsProductId);
+  const existingLio = lioMappings.find((m: any) => m.cmsProductId === cmsProductId);
 
   async function fetchBusanProducts() {
     setBusanLoading(true); setBusanError(""); setBusanProducts([]);
@@ -108,6 +119,19 @@ export function ProductMappingModal({
       setSmileProducts(data.success && Array.isArray(data.products) ? data.products : []);
     } catch { setSmileProducts([]); }
     finally { setSmileLoading(false); }
+  }
+
+  async function fetchLioVariations(productId: string) {
+    if (!productId || isNaN(parseInt(productId, 10))) { setLioVariations([]); return; }
+    setLioVarLoading(true);
+    try {
+      const res = await fetch(`/api/admin/liogames/product-variations?product_id=${productId}`, {
+        headers: { "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setLioVariations(data?.data?.variations ?? []);
+    } catch { setLioVariations([]); }
+    finally { setLioVarLoading(false); }
   }
 
   async function mapBusan() {
@@ -143,6 +167,23 @@ export function ProductMappingModal({
     finally { setSaving(false); }
   }
 
+  async function mapLio() {
+    if (!lioProductId) return;
+    setSaving(true);
+    try {
+      if (existingLio) await adminApi.delete(`/liogames/mappings/${existingLio.id}`);
+      await adminApi.post("/liogames/mappings", {
+        cmsProductId, cmsProductName,
+        lioProductId: parseInt(lioProductId, 10),
+        lioVariationId: lioVariationId ? parseInt(lioVariationId, 10) : undefined,
+        lioProductName: lioProductName || undefined,
+      });
+      qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] });
+      onClose();
+    } catch (e: any) { console.error(e); }
+    finally { setSaving(false); }
+  }
+
   async function removeBusan() {
     if (!existingBusan) return;
     await adminApi.delete(`/busan/mappings/${existingBusan.id}`);
@@ -155,6 +196,12 @@ export function ProductMappingModal({
     qc.invalidateQueries({ queryKey: ["/api/admin/smileone/mappings"] });
   }
 
+  async function removeLio() {
+    if (!existingLio) return;
+    await adminApi.delete(`/liogames/mappings/${existingLio.id}`);
+    qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] });
+  }
+
   function goBack() {
     setProvider(null);
     setSelectedBusan(null);
@@ -162,7 +209,17 @@ export function ProductMappingModal({
     setBusanProducts([]);
     setBusanError("");
     setSmileProducts([]);
+    setLioProductId("");
+    setLioVariationId("");
+    setLioProductName("");
+    setLioVariations([]);
   }
+
+  const titleMap: Record<string, string> = {
+    busan: "Busan — Select Product",
+    smileone: "Smile.one — Select Product",
+    liogames: "Liogames — Enter Product",
+  };
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
@@ -182,7 +239,7 @@ export function ProductMappingModal({
               </button>
             )}
             <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>
-              {provider === "busan" ? "Busan — Select Product" : provider === "smileone" ? "Smile.one — Select Product" : "Map to Provider"}
+              {provider ? titleMap[provider] : "Map to Provider"}
             </h3>
           </div>
           <button type="button" onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer", display: "flex" }}>
@@ -202,23 +259,21 @@ export function ProductMappingModal({
               Choose an API provider for auto-fulfillment:
             </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
               <button
                 type="button"
                 onClick={() => { setProvider("busan"); fetchBusanProducts(); }}
                 style={{
-                  padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
+                  padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
                   border: existingBusan ? "2px solid rgba(74,222,128,0.45)" : "1px solid hsl(var(--border))",
                   background: existingBusan ? "rgba(74,222,128,0.05)" : "hsl(var(--card))",
                   display: "flex", flexDirection: "column", gap: "6px", transition: "border 0.15s",
                 }}
               >
-                <Zap size={20} color="hsl(258,90%,62%)" />
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
+                <Zap size={18} color="hsl(258,90%,62%)" />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
                 {existingBusan
-                  ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}>
-                      <CheckCircle size={9} /> Mapped
-                    </span>
+                  ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}><CheckCircle size={9} /> Mapped</span>
                   : <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Not mapped</span>}
               </button>
 
@@ -226,23 +281,38 @@ export function ProductMappingModal({
                 type="button"
                 onClick={() => setProvider("smileone")}
                 style={{
-                  padding: "18px 14px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
+                  padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
                   border: existingSmile ? "2px solid rgba(74,222,128,0.45)" : "1px solid hsl(var(--border))",
                   background: existingSmile ? "rgba(74,222,128,0.05)" : "hsl(var(--card))",
                   display: "flex", flexDirection: "column", gap: "6px", transition: "border 0.15s",
                 }}
               >
-                <Smile size={20} color="#f59e0b" />
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Smile.one</span>
+                <Smile size={18} color="#f59e0b" />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Smile.one</span>
                 {existingSmile
-                  ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}>
-                      <CheckCircle size={9} /> Mapped
-                    </span>
+                  ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}><CheckCircle size={9} /> Mapped</span>
+                  : <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Not mapped</span>}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setProvider("liogames")}
+                style={{
+                  padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left",
+                  border: existingLio ? "2px solid rgba(74,222,128,0.45)" : "1px solid hsl(var(--border))",
+                  background: existingLio ? "rgba(74,222,128,0.05)" : "hsl(var(--card))",
+                  display: "flex", flexDirection: "column", gap: "6px", transition: "border 0.15s",
+                }}
+              >
+                <Zap size={18} color="#06b6d4" />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Liogames</span>
+                {existingLio
+                  ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}><CheckCircle size={9} /> Mapped</span>
                   : <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Not mapped</span>}
               </button>
             </div>
 
-            {(existingBusan || existingSmile) && (
+            {(existingBusan || existingSmile || existingLio) && (
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>
                   Active Mappings
@@ -259,6 +329,14 @@ export function ProductMappingModal({
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
                     <span style={{ color: "hsl(var(--foreground))" }}><strong>Smile.one:</strong> {existingSmile.smileProductName ?? existingSmile.smileProductId}</span>
                     <button type="button" onClick={removeSmile} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                )}
+                {existingLio && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", fontSize: "11px" }}>
+                    <span style={{ color: "hsl(var(--foreground))" }}><strong>Liogames:</strong> {existingLio.lioProductName ?? `#${existingLio.lioProductId}`}{existingLio.lioVariationId ? ` / Var #${existingLio.lioVariationId}` : ""}</span>
+                    <button type="button" onClick={removeLio} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", display: "flex", padding: "2px" }}>
                       <Trash2 size={11} />
                     </button>
                   </div>
@@ -389,6 +467,80 @@ export function ProductMappingModal({
                 onClick={mapSmile}
                 disabled={!selectedSmile || saving}
                 style={{ ...btnPrimary, opacity: (!selectedSmile || saving) ? 0.5 : 1, cursor: !selectedSmile || saving ? "not-allowed" : "pointer" }}
+              >
+                {saving ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Link2 size={12} />}
+                Map
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Liogames ── */}
+        {provider === "liogames" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div>
+              <label style={labelStyle}>Liogames Product ID</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={lioProductId}
+                onChange={(e) => {
+                  setLioProductId(e.target.value);
+                  setLioVariationId("");
+                  fetchLioVariations(e.target.value);
+                }}
+                placeholder="e.g. 123"
+                data-testid="input-lio-product-id"
+              />
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
+                WooCommerce product ID from Liogames. Variations load automatically.
+              </p>
+            </div>
+
+            {lioVarLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
+                <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Loading variations...
+              </div>
+            )}
+
+            {lioVariations.length > 0 && (
+              <div>
+                <label style={labelStyle}>Variation <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+                <select
+                  style={selectStyle}
+                  value={lioVariationId}
+                  onChange={(e) => setLioVariationId(e.target.value)}
+                  data-testid="select-lio-variation"
+                >
+                  <option value="">— No specific variation —</option>
+                  {lioVariations.map((v) => (
+                    <option key={v.variation_id} value={String(v.variation_id)}>{v.name} (#{v.variation_id})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label style={labelStyle}>Product Label <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span></label>
+              <input
+                style={inputStyle}
+                value={lioProductName}
+                onChange={(e) => setLioProductName(e.target.value)}
+                placeholder="e.g. Mobile Legends Diamonds"
+                data-testid="input-lio-product-name"
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "10px", borderTop: "1px solid hsl(var(--border))" }}>
+              <button type="button" onClick={goBack} style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={mapLio}
+                disabled={!lioProductId || saving}
+                style={{ ...btnPrimary, opacity: (!lioProductId || saving) ? 0.5 : 1, cursor: !lioProductId || saving ? "not-allowed" : "pointer" }}
+                data-testid="button-map-liogames"
               >
                 {saving ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Link2 size={12} />}
                 Map
