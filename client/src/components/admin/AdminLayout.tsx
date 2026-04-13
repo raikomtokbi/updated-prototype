@@ -290,7 +290,7 @@ function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: bo
       </nav>
 
       <div style={{ padding: "8px 14px", borderTop: "1px solid hsl(220, 15%, 13%)", flexShrink: 0 }}>
-        <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Admin v1.0</p>
+        <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Admin v1.12.6</p>
       </div>
     </aside>
   );
