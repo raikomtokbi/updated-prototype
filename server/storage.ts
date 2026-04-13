@@ -98,6 +98,7 @@ export interface IStorage {
   // Transactions
   getAllTransactions(limit?: number, offset?: number): Promise<Transaction[]>;
   getRefunds(): Promise<Transaction[]>;
+  getRefundedOrders(): Promise<Order[]>;
 
   // Coupons
   getAllCoupons(): Promise<Coupon[]>;
@@ -456,6 +457,9 @@ export class DatabaseStorage implements IStorage {
   }
   async getRefunds() {
     return db.select().from(transactions).where(eq(transactions.isRefund, true)).orderBy(desc(transactions.createdAt));
+  }
+  async getRefundedOrders() {
+    return db.select().from(orders).where(eq(orders.status, "refunded")).orderBy(desc(orders.updatedAt));
   }
   async createRefundTransaction(order: Order) {
     const id = randomUUID();

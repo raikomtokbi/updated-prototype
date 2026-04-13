@@ -1272,7 +1272,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/admin/transactions/refunds", requireAdmin, async (_req, res) => {
-    res.json(await storage.getRefunds());
+    res.json(await storage.getRefundedOrders());
   });
 
 
