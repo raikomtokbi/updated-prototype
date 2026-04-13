@@ -147,6 +147,8 @@ interface SmtpConfig {
   SMTP_PASS: string;
   SMTP_FROM_EMAIL?: string;
   SMTP_FROM_NAME?: string;
+  SMTP_COMPOSE_FROM_EMAIL?: string;
+  SMTP_DEFAULT_TO?: string;
 }
 
 function createTransporter(config: SmtpConfig) {
@@ -232,8 +234,8 @@ export async function sendRawEmail(opts: SendRawEmailOptions): Promise<{ ok: boo
 
   try {
     const transporter = createTransporter(smtpConfig);
-    const fromEmail = smtpConfig.SMTP_FROM_EMAIL || smtpConfig.SMTP_USER;
-    const fromNameFinal = fromName || smtpConfig.SMTP_FROM_NAME || "Admin";
+    const fromEmail = smtpConfig.SMTP_COMPOSE_FROM_EMAIL || smtpConfig.SMTP_FROM_EMAIL || smtpConfig.SMTP_USER;
+    const fromNameFinal = fromName || "Admin";
     const htmlBody = body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
 
     await transporter.sendMail({

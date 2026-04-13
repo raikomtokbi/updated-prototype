@@ -111,11 +111,10 @@ export default function Dashboard() {
   })();
 
   useEffect(() => {
-    if (smtpConfig.SMTP_DEFAULT_TO || smtpConfig.SMTP_FROM_NAME) {
+    if (smtpConfig.SMTP_DEFAULT_TO) {
       setEmailForm((f) => ({
         ...f,
         to: f.to || smtpConfig.SMTP_DEFAULT_TO || "",
-        fromName: f.fromName || smtpConfig.SMTP_FROM_NAME || "",
       }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
