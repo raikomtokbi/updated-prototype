@@ -821,7 +821,13 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
                 {lioVariations.map((v) => (
                   <div
                     key={v.variation_id}
-                    onClick={() => setLioVariationId(String(v.variation_id))}
+                    onClick={() => {
+                      setLioVariationId(String(v.variation_id));
+                      if (v.price != null) {
+                        setField("rate", String(v.price));
+                        fetchUsdInrRate();
+                      }
+                    }}
                     style={{
                       padding: "9px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
                       background: lioVariationId === String(v.variation_id) ? "rgba(6,182,212,0.15)" : "hsl(var(--card))",
