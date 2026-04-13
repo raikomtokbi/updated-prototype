@@ -54,7 +54,8 @@ export async function injectSeo(html: string): Promise<string> {
     for (const [token, raw] of Object.entries(vals)) {
       html = html.replaceAll(token, escHtml(raw));
     }
-  } catch {
+  } catch (err) {
+    console.error("[seoInjector] Failed to inject SEO values:", err);
   }
   return html;
 }
