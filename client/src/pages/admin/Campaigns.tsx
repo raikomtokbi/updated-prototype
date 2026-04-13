@@ -159,6 +159,7 @@ export default function Campaigns() {
 
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
+  const [bonusEnabled, setBonusEnabled] = useState(false);
   const [bonus, setBonus] = useState({
     badge_text: "",
     headline: "",
@@ -176,6 +177,7 @@ export default function Campaigns() {
         button_text: settings.bonus_button_text ?? "",
         description: settings.bonus_description ?? "",
       });
+      setBonusEnabled(settings.bonus_enabled === "true");
     }
   }, [settingsLoading, settings]);
 
@@ -245,11 +247,31 @@ export default function Campaigns() {
 
       {/* ── Bonus Banner ──────────────────────────────────────────────── */}
       <div style={{ ...card, marginTop: "16px" }}>
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))" }}>
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", margin: 0 }}>Bonus Banner</p>
-          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "3px 0 0" }}>
-            Controls the promotional banner on the homepage
-          </p>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+          <div>
+            <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", margin: 0 }}>Bonus Banner</p>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "3px 0 0" }}>
+              Controls the promotional banner on the homepage
+            </p>
+          </div>
+          <button
+            data-testid="toggle-bonus-banner"
+            onClick={() => setBonusEnabled(v => !v)}
+            style={{
+              fontSize: "11px",
+              padding: "6px 14px",
+              borderRadius: "4px",
+              background: bonusEnabled ? "hsl(var(--primary) / 0.15)" : "hsl(220, 15%, 13%)",
+              color: bonusEnabled ? "hsl(258, 90%, 70%)" : "hsl(var(--muted-foreground))",
+              border: "1px solid hsl(var(--border))",
+              cursor: "pointer",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {bonusEnabled ? "Enabled" : "Disabled"}
+          </button>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -283,6 +305,7 @@ export default function Campaigns() {
                 bonus_headline: bonus.headline,
                 bonus_button_text: bonus.button_text,
                 bonus_description: bonus.description,
+                bonus_enabled: bonusEnabled.toString(),
               })}
               disabled={saveBonus.isPending}
               style={{ ...btnPrimary, padding: "7px 18px", fontSize: "12px" }}

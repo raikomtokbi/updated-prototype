@@ -768,6 +768,8 @@ function BonusBanner() {
   const description = siteSettings.bonus_description || "Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.";
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
+  if (siteSettings.bonus_enabled === "false") return null;
+
   return (
     <section style={{ padding: "0 10px", maxWidth: "1320px", margin: "12px auto 0" }}>
       <div

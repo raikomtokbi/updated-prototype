@@ -608,6 +608,7 @@ function OrdersTab({ user }: { user: any }) {
 
 // ── Security Tab ─────────────────────────────────────────────────────────────
 function SecurityTab({ user }: { user: any }) {
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -660,35 +661,31 @@ function SecurityTab({ user }: { user: any }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Security overview */}
-      <div style={{
-        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
-        borderRadius: "0.75rem", padding: "1.25rem",
-        display: "flex", alignItems: "center", gap: "1rem",
-      }}>
-        <div style={{
-          width: "44px", height: "44px", borderRadius: "0.5rem", flexShrink: 0,
-          background: "hsla(145,70%,55%,0.1)", border: "1px solid hsla(145,70%,55%,0.2)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <Shield size={20} style={{ color: "hsl(145,70%,55%)" }} />
-        </div>
-        <div>
-          <div style={{ fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "0.2rem" }}>Account Security</div>
-          <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
-            Manage your password to keep your account safe.
-          </div>
-        </div>
-      </div>
 
-      {/* Change Password */}
+      {/* Change Password – collapsible */}
       <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", overflow: "hidden" }}>
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid hsl(var(--border))" }}>
-          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Change Password
-          </h3>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", padding: "1.25rem" }}>
+          <div>
+            <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+              Change Password
+            </h3>
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
+              Update your password to keep your account secure.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowChangePassword(v => !v)}
+            className="btn-secondary"
+            style={{ fontSize: "0.68rem", flexShrink: 0 }}
+            data-testid="button-change-password-toggle"
+          >
+            {showChangePassword ? "Cancel" : "Change"}
+          </button>
         </div>
-        <form onSubmit={handleSubmit} style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+
+        {showChangePassword && (
+        <form onSubmit={handleSubmit} style={{ borderTop: "1px solid hsl(var(--border))", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Current password */}
           <div>
             <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>
@@ -830,6 +827,7 @@ function SecurityTab({ user }: { user: any }) {
             Update Password
           </button>
         </form>
+        )}
       </div>
 
       {/* Delete Account Section */}
