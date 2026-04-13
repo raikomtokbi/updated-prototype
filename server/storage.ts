@@ -468,7 +468,7 @@ export class DatabaseStorage implements IStorage {
       paymentMethod: (order as any).paymentMethod ?? "manual",
       amount: String(order.totalAmount),
       currency: (order as any).currency ?? "USD",
-      status: "completed" as any,
+      status: "success" as any,
       isRefund: true,
       completedAt: new Date(),
     });
