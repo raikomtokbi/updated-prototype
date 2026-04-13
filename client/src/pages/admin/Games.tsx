@@ -408,7 +408,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
   const [smileLoading, setSmileLoading] = useState(false);
   const [highlightSmile, setHighlightSmile] = useState<any | null>(null);
 
-  const [form, setForm] = useState({ name: "", description: "", imageUrl: "", price: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" });
+  const [form, setForm] = useState({ name: "", description: "", imageUrl: "", price: "", rate: "", discountPercent: "0", finalPrice: "", status: "active", sortOrder: 0, stock: "" });
   const [saving, setSaving] = useState(false);
 
   function setField(k: string, v: string | number) { setForm((p) => ({ ...p, [k]: v })); }
@@ -442,14 +442,14 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
   function pickBusan(p: any) {
     setHighlightBusan(p);
     setSelectedProduct(p);
-    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, price: p.price ? String(p.price) : prev.price, finalPrice: p.price ? String(p.price) : prev.finalPrice }));
+    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, rate: p.price ? String(p.price) : prev.rate }));
     setStep(3);
   }
 
   function pickSmile(p: any) {
     setHighlightSmile(p);
     setSelectedProduct(p);
-    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, price: p.price ? String(p.price) : prev.price, finalPrice: p.price ? String(p.price) : prev.finalPrice }));
+    setForm((prev) => ({ ...prev, name: p.name ?? prev.name, rate: p.price ? String(p.price) : prev.rate }));
     setStep(3);
   }
 
@@ -624,6 +624,10 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
               <label style={labelStyle}>Final Price</label>
               <input style={inputStyle} type="number" step="0.01" value={form.finalPrice} onChange={(e) => setField("finalPrice", e.target.value)} placeholder="auto" />
             </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Rate <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(provider value, admin only)</span></label>
+            <input style={inputStyle} type="number" step="0.01" value={form.rate} readOnly placeholder="Fetched from provider" />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
             <div>
