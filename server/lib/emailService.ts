@@ -212,6 +212,46 @@ export async function sendTemplatedEmail(opts: SendEmailOptions): Promise<{ ok: 
   }
 }
 
+// ─── Raw email send (admin compose) ───────────────────────────────────────────
+
+export interface SendRawEmailOptions {
+  to: string;
+  fromName?: string;
+  replyTo?: string;
+  subject: string;
+  body: string;
+  smtpConfig: SmtpConfig;
+}
+
+export async function sendRawEmail(opts: SendRawEmailOptions): Promise<{ ok: boolean; error?: string }> {
+  const { to, fromName, replyTo, subject, body, smtpConfig } = opts;
+
+  if (!smtpConfig.SMTP_HOST || !smtpConfig.SMTP_USER || !smtpConfig.SMTP_PASS) {
+    return { ok: false, error: "SMTP not configured" };
+  }
+
+  try {
+    const transporter = createTransporter(smtpConfig);
+    const fromEmail = smtpConfig.SMTP_FROM_EMAIL || smtpConfig.SMTP_USER;
+    const fromNameFinal = fromName || smtpConfig.SMTP_FROM_NAME || "Admin";
+    const htmlBody = body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+
+    await transporter.sendMail({
+      from: `${fromNameFinal} <${fromEmail}>`,
+      to,
+      replyTo: replyTo || fromEmail,
+      subject,
+      html: `<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#333;">${htmlBody}</div>`,
+      text: body,
+    });
+    return { ok: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[EmailService] Raw send failed to ${to}:`, message);
+    return { ok: false, error: message };
+  }
+}
+
 // ─── Default templates ─────────────────────────────────────────────────────────
 
 export const DEFAULT_EMAIL_TEMPLATES = [

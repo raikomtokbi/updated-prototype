@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
-import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown, Mail, Send, X } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/lib/store/authstore";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -93,6 +95,28 @@ export default function Dashboard() {
   const [salesCustomRange, setSalesCustomRange] = useState<DateRange | undefined>(undefined);
   const [orderRangeKey, setOrderRangeKey] = useState("today");
   const [orderCustomRange, setOrderCustomRange] = useState<DateRange | undefined>(undefined);
+
+  // ── Email composer state ───────────────────────────────────────────────────
+  const { toast } = useToast();
+  const [emailForm, setEmailForm] = useState({ fromName: "", replyTo: "", to: "", subject: "", body: "" });
+  const [emailSent, setEmailSent] = useState(false);
+  const sendEmailMutation = useMutation({
+    mutationFn: async (data: typeof emailForm) => {
+      const res = await apiRequest("POST", "/api/admin/send-email", data);
+      if (!res.ok) { const j = await res.json(); throw new Error(j.error || "Failed to send"); }
+      return res.json();
+    },
+    onSuccess: () => {
+      setEmailSent(true);
+      setEmailForm({ fromName: "", replyTo: "", to: "", subject: "", body: "" });
+      toast({ title: "Email sent", description: "Your email was delivered successfully." });
+      setTimeout(() => setEmailSent(false), 4000);
+    },
+    onError: (e: any) => {
+      toast({ title: "Send failed", description: e.message, variant: "destructive" });
+    },
+  });
+
   const statsQueryKey = statsRangeKey === "custom" && statsCustomRange?.from
     ? ["/api/admin/stats", statsRangeKey, statsCustomRange.from?.toISOString(), statsCustomRange.to?.toISOString()]
     : ["/api/admin/stats", statsRangeKey];
@@ -370,6 +394,110 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* ── Email Composer ─────────────────────────────────────────────── */}
+        <div style={{ ...card, padding: 0, overflow: "hidden" }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))" }}>
+            <Mail size={15} style={{ color: "hsl(var(--primary))", flexShrink: 0 }} />
+            <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(var(--foreground))" }}>Compose Email</span>
+            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginLeft: "4px" }}>Send a message to any recipient via SMTP</span>
+          </div>
+
+          <div style={{ padding: "20px", display: "grid", gap: "14px" }}>
+            {/* Row 1: From Name + Reply-To */}
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>From Name</label>
+                <input
+                  type="text"
+                  value={emailForm.fromName}
+                  onChange={(e) => setEmailForm((f) => ({ ...f, fromName: e.target.value }))}
+                  placeholder="e.g. Nexcoin Support"
+                  data-testid="input-email-from-name"
+                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>Reply-To Email <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                <input
+                  type="email"
+                  value={emailForm.replyTo}
+                  onChange={(e) => setEmailForm((f) => ({ ...f, replyTo: e.target.value }))}
+                  placeholder="replies@yourdomain.com"
+                  data-testid="input-email-reply-to"
+                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            {/* Row 2: To + Subject */}
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>To <span style={{ color: "hsl(0,72%,60%)" }}>*</span></label>
+                <input
+                  type="email"
+                  value={emailForm.to}
+                  onChange={(e) => setEmailForm((f) => ({ ...f, to: e.target.value }))}
+                  placeholder="recipient@example.com"
+                  data-testid="input-email-to"
+                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>Subject <span style={{ color: "hsl(0,72%,60%)" }}>*</span></label>
+                <input
+                  type="text"
+                  value={emailForm.subject}
+                  onChange={(e) => setEmailForm((f) => ({ ...f, subject: e.target.value }))}
+                  placeholder="Email subject line"
+                  data-testid="input-email-subject"
+                  style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            {/* Body */}
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "5px" }}>Message <span style={{ color: "hsl(0,72%,60%)" }}>*</span></label>
+              <textarea
+                value={emailForm.body}
+                onChange={(e) => setEmailForm((f) => ({ ...f, body: e.target.value }))}
+                placeholder="Write your message here..."
+                rows={6}
+                data-testid="input-email-body"
+                style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.6 }}
+              />
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                onClick={() => sendEmailMutation.mutate(emailForm)}
+                disabled={sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body}
+                data-testid="button-send-email"
+                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? "not-allowed" : "pointer", opacity: sendEmailMutation.isPending || !emailForm.to || !emailForm.subject || !emailForm.body ? 0.55 : 1, transition: "opacity 0.15s" }}
+              >
+                {sendEmailMutation.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={13} />}
+                {sendEmailMutation.isPending ? "Sending…" : "Send Email"}
+              </button>
+              {(emailForm.fromName || emailForm.replyTo || emailForm.to || emailForm.subject || emailForm.body) && (
+                <button
+                  onClick={() => setEmailForm({ fromName: "", replyTo: "", to: "", subject: "", body: "" })}
+                  data-testid="button-clear-email"
+                  style={{ display: "flex", alignItems: "center", gap: "5px", padding: "8px 12px", background: "transparent", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}
+                >
+                  <X size={12} />
+                  Clear
+                </button>
+              )}
+              {emailSent && (
+                <span style={{ fontSize: "12px", color: "hsl(142,71%,45%)", fontWeight: 500 }}>Email sent successfully!</span>
+              )}
+            </div>
+          </div>
+        </div>
+
       </div>
     </AdminLayout>
   );

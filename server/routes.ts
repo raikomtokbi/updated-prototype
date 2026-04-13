@@ -14,6 +14,7 @@ import { invalidateSeoCache } from "./lib/seoInjector";
 import { getGatewayHandler } from "./lib/paymentGateways/index";
 import {
   sendTemplatedEmail,
+  sendRawEmail,
   buildEmailHtml,
   processTemplate,
   DEFAULT_EMAIL_TEMPLATES,
@@ -3050,6 +3051,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const permissions = row ? JSON.parse(row.permissions as string || "[]") : [];
       res.json({ role: adminRole, permissions });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ── Admin: Compose & send email ───────────────────────────────────────────
+  app.post("/api/admin/send-email", requireAdmin, async (req, res) => {
+    try {
+      const { fromName, replyTo, to, subject, body } = req.body;
+      if (!to || !subject || !body) {
+        return res.status(400).json({ error: "to, subject, and body are required" });
+      }
+
+      const smtpPlugin = await storage.getPlugin("smtp-email");
+      const smtpConfig = smtpPlugin?.config ? JSON.parse(smtpPlugin.config as string) : null;
+      if (!smtpConfig?.SMTP_HOST) {
+        return res.status(400).json({ error: "SMTP is not configured. Please set it up in API Integrations → SMTP Email." });
+      }
+
+      const result = await sendRawEmail({ fromName, replyTo, to, subject, body, smtpConfig });
+      if (!result.ok) return res.status(500).json({ error: result.error });
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   // Auto-expire pending orders older than 5 hours
