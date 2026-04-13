@@ -503,7 +503,7 @@ export default function EditContent() {
     if (remoteSettings) {
       const enriched: SettingsMap = { ...remoteSettings };
       for (const [k, v] of Object.entries(DEFAULTS)) {
-        if (!enriched[k]) enriched[k] = v;
+        if (enriched[k] === undefined || enriched[k] === null) enriched[k] = v;
       }
       setLocal((prev) => ({ ...prev, ...enriched }));
     }
