@@ -629,11 +629,12 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
           {form.rate && (
             <div>
               <label style={labelStyle}>Rate</label>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ display: "flex", alignItems: "center", flex: 1, border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
-                  <span style={{ padding: "0 8px", fontSize: "13px", color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", height: "100%", display: "flex", alignItems: "center", userSelect: "none" }}>$</span>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {/* USD box */}
+                <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                  <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>$</span>
                   <input
-                    style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed" }}
+                    style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed", margin: 0 }}
                     type="number"
                     step="0.01"
                     value={form.rate}
@@ -641,13 +642,15 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
                     disabled
                   />
                 </div>
-                <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap", minWidth: "80px" }}>
-                  {usdInrRate && form.rate
-                    ? `≈ ₹${((parseFloat(form.rate) || 0) * usdInrRate).toFixed(2)}`
-                    : usdInrRate === null && form.rate
-                      ? "₹ (loading…)"
-                      : "₹—"}
-                </span>
+                {/* INR box */}
+                <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                  <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>₹</span>
+                  <span style={{ flex: 1, padding: "0 10px", fontSize: "13px", color: "hsl(var(--foreground))", display: "flex", alignItems: "center", height: "100%" }}>
+                    {usdInrRate && form.rate
+                      ? ((parseFloat(form.rate) || 0) * usdInrRate).toFixed(2)
+                      : usdInrRate === null && form.rate ? "…" : "—"}
+                  </span>
+                </div>
               </div>
             </div>
           )}
