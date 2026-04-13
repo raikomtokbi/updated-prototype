@@ -501,11 +501,15 @@ export default function EditContent() {
 
   useEffect(() => {
     if (remoteSettings) {
-      setLocal((prev) => ({ ...prev, ...remoteSettings }));
+      const enriched: SettingsMap = { ...remoteSettings };
+      for (const [k, v] of Object.entries(DEFAULTS)) {
+        if (!enriched[k]) enriched[k] = v;
+      }
+      setLocal((prev) => ({ ...prev, ...enriched }));
     }
   }, [remoteSettings]);
 
-  const dirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] ?? DEFAULTS[k])));
+  const dirty = !!(remoteSettings && Object.keys(DEFAULTS).some((k) => local[k] !== (remoteSettings[k] || DEFAULTS[k])));
   const { leaveDialog, cancelLeave, doLeave } = useNavGuard(dirty);
 
   const save = useMutation({
