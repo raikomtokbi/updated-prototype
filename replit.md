@@ -6,8 +6,8 @@ A full-stack web CMS and e-commerce platform for selling digital products (game 
 
 - **Frontend**: React 19, Tailwind CSS 4, TanStack Query, Wouter (routing), Zustand (state), Radix UI / shadcn
 - **Backend**: Node.js + Express 5
-- **Database**: PostgreSQL via `pg` + Drizzle ORM (pg-core) — Replit built-in PostgreSQL (dev); cPanel deployment bundle targets MySQL/MariaDB via `nexcoin-cpanel.zip`
-- **Build**: Vite (frontend), tsx (dev server), esbuild (production build)
+- **Database**: MySQL / MariaDB via `mysql2` + Drizzle ORM (mysql-core) for production (cPanel). Dev environment auto-detects `postgres://` URL and falls back to `pg` driver so Replit's built-in PostgreSQL still works during development.
+- **Build**: Vite (frontend), tsx (dev server), esbuild (production build via `npm run build`)
 
 ## Project Structure
 
