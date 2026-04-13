@@ -763,9 +763,8 @@ function BonusBanner() {
   });
 
   const badgeText = siteSettings.bonus_badge_text || "WEEKEND SPECIAL";
-  const bonusText = siteSettings.bonus_percent || "20%";
-  const mainTitle = siteSettings.bonus_main_title || "GET";
-  const mainTitleSuffix = siteSettings.bonus_main_suffix || "CREDITS";
+  const headline = siteSettings.bonus_headline
+    || ((siteSettings.bonus_main_title || "GET") + " " + (siteSettings.bonus_percent || "20%") + " BONUS " + (siteSettings.bonus_main_suffix || "CREDITS"));
   const description = siteSettings.bonus_description || "Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.";
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
 
@@ -800,9 +799,7 @@ function BonusBanner() {
             {badgeText}
           </span>
           <h2 className="font-orbitron" style={{ fontSize: "0.95rem", fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: "0.3rem", lineHeight: 1.2 }}>
-            {mainTitle}{" "}
-            <span style={{ color: "hsl(var(--primary))" }}>{bonusText} BONUS</span>{" "}
-            {mainTitleSuffix}
+            {headline}
           </h2>
           <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>
             {description}

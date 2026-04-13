@@ -161,20 +161,18 @@ export default function Campaigns() {
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
   const [bonus, setBonus] = useState({
     badge_text: "",
-    percent: "",
-    main_title: "",
-    main_suffix: "",
+    headline: "",
     button_text: "",
     description: "",
   });
 
   useEffect(() => {
     if (!settingsLoading && Object.keys(settings).length > 0) {
+      const headline = settings.bonus_headline
+        || ((settings.bonus_main_title || "GET") + " " + (settings.bonus_percent || "20%") + " BONUS " + (settings.bonus_main_suffix || "CREDITS"));
       setBonus({
         badge_text: settings.bonus_badge_text ?? "",
-        percent: settings.bonus_percent ?? "",
-        main_title: settings.bonus_main_title ?? "",
-        main_suffix: settings.bonus_main_suffix ?? "",
+        headline,
         button_text: settings.bonus_button_text ?? "",
         description: settings.bonus_description ?? "",
       });
@@ -254,27 +252,15 @@ export default function Campaigns() {
           </p>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <div>
-              <label style={labelStyle}>Badge Text</label>
-              <input data-testid="input-bonus-badge" style={inputStyle} value={bonus.badge_text} onChange={(e) => setB("badge_text", e.target.value)} placeholder="WEEKEND SPECIAL" />
-            </div>
-            <div>
-              <label style={labelStyle}>Bonus %</label>
-              <input data-testid="input-bonus-percent" style={inputStyle} value={bonus.percent} onChange={(e) => setB("percent", e.target.value)} placeholder="20%" />
-            </div>
-            <div>
-              <label style={labelStyle}>Title Prefix</label>
-              <input data-testid="input-bonus-title" style={inputStyle} value={bonus.main_title} onChange={(e) => setB("main_title", e.target.value)} placeholder="GET" />
-            </div>
-            <div>
-              <label style={labelStyle}>Title Suffix</label>
-              <input data-testid="input-bonus-suffix" style={inputStyle} value={bonus.main_suffix} onChange={(e) => setB("main_suffix", e.target.value)} placeholder="CREDITS" />
-            </div>
-            <div>
-              <label style={labelStyle}>Button Text</label>
-              <input data-testid="input-bonus-button" style={inputStyle} value={bonus.button_text} onChange={(e) => setB("button_text", e.target.value)} placeholder="Claim Now" />
-            </div>
+          <div>
+            <label style={labelStyle}>Label</label>
+            <input data-testid="input-bonus-badge" style={inputStyle} value={bonus.badge_text} onChange={(e) => setB("badge_text", e.target.value)} placeholder="e.g. WEEKEND SPECIAL" />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>Small pill shown above the headline</p>
+          </div>
+          <div>
+            <label style={labelStyle}>Headline</label>
+            <input data-testid="input-bonus-headline" style={inputStyle} value={bonus.headline} onChange={(e) => setB("headline", e.target.value)} placeholder="e.g. GET 20% BONUS CREDITS" />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>Main title shown on the banner</p>
           </div>
           <div>
             <label style={labelStyle}>Description</label>
@@ -283,16 +269,18 @@ export default function Campaigns() {
               style={{ ...sharedInput, padding: "8px 10px", fontSize: "13px", minHeight: "80px", resize: "vertical" } as any}
               value={bonus.description}
               onChange={(e) => setB("description", e.target.value)}
-              placeholder="Top up using any supported payment method this weekend and receive bonus credits on all top-ups."
+              placeholder="e.g. Top up this weekend and receive bonus credits on all top-ups. Offer ends Sunday."
             />
+          </div>
+          <div>
+            <label style={labelStyle}>Button Text</label>
+            <input data-testid="input-bonus-button" style={inputStyle} value={bonus.button_text} onChange={(e) => setB("button_text", e.target.value)} placeholder="e.g. Claim Now" />
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button
               onClick={() => saveBonus.mutate({
                 bonus_badge_text: bonus.badge_text,
-                bonus_percent: bonus.percent,
-                bonus_main_title: bonus.main_title,
-                bonus_main_suffix: bonus.main_suffix,
+                bonus_headline: bonus.headline,
                 bonus_button_text: bonus.button_text,
                 bonus_description: bonus.description,
               })}
