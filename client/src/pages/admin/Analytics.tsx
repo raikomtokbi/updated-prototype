@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -14,7 +14,7 @@ const card: React.CSSProperties = {
   background: "hsl(var(--card))",
   border: "1px solid hsl(220,15%,13%)",
   borderRadius: "10px",
-  padding: "20px",
+  padding: "16px",
 };
 
 const COLORS = [
@@ -26,15 +26,15 @@ const COLORS = [
 ];
 
 const RANGE_OPTIONS = [
-  { key: "7days", label: "7 days" },
-  { key: "30days", label: "30 days" },
-  { key: "90days", label: "90 days" },
+  { key: "7days", label: "7d" },
+  { key: "30days", label: "30d" },
+  { key: "90days", label: "90d" },
 ];
 
 const tooltipStyle = {
   contentStyle: {
     background: "hsl(var(--card))", border: "1px solid hsl(220,15%,15%)",
-    borderRadius: "8px", fontSize: "12px", color: "hsl(var(--foreground))",
+    borderRadius: "8px", fontSize: "11px", color: "hsl(var(--foreground))",
   },
 };
 
@@ -47,63 +47,63 @@ const INFO: Record<string, { title: string; desc: string; formula?: string }> = 
   },
   sessions: {
     title: "Unique Sessions",
-    desc: "Number of distinct browsing sessions. A session starts when a visitor opens the site and ends when they close the tab or are inactive. One person visiting multiple pages = one session.",
+    desc: "Number of distinct browsing sessions. A session starts when a visitor opens the site and ends when they close the tab or are inactive.",
     formula: "COUNT(DISTINCT session_id)",
   },
   bounceRate: {
     title: "Bounce Rate",
-    desc: "Percentage of sessions where the visitor viewed only one page before leaving. A high bounce rate can indicate the landing page isn't relevant or engaging enough.",
+    desc: "Percentage of sessions where the visitor viewed only one page before leaving. A high bounce rate can indicate the landing page isn't relevant.",
     formula: "Single-page sessions ÷ Total sessions × 100",
   },
   avgDuration: {
     title: "Avg Engagement Time",
-    desc: "Average time visitors actively spend on your pages. Measured from when the page loads to when they navigate away or close the tab.",
-    formula: "Total time on pages ÷ Number of page views with recorded duration",
+    desc: "Average time visitors actively spend on your pages. Measured from when the page loads to when they navigate away.",
+    formula: "Total time on pages ÷ Page views with recorded duration",
   },
   activeNow: {
     title: "Active Now",
-    desc: "Number of unique sessions that have recorded activity in the last 5 minutes. Gives a real-time snapshot of who is currently on your site.",
+    desc: "Unique sessions that have recorded activity in the last 5 minutes.",
     formula: "Distinct sessions with events in the last 5 minutes",
   },
   liveTraffic: {
     title: "Live Traffic",
-    desc: "Page views plotted by hour over the last 24 hours. Helps you identify peak traffic hours and see how traffic changes throughout the day.",
+    desc: "Page views plotted by hour over the last 24 hours. Helps identify peak traffic hours.",
     formula: "COUNT(page views) grouped by hour",
   },
   trafficSources: {
     title: "Traffic Sources",
-    desc: "Where your visitors come from, classified by the referring URL.\n• Direct — no referrer (typed URL, bookmark, or app)\n• Organic — search engines (Google, Bing)\n• Social — social media platforms\n• Referral — other websites",
-    formula: "Classified from the HTTP Referer header on first page of session",
+    desc: "Where visitors come from: Direct (no referrer), Organic (search), Social (social media), Referral (other sites).",
+    formula: "Classified from HTTP Referer on first page of session",
   },
   engagementTime: {
     title: "Engagement Time",
-    desc: "Average seconds visitors spend per page, grouped by day. Higher values mean visitors are reading and interacting more with your content.",
+    desc: "Average seconds visitors spend per page, grouped by day.",
     formula: "AVG(duration_ms) per day ÷ 1000",
   },
   bounceByDay: {
     title: "Bounce Rate Trend",
-    desc: "How your bounce rate changes day by day. A downward trend is positive — it means more visitors are exploring multiple pages per visit.",
+    desc: "How your bounce rate changes day by day. A downward trend means more visitors explore multiple pages.",
     formula: "Bounced sessions ÷ Total sessions per day × 100",
   },
   topPages: {
     title: "Navigation Paths",
-    desc: "The most visited pages ranked by view count. The bar shows each page's traffic relative to the top page. Useful for understanding which content drives the most interest.",
+    desc: "The most visited pages ranked by view count. Useful for understanding which content drives the most interest.",
     formula: "COUNT(page views) grouped by path, top 8",
   },
   devices: {
     title: "Device Breakdown",
-    desc: "The split of visitors across device types. Detected from the User-Agent header sent by the browser.\n• Desktop — PCs and laptops\n• Mobile — phones\n• Tablet — tablets and iPads",
+    desc: "Split of visitors across device types — Desktop, Mobile, and Tablet — detected from the User-Agent header.",
     formula: "User-Agent classification on page load",
   },
   siteSpeed: {
     title: "Site Speed",
-    desc: "Indicative server-side response times based on observed API performance. Full page-load speed depends on CDN, assets, and the visitor's network — check browser DevTools Network tab for accurate load times.",
-    formula: "Express middleware request timing (logged server-side)",
+    desc: "Indicative server-side response times. Check browser DevTools → Network for real page-load times.",
+    formula: "Express middleware request timing (server-side)",
   },
 };
 
 // ─── InfoPopover ─────────────────────────────────────────────────────────────
-function InfoPopover({ id }: { id: string }) {
+function InfoPopover({ id, alignLeft = false }: { id: string; alignLeft?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const info = INFO[id];
@@ -120,7 +120,7 @@ function InfoPopover({ id }: { id: string }) {
   if (!info) return null;
 
   return (
-    <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
+    <div ref={ref} style={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
       <button
         onClick={() => setOpen(v => !v)}
         title="More info"
@@ -136,15 +136,18 @@ function InfoPopover({ id }: { id: string }) {
 
       {open && (
         <div style={{
-          position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 50,
-          width: 280, background: "hsl(var(--card))",
+          position: "absolute", top: "calc(100% + 6px)",
+          ...(alignLeft ? { left: 0 } : { right: 0 }),
+          zIndex: 9999,
+          width: "min(270px, 80vw)",
+          background: "hsl(var(--card))",
           border: "1px solid hsl(220,15%,18%)",
-          borderRadius: "10px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+          borderRadius: "10px", boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
           padding: "14px 16px",
         }}>
-          {/* Arrow */}
           <div style={{
-            position: "absolute", top: -6, right: 10,
+            position: "absolute", top: -6,
+            ...(alignLeft ? { left: 10 } : { right: 10 }),
             width: 12, height: 12, background: "hsl(var(--card))",
             border: "1px solid hsl(220,15%,18%)", borderBottom: "none", borderRight: "none",
             transform: "rotate(45deg)",
@@ -177,19 +180,19 @@ function StatCard({ icon, label, value, sub, color, infoId }: {
   sub?: string; color?: string; infoId: string;
 }) {
   return (
-    <div style={{ ...card, display: "flex", alignItems: "center", gap: "14px", position: "relative" }}>
+    <div style={{ ...card, display: "flex", alignItems: "center", gap: "12px", position: "relative" }}>
       <div style={{
-        width: 42, height: 42, borderRadius: "10px", flexShrink: 0,
+        width: 38, height: 38, borderRadius: "9px", flexShrink: 0,
         background: color ? `${color}22` : "hsl(var(--primary) / 0.12)",
         display: "flex", alignItems: "center", justifyContent: "center",
         color: color ?? "hsl(var(--primary))",
       }}>{icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", marginBottom: 2 }}>{label}</div>
-        <div style={{ fontSize: "22px", fontWeight: 700, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</div>
-        {sub && <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{sub}</div>}
+        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: 2 }}>{label}</div>
+        <div style={{ fontSize: "18px", fontWeight: 700, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</div>
+        {sub && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{sub}</div>}
       </div>
-      <div style={{ position: "absolute", top: 12, right: 12 }}>
+      <div style={{ flexShrink: 0 }}>
         <InfoPopover id={infoId} />
       </div>
     </div>
@@ -197,17 +200,17 @@ function StatCard({ icon, label, value, sub, color, infoId }: {
 }
 
 // ─── ChartCard ───────────────────────────────────────────────────────────────
-function ChartCard({ title, subtitle, infoId, children }: {
-  title: string; subtitle?: string; infoId: string; children: React.ReactNode;
+function ChartCard({ title, subtitle, infoId, alignInfoLeft, children }: {
+  title: string; subtitle?: string; infoId: string; alignInfoLeft?: boolean; children: React.ReactNode;
 }) {
   return (
     <div style={card}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-        <div>
-          <div style={{ fontSize: "14px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{title}</div>
-          {subtitle && <div style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{subtitle}</div>}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 14 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{title}</div>
+          {subtitle && <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{subtitle}</div>}
         </div>
-        <InfoPopover id={infoId} />
+        <InfoPopover id={infoId} alignLeft={alignInfoLeft} />
       </div>
       {children}
     </div>
@@ -215,14 +218,14 @@ function ChartCard({ title, subtitle, infoId, children }: {
 }
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
-function EmptyChart({ message = "No data yet — data appears as visitors browse your site." }: { message?: string }) {
+function EmptyChart({ message = "No data yet — appears as visitors browse your site." }: { message?: string }) {
   return (
     <div style={{
-      height: 180, display: "flex", flexDirection: "column", alignItems: "center",
+      height: 140, display: "flex", flexDirection: "column", alignItems: "center",
       justifyContent: "center", color: "hsl(var(--muted-foreground))", gap: 8,
     }}>
-      <div style={{ fontSize: "28px", opacity: 0.3 }}>📊</div>
-      <div style={{ fontSize: "12px", textAlign: "center", maxWidth: 240 }}>{message}</div>
+      <div style={{ fontSize: "24px", opacity: 0.3 }}>📊</div>
+      <div style={{ fontSize: "11px", textAlign: "center", maxWidth: 200 }}>{message}</div>
     </div>
   );
 }
@@ -235,6 +238,7 @@ function fmtTime(sec: number) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function Analytics() {
   const [range, setRange] = useState("30days");
+  const isMobile = useMobile(768);
 
   const { data, isLoading } = useQuery<any>({
     queryKey: ["/api/admin/analytics/site", range],
@@ -255,102 +259,166 @@ export default function Analytics() {
   const bounceByDay: any[] = data?.bounceByDay ?? [];
 
   const hasData = totalViews > 0;
+  const chartH = isMobile ? 170 : 200;
+  const pieH = isMobile ? 120 : 150;
 
   return (
     <AdminLayout title="Analytics">
       {/* Range selector + live indicator */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 20, alignItems: "center" }}>
-        {RANGE_OPTIONS.map(o => (
-          <button key={o.key} onClick={() => setRange(o.key)} style={{
-            padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
-            cursor: "pointer", border: "1px solid",
-            background: range === o.key ? "hsl(var(--primary))" : "transparent",
-            borderColor: range === o.key ? "hsl(var(--primary))" : "hsl(220,15%,20%)",
-            color: range === o.key ? "white" : "hsl(var(--muted-foreground))",
-          }}>{o.label}</button>
-        ))}
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          {RANGE_OPTIONS.map(o => (
+            <button key={o.key} onClick={() => setRange(o.key)} style={{
+              padding: isMobile ? "5px 11px" : "6px 14px",
+              borderRadius: "6px", fontSize: "12px", fontWeight: 600,
+              cursor: "pointer", border: "1px solid",
+              background: range === o.key ? "hsl(var(--primary))" : "transparent",
+              borderColor: range === o.key ? "hsl(var(--primary))" : "hsl(220,15%,20%)",
+              color: range === o.key ? "white" : "hsl(var(--muted-foreground))",
+            }}>{o.label}</button>
+          ))}
+        </div>
         <div style={{
           marginLeft: "auto", display: "flex", alignItems: "center", gap: 6,
-          fontSize: "12px",
+          fontSize: "11px",
           color: activeNow > 0 ? "hsl(142,71%,45%)" : "hsl(var(--muted-foreground))",
         }}>
           <span style={{
-            width: 8, height: 8, borderRadius: "50%", display: "inline-block",
+            width: 7, height: 7, borderRadius: "50%", display: "inline-block",
             background: activeNow > 0 ? "hsl(142,71%,45%)" : "hsl(220,15%,30%)",
             boxShadow: activeNow > 0 ? "0 0 6px hsl(142,71%,45%)" : "none",
           }} />
-          {isLoading ? "Loading…" : activeNow > 0 ? `${activeNow} active now` : "No active visitors"}
+          {isLoading ? "Loading…" : activeNow > 0 ? `${activeNow} active` : "No active visitors"}
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14, marginBottom: 22 }}>
-        <StatCard infoId="pageViews" icon={<Eye size={18} />} label="Page Views" value={totalViews.toLocaleString()} />
-        <StatCard infoId="sessions" icon={<Users size={18} />} label="Unique Sessions" value={uniqueSessions.toLocaleString()} />
-        <StatCard infoId="bounceRate" icon={<TrendingDown size={18} />} label="Bounce Rate" value={`${bounceRate}%`}
+      {/* Stat cards — 2 cols on mobile, auto-fit on desktop */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(170px, 1fr))",
+        gap: 10, marginBottom: 16,
+      }}>
+        <StatCard infoId="pageViews" icon={<Eye size={16} />} label="Page Views" value={totalViews.toLocaleString()} />
+        <StatCard infoId="sessions" icon={<Users size={16} />} label="Sessions" value={uniqueSessions.toLocaleString()} />
+        <StatCard infoId="bounceRate" icon={<TrendingDown size={16} />} label="Bounce Rate" value={`${bounceRate}%`}
           color={bounceRate > 60 ? "hsl(0,72%,55%)" : bounceRate > 40 ? "hsl(38,92%,55%)" : "hsl(142,71%,45%)"} />
-        <StatCard infoId="avgDuration" icon={<Clock size={18} />} label="Avg Engagement" value={fmtTime(avgDuration)} />
-        <StatCard infoId="activeNow" icon={<Wifi size={18} />} label="Active Now" value={activeNow}
+        <StatCard infoId="avgDuration" icon={<Clock size={16} />} label="Avg Engage" value={fmtTime(avgDuration)} />
+        <StatCard infoId="activeNow" icon={<Wifi size={16} />} label="Active Now" value={activeNow}
           color={activeNow > 0 ? "hsl(142,71%,45%)" : undefined} />
       </div>
 
-      {/* Row 1: Live Traffic + Traffic Sources */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14, marginBottom: 14 }}>
-        <ChartCard title="Live Traffic" subtitle="Page views per hour over the last 24 hours" infoId="liveTraffic">
-          {!hasData ? <EmptyChart /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={liveTraffic}>
-                <defs>
-                  <linearGradient id="cgLive" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(258,90%,70%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(258,90%,70%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
-                <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={3} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
-                <Tooltip {...tooltipStyle} />
-                <Area type="monotone" dataKey="views" stroke="hsl(258,90%,70%)" fill="url(#cgLive)" strokeWidth={2} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </ChartCard>
+      {/* Row 1: Live Traffic (full width) + Traffic Sources */}
+      {isMobile ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
+          {/* Live Traffic – full width */}
+          <ChartCard title="Live Traffic" subtitle="Page views per hour (last 24h)" infoId="liveTraffic">
+            {!hasData ? <EmptyChart /> : (
+              <ResponsiveContainer width="100%" height={chartH}>
+                <AreaChart data={liveTraffic}>
+                  <defs>
+                    <linearGradient id="cgLive" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(258,90%,70%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(258,90%,70%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
+                  <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={5} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} width={24} />
+                  <Tooltip {...tooltipStyle} />
+                  <Area type="monotone" dataKey="views" stroke="hsl(258,90%,70%)" fill="url(#cgLive)" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </ChartCard>
 
-        <ChartCard title="Traffic Sources" subtitle="Where visitors come from" infoId="trafficSources">
-          {!hasData || trafficSources.every(s => s.value === 0) ? <EmptyChart /> : (
-            <>
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie data={trafficSources} cx="50%" cy="50%" innerRadius={42} outerRadius={65}
+          {/* Traffic Sources – compact horizontal pie */}
+          <ChartCard title="Traffic Sources" subtitle="Where visitors come from" infoId="trafficSources">
+            {!hasData || trafficSources.every(s => s.value === 0) ? <EmptyChart /> : (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <PieChart width={110} height={110}>
+                  <Pie data={trafficSources} cx="50%" cy="50%" innerRadius={32} outerRadius={50}
                     dataKey="value" paddingAngle={3}>
                     {trafficSources.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip {...tooltipStyle} />
                 </PieChart>
-              </ResponsiveContainer>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", justifyContent: "center", marginTop: 8 }}>
-                {trafficSources.map((s, i) => (
-                  <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "11px" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
-                    <span style={{ color: "hsl(var(--muted-foreground))" }}>{s.name}</span>
-                    <span style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>{s.value}</span>
-                  </div>
-                ))}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+                  {trafficSources.map((s, i) => (
+                    <div key={s.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "11px" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: 5, color: "hsl(var(--muted-foreground))" }}>
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
+                        {s.name}
+                      </span>
+                      <span style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </>
-          )}
-        </ChartCard>
-      </div>
+            )}
+          </ChartCard>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 12, marginBottom: 12 }}>
+          <ChartCard title="Live Traffic" subtitle="Page views per hour over the last 24 hours" infoId="liveTraffic">
+            {!hasData ? <EmptyChart /> : (
+              <ResponsiveContainer width="100%" height={chartH}>
+                <AreaChart data={liveTraffic}>
+                  <defs>
+                    <linearGradient id="cgLive" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(258,90%,70%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(258,90%,70%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
+                  <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={3} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                  <Tooltip {...tooltipStyle} />
+                  <Area type="monotone" dataKey="views" stroke="hsl(258,90%,70%)" fill="url(#cgLive)" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </ChartCard>
+
+          <ChartCard title="Traffic Sources" subtitle="Where visitors come from" infoId="trafficSources">
+            {!hasData || trafficSources.every(s => s.value === 0) ? <EmptyChart /> : (
+              <>
+                <ResponsiveContainer width="100%" height={140}>
+                  <PieChart>
+                    <Pie data={trafficSources} cx="50%" cy="50%" innerRadius={38} outerRadius={58}
+                      dataKey="value" paddingAngle={3}>
+                      {trafficSources.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip {...tooltipStyle} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "5px 12px", justifyContent: "center", marginTop: 6 }}>
+                  {trafficSources.map((s, i) => (
+                    <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "11px" }}>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS[i % COLORS.length], flexShrink: 0 }} />
+                      <span style={{ color: "hsl(var(--muted-foreground))" }}>{s.name}</span>
+                      <span style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </ChartCard>
+        </div>
+      )}
 
       {/* Row 2: Engagement + Bounce Rate */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-        <ChartCard title="Engagement Time" subtitle="Average seconds per page by day" infoId="engagementTime">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+        gap: 10, marginBottom: 10,
+      }}>
+        <ChartCard title="Engagement Time" subtitle="Avg seconds per page by day" infoId="engagementTime">
           {engagementByDay.length === 0 ? <EmptyChart /> : (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={chartH}>
               <BarChart data={engagementByDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
-                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} unit="s" />
+                <XAxis dataKey="day" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} unit="s" width={28} />
                 <Tooltip {...tooltipStyle} formatter={(v: any) => [`${v}s`, "Avg time"]} />
                 <Bar dataKey="avgSec" fill="hsl(196,100%,50%)" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -358,13 +426,13 @@ export default function Analytics() {
           )}
         </ChartCard>
 
-        <ChartCard title="Bounce Rate" subtitle="% of single-page sessions by day" infoId="bounceByDay">
+        <ChartCard title="Bounce Rate" subtitle="% single-page sessions by day" infoId="bounceByDay">
           {bounceByDay.length === 0 ? <EmptyChart /> : (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={chartH}>
               <LineChart data={bounceByDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
-                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} unit="%" domain={[0, 100]} />
+                <XAxis dataKey="day" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} unit="%" domain={[0, 100]} width={28} />
                 <Tooltip {...tooltipStyle} formatter={(v: any) => [`${v}%`, "Bounce rate"]} />
                 <Line type="monotone" dataKey="rate" stroke="hsl(0,72%,55%)" strokeWidth={2}
                   dot={{ r: 3, fill: "hsl(0,72%,55%)" }} />
@@ -374,30 +442,35 @@ export default function Analytics() {
         </ChartCard>
       </div>
 
-      {/* Row 3: Top Pages + Device + Site Speed */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 14 }}>
-        <ChartCard title="Navigation Paths" subtitle="Most visited pages in selected period" infoId="topPages">
+      {/* Row 3: Top Pages + (Device + Site Speed) */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 260px",
+        gap: 10,
+      }}>
+        <ChartCard title="Navigation Paths" subtitle="Most visited pages in selected period" infoId="topPages" alignInfoLeft>
           {topPages.length === 0 ? <EmptyChart /> : (
             <div>
               {topPages.map((p, i) => {
                 const pct = topPages[0].views > 0 ? Math.round((p.views / topPages[0].views) * 100) : 0;
                 return (
                   <div key={p.path} style={{
-                    display: "flex", alignItems: "center", gap: 10, padding: "7px 0",
+                    display: "flex", alignItems: "center", gap: 8, padding: "6px 0",
                     borderBottom: i < topPages.length - 1 ? "1px solid hsl(220,15%,10%)" : "none",
                   }}>
-                    <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", width: 18, textAlign: "right", flexShrink: 0 }}>
+                    <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", width: 16, textAlign: "right", flexShrink: 0 }}>
                       {i + 1}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                         <span style={{
-                          fontSize: "12px", color: "hsl(var(--foreground))", fontFamily: "monospace",
-                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "72%",
+                          fontSize: "11px", color: "hsl(var(--foreground))", fontFamily: "monospace",
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          maxWidth: isMobile ? "65%" : "72%",
                         }}>{p.path}</span>
-                        <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{p.views}</span>
+                        <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(var(--foreground))" }}>{p.views}</span>
                       </div>
-                      <div style={{ height: 4, background: "hsl(220,15%,12%)", borderRadius: 2 }}>
+                      <div style={{ height: 3, background: "hsl(220,15%,12%)", borderRadius: 2 }}>
                         <div style={{ height: "100%", borderRadius: 2, width: `${pct}%`, background: `hsl(${258 - i * 18},80%,65%)` }} />
                       </div>
                     </div>
@@ -408,56 +481,77 @@ export default function Analytics() {
           )}
         </ChartCard>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Devices */}
           <ChartCard title="Devices" subtitle="Visitor device types" infoId="devices">
             {!hasData || devices.every(d => d.value === 0) ? <EmptyChart message="No device data yet." /> : (
-              <>
-                <ResponsiveContainer width="100%" height={110}>
-                  <PieChart>
-                    <Pie data={devices} cx="50%" cy="50%" outerRadius={48} dataKey="value" paddingAngle={2}>
+              isMobile ? (
+                /* On mobile: horizontal layout */
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <PieChart width={90} height={90}>
+                    <Pie data={devices} cx="50%" cy="50%" outerRadius={40} dataKey="value" paddingAngle={2}>
                       {devices.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip {...tooltipStyle} />
                   </PieChart>
-                </ResponsiveContainer>
-                <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 4 }}>
-                  {devices.map((d, i) => (
-                    <div key={d.name} style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                      <span style={{ display: "flex", alignItems: "center", gap: 6, color: "hsl(var(--muted-foreground))", textTransform: "capitalize" }}>
-                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS[i % COLORS.length] }} />
-                        {d.name}
-                      </span>
-                      <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{d.value}</span>
-                    </div>
-                  ))}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                    {devices.map((d, i) => (
+                      <div key={d.name} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 5, color: "hsl(var(--muted-foreground))", textTransform: "capitalize" }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS[i % COLORS.length] }} />
+                          {d.name}
+                        </span>
+                        <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={pieH}>
+                    <PieChart>
+                      <Pie data={devices} cx="50%" cy="50%" outerRadius={48} dataKey="value" paddingAngle={2}>
+                        {devices.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip {...tooltipStyle} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 4 }}>
+                    {devices.map((d, i) => (
+                      <div key={d.name} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 5, color: "hsl(var(--muted-foreground))", textTransform: "capitalize" }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS[i % COLORS.length] }} />
+                          {d.name}
+                        </span>
+                        <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )
             )}
           </ChartCard>
 
           {/* Site Speed */}
-          <div style={{ ...card, flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Site Speed</div>
+          <div style={card}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Site Speed</div>
               <InfoPopover id="siteSpeed" />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {[
-                { label: "API response", value: "~5–20ms", color: "hsl(142,71%,45%)" },
-                { label: "DB queries", value: "~2–10ms", color: "hsl(142,71%,45%)" },
-                { label: "Page load", value: "CDN-dependent", color: "hsl(38,92%,55%)" },
-              ].map((s, i, arr) => (
-                <div key={s.label} style={{
-                  display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: "12px",
-                  borderBottom: i < arr.length - 1 ? "1px solid hsl(220,15%,10%)" : "none",
-                }}>
-                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{s.label}</span>
-                  <span style={{ fontWeight: 600, color: s.color }}>{s.value}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: 12, lineHeight: 1.6 }}>
-              Check browser DevTools → Network for real page-load times.
+            {[
+              { label: "API response", value: "~5–20ms", color: "hsl(142,71%,45%)" },
+              { label: "DB queries", value: "~2–10ms", color: "hsl(142,71%,45%)" },
+              { label: "Page load", value: "CDN-dependent", color: "hsl(38,92%,55%)" },
+            ].map((s, i, arr) => (
+              <div key={s.label} style={{
+                display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: "12px",
+                borderBottom: i < arr.length - 1 ? "1px solid hsl(220,15%,10%)" : "none",
+              }}>
+                <span style={{ color: "hsl(var(--muted-foreground))" }}>{s.label}</span>
+                <span style={{ fontWeight: 600, color: s.color }}>{s.value}</span>
+              </div>
+            ))}
+            <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: 10, lineHeight: 1.6 }}>
+              Check DevTools → Network for real load times.
             </div>
           </div>
         </div>
