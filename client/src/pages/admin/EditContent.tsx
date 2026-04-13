@@ -664,9 +664,10 @@ export default function EditContent() {
           </div>
           <div>
             <label style={labelStyle}>Default Hero Subtitle</label>
-            <textarea
+            <input
+              type="text"
               data-testid="input-hero-subtitle"
-              style={{ ...textareaStyle, minHeight: "250px" }}
+              style={inputStyle}
               value={local.hero_subtitle ?? ""}
               onChange={(e) => set("hero_subtitle", e.target.value)}
             />
