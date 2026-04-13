@@ -10,7 +10,7 @@ import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
 import { useAuthStore } from "@/lib/store/authstore";
-import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMapping } from "@shared/schema";
+import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMapping, LioGamesConfig, LioGamesMapping } from "@shared/schema";
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -992,6 +992,316 @@ function SmileOneModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Liogames Config Tab ──────────────────────────────────────────────────────
+function LioGamesConfigTab() {
+  const qc = useQueryClient();
+  const { user } = useAuthStore();
+
+  const { data: config } = useQuery<LioGamesConfig | null>({
+    queryKey: ["/api/admin/liogames/config"],
+    queryFn: () => adminApi.get("/liogames/config"),
+  });
+
+  const [form, setForm] = useState({ memberCode: "", secret: "", baseUrl: "https://api.liogames.com/wp-json/liogames/v1" });
+  const [testStatus, setTestStatus] = useState<null | { ok: boolean; message: string; balance?: number; currency?: string }>(null);
+  const [testing, setTesting] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (config) {
+      setForm({
+        memberCode: config.memberCode ?? "",
+        secret: config.secret ?? "",
+        baseUrl: config.baseUrl ?? "https://api.liogames.com/wp-json/liogames/v1",
+      });
+    }
+  }, [config]);
+
+  const isDirty = useMemo(() => {
+    if (!config) return true;
+    return (
+      form.memberCode !== (config.memberCode ?? "") ||
+      form.secret !== (config.secret ?? "") ||
+      form.baseUrl !== (config.baseUrl ?? "https://api.liogames.com/wp-json/liogames/v1")
+    );
+  }, [form, config]);
+
+  const saveMut = useMutation({
+    mutationFn: () => adminApi.post("/liogames/config", { ...form, isActive: true }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/liogames/config"] });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+  });
+
+  async function testConnection() {
+    setTesting(true); setTestStatus(null);
+    try {
+      const res = await fetch("/api/admin/liogames/test-connection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-role": user?.role ?? "super_admin" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      setTestStatus({ ok: data.success, message: data.message, balance: data.balance, currency: data.currency });
+    } catch { setTestStatus({ ok: false, message: "Connection failed" }); }
+    finally { setTesting(false); }
+  }
+
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={innerCard}>
+        <p style={sectionTitle}>API Credentials</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>API Base URL</label>
+            <input data-testid="input-liogames-base-url" style={inputStyle} value={form.baseUrl} onChange={set("baseUrl")} placeholder="https://api.liogames.com/wp-json/liogames/v1" />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "5px" }}>Base URL without trailing slash. Change only if you have a custom endpoint.</p>
+          </div>
+          <div>
+            <label style={labelStyle}>Member Code</label>
+            <input data-testid="input-liogames-member-code" style={inputStyle} value={form.memberCode} onChange={set("memberCode")} placeholder="Your Liogames member code" />
+          </div>
+          <div>
+            <label style={labelStyle}>Secret Key</label>
+            <input data-testid="input-liogames-secret" type="password" style={inputStyle} value={form.secret} onChange={set("secret")} placeholder="••••••••" autoComplete="off" />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "5px" }}>
+              Used for HMAC-SHA256 request signing (<code style={{ background: "rgba(255,255,255,0.06)", padding: "1px 4px", borderRadius: "3px" }}>x-liog-sign</code> header).
+            </p>
+          </div>
+          {testStatus && (
+            <div style={{
+              padding: "10px 14px", borderRadius: "6px", fontSize: "12px",
+              background: testStatus.ok ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
+              border: `1px solid ${testStatus.ok ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"}`,
+              color: testStatus.ok ? "#4ade80" : "#f87171",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}>
+              {testStatus.ok ? <CheckCircle size={14} /> : <XCircle size={14} />}
+              {testStatus.message}{testStatus.balance != null ? ` — Balance: ${testStatus.currency ?? ""} ${testStatus.balance}` : ""}
+            </div>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button data-testid="button-test-liogames"
+              style={{ ...btnPrimary, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", display: "inline-flex", alignItems: "center", gap: "6px" }}
+              onClick={testConnection} disabled={testing || !form.memberCode || !form.secret}>
+              {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
+              Test Connection
+            </button>
+            {isDirty && (
+              <button data-testid="button-save-liogames-config"
+                style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
+                onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
+                {saveMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
+                {saved ? "Saved!" : "Save Config"}
+              </button>
+            )}
+            {!isDirty && <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Liogames Mapping Tab ─────────────────────────────────────────────────────
+interface LioNewMappingForm {
+  cmsProductId: string; cmsProductName: string;
+  lioProductId: string; lioVariationId: string; lioProductName: string;
+}
+
+function LioGamesMappingTab() {
+  const qc = useQueryClient();
+
+  const { data: mappings = [], isLoading } = useQuery<LioGamesMapping[]>({
+    queryKey: ["/api/admin/liogames/mappings"],
+    queryFn: () => adminApi.get("/liogames/mappings"),
+  });
+  const { data: cmsProducts = [] } = useQuery<Service[]>({
+    queryKey: ["/api/admin/services"],
+    queryFn: () => adminApi.get("/services"),
+  });
+  const { data: games = [] } = useQuery<Game[]>({
+    queryKey: ["/api/admin/games"],
+    queryFn: () => adminApi.get("/games"),
+  });
+
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState<LioNewMappingForm>({ cmsProductId: "", cmsProductName: "", lioProductId: "", lioVariationId: "", lioProductName: "" });
+  const [variations, setVariations] = useState<{ variation_id: number; name: string }[]>([]);
+  const [varLoading, setVarLoading] = useState(false);
+
+  const gameNameMap = Object.fromEntries(games.map(g => [g.id, g.name]));
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => adminApi.delete(`/liogames/mappings/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] }),
+  });
+
+  const createMut = useMutation({
+    mutationFn: () => adminApi.post("/liogames/mappings", {
+      cmsProductId: form.cmsProductId,
+      cmsProductName: form.cmsProductName || undefined,
+      lioProductId: parseInt(form.lioProductId, 10),
+      lioVariationId: form.lioVariationId ? parseInt(form.lioVariationId, 10) : undefined,
+      lioProductName: form.lioProductName || undefined,
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/liogames/mappings"] });
+      setShowModal(false);
+      setForm({ cmsProductId: "", cmsProductName: "", lioProductId: "", lioVariationId: "", lioProductName: "" });
+      setVariations([]);
+    },
+  });
+
+  async function fetchVariations(productId: string) {
+    if (!productId || isNaN(parseInt(productId, 10))) { setVariations([]); return; }
+    setVarLoading(true);
+    try {
+      const { user } = useAuthStore.getState();
+      const res = await fetch(`/api/admin/liogames/product-variations?product_id=${productId}`, {
+        headers: { "x-admin-role": user?.role ?? "super_admin" },
+      });
+      const data = await res.json();
+      setVariations(data?.data?.variations ?? []);
+    } catch { setVariations([]); }
+    finally { setVarLoading(false); }
+  }
+
+  const setF = (k: keyof LioNewMappingForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (k === "lioProductId") {
+      setForm(p => ({ ...p, lioProductId: val, lioVariationId: "" }));
+      fetchVariations(val);
+    } else if (k === "cmsProductId") {
+      const found = cmsProducts.find(p => p.id === val);
+      const gameName = found ? (gameNameMap[found.gameId] ?? "") : "";
+      setForm(p => ({ ...p, cmsProductId: val, cmsProductName: found ? `${gameName} — ${found.name}` : "" }));
+    } else {
+      setForm(p => ({ ...p, [k]: val }));
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <p style={{ ...sectionTitle, margin: 0 }}>Product Mappings ({mappings.length})</p>
+        <button data-testid="button-add-liogames-mapping"
+          style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px" }}
+          onClick={() => setShowModal(true)}>
+          <Plus size={13} /> New Mapping
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>
+          <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Loading mappings...
+        </div>
+      ) : mappings.length === 0 ? (
+        <div style={{ ...innerCard, textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px", padding: "32px" }}>
+          No mappings yet. Click "New Mapping" to link a CMS product to a Liogames product.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {mappings.map(m => (
+            <div key={m.id} data-testid={`row-liogames-mapping-${m.id}`} style={{ ...innerCard, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {m.cmsProductName || m.cmsProductId}
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "3px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>CMS: {m.cmsProductId.slice(0, 8)}…</span>
+                  <Link2 size={10} style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+                  <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
+                    Lio #{m.lioProductId}{m.lioVariationId ? ` / Var #${m.lioVariationId}` : ""}
+                  </span>
+                  {m.lioProductName && <span style={{ fontSize: "11px", color: "hsl(var(--foreground))", fontStyle: "italic" }}>({m.lioProductName})</span>}
+                </div>
+              </div>
+              <button data-testid={`button-delete-mapping-${m.id}`}
+                onClick={() => deleteMut.mutate(m.id)} disabled={deleteMut.isPending}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--destructive))", padding: "4px", flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showModal && (
+        <Modal title="New Liogames Mapping" onClose={() => { setShowModal(false); setVariations([]); setForm({ cmsProductId: "", cmsProductName: "", lioProductId: "", lioVariationId: "", lioProductName: "" }); }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>CMS Product</label>
+              <select style={selectStyle} value={form.cmsProductId} onChange={setF("cmsProductId")} data-testid="select-liogames-cms-product">
+                <option value="">— Select a product —</option>
+                {cmsProducts.map(p => {
+                  const gameName = gameNameMap[p.gameId] ?? "Unknown";
+                  return <option key={p.id} value={p.id}>{gameName} — {p.name}</option>;
+                })}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Liogames Product ID</label>
+              <input data-testid="input-lio-product-id" style={inputStyle} type="number" value={form.lioProductId} onChange={setF("lioProductId")} placeholder="e.g. 123" />
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>WooCommerce product ID from Liogames. Variations load automatically.</p>
+            </div>
+            {varLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>
+                <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Loading variations...
+              </div>
+            )}
+            {variations.length > 0 && (
+              <div>
+                <label style={labelStyle}>Variation (optional)</label>
+                <select style={selectStyle} value={form.lioVariationId} onChange={setF("lioVariationId")} data-testid="select-lio-variation">
+                  <option value="">— No specific variation —</option>
+                  {variations.map(v => <option key={v.variation_id} value={String(v.variation_id)}>{v.name} (#{v.variation_id})</option>)}
+                </select>
+              </div>
+            )}
+            <div>
+              <label style={labelStyle}>Liogames Product Name <span style={{ fontWeight: 400 }}>(optional label)</span></label>
+              <input data-testid="input-lio-product-name" style={inputStyle} value={form.lioProductName} onChange={setF("lioProductName")} placeholder="e.g. Mobile Legends Diamonds" />
+            </div>
+            {createMut.isError && <p style={{ fontSize: "12px", color: "hsl(var(--destructive))", margin: 0 }}>Failed to save mapping. Please try again.</p>}
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <button onClick={() => { setShowModal(false); setVariations([]); setForm({ cmsProductId: "", cmsProductName: "", lioProductId: "", lioVariationId: "", lioProductName: "" }); }}
+                style={{ padding: "7px 14px", borderRadius: "6px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))", fontSize: "12px", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button data-testid="button-create-liogames-mapping"
+                style={{ ...btnPrimary, opacity: createMut.isPending || !form.cmsProductId || !form.lioProductId ? 0.6 : 1 }}
+                onClick={() => createMut.mutate()} disabled={createMut.isPending || !form.cmsProductId || !form.lioProductId}>
+                {createMut.isPending ? "Saving..." : "Add Mapping"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function LioGamesModal({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<"config" | "mapping">("config");
+  return (
+    <Modal title="Liogames Integration" onClose={onClose} wide>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div style={{ display: "flex", gap: "4px", background: "hsl(var(--card))", padding: "4px", borderRadius: "8px", width: "fit-content", border: "1px solid hsl(var(--border))" }}>
+          <button data-testid="tab-liogames-config" style={tabBtn(tab === "config")} onClick={() => setTab("config")}>Configuration</button>
+          <button data-testid="tab-liogames-mapping" style={tabBtn(tab === "mapping")} onClick={() => setTab("mapping")}>Product Mapping</button>
+        </div>
+        {tab === "config" && <LioGamesConfigTab />}
+        {tab === "mapping" && <LioGamesMappingTab />}
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Social Auth Modal ────────────────────────────────────────────────────────
 interface ProviderSectionProps {
   slug: string;
@@ -1172,6 +1482,7 @@ export default function ApiIntegration() {
   const [configuring, setConfiguring] = useState<ServiceDef | null>(null);
   const [busanOpen, setBusanOpen] = useState(false);
   const [smileOneOpen, setSmileOneOpen] = useState(false);
+  const [lioGamesOpen, setLioGamesOpen] = useState(false);
   const [socialAuthOpen, setSocialAuthOpen] = useState(false);
 
   const { data: plugins = [] } = useQuery<Plugin[]>({
@@ -1187,6 +1498,11 @@ export default function ApiIntegration() {
   const { data: smileOneConfig } = useQuery<SmileOneConfig | null>({
     queryKey: ["/api/admin/smileone/config"],
     queryFn: () => adminApi.get("/smileone/config"),
+  });
+
+  const { data: lioGamesConfig } = useQuery<LioGamesConfig | null>({
+    queryKey: ["/api/admin/liogames/config"],
+    queryFn: () => adminApi.get("/liogames/config"),
   });
 
   useEffect(() => {
@@ -1226,6 +1542,12 @@ export default function ApiIntegration() {
     onSuccess: () => qcMain.invalidateQueries({ queryKey: ["/api/admin/smileone/config"] }),
   });
 
+  const toggleLioGamesMut = useMutation({
+    mutationFn: (isActive: boolean) =>
+      adminApi.post("/liogames/config", { ...lioGamesConfig, isActive }),
+    onSuccess: () => qcMain.invalidateQueries({ queryKey: ["/api/admin/liogames/config"] }),
+  });
+
   const pluginMap = Object.fromEntries(plugins.map((p) => [p.slug, p]));
 
   function isConfigured(service: ServiceDef) {
@@ -1239,6 +1561,7 @@ export default function ApiIntegration() {
 
   const busanConfigured = Boolean(busanConfig?.apiToken);
   const smileOneConfigured = Boolean(smileOneConfig?.apiKey);
+  const lioGamesConfigured = Boolean(lioGamesConfig?.memberCode);
 
   const socialAuthConfigured = (() => {
     const slugs = ["social-auth-google", "social-auth-facebook", "social-auth-discord"];
@@ -1387,12 +1710,29 @@ export default function ApiIntegration() {
               smileOneConfigured,
               () => setSmileOneOpen(true),
               "button-configure-smileone",
-              true,
+              false,
               {
                 enabled: smileOneConfig?.isActive !== false,
                 onToggle: () => toggleSmileMut.mutate(!(smileOneConfig?.isActive !== false)),
                 loading: toggleSmileMut.isPending,
                 toggleTestId: "toggle-smileone",
+              },
+            )}
+
+            {/* Liogames Integration row */}
+            {renderRow(
+              <Zap size={14} />,
+              "Liogames Integration",
+              "Auto-fulfil game top-ups via Liogames after payment confirmation",
+              lioGamesConfigured,
+              () => setLioGamesOpen(true),
+              "button-configure-liogames",
+              true,
+              {
+                enabled: lioGamesConfig?.isActive !== false,
+                onToggle: () => toggleLioGamesMut.mutate(!(lioGamesConfig?.isActive !== false)),
+                loading: toggleLioGamesMut.isPending,
+                toggleTestId: "toggle-liogames",
               },
             )}
           </div>
@@ -1405,6 +1745,7 @@ export default function ApiIntegration() {
       )}
       {busanOpen && <BusanModal onClose={() => setBusanOpen(false)} />}
       {smileOneOpen && <SmileOneModal onClose={() => setSmileOneOpen(false)} />}
+      {lioGamesOpen && <LioGamesModal onClose={() => setLioGamesOpen(false)} />}
       {socialAuthOpen && <SocialAuthModal plugins={plugins} onClose={() => setSocialAuthOpen(false)} />}
     </AdminLayout>
   );

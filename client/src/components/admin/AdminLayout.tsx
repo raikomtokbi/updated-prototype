@@ -123,7 +123,6 @@ const navSections: NavSection[] = [
       { label: "Control Panel", icon: <Settings size={15} />, path: "/admin/control-panel", permKey: "control_panel" },
       { label: "Payment method", icon: <Wallet size={15} />, path: "/admin/payment-method", permKey: "payment_method" },
       { label: "Api integration", icon: <Plug size={15} />, path: "/admin/api-integration", permKey: "api_integration" },
-      { label: "Liogames", icon: <Zap size={15} />, path: "/admin/liogames", permKey: "api_integration" },
       { label: "Email Templates", icon: <Mail size={15} />, path: "/admin/email-templates", permKey: "email_templates" },
     ],
   },
