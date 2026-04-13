@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2, AlertTriangle } from "lucide-react";
+import { Zap, ShoppingCart, ArrowLeft, Gamepad2, Gift, RefreshCcw, Plus, Minus, BoltIcon, CheckCircle2, AlertCircle, Loader2, AlertTriangle, Lock } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -53,11 +53,11 @@ function PackageCard({
         padding: "12px 8px",
         borderRadius: "10px",
         background: outOfStock
-          ? "hsl(220,15%,9%)"
+          ? "hsl(220,13%,11%)"
           : selected
             ? "linear-gradient(135deg, hsla(258,90%,66%,0.22), hsla(258,90%,50%,0.12))"
             : "hsl(var(--card))",
-        border: `2px solid ${outOfStock ? "hsl(var(--border))" : selected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
+        border: `2px solid ${outOfStock ? "hsl(220,10%,20%)" : selected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
         cursor: outOfStock ? "not-allowed" : "pointer",
         color: outOfStock ? "hsl(var(--muted-foreground))" : selected ? "hsl(var(--foreground))" : "hsl(var(--foreground))",
         transition: "all 0.15s ease",
@@ -65,15 +65,18 @@ function PackageCard({
         width: "100%",
         textAlign: "center",
         overflow: "hidden",
-        opacity: outOfStock ? 0.55 : 1,
+        opacity: outOfStock ? 0.5 : 1,
+        filter: outOfStock ? "grayscale(1)" : "none",
       }}
     >
       {outOfStock && (
         <span style={{
-          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-          background: "hsl(var(--foreground) / 0.12)", borderRadius: "8px", zIndex: 1,
+          position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: "4px",
+          background: "rgba(0,0,0,0.45)", borderRadius: "8px", zIndex: 1,
         }}>
-          <span style={{ fontSize: "10px", fontWeight: 700, color: "hsl(0,60%,50%)", letterSpacing: "0.04em", textTransform: "uppercase" }}>Out of Stock</span>
+          <Lock size={14} style={{ color: "hsl(var(--muted-foreground))", opacity: 0.8 }} />
+          <span style={{ fontSize: "9px", fontWeight: 600, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sold Out</span>
         </span>
       )}
       {!outOfStock && selected && (
