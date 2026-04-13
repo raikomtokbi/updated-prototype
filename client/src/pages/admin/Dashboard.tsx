@@ -131,7 +131,7 @@ export default function Dashboard() {
   const { data: stats } = useQuery<{ totalUsers: number; totalOrders: number; totalRevenue: number; openTickets: number }>({
     queryKey: statsQueryKey,
     queryFn: () => adminApi.get(statsUrl),
-    refetchInterval: 1000,
+    refetchInterval: false,
   });
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
@@ -157,7 +157,7 @@ export default function Dashboard() {
     queryKey: salesQueryKey,
     queryFn: () => adminApi.get(salesUrl),
     staleTime: 60000,
-    refetchInterval: 2000,
+    refetchInterval: false,
   });
 
   const orderQueryKey = orderRangeKey === "custom" && orderCustomRange?.from
@@ -175,7 +175,7 @@ export default function Dashboard() {
     queryKey: orderQueryKey,
     queryFn: () => adminApi.get(orderUrl),
     staleTime: 60000,
-    refetchInterval: 2000,
+    refetchInterval: false,
   });
 
   const placeholderSalesData = salesRangeKey === "today"
