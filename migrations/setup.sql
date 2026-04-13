@@ -572,6 +572,12 @@ CREATE TABLE IF NOT EXISTS `role_permissions` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Safe upgrade fixes for older databases
+ALTER TABLE `users`
+  ADD COLUMN IF NOT EXISTS `is_banned` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_active`,
+  ADD COLUMN IF NOT EXISTS `is_email_verified` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_banned`,
+  ADD COLUMN IF NOT EXISTS `is_subscribed` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_email_verified`;
+
 -- =============================================================================
 -- Default admin user (password: admin123456 — CHANGE THIS AFTER FIRST LOGIN)
 -- =============================================================================
