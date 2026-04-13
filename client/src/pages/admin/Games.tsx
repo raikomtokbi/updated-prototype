@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2, Link2, Zap, Smile, ArrowLeft, RefreshCw, CheckCircle } from "lucide-react";
 import { ProductMappingModal } from "@/components/admin/ProductMappingModal";
@@ -303,8 +303,12 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
 // ─── Service Form ─────────────────────────────────────────────────────────────
 function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SERVICE; onSubmit: (d: any) => void; loading: boolean }) {
   const isMobile = useMobile(768);
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initial);
   const [mappingOpen, setMappingOpen] = useState(false);
+  const [rate, setRate] = useState("");
+  const [usdInrRate, setUsdInrRate] = useState<number | null>(null);
+  const [rateLoading, setRateLoading] = useState(false);
   const set = (k: string, v: string | number) => setForm((p) => ({ ...p, [k]: v }));
 
   function computeFinal(price: string, disc: string) {
@@ -312,6 +316,48 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
     const d = parseFloat(disc) || 0;
     return (p * (1 - d / 100)).toFixed(2);
   }
+
+  useEffect(() => {
+    if (!form.id) return;
+    async function loadRate() {
+      setRateLoading(true);
+      try {
+        const [busanMappings, smileMappings, fxRes] = await Promise.all([
+          adminApi.get("/busan/mappings"),
+          adminApi.get("/smileone/mappings"),
+          fetch("https://api.frankfurter.dev/latest?from=USD&to=INR").then((r) => r.json()),
+        ]);
+        const inrRate = fxRes?.rates?.INR ?? null;
+        setUsdInrRate(typeof inrRate === "number" ? inrRate : null);
+
+        // Try Busan mapping first
+        const bMap = Array.isArray(busanMappings) ? busanMappings.find((m: any) => m.cmsProductId === form.id) : null;
+        if (bMap) {
+          const products = await adminApi.get("/busan/products");
+          const prod = Array.isArray(products)
+            ? products.find((p: any) => String(p.id) === String(bMap.busanProductId))
+            : null;
+          if (prod?.price) { setRate(String(prod.price)); setRateLoading(false); return; }
+        }
+
+        // Try Smile.one mapping
+        const sMap = Array.isArray(smileMappings) ? smileMappings.find((m: any) => m.cmsProductId === form.id) : null;
+        if (sMap?.gameSlug) {
+          try {
+            const res = await fetch(`/api/smileone/products?game=${encodeURIComponent(sMap.gameSlug)}&region=${sMap.region ?? "global"}`, {
+              headers: { "X-Username": user?.username ?? "", "x-admin-role": user?.role ?? "super_admin" },
+            });
+            const data = await res.json();
+            const prods = data.success && Array.isArray(data.products) ? data.products : [];
+            const prod = prods.find((p: any) => String(p.product_id) === String(sMap.smileProductId));
+            if (prod?.price) { setRate(String(prod.price)); setRateLoading(false); return; }
+          } catch { /* ignore */ }
+        }
+      } catch (e) { console.error(e); }
+      setRateLoading(false);
+    }
+    loadRate();
+  }, [form.id]);
 
   return (
     <form onSubmit={(e) => {
@@ -326,6 +372,29 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         <label style={labelStyle}>Name *</label>
         <input style={inputStyle} required value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="100 UC" />
       </div>
+      {form.id && (rateLoading || rate) && (
+        <div>
+          <label style={labelStyle}>Provider Rate</label>
+          {rateLoading ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "hsl(var(--muted-foreground))", padding: "8px 0" }}>
+              <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Fetching provider rate…
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>$</span>
+                <input style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed", margin: 0 }} type="number" step="0.01" value={rate} readOnly disabled />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                <span style={{ padding: "0 10px", fontSize: "13px", fontWeight: 600, color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", alignSelf: "stretch", display: "flex", alignItems: "center", userSelect: "none" }}>₹</span>
+                <span style={{ flex: 1, padding: "0 10px", fontSize: "13px", color: "hsl(var(--foreground))", display: "flex", alignItems: "center", height: "100%" }}>
+                  {usdInrRate ? ((parseFloat(rate) || 0) * usdInrRate).toFixed(2) : "—"}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
         <div>
           <label style={labelStyle}>Price *</label>
