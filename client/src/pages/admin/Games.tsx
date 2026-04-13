@@ -471,10 +471,11 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
     e.preventDefault();
     setSaving(true);
     try {
+      const { rate: _rate, ...formData } = form;
       const created = await adminApi.post("/services", {
-        ...form, gameId: game.id,
-        finalPrice: form.finalPrice || computeFinal(form.price, form.discountPercent),
-        stock: form.stock !== "" ? parseInt(form.stock) : null,
+        ...formData, gameId: game.id,
+        finalPrice: formData.finalPrice || computeFinal(formData.price, formData.discountPercent),
+        stock: formData.stock !== "" ? parseInt(formData.stock) : null,
       });
       if (selectedProduct && created?.id) {
         if (provider === "busan") {
@@ -625,15 +626,31 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
             <label style={labelStyle}>Name *</label>
             <input style={inputStyle} required value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="100 UC" />
           </div>
-          <div>
-            <label style={labelStyle}>Rate</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <input style={{ ...inputStyle, flex: 1 }} type="number" step="0.01" value={form.rate} readOnly disabled placeholder="Fetched from provider" />
-              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
-                {usdInrRate && form.rate ? `₹${(parseFloat(form.rate) || 0) * usdInrRate}` : "₹—"}
-              </span>
+          {form.rate && (
+            <div>
+              <label style={labelStyle}>Rate</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", flex: 1, border: "1px solid hsl(var(--border))", borderRadius: "6px", overflow: "hidden", background: "hsl(var(--muted))" }}>
+                  <span style={{ padding: "0 8px", fontSize: "13px", color: "hsl(var(--muted-foreground))", borderRight: "1px solid hsl(var(--border))", height: "100%", display: "flex", alignItems: "center", userSelect: "none" }}>$</span>
+                  <input
+                    style={{ ...inputStyle, border: "none", borderRadius: 0, flex: 1, background: "transparent", cursor: "not-allowed" }}
+                    type="number"
+                    step="0.01"
+                    value={form.rate}
+                    readOnly
+                    disabled
+                  />
+                </div>
+                <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap", minWidth: "80px" }}>
+                  {usdInrRate && form.rate
+                    ? `≈ ₹${((parseFloat(form.rate) || 0) * usdInrRate).toFixed(2)}`
+                    : usdInrRate === null && form.rate
+                      ? "₹ (loading…)"
+                      : "₹—"}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
             <div>
               <label style={labelStyle}>Price *</label>
