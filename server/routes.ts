@@ -170,6 +170,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(obj);
   });
 
+  // ── Exchange rate proxy (avoids browser CORS restrictions) ────────────────
+  app.get("/api/exchange-rate", async (req, res) => {
+    const from = (req.query.from as string) || "USD";
+    const to = (req.query.to as string) || "INR";
+    try {
+      const r = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
+      const data = await r.json() as any;
+      res.json({ rate: data?.rates?.[to] ?? null });
+    } catch {
+      res.json({ rate: null });
+    }
+  });
+
   // Get active fees (public endpoint for checkout/cart)
   app.get("/api/fees", async (_req, res) => {
     const fees = await storage.getActiveFees();

@@ -329,10 +329,10 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         ]);
 
         // Fetch INR rate separately so a failure doesn't block product lookup
-        fetch("https://api.frankfurter.app/latest?from=USD&to=INR")
+        fetch("/api/exchange-rate?from=USD&to=INR")
           .then((r) => r.json())
           .then((data) => {
-            const inrRate = data?.rates?.INR ?? null;
+            const inrRate = data?.rate ?? null;
             setUsdInrRate(typeof inrRate === "number" ? inrRate : null);
           })
           .catch(() => setUsdInrRate(null));
@@ -534,9 +534,9 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
 
   async function fetchUsdInrRate() {
     try {
-      const res = await fetch("https://api.frankfurter.app/latest?from=USD&to=INR");
+      const res = await fetch("/api/exchange-rate?from=USD&to=INR");
       const data = await res.json();
-      const rate = data?.rates?.INR;
+      const rate = data?.rate;
       setUsdInrRate(typeof rate === "number" ? rate : null);
     } catch {
       setUsdInrRate(null);
