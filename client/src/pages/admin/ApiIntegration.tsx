@@ -77,7 +77,6 @@ const SERVICES: ServiceDef[] = [
       { key: "SMTP_FROM_EMAIL", label: "From Email (Automated emails)", placeholder: "noreply@example.com" },
       { key: "SMTP_FROM_NAME", label: "From Name (Automated emails)", placeholder: "Nexcoin Support" },
       { key: "SMTP_COMPOSE_FROM_EMAIL", label: "From Email (Dashboard Compose)", placeholder: "admin@example.com" },
-      { key: "SMTP_DEFAULT_TO", label: "Default Recipient Email (Dashboard Compose)", placeholder: "recipient@example.com" },
     ],
   },
 ];
