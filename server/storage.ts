@@ -718,7 +718,25 @@ export class DatabaseStorage implements IStorage {
   }
   async getActiveHeroSliders() {
     const now = new Date();
-    const all = await db.select().from(heroSliders).where(eq(heroSliders.isActive, true)).orderBy(asc(heroSliders.sortOrder));
+    const all = await db
+      .select({
+        id: heroSliders.id,
+        title: heroSliders.title,
+        subtitle: heroSliders.subtitle,
+        bannerUrl: heroSliders.bannerUrl,
+        buttonText: heroSliders.buttonText,
+        buttonLink: heroSliders.buttonLink,
+        linkedGameId: heroSliders.linkedGameId,
+        linkedProductId: heroSliders.linkedProductId,
+        startsAt: heroSliders.startsAt,
+        endsAt: heroSliders.endsAt,
+        isActive: heroSliders.isActive,
+        sortOrder: heroSliders.sortOrder,
+        createdAt: heroSliders.createdAt,
+      })
+      .from(heroSliders)
+      .where(eq(heroSliders.isActive, true))
+      .orderBy(asc(heroSliders.sortOrder));
     return all.filter((s) => {
       if (s.startsAt && s.startsAt > now) return false;
       if (s.endsAt && s.endsAt < now) return false;
