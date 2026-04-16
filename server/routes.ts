@@ -200,6 +200,77 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(fees);
   });
 
+  // ── Sitemap & robots ──────────────────────────────────────────────────────
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const base = `${req.protocol}://${req.get("host")}`;
+      const now = new Date().toISOString().split("T")[0];
+
+      const [allGames, allProducts] = await Promise.all([
+        storage.getAllGames(),
+        storage.getAllProducts(),
+      ]);
+
+      const staticPages = [
+        { url: "/", priority: "1.0", changefreq: "daily" },
+        { url: "/products", priority: "0.9", changefreq: "daily" },
+        { url: "/offers", priority: "0.8", changefreq: "weekly" },
+        { url: "/about", priority: "0.6", changefreq: "monthly" },
+        { url: "/support", priority: "0.5", changefreq: "monthly" },
+      ];
+
+      const gameUrls = allGames
+        .filter((g: any) => g.isActive !== false)
+        .map((g: any) => ({ url: `/products/${g.slug}`, priority: "0.8", changefreq: "weekly" }));
+
+      const productUrls = allProducts
+        .filter((p: any) => p.isActive !== false)
+        .map((p: any) => ({ url: `/products/${p.id}`, priority: "0.7", changefreq: "weekly" }));
+
+      const entries = [...staticPages, ...gameUrls, ...productUrls];
+
+      const xml = [
+        `<?xml version="1.0" encoding="UTF-8"?>`,
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+        ...entries.map(e => [
+          `  <url>`,
+          `    <loc>${base}${e.url}</loc>`,
+          `    <lastmod>${now}</lastmod>`,
+          `    <changefreq>${e.changefreq}</changefreq>`,
+          `    <priority>${e.priority}</priority>`,
+          `  </url>`,
+        ].join("\n")),
+        `</urlset>`,
+      ].join("\n");
+
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.send(xml);
+    } catch (err) {
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  app.get("/robots.txt", async (req, res) => {
+    const base = `${req.protocol}://${req.get("host")}`;
+    const txt = [
+      "User-agent: *",
+      "Allow: /",
+      "Disallow: /admin/",
+      "Disallow: /api/",
+      "Disallow: /cart",
+      "Disallow: /checkout",
+      "Disallow: /account",
+      "Disallow: /login",
+      "Disallow: /register",
+      "",
+      `Sitemap: ${base}/sitemap.xml`,
+    ].join("\n");
+    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.send(txt);
+  });
+
   // ── Public product routes ──────────────────────────────────────────────────
   app.get("/api/products", async (_req, res) => {
     const prods = await storage.getAllProducts();
