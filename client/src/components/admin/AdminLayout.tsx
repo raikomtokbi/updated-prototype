@@ -825,9 +825,10 @@ interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
   actions?: React.ReactNode;
+  saveBar?: React.ReactNode;
 }
 
-export default function AdminLayout({ children, title, actions }: AdminLayoutProps) {
+export default function AdminLayout({ children, title, actions, saveBar }: AdminLayoutProps) {
   const { isStaff, isAuthenticated } = useAuthStore();
   const isMobile = useMobile(1024);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -956,13 +957,19 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
           </header>
         )}
 
-        <main style={{ flex: 1, padding: isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92, paddingBottom: actions ? "64px" : undefined }}>
+        <main style={{ flex: 1, paddingTop: isMobile ? "10px" : "14px", paddingLeft: isMobile ? "10px" : "14px", paddingRight: isMobile ? "10px" : "14px", paddingBottom: saveBar ? "60px" : isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92 }}>
+          {/* Toolbar actions strip (Add/Edit buttons etc.) */}
+          {actions && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
+              {actions}
+            </div>
+          )}
           {children}
         </main>
       </div>
 
       {/* ── Fixed bottom save pill ── */}
-      {actions && (
+      {saveBar && (
         <div
           style={{
             position: "fixed",
@@ -993,7 +1000,7 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
               Unsaved changes
             </span>
             <div className="admin-save-pill-action">
-              {actions}
+              {saveBar}
             </div>
           </div>
         </div>

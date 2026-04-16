@@ -614,7 +614,7 @@ export default function EditContent() {
   }
 
   return (
-    <AdminLayout title="Content" actions={dirty ? (
+    <AdminLayout title="Content" saveBar={dirty ? (
       <button
         data-testid="button-save-content"
         onClick={() => save.mutate(local)}

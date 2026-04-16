@@ -162,7 +162,7 @@ export default function ChooseTheme() {
   ) : undefined;
 
   return (
-    <AdminLayout title="Theme" actions={saveBtn}>
+    <AdminLayout title="Theme" saveBar={saveBtn}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 

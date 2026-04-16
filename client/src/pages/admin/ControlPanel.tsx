@@ -497,7 +497,7 @@ export default function ControlPanel() {
   ) : undefined;
 
   return (
-    <AdminLayout title="Control Panel" actions={saveBtn}>
+    <AdminLayout title="Control Panel" saveBar={saveBtn}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ marginBottom: "20px" }}>
         <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
