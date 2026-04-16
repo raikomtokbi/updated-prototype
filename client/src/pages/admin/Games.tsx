@@ -222,7 +222,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
       </div>
       <div>
         <label style={labelStyle}>Description</label>
-        <textarea style={{ ...inputStyle, resize: "none", minHeight: "250px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
+        <textarea style={{ ...inputStyle, resize: "vertical", minHeight: "72px" }} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Short description..." />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <ImageUploadField
@@ -240,7 +240,16 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
           labelStyle={labelStyle}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.75rem" }}>
+        <div>
+          <label style={labelStyle}>Category</label>
+          <select style={inputStyle} value={form.category} onChange={(e) => set("category", e.target.value)}>
+            <option value="game_currency">Game Currency</option>
+            <option value="gift_card">Gift Card</option>
+            <option value="voucher">Voucher</option>
+            <option value="subscription">Subscription</option>
+          </select>
+        </div>
         <div>
           <label style={labelStyle}>Status</label>
           <select style={inputStyle} value={form.status} onChange={(e) => set("status", e.target.value)}>
