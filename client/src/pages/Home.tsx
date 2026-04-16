@@ -953,7 +953,7 @@ function Footer() {
                   transition: "color 0.15s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "hsl(var(--muted-foreground))"; }}
               >
                 <Mail size={12} />
                 {siteSettings.footer_support_email}
@@ -1026,7 +1026,7 @@ function Footer() {
                     href={item.href}
                     style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "hsl(var(--muted-foreground))"; }}
                   >
                     {item.label}
                   </Link>
@@ -1056,7 +1056,7 @@ function Footer() {
                     href={item.href}
                     style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "hsl(var(--muted-foreground))"; }}
                   >
                     {item.label}
                   </Link>
@@ -1117,17 +1117,17 @@ function Footer() {
               data-testid="link-footer-button"
               style={{
                 fontSize: "0.68rem",
-                color: "rgba(148,163,184,0.45)",
+                color: "hsl(var(--muted-foreground))",
                 textDecoration: "none",
                 transition: "color 0.15s",
                 cursor: "pointer",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = "rgba(148,163,184,0.75)";
+                e.currentTarget.style.color = "hsl(var(--primary))";
                 e.currentTarget.style.textDecoration = "underline";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = "rgba(148,163,184,0.45)";
+                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
                 e.currentTarget.style.textDecoration = "none";
               }}
             >
