@@ -72,7 +72,7 @@ function GameCard({ game }: { game: Game }) {
           </span>
         )}
       </div>
-      <h3 style={{ fontSize: "0.62rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.3rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <h3 style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.35rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center" }}>
         {game.name}
       </h3>
     </Link>
@@ -100,7 +100,7 @@ function ProductCard({ product }: { product: Product }) {
           {categoryLabel(product.category)}
         </span>
       </div>
-      <h3 style={{ fontSize: "0.62rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.3rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <h3 style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.35rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center" }}>
         {product.title}
       </h3>
     </Link>
