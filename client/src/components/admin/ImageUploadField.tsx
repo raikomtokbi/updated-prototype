@@ -36,13 +36,16 @@ export function ImageUploadField({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ratio, setRatio] = useState<AspectRatio>(externalRatio ?? "any");
+  const [dragOver, setDragOver] = useState(false);
 
   const { aspect, hint } = RATIO_META[ratio];
   const isWide = ratio === "rectangle";
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function processFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("Please drop an image file");
+      return;
+    }
     setUploading(true);
     setError(null);
     try {
@@ -63,6 +66,31 @@ export function ImageUploadField({
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  }
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   }
 
   async function handleDelete() {
@@ -102,6 +130,20 @@ export function ImageUploadField({
     border: "1px solid",
   };
 
+  const dragBorder = dragOver
+    ? "2px dashed hsl(var(--primary) / 0.7)"
+    : value
+      ? "1px solid hsl(var(--border))"
+      : "1px dashed hsl(220,15%,22%)";
+
+  const dragBg = dragOver ? "hsl(var(--primary) / 0.07)" : value ? "transparent" : "hsl(var(--background))";
+
+  const dropHandlers = {
+    onDragOver: handleDragOver,
+    onDragLeave: handleDragLeave,
+    onDrop: handleDrop,
+  };
+
   return (
     <div>
       <label style={labelStyle}>{label}</label>
@@ -131,20 +173,21 @@ export function ImageUploadField({
         </div>
       )}
 
-      {/* Wide (rectangle) ratio: stacked layout — preview full width, controls below */}
+      {/* Wide (rectangle) ratio: stacked layout */}
       {isWide ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {/* Full-width 16:5 preview */}
           <div
+            {...dropHandlers}
             style={{
               width: "100%",
               aspectRatio: aspect,
               borderRadius: "6px",
-              border: value ? "1px solid hsl(var(--border))" : "1px dashed hsl(220,15%,22%)",
-              background: value ? "transparent" : "hsl(var(--background))",
+              border: dragBorder,
+              background: dragBg,
               overflow: "hidden",
               position: "relative",
               cursor: !value ? "pointer" : "default",
+              transition: "border-color 0.15s, background 0.15s",
             }}
             onClick={!value ? () => fileRef.current?.click() : undefined}
           >
@@ -152,35 +195,25 @@ export function ImageUploadField({
               <img
                 src={value}
                 alt="preview"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center center",
-                  display: "block",
-                }}
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block" }}
               />
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                }}
-              >
-                <ImageIcon size={22} style={{ color: "hsl(var(--muted-foreground))" }} />
-                <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
-                  No image — click to upload
+              <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px", pointerEvents: "none" }}>
+                <ImageIcon size={22} style={{ color: dragOver ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
+                <span style={{ fontSize: "10px", color: dragOver ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
+                  {dragOver ? "Drop to upload" : "Click or drag & drop to upload"}
                 </span>
+              </div>
+            )}
+            {/* Drag overlay on top of existing image */}
+            {dragOver && value && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "6px", background: "hsl(var(--primary) / 0.25)", backdropFilter: "blur(2px)", pointerEvents: "none" }}>
+                <Upload size={24} style={{ color: "white" }} />
+                <span style={{ fontSize: "11px", color: "white", fontWeight: 600 }}>Drop to replace</span>
               </div>
             )}
           </div>
 
-          {/* URL input + buttons in a row */}
           <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
             <input
               style={{ ...inputStyle, flex: 1, minWidth: 0 }}
@@ -234,49 +267,41 @@ export function ImageUploadField({
       ) : (
         /* Square / free ratio: side-by-side layout */
         <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-          {/* Compact square preview on the left */}
+          {/* Compact square preview on the left — full drop zone */}
           <div
+            {...dropHandlers}
+            onClick={() => fileRef.current?.click()}
             style={{
               width: "120px",
               height: aspect ? undefined : "120px",
               aspectRatio: aspect,
               flexShrink: 0,
               borderRadius: "6px",
-              border: value ? "1px solid hsl(var(--border))" : "1px dashed hsl(220,15%,22%)",
-              background: value ? "transparent" : "hsl(var(--background))",
+              border: dragBorder,
+              background: dragBg,
               overflow: "hidden",
               position: "relative",
+              cursor: "pointer",
+              transition: "border-color 0.15s, background 0.15s",
             }}
           >
             {value ? (
               <img
                 src={value}
                 alt="preview"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  display: "block",
-                }}
+                style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
               />
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "4px",
-                  cursor: "pointer",
-                }}
-                onClick={() => fileRef.current?.click()}
-              >
-                <ImageIcon size={18} style={{ color: "hsl(var(--muted-foreground))" }} />
-                <span style={{ fontSize: "9px", color: "hsl(var(--muted-foreground))", letterSpacing: "0.04em", textAlign: "center" }}>
-                  No image
+              <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", pointerEvents: "none" }}>
+                <ImageIcon size={18} style={{ color: dragOver ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
+                <span style={{ fontSize: "9px", color: dragOver ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", letterSpacing: "0.04em", textAlign: "center" }}>
+                  {dragOver ? "Drop" : "No image"}
                 </span>
+              </div>
+            )}
+            {dragOver && value && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--primary) / 0.3)", backdropFilter: "blur(2px)", pointerEvents: "none" }}>
+                <Upload size={18} style={{ color: "white" }} />
               </div>
             )}
           </div>
