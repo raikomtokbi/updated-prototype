@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Palette, RotateCcw, Save } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
-import { applyThemeVars, PRESET_THEMES, type ThemePreset } from "@/lib/theme";
+import { applyThemeVars, hslToHex, hexToHsl, PRESET_THEMES, type ThemePreset } from "@/lib/theme";
 import { useNavGuard } from "@/hooks/useNavGuard";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
@@ -16,53 +16,60 @@ function ColorSwatch({ color, label }: { color: string; label: string }) {
   );
 }
 
-function HslPicker({
+function ColorPicker({
   label,
+  description,
   value,
   onChange,
 }: {
   label: string;
+  description: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (hsl: string) => void;
 }) {
-  const parts = value.split(" ");
-  const h = parseInt(parts[0] ?? "0", 10);
-  const s = parseInt((parts[1] ?? "0").replace("%", ""), 10);
-  const l = parseInt((parts[2] ?? "0").replace("%", ""), 10);
-
-  function setH(v: number) { onChange(`${v} ${s}% ${l}%`); }
-  function setS(v: number) { onChange(`${h} ${v}% ${l}%`); }
-  function setL(v: number) { onChange(`${h} ${s}% ${v}%`); }
-
-  const labelSt: React.CSSProperties = { fontSize: "10px", color: "hsl(220,10%,48%)", marginBottom: "2px" };
-  const inp: React.CSSProperties = {
-    width: "100%",
-    padding: "3px 6px",
-    background: "hsl(var(--card))",
-    border: "1px solid hsl(var(--border))",
-    borderRadius: "4px",
-    color: "hsl(var(--foreground))",
-    fontSize: "11px",
-    outline: "none",
-  };
+  const inputRef = useRef<HTMLInputElement>(null);
+  const hex = hslToHex(value);
 
   return (
-    <div>
-      <div style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,40%,72%)", marginBottom: "6px" }}>{label}</div>
-      <div style={{ display: "flex", gap: "6px", alignItems: "flex-end" }}>
-        <div style={{ width: "36px", height: "36px", borderRadius: "6px", flexShrink: 0, background: `hsl(${value})`, border: "1px solid hsl(var(--border))" }} />
-        <div style={{ flex: 1 }}>
-          <div style={labelSt}>Hue (0–360)</div>
-          <input style={inp} type="number" min={0} max={360} value={h} onChange={(e) => setH(Number(e.target.value))} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={labelSt}>Sat %</div>
-          <input style={inp} type="number" min={0} max={100} value={s} onChange={(e) => setS(Number(e.target.value))} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={labelSt}>Light %</div>
-          <input style={inp} type="number" min={0} max={100} value={l} onChange={(e) => setL(Number(e.target.value))} />
-        </div>
+    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <button
+        type="button"
+        title="Pick color"
+        onClick={() => inputRef.current?.click()}
+        style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "8px",
+          background: `hsl(${value})`,
+          border: "2px solid hsl(var(--border))",
+          cursor: "pointer",
+          flexShrink: 0,
+          position: "relative",
+          overflow: "hidden",
+          padding: 0,
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="color"
+          value={hex}
+          onChange={(e) => onChange(hexToHsl(e.target.value))}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0,
+            cursor: "pointer",
+            border: "none",
+            padding: 0,
+          }}
+        />
+      </button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "2px" }}>{label}</div>
+        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}>{description}</div>
+        <span style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))", background: "hsl(var(--muted))", padding: "1px 6px", borderRadius: "3px" }}>{hex}</span>
       </div>
     </div>
   );
@@ -79,16 +86,32 @@ export default function ChooseTheme() {
 
   const [customPrimary, setCustomPrimary] = useState("258 90% 66%");
   const [customAccent, setCustomAccent] = useState("196 100% 50%");
+  const [customBackground, setCustomBackground] = useState("220 20% 6%");
+  const [customSurface, setCustomSurface] = useState("220 20% 9%");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (settings.theme_custom_primary) setCustomPrimary(settings.theme_custom_primary);
     if (settings.theme_custom_accent) setCustomAccent(settings.theme_custom_accent);
-  }, [settings.theme_custom_primary, settings.theme_custom_accent]);
+    if (settings.theme_custom_background) setCustomBackground(settings.theme_custom_background);
+    if (settings.theme_custom_surface) setCustomSurface(settings.theme_custom_surface);
+  }, [
+    settings.theme_custom_primary,
+    settings.theme_custom_accent,
+    settings.theme_custom_background,
+    settings.theme_custom_surface,
+  ]);
 
   const savedPrimary = settings.theme_custom_primary ?? "258 90% 66%";
   const savedAccent = settings.theme_custom_accent ?? "196 100% 50%";
-  const customDirty = customPrimary !== savedPrimary || customAccent !== savedAccent;
+  const savedBackground = settings.theme_custom_background ?? "220 20% 6%";
+  const savedSurface = settings.theme_custom_surface ?? "220 20% 9%";
+
+  const customDirty =
+    customPrimary !== savedPrimary ||
+    customAccent !== savedAccent ||
+    customBackground !== savedBackground ||
+    customSurface !== savedSurface;
 
   const { leaveDialog, cancelLeave, doLeave } = useNavGuard(customDirty);
 
@@ -96,37 +119,69 @@ export default function ChooseTheme() {
     mutationFn: (data: Record<string, string>) => adminApi.put("/settings", data),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
-      applyThemeVars(vars.active_theme, vars.theme_custom_primary, vars.theme_custom_accent);
+      applyThemeVars(
+        vars.active_theme,
+        vars.theme_custom_primary,
+        vars.theme_custom_accent,
+        vars.theme_custom_background,
+        vars.theme_custom_surface,
+      );
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
   });
 
+  function buildCustomPayload() {
+    return {
+      active_theme: "custom",
+      theme_custom_primary: customPrimary,
+      theme_custom_accent: customAccent,
+      theme_custom_background: customBackground,
+      theme_custom_surface: customSurface,
+    };
+  }
+
   function applyPreset(id: string) {
-    saveMut.mutate({ active_theme: id, theme_custom_primary: customPrimary, theme_custom_accent: customAccent });
+    saveMut.mutate({
+      active_theme: id,
+      theme_custom_primary: customPrimary,
+      theme_custom_accent: customAccent,
+      theme_custom_background: customBackground,
+      theme_custom_surface: customSurface,
+    });
   }
 
   function applyCustom() {
-    saveMut.mutate({ active_theme: "custom", theme_custom_primary: customPrimary, theme_custom_accent: customAccent });
+    saveMut.mutate(buildCustomPayload());
   }
 
   function resetToDefault() {
     const def = PRESET_THEMES.find((t) => t.id === "dark-purple")!;
+    const bg = def.bg;
+    const card = def.card ?? "220 20% 9%";
     setCustomPrimary(def.primary);
     setCustomAccent(def.accent);
-    saveMut.mutate({ active_theme: "dark-purple", theme_custom_primary: def.primary, theme_custom_accent: def.accent });
+    setCustomBackground(bg);
+    setCustomSurface(card);
+    saveMut.mutate({
+      active_theme: "dark-purple",
+      theme_custom_primary: def.primary,
+      theme_custom_accent: def.accent,
+      theme_custom_background: bg,
+      theme_custom_surface: card,
+    });
   }
 
   function leaveAndDiscard() {
     setCustomPrimary(savedPrimary);
     setCustomAccent(savedAccent);
+    setCustomBackground(savedBackground);
+    setCustomSurface(savedSurface);
     doLeave();
   }
 
   function leaveAndSave() {
-    saveMut.mutate({ active_theme: "custom", theme_custom_primary: customPrimary, theme_custom_accent: customAccent }, {
-      onSuccess: () => doLeave(),
-    });
+    saveMut.mutate(buildCustomPayload(), { onSuccess: () => doLeave() });
   }
 
   const card: React.CSSProperties = {
@@ -208,7 +263,6 @@ export default function ChooseTheme() {
                       <Check size={10} style={{ color: "white" }} />
                     </div>
                   )}
-                  {/* Mini preview */}
                   <div style={{ borderRadius: "5px", height: "60px", background: `hsl(${theme.bg})`, marginBottom: "8px", overflow: "hidden", position: "relative", border: theme.isLight ? "1px solid hsl(220,13%,87%)" : "none" }}>
                     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "2px", background: `hsl(${theme.primary})` }} />
                     <div style={{ display: "flex", gap: "5px", padding: "8px", alignItems: "center" }}>
@@ -255,13 +309,51 @@ export default function ChooseTheme() {
               </span>
             )}
           </div>
-          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: 0 }}>
-              Tune the hue, saturation, and lightness to create a unique look. Changes apply site-wide instantly.
+          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", margin: "0 0 10px" }}>
+              Click a color swatch to open the color picker. Changes apply site-wide to both the storefront and admin panel.
             </p>
-            <HslPicker label="Primary Color" value={customPrimary} onChange={setCustomPrimary} />
-            <HslPicker label="Accent Color" value={customAccent} onChange={setCustomAccent} />
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", paddingTop: "4px" }}>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
+              {/* Primary */}
+              <div style={{ padding: "14px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                <ColorPicker
+                  label="Primary"
+                  description="Save / Edit buttons, active nav highlights, links"
+                  value={customPrimary}
+                  onChange={setCustomPrimary}
+                />
+              </div>
+              {/* Secondary / Accent */}
+              <div style={{ padding: "14px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                <ColorPicker
+                  label="Secondary / Accent"
+                  description="Account button, User ID badge, secondary accents"
+                  value={customAccent}
+                  onChange={setCustomAccent}
+                />
+              </div>
+              {/* Background */}
+              <div style={{ padding: "14px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                <ColorPicker
+                  label="Background"
+                  description="Main page background — the largest visible area"
+                  value={customBackground}
+                  onChange={setCustomBackground}
+                />
+              </div>
+              {/* Surface */}
+              <div style={{ padding: "14px 0" }}>
+                <ColorPicker
+                  label="Surface"
+                  description="Cards, panels, and elevated container backgrounds"
+                  value={customSurface}
+                  onChange={setCustomSurface}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", paddingTop: "10px" }}>
               <button
                 onClick={applyCustom}
                 disabled={saveMut.isPending}

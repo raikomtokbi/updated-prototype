@@ -238,9 +238,17 @@ export default function App() {
         siteSettings.active_theme,
         siteSettings.theme_custom_primary,
         siteSettings.theme_custom_accent,
+        siteSettings.theme_custom_background,
+        siteSettings.theme_custom_surface,
       );
     }
-  }, [siteSettings?.active_theme, siteSettings?.theme_custom_primary, siteSettings?.theme_custom_accent]);
+  }, [
+    siteSettings?.active_theme,
+    siteSettings?.theme_custom_primary,
+    siteSettings?.theme_custom_accent,
+    siteSettings?.theme_custom_background,
+    siteSettings?.theme_custom_surface,
+  ]);
 
   if (isAdmin) {
     return <AdminRoutes />;
