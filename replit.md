@@ -6,7 +6,7 @@ A full-stack web CMS and e-commerce platform for selling digital products (game 
 
 - **Frontend**: React 19, Tailwind CSS 4, TanStack Query, Wouter (routing), Zustand (state), Radix UI / shadcn
 - **Backend**: Node.js + Express 5
-- **Database**: MySQL / MariaDB via `mysql2` + Drizzle ORM (mysql-core) for production (cPanel). Dev environment auto-detects `postgres://` URL and falls back to `pg` driver so Replit's built-in PostgreSQL still works during development.
+- **Database**: PostgreSQL via `pg` + Drizzle ORM (`drizzle-orm/node-postgres`) — uses Replit's built-in PostgreSQL
 - **Build**: Vite (frontend), tsx (dev server), esbuild (production build via `npm run build`)
 
 ## Project Structure
@@ -38,7 +38,7 @@ server/         Express backend
 shared/
   schema.ts     Drizzle ORM schema (PostgreSQL / pg-core)
 migrations/
-  mysql-schema.sql  Legacy DDL reference only
+  (managed by drizzle-kit push)
 ```
 
 ## Key Scripts
@@ -57,7 +57,7 @@ The `DATABASE_URL` environment variable is automatically set by Replit's built-i
 
 - Session-based auth via Passport.js + express-session
 - Routes protected via `requireAdmin` middleware (roles: `super_admin`, `admin`, `staff`)
-- Default admin account: username `admin`, password `admin123` (change after first login)
+- Default admin account: username `admin`, password `admin123456` (change after first login)
 
 ## Multi-Gateway Payment System
 
