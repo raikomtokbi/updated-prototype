@@ -390,3 +390,10 @@ textarea {
   }
 }
 
+
+/* Admin save pill — force pill border radius on action buttons */
+.admin-save-pill-action button {
+  border-radius: 999px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}

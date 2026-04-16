@@ -961,36 +961,40 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
         </main>
       </div>
 
-      {/* ── Fixed bottom save bar ── */}
+      {/* ── Fixed bottom save pill ── */}
       {actions && (
         <div
           style={{
             position: "fixed",
-            bottom: 0,
-            left: 0,
+            bottom: 20,
+            left: isMobile ? 0 : "236px",
             right: 0,
             zIndex: 200,
+            display: "flex",
+            justifyContent: "center",
+            pointerEvents: "none",
           }}
         >
           <div
             style={{
-              marginLeft: isMobile ? 0 : "236px",
-              padding: "10px 20px",
-              background: "hsl(var(--card))",
-              borderTop: "1px solid hsl(220,15%,18%)",
-              boxShadow: "0 -4px 24px rgba(0,0,0,0.35)",
-              display: "flex",
+              pointerEvents: "auto",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "space-between",
               gap: "10px",
-              flexWrap: "wrap",
+              padding: "8px 10px 8px 14px",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(220,15%,20%)",
+              borderRadius: "999px",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.55)",
             }}
           >
-            <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
               <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "hsl(38,92%,50%)", flexShrink: 0 }} />
-              You have unsaved changes
+              Unsaved changes
             </span>
-            {actions}
+            <div className="admin-save-pill-action">
+              {actions}
+            </div>
           </div>
         </div>
       )}

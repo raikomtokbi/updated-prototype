@@ -9,36 +9,37 @@ interface SaveBarProps {
   sidebarWidth?: number;
 }
 
-export function SaveBar({ show, saving, saved, onSave, label = "You have unsaved changes", sidebarWidth = 236 }: SaveBarProps) {
+export function SaveBar({ show, saving, saved, onSave, label = "Unsaved changes", sidebarWidth = 236 }: SaveBarProps) {
   return (
     <div
       style={{
         position: "fixed",
-        bottom: 0,
-        left: 0,
+        bottom: 20,
+        left: sidebarWidth,
         right: 0,
         zIndex: 200,
-        pointerEvents: show ? "auto" : "none",
+        pointerEvents: "none",
+        display: "flex",
+        justifyContent: "center",
         transition: "transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
-        transform: show ? "translateY(0)" : "translateY(110%)",
+        transform: show ? "translateY(0)" : "translateY(calc(100% + 30px))",
         opacity: show ? 1 : 0,
       }}
     >
       <div
         style={{
-          marginLeft: `${sidebarWidth}px`,
-          padding: "10px 20px",
-          background: "hsl(var(--card))",
-          borderTop: "1px solid hsl(220,15%,18%)",
-          boxShadow: "0 -4px 24px rgba(0,0,0,0.4)",
-          display: "flex",
+          pointerEvents: show ? "auto" : "none",
+          display: "inline-flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px",
-          flexWrap: "wrap",
+          gap: "10px",
+          padding: "8px 10px 8px 14px",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(220,15%,20%)",
+          borderRadius: "999px",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.55)",
         }}
       >
-        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px" }}>
+        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
           <span
             style={{
               display: "inline-block",
@@ -49,7 +50,7 @@ export function SaveBar({ show, saving, saved, onSave, label = "You have unsaved
               flexShrink: 0,
             }}
           />
-          {saved ? "Changes saved!" : label}
+          {saved ? "Saved!" : label}
         </span>
 
         <button
@@ -59,9 +60,9 @@ export function SaveBar({ show, saving, saved, onSave, label = "You have unsaved
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "6px",
-            padding: "7px 16px",
-            borderRadius: "6px",
+            gap: "5px",
+            padding: "5px 12px",
+            borderRadius: "999px",
             background: saved ? "hsl(142,71%,38%)" : "linear-gradient(135deg,#7c3aed,#6d28d9)",
             color: "white",
             fontSize: "12px",
@@ -74,10 +75,10 @@ export function SaveBar({ show, saving, saved, onSave, label = "You have unsaved
           }}
         >
           {saving
-            ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
-            : <Save size={12} />
+            ? <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />
+            : <Save size={11} />
           }
-          {saved ? "Saved!" : "Save Changes"}
+          {saved ? "Saved!" : "Save"}
         </button>
       </div>
     </div>
