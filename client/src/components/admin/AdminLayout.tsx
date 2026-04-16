@@ -895,13 +895,14 @@ export default function AdminLayout({ children, title, actions, saveBar }: Admin
       <div
         style={{
           marginLeft: isMobile ? 0 : "236px",
-          flex: 1,
+          width: isMobile ? "100%" : "calc(100% - 236px)",
           display: "flex",
           flexDirection: "column",
           height: "100vh",
           borderLeft: isMobile ? "none" : "1px solid hsl(220, 15%, 13%)",
           minWidth: 0,
-          overflow: "visible",
+          overflowX: "clip",
+          overflowY: "visible",
         }}
       >
         {/* ── Mobile header ── */}
