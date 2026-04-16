@@ -1088,7 +1088,7 @@ function Footer() {
                     href={item.href}
                     style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "hsl(var(--primary))"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(148,163,184,0.6)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "hsl(var(--muted-foreground))"; }}
                   >
                     {item.label}
                   </Link>
