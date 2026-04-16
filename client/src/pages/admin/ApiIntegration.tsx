@@ -1415,6 +1415,98 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
   );
 }
 
+// ─── Google Analytics Modal ───────────────────────────────────────────────────
+function GoogleAnalyticsModal({ onClose }: { onClose: () => void }) {
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const { data: settings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/admin/settings"],
+    queryFn: () => adminApi.get("/settings"),
+  });
+
+  const measurementId = settings?.ga_measurement_id ?? "";
+  const displayId = draft !== null ? draft : measurementId;
+  const isConnected = !!measurementId.trim();
+  const isDirty = draft !== null && draft.trim() !== measurementId.trim();
+
+  const saveMut = useMutation({
+    mutationFn: () =>
+      adminApi.put("/settings", { ga_measurement_id: (draft ?? "").trim() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
+      setDraft(null);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+  });
+
+  return (
+    <Modal title="Google Analytics 4" onClose={onClose}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: 0 }}>
+          Enter your GA4 Measurement ID to enable Google Analytics tracking on your storefront.
+          Page views are sent automatically on every navigation.
+        </p>
+
+        <div>
+          <label style={labelStyle}>Measurement ID</label>
+          <input
+            value={displayId}
+            onChange={e => setDraft(e.target.value)}
+            placeholder="G-XXXXXXXXXX"
+            spellCheck={false}
+            style={{ ...inputStyle, fontFamily: "monospace" }}
+            data-testid="input-ga-measurement-id"
+          />
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0", lineHeight: 1.5 }}>
+            Find your Measurement ID in Google Analytics → Admin → Data Streams → your stream → Measurement ID.
+          </p>
+        </div>
+
+        {isConnected && (
+          <div style={{
+            fontSize: "11px", color: "hsl(var(--muted-foreground))",
+            padding: "10px 12px", borderRadius: "6px",
+            background: "hsl(142,71%,45% / 0.07)",
+            border: "1px solid hsl(142,71%,45% / 0.2)",
+            lineHeight: 1.65,
+          }}>
+            <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600 }}>Connected:</span>{" "}
+            GA4 tracking is active on your storefront. Real-time data appears in GA immediately;
+            historical reports take 24–48 hours to populate.{" "}
+            <a
+              href={`https://analytics.google.com/analytics/web/#/p${measurementId.replace("G-", "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "hsl(var(--primary))" }}
+            >
+              Open GA Dashboard →
+            </a>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
+          {saved && <span style={{ fontSize: "11px", color: "hsl(142,71%,48%)", alignSelf: "center" }}>Saved</span>}
+          <button onClick={onClose} style={{ ...btnPrimary, background: "transparent", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>
+            Cancel
+          </button>
+          <button
+            disabled={!isDirty || saveMut.isPending}
+            onClick={() => saveMut.mutate()}
+            style={{ ...btnPrimary, opacity: !isDirty || saveMut.isPending ? 0.6 : 1, cursor: !isDirty || saveMut.isPending ? "not-allowed" : "pointer" }}
+            data-testid="button-save-ga-id"
+          >
+            {saveMut.isPending ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 function SocialAuthModal({ plugins, onClose }: { plugins: Plugin[]; onClose: () => void }) {
   return (
     <Modal title="Social Login Configuration" onClose={onClose}>
@@ -1468,6 +1560,7 @@ export default function ApiIntegration() {
   const [smileOneOpen, setSmileOneOpen] = useState(false);
   const [lioGamesOpen, setLioGamesOpen] = useState(false);
   const [socialAuthOpen, setSocialAuthOpen] = useState(false);
+  const [gaOpen, setGaOpen] = useState(false);
 
   const { data: plugins = [] } = useQuery<Plugin[]>({
     queryKey: ["/api/admin/plugins"],
@@ -1487,6 +1580,11 @@ export default function ApiIntegration() {
   const { data: lioGamesConfig } = useQuery<LioGamesConfig | null>({
     queryKey: ["/api/admin/liogames/config"],
     queryFn: () => adminApi.get("/liogames/config"),
+  });
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/admin/settings"],
+    queryFn: () => adminApi.get("/settings"),
   });
 
   useEffect(() => {
@@ -1546,6 +1644,7 @@ export default function ApiIntegration() {
   const busanConfigured = Boolean(busanConfig?.apiToken);
   const smileOneConfigured = Boolean(smileOneConfig?.apiKey);
   const lioGamesConfigured = Boolean(lioGamesConfig?.memberCode);
+  const gaConfigured = Boolean(siteSettings?.ga_measurement_id?.trim());
 
   const socialAuthConfigured = (() => {
     const slugs = ["social-auth-google", "social-auth-facebook", "social-auth-discord"];
@@ -1629,6 +1728,19 @@ export default function ApiIntegration() {
             </p>
           </div>
           <div style={{ padding: "0 20px" }}>
+            {/* Google Analytics row */}
+            <div id="google-analytics">
+              {renderRow(
+                <SiGoogle size={14} />,
+                "Google Analytics 4",
+                "Enter your GA4 Measurement ID to track storefront page views",
+                gaConfigured,
+                () => setGaOpen(true),
+                "button-configure-ga",
+                false,
+              )}
+            </div>
+
             {/* Social Login row — toggles live inside the modal per-provider */}
             <div id="social-auth-google">
               {renderRow(
@@ -1731,6 +1843,7 @@ export default function ApiIntegration() {
       {smileOneOpen && <SmileOneModal onClose={() => setSmileOneOpen(false)} />}
       {lioGamesOpen && <LioGamesModal onClose={() => setLioGamesOpen(false)} />}
       {socialAuthOpen && <SocialAuthModal plugins={plugins} onClose={() => setSocialAuthOpen(false)} />}
+      {gaOpen && <GoogleAnalyticsModal onClose={() => setGaOpen(false)} />}
     </AdminLayout>
   );
 }

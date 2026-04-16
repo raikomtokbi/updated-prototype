@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import {
@@ -7,8 +7,7 @@ import {
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Users, Eye, Clock, TrendingDown, Wifi, Info, ExternalLink, CheckCircle, AlertCircle, Loader2, Save } from "lucide-react";
-import { SiGoogle } from "react-icons/si";
+import { Users, Eye, Clock, TrendingDown, Wifi, Info } from "lucide-react";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
@@ -269,138 +268,6 @@ function fmtTime(sec: number) {
   return `${Math.floor(sec / 60)}m ${sec % 60}s`;
 }
 
-// ─── Google Analytics Panel ───────────────────────────────────────────────────
-function GoogleAnalyticsPanel() {
-  const qc = useQueryClient();
-  const [draft, setDraft] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
-
-  const { data: settings } = useQuery<Record<string, string>>({
-    queryKey: ["/api/admin/settings"],
-    queryFn: () => adminApi.get("/settings"),
-  });
-
-  const measurementId = settings?.ga_measurement_id ?? "";
-  const displayId = draft !== null ? draft : measurementId;
-  const isConnected = !!measurementId.trim();
-
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      adminApi.put("/settings", { ga_measurement_id: (draft ?? "").trim() }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
-      qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
-      setDraft(null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    },
-  });
-
-  const isDirty = draft !== null && draft.trim() !== measurementId.trim();
-
-  return (
-    <div style={{
-      ...card,
-      display: "flex",
-      flexDirection: "column",
-      gap: 12,
-      marginBottom: 16,
-      border: isConnected ? "1px solid hsl(142,71%,45% / 0.3)" : "1px solid hsl(220,15%,13%)",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{
-          width: 34, height: 34, borderRadius: "8px", flexShrink: 0,
-          background: "hsl(0,84%,60% / 0.12)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "hsl(0,84%,60%)",
-        }}>
-          <SiGoogle size={16} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Google Analytics 4</div>
-          <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: 1 }}>
-            Enter your Measurement ID to enable GA4 tracking on your storefront
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "11px", flexShrink: 0 }}>
-          {isConnected
-            ? <><CheckCircle size={13} style={{ color: "hsl(142,71%,45%)" }} /><span style={{ color: "hsl(142,71%,45%)" }}>Connected</span></>
-            : <><AlertCircle size={13} style={{ color: "hsl(var(--muted-foreground))" }} /><span style={{ color: "hsl(var(--muted-foreground))" }}>Not configured</span></>}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <input
-          value={displayId}
-          onChange={e => setDraft(e.target.value)}
-          placeholder="G-XXXXXXXXXX"
-          spellCheck={false}
-          style={{
-            flex: 1, minWidth: 160, padding: "7px 10px",
-            background: "hsl(var(--background))",
-            border: `1px solid ${isDirty ? "hsl(var(--primary) / 0.5)" : "hsl(var(--border))"}`,
-            borderRadius: "6px", color: "hsl(var(--foreground))",
-            fontSize: "13px", outline: "none", fontFamily: "monospace",
-          }}
-          data-testid="input-ga-measurement-id"
-        />
-        <button
-          disabled={!isDirty || saveMutation.isPending}
-          onClick={() => saveMutation.mutate()}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "7px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
-            cursor: !isDirty || saveMutation.isPending ? "not-allowed" : "pointer",
-            background: "hsl(var(--primary))", color: "white", border: "none",
-            opacity: !isDirty || saveMutation.isPending ? 0.6 : 1,
-            transition: "opacity 0.15s",
-          }}
-          data-testid="button-save-ga-id"
-        >
-          {saveMutation.isPending
-            ? <><Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Saving...</>
-            : saved
-            ? <><CheckCircle size={12} /> Saved</>
-            : <><Save size={12} /> Save</>}
-        </button>
-        {isConnected && (
-          <a
-            href={`https://analytics.google.com/analytics/web/#/p${measurementId.replace("G-", "")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              padding: "7px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
-              color: "hsl(var(--primary))", textDecoration: "none",
-              border: "1px solid hsl(var(--primary) / 0.3)",
-              background: "hsl(var(--primary) / 0.08)",
-            }}
-          >
-            Open GA Dashboard <ExternalLink size={11} />
-          </a>
-        )}
-      </div>
-
-      {isConnected && (
-        <div style={{
-          fontSize: "11px", color: "hsl(var(--muted-foreground))",
-          padding: "8px 10px", borderRadius: "6px",
-          background: "hsl(var(--primary) / 0.05)",
-          border: "1px solid hsl(var(--primary) / 0.1)",
-          lineHeight: 1.6,
-        }}>
-          GA4 tracking is active. Page views are sent to Google Analytics on every storefront navigation.
-          Real-time visitor data appears in your{" "}
-          <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--primary))" }}>
-            GA dashboard
-          </a>{" "}
-          immediately. Historical reports take 24–48 hours to populate.
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function Analytics() {
   const [range, setRange] = useState("30days");
@@ -430,9 +297,6 @@ export default function Analytics() {
 
   return (
     <AdminLayout title="Analytics">
-      {/* Google Analytics Settings */}
-      <GoogleAnalyticsPanel />
-
       {/* Range selector + live indicator */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ display: "flex", gap: 4 }}>
