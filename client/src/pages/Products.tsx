@@ -157,13 +157,11 @@ export default function Products() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
-  // Extract search query parameter from URL on mount
+  // Sync search and category from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.split("?")[1] || "");
-    const searchParam = params.get("search");
-    if (searchParam) {
-      setSearch(decodeURIComponent(searchParam));
-    }
+    setSearch(decodeURIComponent(params.get("search") ?? ""));
+    setCategory(params.get("category") ?? "all");
   }, [location]);
 
   const { data: games = [], isLoading: gamesLoading } = useQuery<Game[]>({

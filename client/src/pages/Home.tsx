@@ -850,7 +850,7 @@ function Footer() {
 
   const MARKETPLACE = [
     { label: "All Products", href: "/products" },
-    { label: "Games", href: "/products?category=game_currency" },
+    { label: "Games", href: "/products?category=games" },
     { label: "Vouchers", href: "/products?category=voucher" },
     { label: "Gift Cards", href: "/products?category=gift_card" },
     { label: "Subscriptions", href: "/products?category=subscription" },
