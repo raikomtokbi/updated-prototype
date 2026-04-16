@@ -981,7 +981,7 @@ export class DatabaseStorage implements IStorage {
     // Truncate to the appropriate bucket in local time (for chronological ORDER BY).
     const truncTs =
       groupBy === "hour" ? sql`date_trunc('hour', ${localTs})`
-      : groupBy === "day" ? localTs
+      : groupBy === "day" ? sql`date_trunc('day', ${localTs})`
       : groupBy === "week" ? sql`date_trunc('week', ${localTs})`
       : sql`date_trunc('month', ${localTs})`;
 
