@@ -1147,7 +1147,9 @@ function MaintenancePage() {
   return (
     <div
       style={{
-        minHeight: "calc(100vh - 64px)",
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

@@ -339,6 +339,11 @@ function timeAgo(dateStr: string | Date | null | undefined) {
 function NotificationBell() {
   const qc = useQueryClient();
   const { open, setOpen, ref } = useDropdown();
+  const [confirmingClear, setConfirmingClear] = useState(false);
+
+  useEffect(() => {
+    if (!open) setConfirmingClear(false);
+  }, [open]);
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/admin/notifications"],
@@ -568,31 +573,51 @@ function NotificationBell() {
           </div>
 
           <div style={{ padding: "10px 16px", borderTop: "1px solid hsl(220, 15%, 14%)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
-              {notifications.length === 0 ? "No notifications" : `Showing ${notifications.length} notifications`}
-            </span>
-            {notifications.length > 0 && (
-              <button
-                data-testid="button-clear-notifications"
-                onClick={() => { if (confirm("Clear all notifications?")) clearAll.mutate(); }}
-                disabled={clearAll.isPending}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "11px",
-                  color: "hsl(0, 72%, 55%)",
-                  background: "rgba(239,68,68,0.08)",
-                  border: "1px solid rgba(239,68,68,0.2)",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  padding: "3px 8px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <Trash2 size={10} />
-                {clearAll.isPending ? "Clearing..." : "Clear all"}
-              </button>
+            {confirmingClear ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "100%" }}>
+                <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", flex: 1 }}>Remove all notifications?</span>
+                <button
+                  onClick={() => { clearAll.mutate(); setConfirmingClear(false); }}
+                  disabled={clearAll.isPending}
+                  style={{ fontSize: "11px", color: "hsl(0, 72%, 55%)", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "4px", cursor: "pointer", padding: "3px 10px", whiteSpace: "nowrap", fontWeight: 600 }}
+                >
+                  {clearAll.isPending ? "Clearing..." : "Yes, clear"}
+                </button>
+                <button
+                  onClick={() => setConfirmingClear(false)}
+                  style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", cursor: "pointer", padding: "3px 10px", whiteSpace: "nowrap" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <>
+                <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>
+                  {notifications.length === 0 ? "No notifications" : `Showing ${notifications.length} notifications`}
+                </span>
+                {notifications.length > 0 && (
+                  <button
+                    data-testid="button-clear-notifications"
+                    onClick={() => setConfirmingClear(true)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "11px",
+                      color: "hsl(0, 72%, 55%)",
+                      background: "rgba(239,68,68,0.08)",
+                      border: "1px solid rgba(239,68,68,0.2)",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      padding: "3px 8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Trash2 size={10} />
+                    Clear all
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
