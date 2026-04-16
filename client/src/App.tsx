@@ -232,6 +232,33 @@ export default function App() {
 
   const maintenanceMode = siteSettings?.maintenance_mode === "true";
 
+  // ── Inject Google Analytics 4 ─────────────────────────────────────────────
+  useEffect(() => {
+    const measurementId = siteSettings?.ga_measurement_id?.trim();
+    if (!measurementId) return;
+    if (document.getElementById("ga-script")) return; // already injected
+    const s = document.createElement("script");
+    s.id = "ga-script";
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+    s.async = true;
+    document.head.appendChild(s);
+    const inline = document.createElement("script");
+    inline.id = "ga-inline";
+    inline.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${measurementId}',{send_page_view:false});`;
+    document.head.appendChild(inline);
+  }, [siteSettings?.ga_measurement_id]);
+
+  // ── Fire GA page_view on every navigation ─────────────────────────────────
+  useEffect(() => {
+    const measurementId = siteSettings?.ga_measurement_id?.trim();
+    if (!measurementId) return;
+    if (typeof (window as any).gtag !== "function") return;
+    (window as any).gtag("event", "page_view", {
+      page_path: location,
+      send_to: measurementId,
+    });
+  }, [location, siteSettings?.ga_measurement_id]);
+
   useEffect(() => {
     if (siteSettings) {
       applyThemeVars(
