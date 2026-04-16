@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plug, CheckCircle, XCircle, Settings, Zap,
-  RefreshCw, Trash2, Plus, Package, Save, Smile,
+  RefreshCw, Trash2, Plus, Package, Smile,
   Wifi, Loader2, Link2, ArrowRight, ShieldCheck, Copy, Check,
 } from "lucide-react";
 import { SiGoogle, SiFacebook, SiDiscord } from "react-icons/si";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, Modal } from "@/components/admin/shared";
+import { SaveBar } from "@/components/admin/SaveBar";
 import { useAuthStore } from "@/lib/store/authstore";
 import type { Plugin, Service, BusanMapping, Game, SmileOneConfig, SmileOneMapping, LioGamesConfig, LioGamesMapping } from "@shared/schema";
 
@@ -249,22 +250,13 @@ function BusanConfigTab() {
               {CURRENCIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            {isDirty && (
-              <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
-                style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
-                data-testid="button-save-busan-config">
-                <Save size={13} />
-                {saveMut.isPending ? "Saving..." : "Save Configuration"}
-              </button>
-            )}
-            {saved && <span style={{ fontSize: "12px", color: "hsl(142,71%,52%)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <CheckCircle size={13} /> Configuration saved
-            </span>}
-            {!isDirty && !saved && (
-              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>
-            )}
-          </div>
+          <SaveBar
+            show={isDirty || saved}
+            saving={saveMut.isPending}
+            saved={saved}
+            onSave={() => saveMut.mutate()}
+            label="Busan API configuration has unsaved changes"
+          />
         </div>
       </div>
 
@@ -594,6 +586,7 @@ function SmileOneConfigTab() {
   const [testStatus, setTestStatus] = useState<null | { ok: boolean; message: string; balance?: unknown }>(null);
   const [testing, setTesting] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (config) {
@@ -620,7 +613,11 @@ function SmileOneConfigTab() {
 
   const saveMutation = useMutation({
     mutationFn: () => adminApi.post("/smileone/config", form),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/smileone/config"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/smileone/config"] });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
   });
 
   async function testConnection() {
@@ -704,17 +701,14 @@ function SmileOneConfigTab() {
               {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
               Test Connection
             </button>
-            {isDirty && (
-              <button data-testid="button-save-smileone-config" style={{ ...btnPrimary, opacity: saveMutation.isPending ? 0.7 : 1 }}
-                onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-                {saveMutation.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
-                Save Config
-              </button>
-            )}
-            {!isDirty && (
-              <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>
-            )}
           </div>
+          <SaveBar
+            show={isDirty || saved}
+            saving={saveMutation.isPending}
+            saved={saved}
+            onSave={() => saveMutation.mutate()}
+            label="Smile.one configuration has unsaved changes"
+          />
         </div>
       </div>
 
@@ -1091,16 +1085,14 @@ function LioGamesConfigTab() {
               {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
               Test Connection
             </button>
-            {isDirty && (
-              <button data-testid="button-save-liogames-config"
-                style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
-                onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
-                {saveMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
-                {saved ? "Saved!" : "Save Config"}
-              </button>
-            )}
-            {!isDirty && <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>No unsaved changes</span>}
           </div>
+          <SaveBar
+            show={isDirty || saved}
+            saving={saveMut.isPending}
+            saved={saved}
+            onSave={() => saveMut.mutate()}
+            label="LioGames configuration has unsaved changes"
+          />
         </div>
       </div>
     </div>

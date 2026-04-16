@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Wifi, Save, Trash2, RefreshCw, CheckCircle,
+  Wifi, Trash2, RefreshCw, CheckCircle,
   XCircle, Loader2, Plus, Link2, Copy, Check,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
 import { card, btnPrimary, inputStyle, selectStyle } from "@/components/admin/shared";
+import { SaveBar } from "@/components/admin/SaveBar";
 import { useAuthStore } from "@/lib/store/authstore";
 import type { LioGamesConfig, LioGamesMapping } from "@shared/schema";
 
@@ -173,18 +174,14 @@ function ConfigTab() {
             {testing ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Wifi size={13} />}
             Test Connection
           </button>
-          {isDirty && (
-            <button
-              data-testid="button-save-liogames-config"
-              style={{ ...btnPrimary, display: "inline-flex", alignItems: "center", gap: "6px", opacity: saveMut.isPending ? 0.7 : 1 }}
-              onClick={() => saveMut.mutate()}
-              disabled={saveMut.isPending}
-            >
-              {saveMut.isPending ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={13} />}
-              {saved ? "Saved!" : "Save Config"}
-            </button>
-          )}
         </div>
+        <SaveBar
+          show={isDirty || saved}
+          saving={saveMut.isPending}
+          saved={saved}
+          onSave={() => saveMut.mutate()}
+          label="LioGames configuration has unsaved changes"
+        />
       </div>
 
       <LiogamesApiDocsPanel />

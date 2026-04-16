@@ -956,16 +956,44 @@ export default function AdminLayout({ children, title, actions }: AdminLayoutPro
           </header>
         )}
 
-        <main style={{ flex: 1, padding: isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92 }}>
-          {/* Action buttons strip — mobile and desktop */}
-          {actions && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
-              {actions}
-            </div>
-          )}
+        <main style={{ flex: 1, padding: isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92, paddingBottom: actions ? "64px" : undefined }}>
           {children}
         </main>
       </div>
+
+      {/* ── Fixed bottom save bar ── */}
+      {actions && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 200,
+          }}
+        >
+          <div
+            style={{
+              marginLeft: isMobile ? 0 : "236px",
+              padding: "10px 20px",
+              background: "hsl(var(--card))",
+              borderTop: "1px solid hsl(220,15%,18%)",
+              boxShadow: "0 -4px 24px rgba(0,0,0,0.35)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "hsl(38,92%,50%)", flexShrink: 0 }} />
+              You have unsaved changes
+            </span>
+            {actions}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
