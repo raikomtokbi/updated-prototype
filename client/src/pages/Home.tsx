@@ -306,7 +306,9 @@ function FeaturesStrip() {
         background: "hsl(var(--card))",
         border: "1px solid hsl(var(--border))",
         borderRadius: "16px",
-        margin: "12px 10px 0",
+        width: "calc(100% - 20px)",
+        maxWidth: "1320px",
+        margin: "12px auto 0",
         padding: "1.25rem 1.5rem",
         overflow: "hidden",
       }}

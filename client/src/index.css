@@ -317,7 +317,9 @@ textarea {
   overflow: hidden;
   aspect-ratio: 3 / 2;
   border-radius: 16px;
-  margin: 8px 10px 0;
+  width: calc(100% - 20px);
+  max-width: 1320px;
+  margin: 8px auto 0;
 }
 
 @media (min-width: 768px) {
