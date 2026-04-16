@@ -873,18 +873,17 @@ export default function AdminLayout({ children, title, actions, saveBar }: Admin
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          overflowY: "auto",
-          minHeight: "100vh",
+          height: "100vh",
           borderLeft: isMobile ? "none" : "1px solid hsl(220, 15%, 13%)",
           minWidth: 0,
+          overflow: "visible",
         }}
       >
         {/* ── Mobile header ── */}
         {isMobile ? (
           <header
             style={{
-              position: "sticky",
-              top: 0,
+              position: "relative",
               zIndex: 40,
               display: "flex",
               alignItems: "center",
@@ -932,8 +931,7 @@ export default function AdminLayout({ children, title, actions, saveBar }: Admin
           /* ── Desktop header ── */
           <header
             style={{
-              position: "sticky",
-              top: 0,
+              position: "relative",
               zIndex: 40,
               display: "flex",
               alignItems: "center",
@@ -957,7 +955,7 @@ export default function AdminLayout({ children, title, actions, saveBar }: Admin
           </header>
         )}
 
-        <main style={{ flex: 1, paddingTop: isMobile ? "10px" : "14px", paddingLeft: isMobile ? "10px" : "14px", paddingRight: isMobile ? "10px" : "14px", paddingBottom: saveBar ? "60px" : isMobile ? "10px" : "14px", fontSize: "12px", zoom: 0.92 }}>
+        <main style={{ flex: 1, overflowY: "auto", paddingTop: isMobile ? "10px" : "14px", paddingLeft: isMobile ? "10px" : "14px", paddingRight: isMobile ? "10px" : "14px", paddingBottom: saveBar ? "60px" : isMobile ? "10px" : "14px", fontSize: "12px" }}>
           {/* Toolbar actions strip (Add/Edit buttons etc.) */}
           {actions && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
