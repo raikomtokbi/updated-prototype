@@ -59,17 +59,17 @@ function GameCard({ game }: { game: Game }) {
           />
         ) : (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Gamepad2 size={40} style={{ color: "hsla(258,90%,66%,0.3)" }} />
+            <Gamepad2 size={28} style={{ color: "hsl(var(--primary) / 0.3)" }} />
           </div>
         )}
         {game.isTrending && (
-          <span style={{ position: "absolute", top: "0.4rem", left: "0.4rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "hsl(var(--primary))", color: "white", fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.05em" }}>
+          <span style={{ position: "absolute", top: "0.3rem", left: "0.3rem", padding: "0.1rem 0.35rem", borderRadius: "3px", background: "hsl(var(--primary))", color: "white", fontSize: "0.55rem", fontWeight: 800, letterSpacing: "0.05em" }}>
             HOT
           </span>
         )}
         {/* Game name hanging below */}
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.4rem", paddingX: "0" }}>
-          <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingLeft: "0.1rem", paddingRight: "0.1rem" }}>
+        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.3rem" }}>
+          <h3 style={{ fontSize: "0.62rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {game.name}
           </h3>
         </div>
@@ -106,7 +106,7 @@ function ProductCard({ product }: { product: Product }) {
     >
       <div
         style={{
-          height: "160px",
+          height: "110px",
           background: "linear-gradient(135deg, hsl(258,35%,16%), hsl(220,28%,10%))",
           display: "flex",
           alignItems: "center",
@@ -117,35 +117,30 @@ function ProductCard({ product }: { product: Product }) {
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <Gift size={44} style={{ color: "hsla(258,90%,66%,0.35)" }} />
+          <Gift size={32} style={{ color: "hsl(var(--primary) / 0.35)" }} />
         )}
       </div>
-      <div style={{ padding: "1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.4rem" }}>
-          <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(var(--foreground))", flex: 1 }}>
+      <div style={{ padding: "0.5rem 0.6rem 0.6rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.3rem", marginBottom: "0.25rem" }}>
+          <h3 style={{ fontSize: "0.72rem", fontWeight: 700, color: "hsl(var(--foreground))", flex: 1, lineHeight: 1.3 }}>
             {product.title}
           </h3>
-          <span className="badge badge-purple" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>
+          <span className="badge badge-purple" style={{ fontSize: "0.58rem", whiteSpace: "nowrap" }}>
             {categoryLabel(product.category)}
           </span>
         </div>
-        {product.description && (
-          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
-            {product.description.length > 70 ? product.description.slice(0, 70) + "…" : product.description}
-          </p>
-        )}
         <div
           style={{
-            marginTop: "0.75rem",
+            marginTop: "0.3rem",
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.35rem",
-            fontSize: "0.68rem",
+            gap: "0.25rem",
+            fontSize: "0.62rem",
             fontWeight: 600,
             color: "hsl(var(--primary))",
           }}
         >
-          View Packages <Zap size={12} />
+          View Packages <Zap size={10} />
         </div>
       </div>
     </Link>
@@ -231,8 +226,8 @@ export default function Products() {
                   gap: "0.3rem",
                   padding: "0.45rem 0.9rem",
                   borderRadius: "0.5rem",
-                  border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(var(--border))"}`,
-                  background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
+                  border: `1px solid ${category === cat.value ? "hsl(var(--primary) / 0.5)" : "hsl(var(--border))"}`,
+                  background: category === cat.value ? "hsl(var(--primary) / 0.12)" : "transparent",
                   color: category === cat.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                   fontSize: "0.68rem",
                   fontWeight: 500,
@@ -258,12 +253,12 @@ export default function Products() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
               style={{
-                aspectRatio: "4/3",
+                aspectRatio: "1/1",
                 background: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
                 borderRadius: "0.75rem",
@@ -288,7 +283,7 @@ export default function Products() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
           {filtered.map((item) =>
             item.kind === "game" ? (
               <GameCard key={`game-${item.data.id}`} game={item.data} />
