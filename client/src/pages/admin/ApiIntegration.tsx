@@ -1418,7 +1418,6 @@ function ProviderSection({ slug, label, icon, accentColor, fields, plugins }: Pr
 // ─── Google Analytics Modal ───────────────────────────────────────────────────
 function GoogleAnalyticsModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
-  const [draft, setDraft] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const { data: settings } = useQuery<Record<string, string>>({
@@ -1426,67 +1425,121 @@ function GoogleAnalyticsModal({ onClose }: { onClose: () => void }) {
     queryFn: () => adminApi.get("/settings"),
   });
 
-  const measurementId = settings?.ga_measurement_id ?? "";
-  const displayId = draft !== null ? draft : measurementId;
-  const isConnected = !!measurementId.trim();
-  const isDirty = draft !== null && draft.trim() !== measurementId.trim();
+  const [drafts, setDrafts] = useState<Record<string, string | null>>({
+    ga_measurement_id: null,
+    ga_property_id: null,
+    ga_service_account_json: null,
+  });
+
+  const get = (key: string) => drafts[key] !== null ? (drafts[key] ?? "") : (settings?.[key] ?? "");
+  const setField = (key: string, val: string) => setDrafts(d => ({ ...d, [key]: val }));
+
+  const isConnected = !!settings?.ga_measurement_id?.trim();
+  const isApiReady = !!(settings?.ga_property_id?.trim() && settings?.ga_service_account_json?.trim());
+
+  const isDirty = Object.keys(drafts).some(k => drafts[k] !== null && drafts[k]?.trim() !== (settings?.[k] ?? "").trim());
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      adminApi.put("/settings", { ga_measurement_id: (draft ?? "").trim() }),
+    mutationFn: () => adminApi.put("/settings", {
+      ga_measurement_id: get("ga_measurement_id").trim(),
+      ga_property_id: get("ga_property_id").trim(),
+      ga_service_account_json: get("ga_service_account_json").trim(),
+    }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
-      setDraft(null);
+      setDrafts({ ga_measurement_id: null, ga_property_id: null, ga_service_account_json: null });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     },
   });
 
+  const sectionHead: React.CSSProperties = {
+    fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
+    letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))",
+    margin: "4px 0 10px",
+  };
+
   return (
     <Modal title="Google Analytics 4" onClose={onClose}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: 0 }}>
-          Enter your GA4 Measurement ID to enable Google Analytics tracking on your storefront.
-          Page views are sent automatically on every navigation.
-        </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
+        {/* ── Section 1: Client-side tracking ── */}
         <div>
+          <p style={sectionHead}>Storefront Tracking (gtag.js)</p>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: "0 0 10px" }}>
+            Enables page-view tracking on your storefront. Find this in GA → Admin → Data Streams → your stream.
+          </p>
           <label style={labelStyle}>Measurement ID</label>
           <input
-            value={displayId}
-            onChange={e => setDraft(e.target.value)}
+            value={get("ga_measurement_id")}
+            onChange={e => setField("ga_measurement_id", e.target.value)}
             placeholder="G-XXXXXXXXXX"
             spellCheck={false}
             style={{ ...inputStyle, fontFamily: "monospace" }}
             data-testid="input-ga-measurement-id"
           />
-          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0", lineHeight: 1.5 }}>
-            Find your Measurement ID in Google Analytics → Admin → Data Streams → your stream → Measurement ID.
-          </p>
+          {isConnected && (
+            <div style={{ marginTop: 8, fontSize: "11px", padding: "8px 10px", borderRadius: "6px", background: "hsl(142,71%,45% / 0.07)", border: "1px solid hsl(142,71%,45% / 0.2)", lineHeight: 1.6 }}>
+              <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600 }}>Tracking active.</span>{" "}
+              <a href={`https://analytics.google.com/analytics/web/#/p${settings!.ga_measurement_id.replace("G-", "")}`} target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--primary))" }}>
+                Open GA Dashboard →
+              </a>
+            </div>
+          )}
         </div>
 
-        {isConnected && (
-          <div style={{
-            fontSize: "11px", color: "hsl(var(--muted-foreground))",
-            padding: "10px 12px", borderRadius: "6px",
-            background: "hsl(142,71%,45% / 0.07)",
-            border: "1px solid hsl(142,71%,45% / 0.2)",
-            lineHeight: 1.65,
-          }}>
-            <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600 }}>Connected:</span>{" "}
-            GA4 tracking is active on your storefront. Real-time data appears in GA immediately;
-            historical reports take 24–48 hours to populate.{" "}
-            <a
-              href={`https://analytics.google.com/analytics/web/#/p${measurementId.replace("G-", "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "hsl(var(--primary))" }}
-            >
-              Open GA Dashboard →
-            </a>
-          </div>
-        )}
+        <div style={{ borderTop: "1px solid hsl(var(--border))" }} />
+
+        {/* ── Section 2: Reporting API ── */}
+        <div>
+          <p style={sectionHead}>Admin Analytics (Reporting API)</p>
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6, margin: "0 0 12px" }}>
+            Powers your Analytics dashboard with real GA4 data. Requires a Google Cloud service account with <strong>Viewer</strong> access to your GA4 property.
+            <br />
+            <a href="https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart-client-libraries" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--primary))" }}>Setup guide →</a>
+          </p>
+
+          <label style={labelStyle}>Property ID <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>(numeric, e.g. 123456789)</span></label>
+          <input
+            value={get("ga_property_id")}
+            onChange={e => setField("ga_property_id", e.target.value)}
+            placeholder="123456789"
+            spellCheck={false}
+            style={{ ...inputStyle, fontFamily: "monospace" }}
+            data-testid="input-ga-property-id"
+          />
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "5px 0 12px", lineHeight: 1.5 }}>
+            GA → Admin → Property Settings → Property ID (not the Measurement ID).
+          </p>
+
+          <label style={labelStyle}>Service Account JSON <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>(paste full JSON)</span></label>
+          <textarea
+            value={get("ga_service_account_json")}
+            onChange={e => setField("ga_service_account_json", e.target.value)}
+            placeholder={'{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key_id": "...",\n  ...\n}'}
+            rows={6}
+            spellCheck={false}
+            style={{
+              ...inputStyle,
+              fontFamily: "monospace",
+              fontSize: "11px",
+              resize: "vertical",
+              minHeight: "120px",
+            }}
+            data-testid="input-ga-service-account-json"
+          />
+          <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "5px 0 0", lineHeight: 1.5 }}>
+            Download from Google Cloud → IAM → Service Accounts → your account → Keys → Add Key → JSON.
+          </p>
+
+          {isApiReady && (
+            <div style={{ marginTop: 10, fontSize: "11px", padding: "8px 10px", borderRadius: "6px", background: "hsl(142,71%,45% / 0.07)", border: "1px solid hsl(142,71%,45% / 0.2)", lineHeight: 1.6 }}>
+              <span style={{ color: "hsl(142,71%,45%)", fontWeight: 600 }}>Reporting API configured.</span>{" "}
+              Your Analytics dashboard now shows real Google Analytics data.
+            </div>
+          )}
+        </div>
 
         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
           {saved && <span style={{ fontSize: "11px", color: "hsl(142,71%,48%)", alignSelf: "center" }}>Saved</span>}
@@ -1644,7 +1697,10 @@ export default function ApiIntegration() {
   const busanConfigured = Boolean(busanConfig?.apiToken);
   const smileOneConfigured = Boolean(smileOneConfig?.apiKey);
   const lioGamesConfigured = Boolean(lioGamesConfig?.memberCode);
-  const gaConfigured = Boolean(siteSettings?.ga_measurement_id?.trim());
+  const gaConfigured = Boolean(
+    siteSettings?.ga_measurement_id?.trim() ||
+    (siteSettings?.ga_property_id?.trim() && siteSettings?.ga_service_account_json?.trim()),
+  );
 
   const socialAuthConfigured = (() => {
     const slugs = ["social-auth-google", "social-auth-facebook", "social-auth-discord"];

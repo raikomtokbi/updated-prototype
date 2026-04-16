@@ -7,7 +7,8 @@ import {
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Users, Eye, Clock, TrendingDown, Wifi, Info } from "lucide-react";
+import { Users, Eye, Clock, TrendingDown, Wifi, Info, ExternalLink } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const card: React.CSSProperties = {
@@ -295,8 +296,46 @@ export default function Analytics() {
   const chartH = isMobile ? 170 : 200;
   const pieH = isMobile ? 120 : 150;
 
+  const isGA = (data as any)?._source === "google_analytics";
+
   return (
     <AdminLayout title="Analytics">
+      {/* Data source badge */}
+      {!isLoading && (
+        <div style={{ marginBottom: 12 }}>
+          {isGA ? (
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 7,
+              padding: "5px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: 600,
+              background: "hsl(0,84%,60% / 0.1)",
+              border: "1px solid hsl(0,84%,60% / 0.25)",
+              color: "hsl(0,84%,60%)",
+            }}>
+              <SiGoogle size={12} />
+              Powered by Google Analytics
+              <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer"
+                style={{ color: "inherit", display: "flex", alignItems: "center" }}>
+                <ExternalLink size={10} />
+              </a>
+            </div>
+          ) : (
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 7,
+              padding: "5px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: 500,
+              background: "hsl(var(--muted))",
+              border: "1px solid hsl(var(--border))",
+              color: "hsl(var(--muted-foreground))",
+            }}>
+              Built-in Analytics
+              <span style={{ opacity: 0.7 }}>·</span>
+              <a href="/admin/api-integration#google-analytics" style={{ color: "hsl(var(--primary))", textDecoration: "none" }}>
+                Connect Google Analytics →
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Range selector + live indicator */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ display: "flex", gap: 4 }}>

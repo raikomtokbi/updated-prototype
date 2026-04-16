@@ -1127,18 +1127,36 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.get("/api/admin/analytics/site", requireAdmin, async (req, res) => {
     const range = (req.query.range as string) || "30days";
+    const allSettings = await storage.getAllSiteSettings();
+    const settingsMap: Record<string, string> = {};
+    allSettings.forEach(s => { settingsMap[s.key] = s.value ?? ""; });
+
+    // Try GA4 if credentials are configured
+    const gaPropertyId = settingsMap.ga_property_id?.trim();
+    const gaCredentials = settingsMap.ga_service_account_json?.trim();
+    if (gaPropertyId && gaCredentials) {
+      try {
+        const { getGA4Analytics } = await import("./services/googleAnalytics");
+        const data = await getGA4Analytics(gaPropertyId, gaCredentials, range);
+        return res.json(data);
+      } catch (err: any) {
+        console.error("[GA4] Error fetching analytics:", err.message);
+        // Fall through to built-in analytics
+      }
+    }
+
+    // Built-in fallback
     const now = new Date();
     let fromDate: Date;
     if (range === "7days") fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     else if (range === "90days") fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     else fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const allSettings = await storage.getAllSiteSettings();
-    const siteTimezone = allSettings.find(s => s.key === "site_timezone")?.value || "UTC";
+    const siteTimezone = settingsMap.site_timezone || "UTC";
     const [data, live] = await Promise.all([
       storage.getAnalyticsOverview(fromDate, now, siteTimezone),
       storage.getLiveTraffic(),
     ]);
-    res.json({ ...data, ...live });
+    res.json({ ...data, ...live, _source: "built_in" });
   });
 
   // ── Analytics (time-series for charts) ────────────────────────────────────
