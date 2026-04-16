@@ -158,7 +158,7 @@ export default function TopupOrders() {
                         }}
                       >
                         <td style={tdStyle}>
-                          <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258, 90%, 70%)" }}>{o.orderNumber}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(var(--primary))" }}>{o.orderNumber}</div>
                           {o.utr && (
                             <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>UTR: {o.utr}</div>
                           )}

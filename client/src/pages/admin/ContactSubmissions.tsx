@@ -211,7 +211,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
               style={{
                 marginLeft: "auto",
                 padding: "0.5rem 1rem",
-                background: "linear-gradient(135deg, hsl(258, 90%, 60%), hsl(258, 90%, 50%))",
+                background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)))",
                 color: "white",
                 border: "none",
                 borderRadius: "6px",
@@ -237,7 +237,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
               {ticket.replies.map((r: any) => (
                 <div key={r.id} style={{ padding: "0.8rem", background: "hsl(var(--card))", borderRadius: "5px", fontSize: "13px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-                    <span style={{ color: r.isStaff ? "hsl(258, 90%, 70%)" : "hsl(var(--muted-foreground))", fontWeight: 500 }}>
+                    <span style={{ color: r.isStaff ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", fontWeight: 500 }}>
                       {r.isStaff ? "Staff" : "Customer"}
                     </span>
                     <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{formatDate(r.createdAt)}</span>
@@ -310,7 +310,7 @@ export default function ContactSubmissions() {
                 {filtered.map((t) => (
                   <tr key={t.id}>
                     <td style={tdStyle}>
-                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(var(--primary))" }}>
                         {t.ticketNumber ?? t.id.slice(0, 14) + "…"}
                       </span>
                     </td>
@@ -333,7 +333,7 @@ export default function ContactSubmissions() {
                             ...btnNeutral,
                             background: "linear-gradient(135deg,hsla(258,90%,55%,0.15),hsla(196,100%,50%,0.1))",
                             borderColor: "hsla(258,90%,55%,0.3)",
-                            color: "hsl(258,90%,70%)",
+                            color: "hsl(var(--primary))",
                           }}
                           onClick={() => setViewTicketId(t.id)}
                         >

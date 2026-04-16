@@ -84,7 +84,7 @@ function PackageManager({ productId }: { productId: string }) {
               <span style={{ fontSize: "12px", color: "hsl(var(--foreground))" }}>{pkg.label}</span>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 {pkg.originalPrice && <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", textDecoration: "line-through" }}>${pkg.originalPrice}</span>}
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(258,90%,72%)" }}>${pkg.price}</span>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(var(--primary))" }}>${pkg.price}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                   <span style={{ fontSize: "9px", color: "hsl(220,10%,40%)", textTransform: "uppercase" }}>Stock:</span>
                   <input
@@ -98,7 +98,7 @@ function PackageManager({ productId }: { productId: string }) {
                 <button
                   title="Map to Provider"
                   onClick={() => setMappingPkg(pkg)}
-                  style={{ background: "none", border: "1px solid rgba(124,58,237,0.3)", borderRadius: "4px", cursor: "pointer", padding: "2px 5px", display: "flex", alignItems: "center", color: "hsl(258,90%,62%)" }}
+                  style={{ background: "none", border: "1px solid hsl(var(--primary) / 0.3)", borderRadius: "4px", cursor: "pointer", padding: "2px 5px", display: "flex", alignItems: "center", color: "hsl(var(--primary))" }}
                 ><Link2 size={10} /></button>
                 <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
               </div>

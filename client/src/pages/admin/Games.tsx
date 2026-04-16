@@ -54,7 +54,7 @@ const btnPrimary: React.CSSProperties = {
   gap: "6px",
   padding: "7px 14px",
   borderRadius: "6px",
-  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+  background: "hsl(var(--primary))",
   color: "white",
   fontSize: "12px",
   fontWeight: 600,
@@ -84,8 +84,8 @@ const btnEdit: React.CSSProperties = {
   padding: "0 12px",
   height: "32px",
   borderRadius: "6px",
-  background: "rgba(124,58,237,0.1)",
-  border: "1px solid rgba(124,58,237,0.25)",
+  background: "hsl(var(--primary) / 0.1)",
+  border: "1px solid hsl(var(--primary) / 0.25)",
   color: "hsl(var(--primary))",
   fontSize: "12px",
   fontWeight: 500,
@@ -121,7 +121,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
@@ -167,7 +167,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
                 gap: "10px",
                 padding: "8px 12px",
                 borderRadius: "7px",
-                border: `1px solid ${on ? "hsl(258,90%,60%)" : "hsl(var(--border))"}`,
+                border: `1px solid ${on ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
                 background: on ? "hsla(258,90%,66%,0.12)" : "hsl(var(--card))",
                 cursor: "pointer",
                 textAlign: "left",
@@ -177,8 +177,8 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
             >
               <span style={{
                 width: "18px", height: "18px", borderRadius: "4px", flexShrink: 0,
-                border: `2px solid ${on ? "hsl(258,90%,60%)" : "hsl(var(--border))"}`,
-                background: on ? "hsl(258,90%,60%)" : "transparent",
+                border: `2px solid ${on ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
+                background: on ? "hsl(var(--primary))" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {on && <span style={{ color: "white", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
@@ -192,7 +192,7 @@ function FieldMapPicker({ value, onChange }: { value: string; onChange: (v: stri
                 </span>
               </span>
               {on && (
-                <span style={{ marginLeft: "auto", fontSize: "10px", fontWeight: 700, color: "hsl(258,90%,70%)", flexShrink: 0 }}>ON</span>
+                <span style={{ marginLeft: "auto", fontSize: "10px", fontWeight: 700, color: "hsl(var(--primary))", flexShrink: 0 }}>ON</span>
               )}
             </button>
           );
@@ -493,7 +493,7 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
         </div>
       </div>
       {form.id ? (
-        <button type="button" onClick={() => setMappingOpen(true)} style={{ ...btnEdit, justifyContent: "center", color: "hsl(258,90%,62%)", borderColor: "rgba(124,58,237,0.3)" }}>
+        <button type="button" onClick={() => setMappingOpen(true)} style={{ ...btnEdit, justifyContent: "center", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.3)" }}>
           <Link2 size={14} /> Map to Provider
         </button>
       ) : (
@@ -668,7 +668,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
       {/* Progress bar */}
       <div style={{ display: "flex", gap: "4px", marginBottom: "1.2rem" }}>
         {[1, 2, 3].map((s) => (
-          <div key={s} style={{ flex: 1, height: "3px", borderRadius: "2px", background: step >= s ? "hsl(258,90%,62%)" : "hsl(var(--border))", transition: "background 0.25s" }} />
+          <div key={s} style={{ flex: 1, height: "3px", borderRadius: "2px", background: step >= s ? "hsl(var(--primary))" : "hsl(var(--border))", transition: "background 0.25s" }} />
         ))}
       </div>
 
@@ -684,7 +684,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
               onClick={() => { setProvider("busan"); setStep(2); fetchBusanProducts(); }}
               style={{ padding: "14px 10px", borderRadius: "8px", cursor: "pointer", textAlign: "left", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", display: "flex", flexDirection: "column", gap: "6px" }}
             >
-              <Zap size={18} color="hsl(258,90%,62%)" />
+              <Zap size={18} color="hsl(var(--primary))" />
               <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
               <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>Browse products</span>
             </button>
@@ -732,7 +732,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
                 <div
                   key={p.id}
                   onClick={() => pickBusan(p)}
-                  style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightBusan?.id === p.id ? "rgba(124,58,237,0.12)" : "hsl(var(--card))", border: highlightBusan?.id === p.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightBusan?.id === p.id ? "hsl(var(--primary) / 0.12)" : "hsl(var(--card))", border: highlightBusan?.id === p.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 >
                   <span style={{ color: "hsl(var(--foreground))" }}>{p.name}</span>
                   <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.priceRaw ?? `${p.currency} ${p.price}`}</span>
@@ -770,7 +770,7 @@ function AddServiceWizard({ game, onClose }: { game: Game; onClose: () => void }
           {smileProducts.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "230px", overflowY: "auto" }}>
               {smileProducts.map((p) => (
-                <div key={p.product_id} onClick={() => pickSmile(p)} style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightSmile?.product_id === p.product_id ? "rgba(124,58,237,0.12)" : "hsl(var(--card))", border: highlightSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div key={p.product_id} onClick={() => pickSmile(p)} style={{ padding: "9px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", background: highlightSmile?.product_id === p.product_id ? "hsl(var(--primary) / 0.12)" : "hsl(var(--card))", border: highlightSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ color: "hsl(var(--foreground))" }}>{p.name}</span>
                   <span style={{ color: "hsl(var(--muted-foreground))", fontSize: "11px" }}>{p.currency} {p.price}</span>
                 </div>
@@ -1165,7 +1165,7 @@ export default function Games() {
                         style={{
                           ...( g.isTrending
                             ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
-                            : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(var(--muted-foreground))" }
+                            : { ...btnEdit, background: "hsl(var(--primary) / 0.07)", color: "hsl(var(--muted-foreground))" }
                           ),
                           flex: 1,
                         }}
@@ -1220,7 +1220,7 @@ export default function Games() {
                       <button
                         style={g.isTrending
                           ? { ...btnEdit, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)", color: "#fbbf24" }
-                          : { ...btnEdit, background: "rgba(124,58,237,0.07)", color: "hsl(var(--muted-foreground))" }}
+                          : { ...btnEdit, background: "hsl(var(--primary) / 0.07)", color: "hsl(var(--muted-foreground))" }}
                         onClick={() => trendingMut.mutate(g.id)}
                         disabled={trendingMut.isPending}
                         title={g.isTrending ? "Remove from Trending" : "Add to Trending"}

@@ -1072,7 +1072,7 @@ function TicketsTab({ user }: { user: any }) {
                 <div style={{ display: "flex", gap: "0.75rem" }}>
                   <div style={{
                     width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
-                    background: "linear-gradient(135deg,hsl(258,90%,45%),hsl(196,100%,40%))",
+                    background: "linear-gradient(135deg,hsl(var(--primary)),hsl(196,100%,40%))",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: "0.68rem", fontWeight: 700, color: "white",
                   }}>
@@ -1100,7 +1100,7 @@ function TicketsTab({ user }: { user: any }) {
                     <div key={r.id} style={{ display: "flex", gap: "0.75rem", flexDirection: isAdmin ? "row-reverse" : "row" }}>
                       <div style={{
                         width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
-                        background: isAdmin ? "linear-gradient(135deg,hsl(258,90%,55%),hsl(196,100%,45%))" : "hsl(220,20%,18%)",
+                        background: isAdmin ? "linear-gradient(135deg,hsl(var(--primary)),hsl(196,100%,45%))" : "hsl(220,20%,18%)",
                         border: isAdmin ? "none" : "1px solid hsl(220,15%,24%)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: "0.68rem", fontWeight: 700, color: "white",
@@ -1197,7 +1197,7 @@ function TicketsTab({ user }: { user: any }) {
                       disabled={!replyMsg.trim() || replyMutation.isPending}
                       style={{
                         marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                        background: "linear-gradient(135deg,hsl(258,90%,55%),hsl(258,90%,45%))",
+                        background: "linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary)))",
                         border: "none", borderRadius: "0.5rem", padding: "0.5rem 1.1rem",
                         fontSize: "0.68rem", fontWeight: 600, color: "white", cursor: "pointer",
                         opacity: !replyMsg.trim() || replyMutation.isPending ? 0.6 : 1,
@@ -1325,7 +1325,7 @@ export default function Account() {
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
           <div style={{
             width: "58px", height: "58px", borderRadius: "50%", flexShrink: 0,
-            background: "linear-gradient(135deg, hsl(258,90%,45%), hsl(196,100%,40%))",
+            background: "linear-gradient(135deg, hsl(var(--primary)), hsl(196,100%,40%))",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             {user.avatarUrl ? (

@@ -205,7 +205,7 @@ export default function ChooseTheme() {
       style={{
         display: "inline-flex", alignItems: "center", gap: "7px",
         padding: "8px 18px", borderRadius: "6px",
-        background: saved ? "hsl(142,71%,38%)" : "linear-gradient(135deg,#7c3aed,#6d28d9)",
+        background: saved ? "hsl(142,71%,38%)" : "hsl(var(--primary))",
         color: "white", fontSize: "13px", fontWeight: 600,
         cursor: saveMut.isPending ? "not-allowed" : "pointer",
         border: "none", flexShrink: 0, opacity: saveMut.isPending ? 0.8 : 1,
@@ -304,7 +304,7 @@ export default function ChooseTheme() {
             <Palette size={14} style={{ color: "hsl(196,100%,50%)" }} />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Custom Colors</span>
             {activeTheme === "custom" && (
-              <span style={{ marginLeft: "6px", fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: "rgba(124,58,237,0.15)", color: "hsl(var(--primary))", border: "1px solid rgba(124,58,237,0.3)", fontWeight: 600 }}>
+              <span style={{ marginLeft: "6px", fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)", fontWeight: 600 }}>
                 Active
               </span>
             )}
@@ -363,7 +363,7 @@ export default function ChooseTheme() {
                   gap: "6px",
                   padding: "8px 18px",
                   borderRadius: "6px",
-                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  background: "hsl(var(--primary))",
                   color: "white",
                   fontSize: "12px",
                   fontWeight: 600,

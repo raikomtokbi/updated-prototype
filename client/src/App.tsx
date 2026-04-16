@@ -207,7 +207,7 @@ function MaintenancePage({ siteName }: { siteName?: string }) {
         textAlign: "center",
       }}
     >
-      <Wrench size={52} style={{ opacity: 0.35, color: "hsl(258, 90%, 70%)" }} />
+      <Wrench size={52} style={{ opacity: 0.35, color: "hsl(var(--primary))" }} />
       <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
         <h1 style={{ fontSize: "26px", fontWeight: 700, color: "hsl(210, 40%, 95%)", margin: 0, lineHeight: 1.2 }}>
           {name} is under maintenance

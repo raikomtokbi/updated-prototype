@@ -202,13 +202,13 @@ function UpiPaymentOverlay({
                 style={{
                   display: "flex", alignItems: "center", gap: "12px",
                   padding: "12px 16px", borderRadius: "8px",
-                  background: "hsl(var(--primary) / 0.1)", border: "1px solid rgba(124,58,237,0.3)",
+                  background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",
                   textDecoration: "none", cursor: "pointer",
                 }}
               >
                 <span style={{
                   width: "32px", height: "32px", borderRadius: "8px",
-                  background: "linear-gradient(135deg,#7c3aed,#6d28d9)", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "hsl(var(--primary))", display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#fff", fontWeight: 800, fontSize: "12px", flexShrink: 0,
                 }}>UPI</span>
                 <div>
@@ -879,7 +879,7 @@ export default function Checkout() {
           {/* ── Coupon Code ── */}
           <div style={card}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-              <Tag size={13} style={{ color: "hsl(258,90%,68%)" }} />
+              <Tag size={13} style={{ color: "hsl(var(--primary))" }} />
               <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>Coupon Code</span>
             </div>
             {couponApplied ? (
@@ -908,7 +908,7 @@ export default function Checkout() {
                   onClick={applyCoupon}
                   disabled={couponLoading || !couponCode.trim()}
                   data-testid="button-apply-coupon"
-                  style={{ padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(258,90%,58%)", color: "#fff", border: "none", fontWeight: 600, fontSize: "0.68rem", cursor: couponLoading || !couponCode.trim() ? "not-allowed" : "pointer", opacity: couponLoading || !couponCode.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
+                  style={{ padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--primary))", color: "#fff", border: "none", fontWeight: 600, fontSize: "0.68rem", cursor: couponLoading || !couponCode.trim() ? "not-allowed" : "pointer", opacity: couponLoading || !couponCode.trim() ? 0.6 : 1, whiteSpace: "nowrap" }}
                 >
                   {couponLoading ? "..." : "Apply"}
                 </button>
@@ -943,7 +943,7 @@ export default function Checkout() {
                         gap: "0.875rem",
                         padding: "0.875rem 1rem",
                         borderRadius: "0.625rem",
-                        border: `1px solid ${isSelected ? "hsl(258,90%,58%)" : "hsl(var(--border))"}`,
+                        border: `1px solid ${isSelected ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
                         background: isSelected ? "hsla(258,90%,58%,0.1)" : "hsl(var(--card))",
                         cursor: "pointer",
                         textAlign: "left",
@@ -981,7 +981,7 @@ export default function Checkout() {
                         </div>
                       </div>
 
-                      <ChevronRight size={15} style={{ color: isSelected ? "hsl(258,90%,68%)" : "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+                      <ChevronRight size={15} style={{ color: isSelected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", flexShrink: 0 }} />
                     </button>
                   );
                 })}

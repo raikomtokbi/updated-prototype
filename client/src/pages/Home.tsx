@@ -902,7 +902,7 @@ function Footer() {
                     width: "30px",
                     height: "30px",
                     borderRadius: "7px",
-                    background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                    background: "linear-gradient(135deg, hsl(var(--primary)), #9333ea)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -922,7 +922,7 @@ function Footer() {
                   ...(isLight
                     ? { color: "hsl(var(--foreground))" }
                     : {
-                        background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                        background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",

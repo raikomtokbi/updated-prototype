@@ -190,7 +190,7 @@ export default function Coupons() {
                       <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "12px", color: "hsl(196, 100%, 60%)" }}>{c.code}</span>
                     </td>
                     <td style={tdStyle}><StatusBadge value={c.discountType} /></td>
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(258, 90%, 70%)" }}>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: "hsl(var(--primary))" }}>
                       {c.discountType === "percentage" ? `${c.discountValue}%` : `$${Number(c.discountValue).toFixed(2)}`}
                     </td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>

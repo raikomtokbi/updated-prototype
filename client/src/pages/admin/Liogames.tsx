@@ -19,7 +19,7 @@ const sectionTitle: React.CSSProperties = {
 const tabBtn = (active: boolean): React.CSSProperties => ({
   padding: "7px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
   cursor: "pointer", border: "none", transition: "all 0.15s",
-  background: active ? "hsl(258, 90%, 62%)" : "transparent",
+  background: active ? "hsl(var(--primary))" : "transparent",
   color: active ? "white" : "hsl(var(--muted-foreground))",
 });
 const fieldRow: React.CSSProperties = { display: "flex", flexDirection: "column", gap: "4px" };

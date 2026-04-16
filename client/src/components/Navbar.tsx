@@ -257,7 +257,7 @@ export default function Navbar() {
             right: 0,
             zIndex: 1001,
             height: `${announcementBarHeight}px`,
-            background: "linear-gradient(90deg, hsl(258,90%,30%) 0%, hsl(258,80%,22%) 100%)",
+            background: "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(258,80%,22%) 100%)",
             borderBottom: "1px solid hsl(var(--primary) / 0.35)",
             display: "flex",
             alignItems: "center",
@@ -314,7 +314,7 @@ export default function Navbar() {
                   width: "30px",
                   height: "30px",
                   borderRadius: "7px",
-                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                  background: "linear-gradient(135deg, hsl(var(--primary)), #9333ea)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -334,7 +334,7 @@ export default function Navbar() {
                 ...(isLight
                   ? { color: "hsl(var(--foreground))" }
                   : {
-                      background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                      background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -768,7 +768,7 @@ export default function Navbar() {
                   width: "26px",
                   height: "26px",
                   borderRadius: "6px",
-                  background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+                  background: "linear-gradient(135deg, hsl(var(--primary)), #9333ea)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -785,7 +785,7 @@ export default function Navbar() {
                 ...(isLight
                   ? { color: "hsl(var(--foreground))" }
                   : {
-                      background: "linear-gradient(135deg, #a78bfa, #22d3ee)",
+                      background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",

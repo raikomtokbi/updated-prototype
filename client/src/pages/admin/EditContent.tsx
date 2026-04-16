@@ -249,8 +249,8 @@ function SliderForm({
             padding: "3px 12px",
             borderRadius: "4px",
             border: `1px solid ${form.isActive ? "rgba(124,58,237,0.5)" : "hsl(220,15%,20%)"}`,
-            background: form.isActive ? "rgba(124,58,237,0.15)" : "transparent",
-            color: form.isActive ? "hsl(258,90%,70%)" : "hsl(var(--muted-foreground))",
+            background: form.isActive ? "hsl(var(--primary) / 0.15)" : "transparent",
+            color: form.isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
             fontSize: "12px",
             cursor: "pointer",
           }}
@@ -283,7 +283,7 @@ function SliderForm({
             gap: "6px",
             padding: "7px 18px",
             borderRadius: "6px",
-            background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+            background: "hsl(var(--primary))",
             color: "white",
             fontSize: "12px",
             fontWeight: 600,
@@ -432,8 +432,8 @@ function SliderItem({
             gap: "4px",
             padding: "5px 14px",
             borderRadius: "5px",
-            background: "rgba(124,58,237,0.1)",
-            border: "1px solid rgba(124,58,237,0.25)",
+            background: "hsl(var(--primary) / 0.1)",
+            border: "1px solid hsl(var(--primary) / 0.25)",
             color: "hsl(var(--primary))",
             fontSize: "11px",
             fontWeight: 600,
@@ -625,7 +625,7 @@ export default function EditContent() {
           gap: "7px",
           padding: "8px 18px",
           borderRadius: "6px",
-          background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+          background: saved ? "hsl(142, 71%, 38%)" : "hsl(var(--primary))",
           color: "white",
           fontSize: "13px",
           fontWeight: 600,
@@ -712,7 +712,7 @@ export default function EditContent() {
                 gap: "5px",
                 padding: "6px 12px",
                 borderRadius: "6px",
-                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                background: "hsl(var(--primary))",
                 color: "white",
                 fontSize: "12px",
                 fontWeight: 600,
@@ -776,7 +776,7 @@ export default function EditContent() {
                   key={s.id}
                   style={{
                     background: "hsl(var(--background))",
-                    border: "1px solid rgba(124,58,237,0.3)",
+                    border: "1px solid hsl(var(--primary) / 0.3)",
                     borderRadius: "8px",
                     padding: "16px",
                   }}
@@ -900,13 +900,13 @@ export default function EditContent() {
                             style={{
                               padding: "8px",
                               borderRadius: "6px",
-                              border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
+                              border: selected ? "1px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
                               background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(220,20%,13%)",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
+                              color: selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                               transition: "all 0.1s",
                             }}
                           >
@@ -944,7 +944,7 @@ export default function EditContent() {
             style={{
               display: "inline-flex", alignItems: "center", gap: "5px",
               padding: "6px 12px", borderRadius: "6px",
-              background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+              background: "hsl(var(--primary))",
               color: "white", fontSize: "12px", fontWeight: 600,
               border: "none", cursor: "pointer",
             }}

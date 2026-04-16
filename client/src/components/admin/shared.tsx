@@ -37,7 +37,7 @@ export const btnPrimary: React.CSSProperties = {
   gap: "6px",
   padding: "6px 14px",
   borderRadius: "6px",
-  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+  background: "hsl(var(--primary))",
   color: "white",
   fontSize: "12px",
   fontWeight: 600,

@@ -63,7 +63,7 @@ export function SaveBar({ show, saving, saved, onSave, label = "Unsaved changes"
             gap: "5px",
             padding: "5px 12px",
             borderRadius: "999px",
-            background: saved ? "hsl(142,71%,38%)" : "linear-gradient(135deg,#7c3aed,#6d28d9)",
+            background: saved ? "hsl(142,71%,38%)" : "hsl(var(--primary))",
             color: "white",
             fontSize: "12px",
             fontWeight: 600,

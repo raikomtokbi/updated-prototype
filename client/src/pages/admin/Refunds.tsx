@@ -63,7 +63,7 @@ export default function Refunds() {
               <tbody>
                 {filtered.map((r) => (
                   <tr key={r.id} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
-                    <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>
+                    <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(var(--primary))" }}>
                       {r.orderNumber}
                     </td>
                     <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--foreground))" }}>

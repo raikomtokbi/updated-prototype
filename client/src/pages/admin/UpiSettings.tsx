@@ -140,7 +140,7 @@ export default function UpiSettings() {
                 onClick={() => set("isActive", !form.isActive)}
                 style={{
                   width: "44px", height: "24px", borderRadius: "12px", border: "none", cursor: "pointer",
-                  background: form.isActive ? "hsl(258,90%,60%)" : "hsl(220,15%,22%)",
+                  background: form.isActive ? "hsl(var(--primary))" : "hsl(220,15%,22%)",
                   position: "relative", transition: "background 0.2s",
                 }}
                 data-testid="toggle-upi-active"
@@ -221,12 +221,12 @@ export default function UpiSettings() {
               Email Auto-Verification (IMAP)
             </h3>
             <div style={{ background: "hsl(220,20%,13%)", borderRadius: "0.5rem", padding: "0.65rem 0.85rem", marginBottom: "1rem", display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-              <Info size={14} style={{ color: "hsl(258,90%,68%)", flexShrink: 0, marginTop: "1px" }} />
+              <Info size={14} style={{ color: "hsl(var(--primary))", flexShrink: 0, marginTop: "1px" }} />
               <p style={{ margin: 0, fontSize: "12px", color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
                 Configure IMAP access to the email account where you receive UPI payment notifications. 
                 The system will check for new payment emails every 60 seconds and auto-complete matching orders.
                 For Gmail, use an <strong style={{ color: "hsl(var(--foreground))" }}>App Password</strong> (not your regular password) 
-                with host <code style={{ color: "hsl(258,90%,72%)" }}>imap.gmail.com</code> port <code style={{ color: "hsl(258,90%,72%)" }}>993</code>.
+                with host <code style={{ color: "hsl(var(--primary))" }}>imap.gmail.com</code> port <code style={{ color: "hsl(var(--primary))" }}>993</code>.
               </p>
             </div>
 
@@ -300,7 +300,7 @@ export default function UpiSettings() {
                 data-testid="input-imap-label"
               />
               <div style={{ fontSize: "11px", color: "hsl(220,10%,40%)", marginTop: "3px" }}>
-                The mailbox or Gmail label to read payment emails from. Use <code style={{ color: "hsl(258,90%,72%)" }}>INBOX</code> for the default inbox, or a label name like <code style={{ color: "hsl(258,90%,72%)" }}>Payments</code>. For nested Gmail labels use <code style={{ color: "hsl(258,90%,72%)" }}>Parent/Child</code>.
+                The mailbox or Gmail label to read payment emails from. Use <code style={{ color: "hsl(var(--primary))" }}>INBOX</code> for the default inbox, or a label name like <code style={{ color: "hsl(var(--primary))" }}>Payments</code>. For nested Gmail labels use <code style={{ color: "hsl(var(--primary))" }}>Parent/Child</code>.
               </div>
             </div>
           </div>

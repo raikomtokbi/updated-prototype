@@ -171,7 +171,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}>
                     User · {formatDate(ticket.createdAt)}
-                    {ticket.category && <> · <span style={{ color: "hsl(258,90%,65%)" }}>{ticket.category}</span></>}
+                    {ticket.category && <> · <span style={{ color: "hsl(var(--primary))" }}>{ticket.category}</span></>}
                   </div>
                   <div style={{
                     background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,22%)",
@@ -190,7 +190,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                   <div key={r.id} style={{ display: "flex", gap: "8px", flexDirection: isAdmin ? "row-reverse" : "row" }}>
                     <div style={{
                       width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
-                      background: isAdmin ? "linear-gradient(135deg,hsl(258,90%,50%),hsl(196,100%,40%))" : "hsl(220,20%,20%)",
+                      background: isAdmin ? "hsl(var(--primary))" : "hsl(220,20%,20%)",
                       border: isAdmin ? "none" : "1px solid hsl(220,15%,28%)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: "11px", fontWeight: 700, color: "white",
@@ -213,7 +213,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                       {r.attachmentUrl && (
                         <div style={{ marginTop: "4px", textAlign: isAdmin ? "right" : "left" }}>
                           <a href={r.attachmentUrl} target="_blank" rel="noreferrer"
-                            style={{ fontSize: "11px", color: "hsl(258,90%,70%)", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                            style={{ fontSize: "11px", color: "hsl(var(--primary))", display: "inline-flex", alignItems: "center", gap: "3px" }}>
                             <Paperclip size={11} /> Attachment
                           </a>
                         </div>
@@ -274,7 +274,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "5px",
                     padding: "6px 14px", borderRadius: "6px",
-                    background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "white",
+                    background: "hsl(var(--primary))", color: "white",
                     fontSize: "12px", fontWeight: 600, cursor: "pointer", border: "none",
                     opacity: !message.trim() || replyMut.isPending ? 0.6 : 1,
                   }}
@@ -348,7 +348,7 @@ export default function SupportTickets() {
                 {filtered.map((t) => (
                   <tr key={t.id}>
                     <td style={tdStyle}>
-                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258, 90%, 70%)" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(var(--primary))" }}>
                         {t.ticketNumber ?? t.id.slice(0, 14) + "…"}
                       </span>
                     </td>
@@ -372,7 +372,7 @@ export default function SupportTickets() {
                             ...btnNeutral,
                             background: "linear-gradient(135deg,hsla(258,90%,55%,0.15),hsla(196,100%,50%,0.1))",
                             borderColor: "hsla(258,90%,55%,0.3)",
-                            color: "hsl(258,90%,70%)",
+                            color: "hsl(var(--primary))",
                           }}
                           onClick={() => setViewTicketId(t.id)}
                         >

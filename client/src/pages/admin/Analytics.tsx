@@ -18,7 +18,7 @@ const card: React.CSSProperties = {
 };
 
 const COLORS = [
-  "hsl(258,90%,70%)",
+  "hsl(var(--primary))",
   "hsl(196,100%,50%)",
   "hsl(142,71%,45%)",
   "hsl(38,92%,55%)",
@@ -342,15 +342,15 @@ export default function Analytics() {
                 <AreaChart data={liveTraffic}>
                   <defs>
                     <linearGradient id="cgLive" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(258,90%,70%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(258,90%,70%)" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
                   <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={5} />
                   <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} width={24} />
                   <Tooltip {...tooltipStyle} />
-                  <Area type="monotone" dataKey="views" stroke="hsl(258,90%,70%)" fill="url(#cgLive)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="views" stroke="hsl(var(--primary))" fill="url(#cgLive)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -390,15 +390,15 @@ export default function Analytics() {
                 <AreaChart data={liveTraffic}>
                   <defs>
                     <linearGradient id="cgLive" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(258,90%,70%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(258,90%,70%)" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,12%)" />
                   <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={3} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
                   <Tooltip {...tooltipStyle} />
-                  <Area type="monotone" dataKey="views" stroke="hsl(258,90%,70%)" fill="url(#cgLive)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="views" stroke="hsl(var(--primary))" fill="url(#cgLive)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             )}

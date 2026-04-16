@@ -55,7 +55,7 @@ export default function CookieBanner({ enabled }: { enabled: boolean }) {
         We use cookies to enhance your experience. By continuing to browse this site you agree to our use of cookies.{" "}
         <a
           href="/privacy"
-          style={{ color: "hsl(258, 90%, 70%)", textDecoration: "none" }}
+          style={{ color: "hsl(var(--primary))", textDecoration: "none" }}
         >
           Learn more
         </a>

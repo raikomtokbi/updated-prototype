@@ -83,7 +83,7 @@ export function UnsavedChangesDialog({ open, saving, onStay, onDiscard, onSave }
             disabled={saving}
             style={{
               padding: "8px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: 600,
-              background: "linear-gradient(135deg, #7c3aed, #6d28d9)", color: "white",
+              background: "hsl(var(--primary))", color: "white",
               border: "none", cursor: saving ? "not-allowed" : "pointer",
               opacity: saving ? 0.75 : 1,
               display: "inline-flex", alignItems: "center", gap: "6px",

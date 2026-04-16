@@ -78,14 +78,14 @@ const DEFAULT_STYLES: EmailStyles = {
   spacing: "20px",
   headingSize: "18px",
   headingColor: "#e8eeff",
-  buttonBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
+  buttonBg: "hsl(var(--primary))",
   buttonColor: "#ffffff",
   buttonBorderRadius: "7px",
   buttonAlignment: "center",
   cardBg: "#141720",
   cardBorderRadius: "12px",
   cardShadow: "none",
-  headerBg: "linear-gradient(135deg,#7c3aed,#6d28d9)",
+  headerBg: "hsl(var(--primary))",
   headerColor: "#ffffff",
   headerText: "",
   headerImageUrl: "",
@@ -333,8 +333,8 @@ function TemplateListItem({
       style={{
         padding: "12px 14px",
         cursor: "pointer",
-        background: isSelected ? "rgba(124,58,237,0.08)" : "transparent",
-        borderLeft: `3px solid ${isSelected ? "#7c3aed" : "transparent"}`,
+        background: isSelected ? "hsl(var(--primary) / 0.08)" : "transparent",
+        borderLeft: `3px solid ${isSelected ? "hsl(var(--primary))" : "transparent"}`,
         borderBottom: "1px solid hsl(var(--border) / 0.5)",
         transition: "background 0.15s",
         display: "flex",
@@ -463,7 +463,7 @@ function StyleRow({ label, children }: { label: string; children: React.ReactNod
 
 function ColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   // Extract a usable hex from gradient or hex for the color swatch
-  const hexFromValue = value.match(/#([0-9a-fA-F]{3,8})/)?.[0] ?? "#7c3aed";
+  const hexFromValue = value.match(/#([0-9a-fA-F]{3,8})/)?.[0] ?? "hsl(var(--primary))";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <input
@@ -675,7 +675,7 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
       >
         <div style={{ padding: "14px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Send size={14} color="#a78bfa" />
+            <Send size={14} color="hsl(var(--primary))" />
             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Send Test Email</span>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", fontSize: 18, lineHeight: 1, padding: "0 4px", display: "flex" }}><X size={16} /></button>
@@ -719,7 +719,7 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
               style={{
                 flex: 2, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "9px 0", borderRadius: 6, fontSize: "13px", fontWeight: 600,
-                background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff",
+                background: "hsl(var(--primary))", color: "#fff",
                 border: "none", cursor: (!to || sending) ? "not-allowed" : "pointer",
                 opacity: !to || sending ? 0.6 : 1,
               }}
@@ -754,7 +754,7 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
       }}>
         {!hideTitle && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Eye size={13} color="#a78bfa" />
+            <Eye size={13} color="hsl(var(--primary))" />
             <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,40%,86%)" }}>Live Preview</span>
             <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>updates in real time</span>
           </div>
@@ -768,9 +768,9 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px",
               borderRadius: 5, fontSize: "11px", fontWeight: 600, border: "1px solid",
               cursor: "pointer", transition: "all 0.15s",
-              background: previewMode === "desktop" ? "rgba(124,58,237,0.15)" : "transparent",
+              background: previewMode === "desktop" ? "hsl(var(--primary) / 0.15)" : "transparent",
               borderColor: previewMode === "desktop" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
-              color: previewMode === "desktop" ? "#a78bfa" : "hsl(var(--muted-foreground))",
+              color: previewMode === "desktop" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
             }}
           >
             <Monitor size={11} /> Desktop
@@ -782,9 +782,9 @@ function LivePreview({ html, previewMode, setPreviewMode, hideTitle }: {
               display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px",
               borderRadius: 5, fontSize: "11px", fontWeight: 600, border: "1px solid",
               cursor: "pointer", transition: "all 0.15s",
-              background: previewMode === "mobile" ? "rgba(124,58,237,0.15)" : "transparent",
+              background: previewMode === "mobile" ? "hsl(var(--primary) / 0.15)" : "transparent",
               borderColor: previewMode === "mobile" ? "rgba(124,58,237,0.4)" : "hsl(var(--border))",
-              color: previewMode === "mobile" ? "#a78bfa" : "hsl(var(--muted-foreground))",
+              color: previewMode === "mobile" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
             }}
           >
             <Smartphone size={11} /> Mobile
@@ -975,8 +975,8 @@ function TemplateEditor({
         flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
         padding: "7px 0", borderRadius: 0, fontSize: "12px", fontWeight: 600,
         background: "transparent", border: "none",
-        borderBottom: `2px solid ${activeTab === tab ? "#7c3aed" : "transparent"}`,
-        color: activeTab === tab ? "#a78bfa" : "hsl(var(--muted-foreground))",
+        borderBottom: `2px solid ${activeTab === tab ? "hsl(var(--primary))" : "transparent"}`,
+        color: activeTab === tab ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
         cursor: "pointer", transition: "color 0.15s",
       }}
     >
@@ -1009,7 +1009,7 @@ function TemplateEditor({
             onClick={() => setField("isEnabled", !form.isEnabled)}
             style={{
               position: "relative", width: 38, height: 22, borderRadius: 11, border: "none",
-              background: form.isEnabled ? "#7c3aed" : "hsl(var(--border))",
+              background: form.isEnabled ? "hsl(var(--primary))" : "hsl(var(--border))",
               cursor: "pointer", flexShrink: 0, padding: 0,
             }}
           >
@@ -1054,7 +1054,7 @@ function TemplateEditor({
             style={{
               flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
               padding: "6px 0", borderRadius: 6, fontSize: "12px", fontWeight: 600,
-              background: saved ? "#16a34a" : (isDirty ? "linear-gradient(135deg,#7c3aed,#6d28d9)" : "hsl(var(--border))"),
+              background: saved ? "#16a34a" : (isDirty ? "hsl(var(--primary))" : "hsl(var(--border))"),
               color: (saved || isDirty) ? "#fff" : "hsl(var(--muted-foreground))",
               border: "none", cursor: saveMut.isPending ? "wait" : "pointer",
               opacity: (!isDirty && !saved) ? 0.5 : 1,
@@ -1222,7 +1222,7 @@ function TemplateEditor({
         <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "hsl(var(--background))", display: "flex", flexDirection: "column" }}>
           <div style={{ padding: "10px 14px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Eye size={14} color="#a78bfa" />
+              <Eye size={14} color="hsl(var(--primary))" />
               <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Live Preview</span>
             </div>
             <button onClick={() => setShowPreviewModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex" }}>
@@ -1305,8 +1305,8 @@ export default function EmailTemplates() {
           display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
           background: "hsl(var(--background))",
         }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Mail size={16} color="#a78bfa" />
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: "hsl(var(--primary) / 0.15)", border: "1px solid hsl(var(--primary) / 0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Mail size={16} color="hsl(var(--primary))" />
           </div>
           <div>
             <div style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210,40%,94%)" }}>Email Templates</div>
@@ -1333,7 +1333,7 @@ export default function EmailTemplates() {
               <div style={{ flex: 1, overflow: "auto" }}>
                 {isLoading ? (
                   <div style={{ padding: "24px", display: "flex", justifyContent: "center" }}>
-                    <Loader2 size={18} color="#7c3aed" style={{ animation: "spin 1s linear infinite" }} />
+                    <Loader2 size={18} color="hsl(var(--primary))" style={{ animation: "spin 1s linear infinite" }} />
                   </div>
                 ) : (
                   TEMPLATE_DEFS.map((def) => (
@@ -1355,7 +1355,7 @@ export default function EmailTemplates() {
             <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
               {isLoading ? (
                 <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Loader2 size={24} color="#7c3aed" style={{ animation: "spin 1s linear infinite" }} />
+                  <Loader2 size={24} color="hsl(var(--primary))" style={{ animation: "spin 1s linear infinite" }} />
                 </div>
               ) : (
                 <TemplateEditor

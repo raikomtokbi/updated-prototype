@@ -45,7 +45,7 @@ export default function Offers() {
             gap: "0.5rem",
             padding: "0.3rem 0.9rem",
             borderRadius: "9999px",
-            background: "rgba(124,58,237,0.18)",
+            background: "hsl(var(--primary) / 0.18)",
             border: "1px solid rgba(124,58,237,0.38)",
             marginBottom: "1rem",
           }}
@@ -68,7 +68,7 @@ export default function Offers() {
           Current{" "}
           <span
             style={{
-              background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+              background: "linear-gradient(135deg, hsl(var(--primary)), #a855f7)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -293,12 +293,12 @@ export default function Offers() {
             gap: "0.4rem",
             padding: "0.6rem 1.5rem",
             borderRadius: "8px",
-            background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+            background: "hsl(var(--primary))",
             color: "white",
             fontSize: "0.68rem",
             fontWeight: 700,
             textDecoration: "none",
-            boxShadow: "0 0 16px rgba(124,58,237,0.3)",
+            boxShadow: "0 0 16px hsl(var(--primary) / 0.3)",
           }}
         >
           Browse All Products <ArrowRight size={14} />

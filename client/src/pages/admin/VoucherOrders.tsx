@@ -130,7 +130,7 @@ export default function VoucherOrders() {
                         }}
                       >
                         <td style={tdStyle}>
-                          <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>{o.orderNumber}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(var(--primary))" }}>{o.orderNumber}</div>
                           {o.utr && (
                             <div style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>UTR: {o.utr}</div>
                           )}
@@ -158,7 +158,7 @@ export default function VoucherOrders() {
                         </td>
                         <td style={tdStyle}>
                           {firstItem?.productCategory ? (
-                            <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: "rgba(124,58,237,0.1)", color: "hsl(258,80%,70%)" }}>
+                            <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500, background: "hsl(var(--primary) / 0.1)", color: "hsl(258,80%,70%)" }}>
                               {categoryLabel(firstItem.productCategory)}
                             </span>
                           ) : (

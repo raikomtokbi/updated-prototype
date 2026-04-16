@@ -116,9 +116,9 @@ export function ImageUploadField({
               style={{
                 padding: "2px 10px",
                 borderRadius: "4px",
-                border: `1px solid ${ratio === r ? "rgba(124,58,237,0.6)" : "rgba(124,58,237,0.2)"}`,
-                background: ratio === r ? "rgba(124,58,237,0.18)" : "transparent",
-                color: ratio === r ? "#a78bfa" : "rgba(148,163,184,0.6)",
+                border: `1px solid ${ratio === r ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.2)"}`,
+                background: ratio === r ? "hsl(var(--primary) / 0.18)" : "transparent",
+                color: ratio === r ? "hsl(var(--primary))" : "rgba(148,163,184,0.6)",
                 fontSize: "10px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -196,7 +196,7 @@ export function ImageUploadField({
               style={{
                 ...btnBase,
                 background: "hsl(var(--primary) / 0.12)",
-                borderColor: "rgba(124,58,237,0.3)",
+                borderColor: "hsl(var(--primary) / 0.3)",
                 color: "hsl(var(--primary))",
                 opacity: uploading || deleting ? 0.7 : 1,
                 cursor: uploading || deleting ? "not-allowed" : "pointer",
@@ -298,7 +298,7 @@ export function ImageUploadField({
                 style={{
                   ...btnBase,
                   background: "hsl(var(--primary) / 0.12)",
-                  borderColor: "rgba(124,58,237,0.3)",
+                  borderColor: "hsl(var(--primary) / 0.3)",
                   color: "hsl(var(--primary))",
                   opacity: uploading || deleting ? 0.7 : 1,
                   cursor: uploading || deleting ? "not-allowed" : "pointer",

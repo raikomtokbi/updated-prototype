@@ -37,7 +37,7 @@ const labelStyle: React.CSSProperties = {
 };
 const btnPrimary: React.CSSProperties = {
   padding: "7px 14px", borderRadius: "6px",
-  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+  background: "hsl(var(--primary))",
   color: "white", fontSize: "12px", fontWeight: 600, cursor: "pointer",
   border: "none", display: "inline-flex", alignItems: "center", gap: "6px",
 };
@@ -238,7 +238,7 @@ export function ProductMappingModal({
       <div style={{
         position: "relative", width: "100%", maxWidth: "500px", maxHeight: "88vh",
         overflowY: "auto", background: "hsl(var(--background))",
-        border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem",
+        border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem",
       }}>
         <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
@@ -281,7 +281,7 @@ export function ProductMappingModal({
                   display: "flex", flexDirection: "column", gap: "6px", transition: "border 0.15s",
                 }}
               >
-                <Zap size={18} color="hsl(258,90%,62%)" />
+                <Zap size={18} color="hsl(var(--primary))" />
                 <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Busan</span>
                 {existingBusan
                   ? <span style={{ fontSize: "10px", color: "hsl(142,71%,48%)", display: "flex", alignItems: "center", gap: "3px" }}><CheckCircle size={9} /> Mapped</span>
@@ -386,7 +386,7 @@ export function ProductMappingModal({
                       onClick={() => setSelectedBusan(p)}
                       style={{
                         padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                        background: selectedBusan?.id === p.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                        background: selectedBusan?.id === p.id ? "hsl(var(--primary) / 0.15)" : "hsl(var(--card))",
                         border: selectedBusan?.id === p.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                         display: "flex", justifyContent: "space-between", alignItems: "center",
                       }}
@@ -454,7 +454,7 @@ export function ProductMappingModal({
                     onClick={() => setSelectedSmile(p)}
                     style={{
                       padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                      background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                      background: selectedSmile?.product_id === p.product_id ? "hsl(var(--primary) / 0.15)" : "hsl(var(--card))",
                       border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                     }}

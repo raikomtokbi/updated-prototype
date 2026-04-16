@@ -35,7 +35,7 @@ const sectionTitle: React.CSSProperties = {
 const tabBtn = (active: boolean): React.CSSProperties => ({
   padding: "7px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 600,
   cursor: "pointer", border: "none", transition: "all 0.15s",
-  background: active ? "hsl(258, 90%, 62%)" : "transparent",
+  background: active ? "hsl(var(--primary))" : "transparent",
   color: active ? "white" : "hsl(var(--muted-foreground))",
 });
 const innerCard: React.CSSProperties = {
@@ -95,7 +95,7 @@ function ToggleSwitch({ checked, onChange, disabled, testId }: {
       style={{
         position: "relative", width: "34px", height: "19px", borderRadius: "10px",
         border: "none", cursor: disabled ? "not-allowed" : "pointer", flexShrink: 0,
-        background: checked ? "hsl(258,90%,58%)" : "hsl(var(--border))",
+        background: checked ? "hsl(var(--primary))" : "hsl(var(--border))",
         transition: "background 0.2s", opacity: disabled ? 0.45 : 1, padding: 0,
       }}
     >
@@ -440,7 +440,7 @@ function BusanMappingTab() {
                 <button onClick={fetchBusanProducts} disabled={fetchingProducts || !isConfigured}
                   style={{
                     padding: "3px 8px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer",
-                    border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))",
+                    border: "1px solid hsl(var(--primary) / 0.3)", background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))",
                     display: "inline-flex", alignItems: "center", gap: "4px",
                   }}
                   data-testid="button-refresh-busan-products">
@@ -457,7 +457,7 @@ function BusanMappingTab() {
                     data-testid="input-busan-product-id" />
                   <p style={{ fontSize: "11px", color: "hsl(0,75%,65%)", marginTop: "5px" }}>{fetchError}</p>
                   <button onClick={fetchBusanProducts} disabled={!isConfigured}
-                    style={{ marginTop: "6px", padding: "4px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))", cursor: "pointer" }}>
+                    style={{ marginTop: "6px", padding: "4px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid hsl(var(--primary) / 0.3)", background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))", cursor: "pointer" }}>
                     Retry
                   </button>
                 </div>
@@ -523,7 +523,7 @@ function BusanMappingTab() {
                       <div style={{ fontWeight: 500, color: "hsl(var(--foreground))" }}>{m.cmsProductName || m.cmsProductId}</div>
                     </td>
                     <td style={{ padding: "10px 14px" }}>
-                      <div style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258,80%,72%)", background: "rgba(124,58,237,0.08)", padding: "2px 7px", borderRadius: "4px", display: "inline-block" }}>
+                      <div style={{ fontFamily: "monospace", fontSize: "11px", color: "hsl(258,80%,72%)", background: "hsl(var(--primary) / 0.08)", padding: "2px 7px", borderRadius: "4px", display: "inline-block" }}>
                         {m.busanProductId}
                       </div>
                       {m.busanProductName && <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", marginTop: "2px" }}>{m.busanProductName}</div>}
@@ -843,7 +843,7 @@ function SmileOneMappingTab() {
                     onClick={() => setSelectedService({ id: svc.id, name: svc.name, price: String(svc.finalPrice) })}
                     style={{
                       padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                      background: selectedService?.id === svc.id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                      background: selectedService?.id === svc.id ? "hsl(var(--primary) / 0.15)" : "hsl(var(--card))",
                       border: selectedService?.id === svc.id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                       color: "hsl(var(--foreground))", display: "flex", justifyContent: "space-between",
                     }}>
@@ -897,7 +897,7 @@ function SmileOneMappingTab() {
                   onClick={() => setSelectedSmile(p)}
                   style={{
                     padding: "7px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                    background: selectedSmile?.product_id === p.product_id ? "rgba(124,58,237,0.15)" : "hsl(var(--card))",
+                    background: selectedSmile?.product_id === p.product_id ? "hsl(var(--primary) / 0.15)" : "hsl(var(--card))",
                     border: selectedSmile?.product_id === p.product_id ? "1px solid rgba(124,58,237,0.4)" : "1px solid hsl(var(--border))",
                     color: "hsl(var(--foreground))", display: "flex", justifyContent: "space-between",
                   }}>
@@ -1602,7 +1602,7 @@ export default function ApiIntegration() {
           />
         )}
         <button onClick={onConfigure}
-          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.1)", color: "hsl(var(--primary))", whiteSpace: "nowrap", flexShrink: 0 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "5px", fontSize: "11px", fontWeight: 600, cursor: "pointer", border: "1px solid hsl(var(--primary) / 0.3)", background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))", whiteSpace: "nowrap", flexShrink: 0 }}
           data-testid={testId}>
           <Settings size={11} /> Configure
         </button>

@@ -84,7 +84,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
         width: "40px",
         height: "22px",
         borderRadius: "11px",
-        background: checked ? "hsl(258, 90%, 60%)" : "hsl(var(--border))",
+        background: checked ? "hsl(var(--primary))" : "hsl(var(--border))",
         border: "none",
         cursor: "pointer",
         flexShrink: 0,
@@ -154,7 +154,7 @@ function ApiConfigLink({ slug, label = "Configure API" }: { slug: string; label?
         style={{
           display: "inline-flex", alignItems: "center", gap: "4px",
           padding: "2px 9px", borderRadius: "4px",
-          background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)",
+          background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.25)",
           fontSize: "10px", fontWeight: 600, color: "hsl(258,80%,72%)",
           textDecoration: "none", cursor: "pointer",
         }}
@@ -295,7 +295,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
   const pickerBtnBase: React.CSSProperties = {
     width: "32px", height: "32px", borderRadius: "6px", border: "1px solid hsl(var(--border))",
     background: "hsl(var(--card))", cursor: "pointer", display: "flex", alignItems: "center",
-    justifyContent: "center", flexShrink: 0, color: "hsl(258,90%,70%)",
+    justifyContent: "center", flexShrink: 0, color: "hsl(var(--primary))",
   };
 
   return (
@@ -360,10 +360,10 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
                         data-testid={`button-icon-${name}-${idx}`}
                         onClick={() => { update(idx, "icon", name); setOpenPickerIdx(null); }}
                         style={{
-                          padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(258,90%,60%)" : "1px solid hsl(var(--border))",
+                          padding: "7px", borderRadius: "6px", border: selected ? "1px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
                           background: selected ? "hsla(258,90%,66%,0.15)" : "hsl(var(--card))",
                           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                          color: selected ? "hsl(258,90%,72%)" : "hsl(var(--muted-foreground))",
+                          color: selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                           transition: "all 0.1s",
                         }}
                       >
@@ -480,7 +480,7 @@ export default function ControlPanel() {
         gap: "7px",
         padding: "8px 18px",
         borderRadius: "6px",
-        background: saved ? "hsl(142, 71%, 38%)" : "linear-gradient(135deg, #7c3aed, #6d28d9)",
+        background: saved ? "hsl(142, 71%, 38%)" : "hsl(var(--primary))",
         color: "white",
         fontSize: "13px",
         fontWeight: 600,

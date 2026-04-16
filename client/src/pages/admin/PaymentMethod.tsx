@@ -37,7 +37,7 @@ const btnPrimary: React.CSSProperties = {
   gap: "6px",
   padding: "7px 14px",
   borderRadius: "6px",
-  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+  background: "hsl(var(--primary))",
   color: "white",
   fontSize: "12px",
   fontWeight: 600,
@@ -62,8 +62,8 @@ const btnEdit: React.CSSProperties = {
   gap: "4px",
   padding: "5px 10px",
   borderRadius: "5px",
-  background: "rgba(124,58,237,0.1)",
-  border: "1px solid rgba(124,58,237,0.25)",
+  background: "hsl(var(--primary) / 0.1)",
+  border: "1px solid hsl(var(--primary) / 0.25)",
   color: "hsl(var(--primary))",
   fontSize: "11px",
   cursor: "pointer",
@@ -251,7 +251,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: "580px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid rgba(124,58,237,0.25)", borderRadius: "10px", padding: "1.5rem" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "580px", maxHeight: "90vh", overflowY: "auto", background: "hsl(var(--background))", border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0 }}>{title}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}><X size={16} /></button>
@@ -485,7 +485,7 @@ export default function PaymentMethodPage() {
         <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading...</div>
       ) : methods.length === 0 ? (
         <div style={{ ...card, padding: "3rem", textAlign: "center" }}>
-          <CreditCard size={36} style={{ color: "rgba(124,58,237,0.3)", marginBottom: "0.75rem" }} />
+          <CreditCard size={36} style={{ color: "hsl(var(--primary) / 0.3)", marginBottom: "0.75rem" }} />
           <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "13px", marginBottom: "12px" }}>No payment gateways configured yet.</p>
           <button style={btnPrimary} onClick={() => setShowAdd(true)}><Plus size={13} /> Add First Gateway</button>
         </div>

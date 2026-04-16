@@ -198,7 +198,7 @@ export default function Payments() {
                     return (
                       <tr key={`order-${o.id}`} style={{ borderBottom: "1px solid hsl(220,15%,11%)" }}>
                         <td style={tdStyle}>
-                          <span style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(258,90%,70%)" }}>
+                          <span style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "hsl(var(--primary))" }}>
                             {o.orderNumber}
                           </span>
                         </td>
@@ -236,7 +236,7 @@ export default function Payments() {
                             )}
                             <a
                               href={getOrderViewUrl(o)}
-                              style={{ color: "hsl(258,90%,70%)", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "2px", textDecoration: "none" }}
+                              style={{ color: "hsl(var(--primary))", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "2px", textDecoration: "none" }}
                               data-testid={`link-view-order-${o.id}`}
                             >
                               <ExternalLink size={11} /> View
@@ -283,7 +283,7 @@ export default function Payments() {
                             {!isAssigned && (
                               <button
                                 onClick={() => setExpandedAssign(isExpanded ? null : p.id)}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(258,90%,68%)", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px", whiteSpace: "nowrap" }}
+                                style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--primary))", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px", whiteSpace: "nowrap" }}
                                 data-testid={`button-expand-assign-${p.id}`}
                               >
                                 Assign {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}

@@ -235,7 +235,7 @@ export default function Products() {
                   borderRadius: "0.5rem",
                   border: `1px solid ${category === cat.value ? "hsla(258,90%,66%,0.5)" : "hsl(var(--border))"}`,
                   background: category === cat.value ? "hsla(258,90%,66%,0.12)" : "transparent",
-                  color: category === cat.value ? "hsl(258,90%,74%)" : "hsl(var(--muted-foreground))",
+                  color: category === cat.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                   fontSize: "0.68rem",
                   fontWeight: 500,
                   cursor: "pointer",
