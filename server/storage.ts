@@ -973,21 +973,31 @@ export class DatabaseStorage implements IStorage {
     const safeTz = (timezone || "UTC").replace(/[^a-zA-Z0-9/_+\-]/g, "");
     const tz = sql.raw(`'${safeTz}'`);
 
-    // createdAt is stored as `timestamp without time zone` but contains UTC values.
-    // (col AT TIME ZONE 'UTC') labels it as UTC → returns timestamptz.
-    // Then AT TIME ZONE tz converts from UTC to the target local time → timestamp without tz in local time.
-    const localTs = sql`(${orders.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${tz}`;
+    // Dialect-aware date math: DB_DIALECT=mysql uses MySQL functions; default is PostgreSQL.
+    const isMysql = process.env.DB_DIALECT === "mysql";
+
+    // Convert stored UTC timestamp to the target local timezone.
+    const localTs = isMysql
+      ? sql`CONVERT_TZ(${orders.createdAt}, 'UTC', ${tz})`
+      : sql`(${orders.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${tz}`;
 
     // Truncate to the appropriate bucket in local time (for chronological ORDER BY).
-    const truncTs =
-      groupBy === "hour" ? sql`date_trunc('hour', ${localTs})`
-      : groupBy === "day" ? sql`date_trunc('day', ${localTs})`
-      : groupBy === "week" ? sql`date_trunc('week', ${localTs})`
-      : sql`date_trunc('month', ${localTs})`;
+    const truncTs = isMysql
+      ? groupBy === "hour" ? sql`DATE_FORMAT(${localTs}, '%Y-%m-%d %H:00:00')`
+        : groupBy === "day" ? sql`DATE(${localTs})`
+        : groupBy === "week" ? sql`DATE_SUB(DATE(${localTs}), INTERVAL WEEKDAY(${localTs}) DAY)`
+        : sql`DATE_FORMAT(${localTs}, '%Y-%m-01')`
+      : groupBy === "hour" ? sql`date_trunc('hour', ${localTs})`
+        : groupBy === "day" ? sql`date_trunc('day', ${localTs})`
+        : groupBy === "week" ? sql`date_trunc('week', ${localTs})`
+        : sql`date_trunc('month', ${localTs})`;
 
     // Format the truncated local timestamp as a label string.
-    const trunc =
-      groupBy === "hour"
+    const trunc = isMysql
+      ? groupBy === "hour"
+        ? sql`DATE_FORMAT(${localTs}, '%h:00 %p')`
+        : sql`DATE_FORMAT(${truncTs}, '%Y-%m-%d')`
+      : groupBy === "hour"
         ? sql`to_char(${truncTs}, 'HH12:00 AM')`
         : sql`to_char(${truncTs}, 'YYYY-MM-DD')`;
 

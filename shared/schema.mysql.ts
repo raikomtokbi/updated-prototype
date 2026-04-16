@@ -1,0 +1,617 @@
+// MySQL production schema — used by the production build (npm run build).
+// Development uses shared/schema.ts (PostgreSQL / pg-core).
+import { relations } from "drizzle-orm";
+import {
+  mysqlTable, mysqlEnum, varchar, text, boolean, int, decimal,
+  timestamp,
+} from "drizzle-orm/mysql-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+export const users = mysqlTable("users", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  username: varchar("username", { length: 191 }).notNull().unique(),
+  email: varchar("email", { length: 191 }).unique(),
+  password: text("password").notNull(),
+  role: mysqlEnum("role", ["super_admin", "admin", "staff", "user"]).notNull().default("user"),
+  fullName: varchar("full_name", { length: 191 }),
+  phone: varchar("phone", { length: 50 }),
+  avatarUrl: text("avatar_url"),
+  isActive: boolean("is_active").notNull().default(true),
+  isBanned: boolean("is_banned").notNull().default(false),
+  isEmailVerified: boolean("is_email_verified").notNull().default(false),
+  isSubscribed: boolean("is_subscribed").notNull().default(false),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Games ────────────────────────────────────────────────────────────────────
+export const games = mysqlTable("games", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 191 }).notNull(),
+  slug: varchar("slug", { length: 191 }).notNull().unique(),
+  description: text("description"),
+  logoUrl: text("logo_url"),
+  bannerUrl: text("banner_url"),
+  category: varchar("category", { length: 100 }).notNull().default("game_currency"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  isTrending: boolean("is_trending").notNull().default(false),
+  instantDelivery: boolean("instant_delivery").notNull().default(true),
+  sortOrder: int("sort_order").notNull().default(0),
+  pluginSlug: varchar("plugin_slug", { length: 100 }),
+  requiredFields: varchar("required_fields", { length: 100 }).default("userId"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+export const services = mysqlTable("services", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  gameId: varchar("game_id", { length: 36 }).notNull().references(() => games.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 191 }).notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  discountPercent: decimal("discount_percent", { precision: 5, scale: 2 }).notNull().default("0"),
+  finalPrice: decimal("final_price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  sortOrder: int("sort_order").notNull().default(0),
+  stock: int("stock"),
+  pluginSlug: varchar("plugin_slug", { length: 100 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Products ─────────────────────────────────────────────────────────────────
+export const products = mysqlTable("products", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  title: varchar("title", { length: 191 }).notNull(),
+  description: text("description"),
+  category: mysqlEnum("category", ["game_currency", "gift_card", "voucher", "subscription"]).notNull().default("game_currency"),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").notNull().default(true),
+  instantDelivery: boolean("instant_delivery").notNull().default(true),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const productPackages = mysqlTable("product_packages", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  productId: varchar("product_id", { length: 36 }).notNull().references(() => products.id, { onDelete: "cascade" }),
+  label: varchar("label", { length: 191 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").notNull().default(true),
+  stock: int("stock"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+export const orders = mysqlTable("orders", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  orderNumber: varchar("order_number", { length: 191 }).notNull().unique(),
+  status: mysqlEnum("status", ["pending", "processing", "completed", "failed", "refunded"]).notNull().default("pending"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  notes: text("notes"),
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  utr: varchar("utr", { length: 100 }),
+  paymentVerifiedAt: timestamp("payment_verified_at"),
+  deliveryStatus: varchar("delivery_status", { length: 50 }),
+  deliveryNote: text("delivery_note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const orderItems = mysqlTable("order_items", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  orderId: varchar("order_id", { length: 36 }).notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: varchar("product_id", { length: 36 }).references(() => products.id),
+  packageId: varchar("package_id", { length: 36 }).references(() => productPackages.id),
+  productTitle: varchar("product_title", { length: 191 }).notNull(),
+  packageLabel: varchar("package_label", { length: 191 }),
+  quantity: int("quantity").notNull().default(1),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+});
+
+// ─── Page Views ───────────────────────────────────────────────────────────────
+export const pageViews = mysqlTable("page_views", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  sessionId: varchar("session_id", { length: 64 }).notNull(),
+  path: varchar("path", { length: 500 }).notNull(),
+  referrer: varchar("referrer", { length: 500 }),
+  deviceType: varchar("device_type", { length: 20 }),
+  durationMs: int("duration_ms"),
+  isBounce: boolean("is_bounce").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type PageView = typeof pageViews.$inferSelect;
+
+// ─── Transactions ─────────────────────────────────────────────────────────────
+export const transactions = mysqlTable("transactions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  transactionNumber: varchar("transaction_number", { length: 50 }).notNull().unique(),
+  orderId: varchar("order_id", { length: 36 }).references(() => orders.id),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  paymentMethod: varchar("payment_method", { length: 100 }).notNull(),
+  gateway: varchar("gateway", { length: 100 }),
+  gatewayRef: varchar("gateway_ref", { length: 191 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  status: mysqlEnum("status", ["pending", "success", "failed", "refunded"]).notNull().default("pending"),
+  failureReason: text("failure_reason"),
+  isRefund: boolean("is_refund").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Coupons ──────────────────────────────────────────────────────────────────
+export const coupons = mysqlTable("coupons", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  code: varchar("code", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  discountType: varchar("discount_type", { length: 50 }).notNull().default("percentage"),
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }),
+  maxUses: int("max_uses"),
+  usedCount: int("used_count").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ─── Support Tickets ──────────────────────────────────────────────────────────
+export const tickets = mysqlTable("tickets", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  ticketNumber: varchar("ticket_number", { length: 50 }).notNull().unique(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  category: varchar("category", { length: 100 }),
+  status: mysqlEnum("status", ["open", "in_progress", "resolved", "closed"]).notNull().default("open"),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).notNull().default("medium"),
+  assignedTo: varchar("assigned_to", { length: 36 }).references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const ticketReplies = mysqlTable("ticket_replies", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  ticketId: varchar("ticket_id", { length: 36 }).notNull().references(() => tickets.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  message: text("message").notNull(),
+  isStaff: boolean("is_staff").notNull().default(false),
+  attachmentUrl: text("attachment_url"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ─── Campaigns ────────────────────────────────────────────────────────────────
+export const campaigns = mysqlTable("campaigns", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 191 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull().default("banner"),
+  bannerUrl: text("banner_url"),
+  isActive: boolean("is_active").notNull().default(true),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ─── Hero Sliders ─────────────────────────────────────────────────────────────
+export const heroSliders = mysqlTable("hero_sliders", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  title: varchar("title", { length: 191 }).notNull(),
+  subtitle: text("subtitle"),
+  bannerUrl: text("banner_url"),
+  buttonText: varchar("button_text", { length: 100 }),
+  buttonLink: varchar("button_link", { length: 500 }),
+  linkedGameId: varchar("linked_game_id", { length: 36 }).references(() => games.id, { onDelete: "set null" }),
+  linkedProductId: varchar("linked_product_id", { length: 36 }).references(() => products.id, { onDelete: "set null" }),
+  startsAt: timestamp("starts_at"),
+  endsAt: timestamp("ends_at"),
+  showButton: boolean("show_button").notNull().default(true),
+  showText: boolean("show_text").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+export const reviews = mysqlTable("reviews", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  productId: varchar("product_id", { length: 36 }).references(() => products.id),
+  rating: int("rating").notNull(),
+  comment: text("comment"),
+  isApproved: boolean("is_approved").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// ─── Payment Methods ──────────────────────────────────────────────────────────
+export const paymentMethods = mysqlTable("payment_methods", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 191 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  paymentType: varchar("payment_type", { length: 20 }).notNull().default("CARD"),
+  provider: varchar("provider", { length: 100 }),
+  publicKey: text("public_key"),
+  secretKey: text("secret_key"),
+  webhookSecret: text("webhook_secret"),
+  mode: varchar("mode", { length: 20 }).notNull().default("test"),
+  supportedCurrencies: text("supported_currencies"),
+  isActive: boolean("is_active").notNull().default(true),
+  config: text("config"),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Relations ────────────────────────────────────────────────────────────────
+export const usersRelations = relations(users, ({ many }) => ({
+  orders: many(orders),
+  transactions: many(transactions),
+  tickets: many(tickets),
+  reviews: many(reviews),
+}));
+
+export const gamesRelations = relations(games, ({ many }) => ({
+  services: many(services),
+}));
+
+export const servicesRelations = relations(services, ({ one }) => ({
+  game: one(games, { fields: [services.gameId], references: [games.id] }),
+}));
+
+export const productsRelations = relations(products, ({ many }) => ({
+  packages: many(productPackages),
+  reviews: many(reviews),
+}));
+
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  user: one(users, { fields: [orders.userId], references: [users.id] }),
+  items: many(orderItems),
+  transactions: many(transactions),
+}));
+
+export const ticketsRelations = relations(tickets, ({ one, many }) => ({
+  user: one(users, { fields: [tickets.userId], references: [users.id] }),
+  replies: many(ticketReplies),
+}));
+
+// ─── Insert schemas & Types ───────────────────────────────────────────────────
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true, email: true, password: true, role: true, fullName: true, isActive: true,
+}).partial({ isActive: true });
+export const insertGameSchema = createInsertSchema(games).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertServiceSchema = createInsertSchema(services).omit({ id: true, createdAt: true });
+export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCouponSchema = createInsertSchema(coupons).omit({ id: true, createdAt: true });
+export const insertTicketSchema = createInsertSchema(tickets).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true });
+export const insertHeroSliderSchema = createInsertSchema(heroSliders).omit({ id: true, createdAt: true });
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({ id: true, createdAt: true });
+
+// ─── Plugins ──────────────────────────────────────────────────────────────────
+export const plugins = mysqlTable("plugins", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  name: varchar("name", { length: 191 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }).notNull().default("integration"),
+  pluginType: varchar("plugin_type", { length: 50 }).default("integration"),
+  version: varchar("version", { length: 20 }).default("1.0.0"),
+  author: varchar("author", { length: 191 }),
+  isEnabled: boolean("is_enabled").notNull().default(false),
+  config: text("config"),
+  settingsSchema: text("settings_schema"),
+  installedAt: timestamp("installed_at"),
+  fileSize: int("file_size"),
+  installPath: varchar("install_path", { length: 500 }),
+  status: varchar("status", { length: 20 }).notNull().default("inactive"),
+  hooks: text("hooks"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPluginSchema = createInsertSchema(plugins).omit({ id: true, createdAt: true, updatedAt: true });
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+export const notifications = mysqlTable("notifications", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  type: varchar("type", { length: 50 }).notNull().default("info"),
+  title: varchar("title", { length: 191 }).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  metadata: text("metadata"),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+
+// ─── Email Templates ──────────────────────────────────────────────────────────
+export const emailTemplates = mysqlTable("email_templates", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  type: varchar("type", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 191 }).notNull(),
+  subject: varchar("subject", { length: 500 }).notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
+  body: text("body").notNull(),
+  footerText: varchar("footer_text", { length: 500 }),
+  buttonText: varchar("button_text", { length: 191 }),
+  buttonLink: varchar("button_link", { length: 500 }),
+  copyEmail: varchar("copy_email", { length: 191 }),
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  styles: text("styles"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+export const sessions = mysqlTable("sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type Session = typeof sessions.$inferSelect;
+
+// ─── Audit Logs ───────────────────────────────────────────────────────────────
+export const auditLogs = mysqlTable("audit_logs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id, { onDelete: "set null" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  entity: varchar("entity", { length: 100 }),
+  entityId: varchar("entity_id", { length: 36 }),
+  oldValues: text("old_values"),
+  newValues: text("new_values"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+
+// ─── Email Verification Tokens ────────────────────────────────────────────────
+export const emailVerificationTokens = mysqlTable("email_verification_tokens", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
+
+// ─── Password Reset Tokens ────────────────────────────────────────────────────
+export const passwordResetTokens = mysqlTable("password_reset_tokens", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id, { onDelete: "cascade" }),
+  otpHash: text("otp_hash").notNull(),
+  resetToken: text("reset_token"),
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: int("attempts").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+export const siteSettings = mysqlTable("site_settings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Additional Fees ──────────────────────────────────────────────────────────
+export const fees = mysqlTable("fees", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull().default("fixed"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFeeSchema = createInsertSchema(fees).omit({ id: true, createdAt: true, updatedAt: true });
+export type Fee = typeof fees.$inferSelect;
+export type InsertFee = z.infer<typeof insertFeeSchema>;
+
+// ─── Busan Config ─────────────────────────────────────────────────────────────
+export const busanConfigs = mysqlTable("busan_configs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  apiToken: varchar("api_token", { length: 255 }),
+  apiBaseUrl: varchar("api_base_url", { length: 500 }).notNull().default("https://1gamestopup.com/api/v1"),
+  currency: varchar("currency", { length: 20 }).notNull().default("IDR"),
+  isActive: boolean("is_active").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertBusanConfigSchema = createInsertSchema(busanConfigs).omit({ id: true, updatedAt: true });
+export type BusanConfig = typeof busanConfigs.$inferSelect;
+export type InsertBusanConfig = z.infer<typeof insertBusanConfigSchema>;
+
+// ─── Busan Product Mappings ───────────────────────────────────────────────────
+export const busanMappings = mysqlTable("busan_mappings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  cmsProductId: varchar("cms_product_id", { length: 36 }).notNull(),
+  cmsProductName: varchar("cms_product_name", { length: 191 }),
+  busanProductId: varchar("busan_product_id", { length: 191 }).notNull(),
+  busanProductName: varchar("busan_product_name", { length: 191 }),
+  requiresZone: boolean("requires_zone").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertBusanMappingSchema = createInsertSchema(busanMappings).omit({ id: true, createdAt: true, updatedAt: true });
+export type BusanMapping = typeof busanMappings.$inferSelect;
+export type InsertBusanMapping = z.infer<typeof insertBusanMappingSchema>;
+
+// ─── Smile.one Config ─────────────────────────────────────────────────────────
+export const smileOneConfigs = mysqlTable("smile_one_configs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  uid: varchar("uid", { length: 191 }),
+  apiKey: varchar("api_key", { length: 255 }),
+  licenseKey: varchar("license_key", { length: 255 }),
+  region: varchar("region", { length: 50 }).notNull().default("global"),
+  email: varchar("email", { length: 191 }),
+  isActive: boolean("is_active").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSmileOneConfigSchema = createInsertSchema(smileOneConfigs).omit({ id: true, updatedAt: true });
+export type SmileOneConfig = typeof smileOneConfigs.$inferSelect;
+export type InsertSmileOneConfig = z.infer<typeof insertSmileOneConfigSchema>;
+
+// ─── Smile.one Product Mappings ───────────────────────────────────────────────
+export const smileOneMappings = mysqlTable("smile_one_mappings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  cmsProductId: varchar("cms_product_id", { length: 36 }).notNull(),
+  cmsProductName: varchar("cms_product_name", { length: 191 }),
+  smileProductId: varchar("smile_product_id", { length: 191 }).notNull(),
+  smileProductName: varchar("smile_product_name", { length: 191 }),
+  gameSlug: varchar("game_slug", { length: 191 }).notNull(),
+  region: varchar("region", { length: 50 }).notNull().default("global"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSmileOneMappingSchema = createInsertSchema(smileOneMappings).omit({ id: true, createdAt: true, updatedAt: true });
+export type SmileOneMapping = typeof smileOneMappings.$inferSelect;
+export type InsertSmileOneMapping = z.infer<typeof insertSmileOneMappingSchema>;
+
+// ─── UPI Payment Settings ─────────────────────────────────────────────────────
+export const upiPaymentSettings = mysqlTable("upi_payment_settings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  upiId: varchar("upi_id", { length: 191 }),
+  qrCodeUrl: text("qr_code_url"),
+  emailAddress: varchar("email_address", { length: 191 }),
+  emailPassword: text("email_password"),
+  imapHost: varchar("imap_host", { length: 191 }).notNull().default("imap.gmail.com"),
+  imapPort: int("imap_port").notNull().default(993),
+  imapLabel: varchar("imap_label", { length: 255 }).notNull().default("INBOX"),
+  isActive: boolean("is_active").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertUpiPaymentSettingsSchema = createInsertSchema(upiPaymentSettings).omit({ id: true, createdAt: true, updatedAt: true });
+export type UpiPaymentSettings = typeof upiPaymentSettings.$inferSelect;
+export type InsertUpiPaymentSettings = z.infer<typeof insertUpiPaymentSettingsSchema>;
+
+// ─── Unmatched Payments ───────────────────────────────────────────────────────
+export const unmatchedPayments = mysqlTable("unmatched_payments", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  utr: varchar("utr", { length: 100 }),
+  senderName: varchar("sender_name", { length: 191 }),
+  emailSubject: varchar("email_subject", { length: 500 }),
+  rawBody: text("raw_body"),
+  detectedAt: timestamp("detected_at").notNull().defaultNow(),
+  assignedToOrderId: varchar("assigned_to_order_id", { length: 36 }).references(() => orders.id, { onDelete: "set null" }),
+});
+
+export const insertUnmatchedPaymentSchema = createInsertSchema(unmatchedPayments).omit({ id: true, detectedAt: true });
+export type UnmatchedPayment = typeof unmatchedPayments.$inferSelect;
+export type InsertUnmatchedPayment = z.infer<typeof insertUnmatchedPaymentSchema>;
+
+// ─── Role Permissions ─────────────────────────────────────────────────────────
+export const rolePermissions = mysqlTable("role_permissions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  role: varchar("role", { length: 80 }).notNull().unique(),
+  label: varchar("label", { length: 120 }).notNull(),
+  isSystem: boolean("is_system").notNull().default(false),
+  permissions: text("permissions").notNull().default("[]"),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({ createdAt: true, updatedAt: true });
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+
+// ─── Liogames Config ──────────────────────────────────────────────────────────
+export const lioGamesConfigs = mysqlTable("liogames_configs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  memberCode: varchar("member_code", { length: 191 }),
+  secret: varchar("secret", { length: 255 }),
+  baseUrl: varchar("base_url", { length: 500 }).notNull().default("https://api.liogames.com/wp-json/liogames/v1"),
+  isActive: boolean("is_active").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertLioGamesConfigSchema = createInsertSchema(lioGamesConfigs).omit({ id: true, updatedAt: true });
+export type LioGamesConfig = typeof lioGamesConfigs.$inferSelect;
+export type InsertLioGamesConfig = z.infer<typeof insertLioGamesConfigSchema>;
+
+// ─── Liogames Product Mappings ────────────────────────────────────────────────
+export const lioGamesMappings = mysqlTable("liogames_mappings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  cmsProductId: varchar("cms_product_id", { length: 36 }).notNull(),
+  cmsProductName: varchar("cms_product_name", { length: 191 }),
+  lioProductId: int("lio_product_id").notNull(),
+  lioVariationId: int("lio_variation_id"),
+  lioProductName: varchar("lio_product_name", { length: 191 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertLioGamesMappingSchema = createInsertSchema(lioGamesMappings).omit({ id: true, createdAt: true, updatedAt: true });
+export type LioGamesMapping = typeof lioGamesMappings.$inferSelect;
+export type InsertLioGamesMapping = z.infer<typeof insertLioGamesMappingSchema>;
+
+// ─── Type Exports ─────────────────────────────────────────────────────────────
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Game = typeof games.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;
+export type Service = typeof services.$inferSelect;
+export type InsertService = z.infer<typeof insertServiceSchema>;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type ProductPackage = typeof productPackages.$inferSelect;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+export type Ticket = typeof tickets.$inferSelect;
+export type InsertTicket = z.infer<typeof insertTicketSchema>;
+export type TicketReply = typeof ticketReplies.$inferSelect;
+export type Campaign = typeof campaigns.$inferSelect;
+export type HeroSlider = typeof heroSliders.$inferSelect;
+export type InsertHeroSlider = z.infer<typeof insertHeroSliderSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type Plugin = typeof plugins.$inferSelect;
+export type InsertPlugin = z.infer<typeof insertPluginSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type SiteSetting = typeof siteSettings.$inferSelect;

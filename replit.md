@@ -6,8 +6,10 @@ A full-stack web CMS and e-commerce platform for selling digital products (game 
 
 - **Frontend**: React 19, Tailwind CSS 4, TanStack Query, Wouter (routing), Zustand (state), Radix UI / shadcn
 - **Backend**: Node.js + Express 5
-- **Database**: PostgreSQL via `pg` + Drizzle ORM (`drizzle-orm/node-postgres`) — uses Replit's built-in PostgreSQL
+- **Database (dev)**: PostgreSQL via `pg` + Drizzle ORM (`drizzle-orm/node-postgres`) — uses Replit's built-in PostgreSQL
+- **Database (production)**: MySQL via `mysql2` + Drizzle ORM (`drizzle-orm/mysql2`) — targets cPanel MySQL on deployment
 - **Build**: Vite (frontend), tsx (dev server), esbuild (production build via `npm run build`)
+  - `npm run build` creates `deploy.zip` — a self-contained package with all Node.js dependencies bundled inline (no npm install needed on the cPanel server)
 
 ## Project Structure
 
@@ -36,7 +38,8 @@ server/         Express backend
       easybuzz.ts      EasyBuzz (SHA512 hash → API access key → redirect)
       bharatpe.ts      BharatPe (API → redirect URL)
 shared/
-  schema.ts     Drizzle ORM schema (PostgreSQL / pg-core)
+  schema.ts        Drizzle ORM schema — PostgreSQL / pg-core (development)
+  schema.mysql.ts  Drizzle ORM schema — MySQL / mysql-core (production build)
 migrations/
   (managed by drizzle-kit push)
 ```
