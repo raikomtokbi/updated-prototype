@@ -23,40 +23,44 @@ function categoryLabel(cat: string) {
   return cat;
 }
 
+const cardHoverIn = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const img = e.currentTarget.querySelector<HTMLElement>(".card-img");
+  if (img) {
+    img.style.borderColor = "hsl(var(--primary) / 0.5)";
+    img.style.transform = "translateY(-3px)";
+    img.style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.15)";
+  }
+};
+const cardHoverOut = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const img = e.currentTarget.querySelector<HTMLElement>(".card-img");
+  if (img) {
+    img.style.borderColor = "hsl(var(--primary) / 0.15)";
+    img.style.transform = "translateY(0)";
+    img.style.boxShadow = "none";
+  }
+};
+
+const cardImgStyle: React.CSSProperties = {
+  aspectRatio: "1/1",
+  position: "relative",
+  overflow: "hidden",
+  borderRadius: "0.75rem",
+  border: "1px solid hsl(var(--primary) / 0.15)",
+  transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
+};
+
 function GameCard({ game }: { game: Game }) {
   return (
     <Link
       href={`/products/${game.slug}`}
       data-testid={`card-game-${game.id}`}
-      style={{
-        display: "block",
-        borderRadius: "0.75rem",
-        overflow: "hidden",
-        border: "1px solid hsl(var(--primary) / 0.15)",
-        background: "hsl(var(--card))",
-        textDecoration: "none",
-        transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-        cursor: "pointer",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.5)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.15)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
-      }}
+      style={{ display: "flex", flexDirection: "column", textDecoration: "none", cursor: "pointer" }}
+      onMouseEnter={cardHoverIn}
+      onMouseLeave={cardHoverOut}
     >
-      {/* Image — square container, fills fully */}
-      <div style={{ aspectRatio: "1/1", position: "relative", overflow: "visible", background: "hsl(258,35%,14%)" }}>
+      <div className="card-img" style={{ ...cardImgStyle, background: "hsl(var(--card))" }}>
         {game.logoUrl ? (
-          <img
-            src={game.logoUrl}
-            alt={game.name}
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          <img src={game.logoUrl} alt={game.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Gamepad2 size={28} style={{ color: "hsl(var(--primary) / 0.3)" }} />
@@ -67,13 +71,10 @@ function GameCard({ game }: { game: Game }) {
             HOT
           </span>
         )}
-        {/* Game name hanging below */}
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.3rem" }}>
-          <h3 style={{ fontSize: "0.62rem", fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {game.name}
-          </h3>
-        </div>
       </div>
+      <h3 style={{ fontSize: "0.62rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.3rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {game.name}
+      </h3>
     </Link>
   );
 }
@@ -83,66 +84,25 @@ function ProductCard({ product }: { product: Product }) {
     <Link
       href={`/products/${product.id}`}
       data-testid={`card-product-${product.id}`}
-      style={{
-        display: "block",
-        borderRadius: "0.75rem",
-        overflow: "hidden",
-        border: "1px solid hsl(var(--primary) / 0.15)",
-        background: "hsl(var(--card))",
-        textDecoration: "none",
-        transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-        cursor: "pointer",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.5)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.15)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.15)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
-      }}
+      style={{ display: "flex", flexDirection: "column", textDecoration: "none", cursor: "pointer" }}
+      onMouseEnter={cardHoverIn}
+      onMouseLeave={cardHoverOut}
     >
-      <div
-        style={{
-          height: "110px",
-          background: "linear-gradient(135deg, hsl(258,35%,16%), hsl(220,28%,10%))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-        }}
-      >
+      <div className="card-img" style={{ ...cardImgStyle, background: "linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted)))" }}>
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={product.imageUrl} alt={product.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <Gift size={32} style={{ color: "hsl(var(--primary) / 0.35)" }} />
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Gift size={28} style={{ color: "hsl(var(--primary) / 0.35)" }} />
+          </div>
         )}
+        <span style={{ position: "absolute", bottom: "0.3rem", right: "0.3rem", padding: "0.1rem 0.35rem", borderRadius: "3px", background: "hsl(var(--primary) / 0.85)", color: "white", fontSize: "0.52rem", fontWeight: 700, letterSpacing: "0.03em" }}>
+          {categoryLabel(product.category)}
+        </span>
       </div>
-      <div style={{ padding: "0.5rem 0.6rem 0.6rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.3rem", marginBottom: "0.25rem" }}>
-          <h3 style={{ fontSize: "0.72rem", fontWeight: 700, color: "hsl(var(--foreground))", flex: 1, lineHeight: 1.3 }}>
-            {product.title}
-          </h3>
-          <span className="badge badge-purple" style={{ fontSize: "0.58rem", whiteSpace: "nowrap" }}>
-            {categoryLabel(product.category)}
-          </span>
-        </div>
-        <div
-          style={{
-            marginTop: "0.3rem",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.25rem",
-            fontSize: "0.62rem",
-            fontWeight: 600,
-            color: "hsl(var(--primary))",
-          }}
-        >
-          View Packages <Zap size={10} />
-        </div>
-      </div>
+      <h3 style={{ fontSize: "0.62rem", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0.3rem 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {product.title}
+      </h3>
     </Link>
   );
 }
