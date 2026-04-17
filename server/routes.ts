@@ -1818,11 +1818,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // Save (upsert) template
   app.put("/api/admin/email-templates/:type", requireAdmin, async (req: Request, res: Response) => {
-    const { type } = req.params;
-    const allowed = DEFAULT_EMAIL_TEMPLATES.map((t) => t.type);
-    if (!allowed.includes(type)) return res.status(400).json({ message: "Unknown template type" });
-    const template = await storage.upsertEmailTemplate(type, { ...req.body, type });
-    res.json(template);
+    try {
+      const { type } = req.params;
+      const allowed = DEFAULT_EMAIL_TEMPLATES.map((t) => t.type);
+      if (!allowed.includes(type)) return res.status(400).json({ message: "Unknown template type" });
+      const template = await storage.upsertEmailTemplate(type, { ...req.body, type });
+      res.json(template);
+    } catch (err: any) {
+      console.error("[EmailTemplates] Save failed:", err);
+      res.status(500).json({ message: err?.message || "Failed to save template" });
+    }
   });
 
   // Preview template HTML

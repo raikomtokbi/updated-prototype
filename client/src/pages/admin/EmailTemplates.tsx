@@ -8,6 +8,7 @@ import {
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useMobile } from "@/components/admin/AdminLayout";
 import { useNavGuard } from "@/hooks/useNavGuard";
+import { useToast } from "@/hooks/use-toast";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -894,9 +895,10 @@ function TemplateEditor({
   // Live preview HTML - recomputed on every form change
   const previewHtml = useMemo(() => buildEmailHtmlClient(form), [form]);
 
+  const { toast } = useToast();
   const saveMut = useMutation({
-    mutationFn: (data: FormState) =>
-      fetch(`/api/admin/email-templates/${def.type}`, {
+    mutationFn: async (data: FormState) => {
+      const res = await fetch(`/api/admin/email-templates/${def.type}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "x-admin-role": "super_admin" },
         credentials: "include",
@@ -913,11 +915,13 @@ function TemplateEditor({
           isEnabled: data.isEnabled,
           styles: JSON.stringify(data.styles),
         }),
-      }).then(async (res) => {
-        const d = await res.json();
-        if (!res.ok) throw new Error(d.message);
-        return d;
-      }),
+      });
+      const text = await res.text();
+      let d: any = {};
+      try { d = text ? JSON.parse(text) : {}; } catch { d = { message: text || `HTTP ${res.status}` }; }
+      if (!res.ok) throw new Error(d.message || `Failed (${res.status})`);
+      return d;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/admin/email-templates"] });
       setSaved(true);
@@ -925,6 +929,10 @@ function TemplateEditor({
       setTimeout(() => setSaved(false), 2500);
       onSaved();
       onSaveSuccess?.();
+      toast({ title: "Template saved", description: `${def.name} saved successfully.` });
+    },
+    onError: (err: any) => {
+      toast({ title: "Save failed", description: err?.message || "Could not save template.", variant: "destructive" });
     },
   });
 

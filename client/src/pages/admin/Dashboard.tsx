@@ -111,7 +111,9 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       setEmailSent(true);
-      setEmailForm({ fromName: "", replyTo: "", to: "", subject: "", body: "" });
+      setEmailForm({ fromName: "", replyTo: "", cc: "", to: "", subject: "", body: "" });
+      setShowReplyTo(false);
+      setShowCC(false);
       toast({ title: "Email sent", description: "Your email was delivered successfully." });
       setTimeout(() => setEmailSent(false), 4000);
     },

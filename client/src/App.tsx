@@ -1,7 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Wrench } from "lucide-react";
+import { Wrench, Loader2 } from "lucide-react";
 import { applyThemeVars } from "@/lib/theme";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import Navbar from "./components/Navbar";
@@ -31,60 +31,71 @@ import ResetPassword from "./pages/ResetPassword";
 import PaymentReturn from "./pages/PaymentReturn";
 import UpiPayment from "./pages/UpiPayment";
 
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminAnalytics from "./pages/admin/Analytics";
-import TopupOrders from "./pages/admin/TopupOrders";
-import VoucherOrders from "./pages/admin/VoucherOrders";
-import Payments from "./pages/admin/Payments";
-import Refunds from "./pages/admin/Refunds";
-import SupportTickets from "./pages/admin/SupportTickets";
-import ContactSubmissions from "./pages/admin/ContactSubmissions";
-import Games from "./pages/admin/Games";
-import AdminVouchers from "./pages/admin/Vouchers";
-import GiftCards from "./pages/admin/GiftCards";
-import Subscriptions from "./pages/admin/Subscriptions";
-import Users from "./pages/admin/Users";
-import Subscribers from "./pages/admin/Subscribers";
-import Campaigns from "./pages/admin/Campaigns";
-import Coupons from "./pages/admin/Coupons";
-import ControlPanel from "./pages/admin/ControlPanel";
-import PaymentMethod from "./pages/admin/PaymentMethod";
-import ApiIntegration from "./pages/admin/ApiIntegration";
-import EmailTemplates from "./pages/admin/EmailTemplates";
-import ChooseTheme from "./pages/admin/ChooseTheme";
-import EditContent from "./pages/admin/EditContent";
-import RolesPermissions from "./pages/admin/RolesPermissions";
-import AdminProfile from "./pages/admin/AdminProfile";
+// Admin routes are lazy-loaded — they're only fetched when an admin visits /admin/*
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const TopupOrders = lazy(() => import("./pages/admin/TopupOrders"));
+const VoucherOrders = lazy(() => import("./pages/admin/VoucherOrders"));
+const Payments = lazy(() => import("./pages/admin/Payments"));
+const Refunds = lazy(() => import("./pages/admin/Refunds"));
+const SupportTickets = lazy(() => import("./pages/admin/SupportTickets"));
+const ContactSubmissions = lazy(() => import("./pages/admin/ContactSubmissions"));
+const Games = lazy(() => import("./pages/admin/Games"));
+const AdminVouchers = lazy(() => import("./pages/admin/Vouchers"));
+const GiftCards = lazy(() => import("./pages/admin/GiftCards"));
+const Subscriptions = lazy(() => import("./pages/admin/Subscriptions"));
+const Users = lazy(() => import("./pages/admin/Users"));
+const Subscribers = lazy(() => import("./pages/admin/Subscribers"));
+const Campaigns = lazy(() => import("./pages/admin/Campaigns"));
+const Coupons = lazy(() => import("./pages/admin/Coupons"));
+const ControlPanel = lazy(() => import("./pages/admin/ControlPanel"));
+const PaymentMethod = lazy(() => import("./pages/admin/PaymentMethod"));
+const ApiIntegration = lazy(() => import("./pages/admin/ApiIntegration"));
+const EmailTemplates = lazy(() => import("./pages/admin/EmailTemplates"));
+const ChooseTheme = lazy(() => import("./pages/admin/ChooseTheme"));
+const EditContent = lazy(() => import("./pages/admin/EditContent"));
+const RolesPermissions = lazy(() => import("./pages/admin/RolesPermissions"));
+const AdminProfile = lazy(() => import("./pages/admin/AdminProfile"));
+
+function AdminLoader() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+      <Loader2 className="animate-spin" size={28} style={{ color: "hsl(var(--primary))" }} />
+    </div>
+  );
+}
 
 function AdminRoutes() {
   return (
-    <Switch>
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/analytics" component={AdminAnalytics} />
-      <Route path="/admin/topup-orders" component={TopupOrders} />
-      <Route path="/admin/voucher-orders" component={VoucherOrders} />
-      <Route path="/admin/payments" component={Payments} />
-      <Route path="/admin/refunds" component={Refunds} />
-      <Route path="/admin/support-tickets" component={SupportTickets} />
-      <Route path="/admin/contact-submissions" component={ContactSubmissions} />
-      <Route path="/admin/games" component={Games} />
-      <Route path="/admin/gift-cards" component={GiftCards} />
-      <Route path="/admin/vouchers" component={AdminVouchers} />
-      <Route path="/admin/subscriptions" component={Subscriptions} />
-      <Route path="/admin/users" component={Users} />
-      <Route path="/admin/subscribers" component={Subscribers} />
-      <Route path="/admin/campaigns" component={Campaigns} />
-      <Route path="/admin/coupons" component={Coupons} />
-      <Route path="/admin/control-panel" component={ControlPanel} />
-      <Route path="/admin/payment-method" component={PaymentMethod} />
-      <Route path="/admin/api-integration" component={ApiIntegration} />
-      <Route path="/admin/email-templates" component={EmailTemplates} />
-      <Route path="/admin/choose-theme" component={ChooseTheme} />
-      <Route path="/admin/edit-content" component={EditContent} />
-      <Route path="/admin/roles-permissions" component={RolesPermissions} />
-      <Route path="/admin/profile" component={AdminProfile} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<AdminLoader />}>
+      <Switch>
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/analytics" component={AdminAnalytics} />
+        <Route path="/admin/topup-orders" component={TopupOrders} />
+        <Route path="/admin/voucher-orders" component={VoucherOrders} />
+        <Route path="/admin/payments" component={Payments} />
+        <Route path="/admin/refunds" component={Refunds} />
+        <Route path="/admin/support-tickets" component={SupportTickets} />
+        <Route path="/admin/contact-submissions" component={ContactSubmissions} />
+        <Route path="/admin/games" component={Games} />
+        <Route path="/admin/gift-cards" component={GiftCards} />
+        <Route path="/admin/vouchers" component={AdminVouchers} />
+        <Route path="/admin/subscriptions" component={Subscriptions} />
+        <Route path="/admin/users" component={Users} />
+        <Route path="/admin/subscribers" component={Subscribers} />
+        <Route path="/admin/campaigns" component={Campaigns} />
+        <Route path="/admin/coupons" component={Coupons} />
+        <Route path="/admin/control-panel" component={ControlPanel} />
+        <Route path="/admin/payment-method" component={PaymentMethod} />
+        <Route path="/admin/api-integration" component={ApiIntegration} />
+        <Route path="/admin/email-templates" component={EmailTemplates} />
+        <Route path="/admin/choose-theme" component={ChooseTheme} />
+        <Route path="/admin/edit-content" component={EditContent} />
+        <Route path="/admin/roles-permissions" component={RolesPermissions} />
+        <Route path="/admin/profile" component={AdminProfile} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
