@@ -1050,7 +1050,7 @@ function ServicesPanel({ game }: { game: Game }) {
                   </td>
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "nowrap", whiteSpace: "nowrap" }}>
                       <button
                         style={{ ...btnEdit, opacity: idx === 0 || reorderMut.isPending ? 0.4 : 1, cursor: idx === 0 ? "not-allowed" : "pointer" }}
                         onClick={() => move(idx, -1)}
