@@ -340,7 +340,7 @@ function ValueCardsEditor({ value, onChange }: { value: string; onChange: (v: st
               </button>
             </div>
             <textarea
-              style={{ width: "100%", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none", minHeight: "250px", lineHeight: 1.5, fontFamily: "inherit", boxSizing: "border-box", resize: "none" }}
+              style={{ width: "100%", padding: "6px 10px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "6px", color: "hsl(var(--foreground))", fontSize: "12px", outline: "none", minHeight: "52px", lineHeight: 1.4, fontFamily: "inherit", boxSizing: "border-box", resize: "vertical" }}
               value={card.desc}
               onChange={(e) => update(idx, "desc", e.target.value)}
               placeholder="Short description for this feature card"
