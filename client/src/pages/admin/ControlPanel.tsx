@@ -418,7 +418,11 @@ export default function ControlPanel() {
 
   const save = useMutation({
     mutationFn: (settings: SettingsMap) => adminApi.put("/settings", settings),
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
+      // Sync the cached "remote" snapshot to what we just saved so isDirty
+      // becomes false immediately — prevents the unsaved-changes popup from
+      // firing during the brief background refetch window.
+      qc.setQueryData(["/api/admin/settings"], (prev: SettingsMap | undefined) => ({ ...(prev ?? {}), ...vars }));
       qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
       qc.invalidateQueries({ queryKey: ["/api/about-stats"] });
@@ -450,12 +454,7 @@ export default function ControlPanel() {
 
   function leaveAndSave() {
     save.mutate(local, {
-      onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ["/api/admin/settings"] });
-        qc.invalidateQueries({ queryKey: ["/api/site-settings"] });
-        qc.invalidateQueries({ queryKey: ["/api/about-stats"] });
-        doLeave();
-      },
+      onSuccess: () => { doLeave(); },
     });
   }
 
