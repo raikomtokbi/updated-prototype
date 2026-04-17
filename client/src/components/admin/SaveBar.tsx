@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
 
 interface SaveBarProps {
@@ -10,17 +11,25 @@ interface SaveBarProps {
 }
 
 export function SaveBar({ show, saving, saved, onSave, label = "Unsaved changes", sidebarWidth = 236 }: SaveBarProps) {
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const effectiveLeft = isMobile ? 0 : sidebarWidth;
   return (
     <div
       style={{
         position: "fixed",
-        bottom: 20,
-        left: sidebarWidth,
+        bottom: isMobile ? 12 : 20,
+        left: effectiveLeft,
         right: 0,
-        zIndex: 200,
+        zIndex: 10000,
         pointerEvents: "none",
         display: "flex",
         justifyContent: "center",
+        padding: isMobile ? "0 10px" : 0,
         transition: "transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
         transform: show ? "translateY(0)" : "translateY(calc(100% + 30px))",
         opacity: show ? 1 : 0,
@@ -39,7 +48,7 @@ export function SaveBar({ show, saving, saved, onSave, label = "Unsaved changes"
           boxShadow: "0 4px 24px rgba(0,0,0,0.55)",
         }}
       >
-        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>
           <span
             style={{
               display: "inline-block",
@@ -50,7 +59,9 @@ export function SaveBar({ show, saving, saved, onSave, label = "Unsaved changes"
               flexShrink: 0,
             }}
           />
-          {saved ? "Saved!" : label}
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+            {saved ? "Saved!" : (isMobile ? "Unsaved changes" : label)}
+          </span>
         </span>
 
         <button
