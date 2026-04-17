@@ -32,12 +32,19 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [socialProviders, setSocialProviders] = useState<SocialProviders>({ enabled: false, google: false, facebook: false, discord: false });
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
 
   useEffect(() => {
     fetch("/api/auth/social-providers")
       .then((r) => r.json())
       .then((data) => setSocialProviders(data))
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 640); }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   if (isAuthenticated) {
@@ -89,7 +96,7 @@ export default function Register() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "2rem 1.5rem",
+        padding: isMobile ? "0.6rem 0.75rem" : "2rem 1.5rem",
         position: "relative",
       }}
     >
@@ -111,53 +118,62 @@ export default function Register() {
           background: "hsl(var(--card))",
           border: "1px solid hsl(var(--border))",
           borderRadius: "1rem",
-          padding: "2.5rem",
+          padding: isMobile ? "1.1rem 1rem" : "2.5rem",
           position: "relative",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? "0.85rem" : "2rem" }}>
           {siteLogo ? (
             <img
               src={siteLogo}
               alt={siteName}
-              style={{ width: "56px", height: "56px", objectFit: "contain", borderRadius: "0.75rem", margin: "0 auto 1rem", display: "block" }}
+              style={{
+                width: isMobile ? "40px" : "56px",
+                height: isMobile ? "40px" : "56px",
+                objectFit: "contain",
+                borderRadius: "0.75rem",
+                margin: isMobile ? "0 auto 0.5rem" : "0 auto 1rem",
+                display: "block",
+              }}
             />
           ) : (
             <div
               style={{
-                width: "52px",
-                height: "52px",
+                width: isMobile ? "40px" : "52px",
+                height: isMobile ? "40px" : "52px",
                 borderRadius: "0.75rem",
                 background: "hsl(var(--primary) / 0.12)",
                 border: "1px solid hsl(var(--primary) / 0.25)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 1rem",
+                margin: isMobile ? "0 auto 0.5rem" : "0 auto 1rem",
               }}
             >
-              <Zap size={24} style={{ color: "hsl(var(--primary))" }} />
+              <Zap size={isMobile ? 20 : 24} style={{ color: "hsl(var(--primary))" }} />
             </div>
           )}
           <h1
             className="font-orbitron"
             style={{
-              fontSize: "1.5rem",
+              fontSize: isMobile ? "1.15rem" : "1.5rem",
               fontWeight: 800,
               color: "hsl(var(--foreground))",
-              marginBottom: "0.4rem",
+              marginBottom: isMobile ? "0.2rem" : "0.4rem",
             }}
           >
             Create Account
           </h1>
-          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
-            Join {siteName} and start topping up instantly
-          </p>
+          {!isMobile && (
+            <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
+              Join {siteName} and start topping up instantly
+            </p>
+          )}
         </div>
 
         <form
           onSubmit={handleRegister}
-          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+          style={{ display: "flex", flexDirection: "column", gap: isMobile ? "0.55rem" : "1rem" }}
         >
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
             <div>
@@ -419,34 +435,34 @@ export default function Register() {
         </form>
 
         {socialProviders.enabled && (socialProviders.google || socialProviders.facebook || socialProviders.discord) && (
-          <div style={{ marginTop: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <div style={{ marginTop: isMobile ? "0.85rem" : "1.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: isMobile ? "0.55rem" : "1rem" }}>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
               <span style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>or sign up with</span>
               <div style={{ flex: 1, height: "1px", background: "hsl(var(--border))" }} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", gap: "0.5rem" }}>
               {socialProviders.google && (
-                <a href="/api/auth/oauth/google" style={{ textDecoration: "none" }} data-testid="button-social-google">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
+                <a href="/api/auth/oauth/google" style={{ textDecoration: "none", flex: isMobile ? 1 : "none" }} data-testid="button-social-google">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <GoogleIcon size={18} />
-                    Continue with Google
+                    {isMobile ? "Google" : "Continue with Google"}
                   </div>
                 </a>
               )}
               {socialProviders.facebook && (
-                <a href="/api/auth/oauth/facebook" style={{ textDecoration: "none" }} data-testid="button-social-facebook">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
+                <a href="/api/auth/oauth/facebook" style={{ textDecoration: "none", flex: isMobile ? 1 : "none" }} data-testid="button-social-facebook">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiFacebook size={16} style={{ color: "#1877F2" }} />
-                    Continue with Facebook
+                    {isMobile ? "Facebook" : "Continue with Facebook"}
                   </div>
                 </a>
               )}
               {socialProviders.discord && (
-                <a href="/api/auth/oauth/discord" style={{ textDecoration: "none" }} data-testid="button-social-discord">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
+                <a href="/api/auth/oauth/discord" style={{ textDecoration: "none", flex: isMobile ? 1 : "none" }} data-testid="button-social-discord">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", width: "100%", padding: isMobile ? "0.55rem 0.5rem" : "0.6rem 1rem", borderRadius: "0.5rem", background: "hsl(var(--border))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: "0.68rem", fontWeight: 500, cursor: "pointer" }}>
                     <SiDiscord size={16} style={{ color: "#5865F2" }} />
-                    Continue with Discord
+                    {isMobile ? "Discord" : "Continue with Discord"}
                   </div>
                 </a>
               )}
@@ -454,7 +470,7 @@ export default function Register() {
           </div>
         )}
 
-        <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+        <div style={{ marginTop: isMobile ? "0.85rem" : "1.5rem", textAlign: "center" }}>
           <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Already have an account?{" "}
             <Link
