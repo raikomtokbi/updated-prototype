@@ -255,6 +255,7 @@ const DEFAULTS: SettingsMap = {
   social_instagram: "",
   social_discord: "",
   // SEO
+  site_url: "",
   seo_title: "Nexcoin — Game Top-Ups, Vouchers & Subscriptions",
   seo_description: "Buy game credits, vouchers, and subscriptions instantly. Fast, secure & affordable.",
   seo_keywords: "game top-up, game credits, mobile legends, free fire, voucher",
@@ -787,6 +788,19 @@ export default function ControlPanel() {
           <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>SEO Settings</span>
         </div>
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Site URL (canonical)</label>
+            <input
+              data-testid="input-site-url"
+              style={inputStyle}
+              value={local.site_url ?? ""}
+              onChange={(e) => set("site_url", e.target.value)}
+              placeholder="https://yourdomain.com"
+            />
+            <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
+              Used for the canonical &lt;link&gt; tag and absolute URLs in sitemap, OpenGraph tags, and emails.
+            </div>
+          </div>
           <div>
             <label style={labelStyle}>Meta Title</label>
             <input
