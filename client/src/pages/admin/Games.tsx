@@ -1221,31 +1221,25 @@ export default function Games() {
                     </div>
                   </div>
                 ) : (
-                  /* ── Desktop card layout (unchanged) ── */
+                  /* ── Desktop card layout ── */
                   <div
-                    style={{ display: "flex", flexDirection: "column", padding: "12px 16px", gap: "8px", cursor: "pointer" }}
+                    style={{ display: "flex", alignItems: "center", padding: "10px 16px", gap: "12px", cursor: "pointer" }}
                     onClick={() => setExpandedId(expandedId === g.id ? null : g.id)}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
-                        {expandedId === g.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                      </span>
-                      {g.logoUrl ? (
-                        <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
-                      ) : (
-                        <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "hsl(var(--primary) / 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
-                        </div>
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
-                        <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
+                    {g.logoUrl ? (
+                      <img src={g.logoUrl} alt={g.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "hsl(var(--primary) / 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Gamepad2 size={14} style={{ color: "hsla(258,90%,66%,0.6)" }} />
                       </div>
-                      <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "13px", color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</div>
+                      <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.slug}</div>
                     </div>
 
                     <div
-                      style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", paddingLeft: "44px" }}
+                      style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
@@ -1263,6 +1257,25 @@ export default function Games() {
                         <Trash2 size={11} />
                       </button>
                     </div>
+
+                    <span style={{ ...statusBadge(g.status === "active"), flexShrink: 0 }}>{g.status}</span>
+                    <span
+                      style={{
+                        color: "hsl(var(--muted-foreground))",
+                        flexShrink: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "6px",
+                        transition: "transform 0.2s ease, background 0.15s ease",
+                        transform: expandedId === g.id ? "rotate(0deg)" : "rotate(0deg)",
+                      }}
+                      title={expandedId === g.id ? "Collapse" : "Expand services"}
+                    >
+                      {expandedId === g.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    </span>
                   </div>
                 )}
 
