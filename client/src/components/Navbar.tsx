@@ -68,7 +68,7 @@ function SearchDropdown({
 }: {
   results: SearchItem[];
   query: string;
-  onSelect: () => void;
+  onSelect: (slug: string) => void;
 }) {
   if (!query.trim() || results.length === 0) return null;
 
@@ -90,10 +90,11 @@ function SearchDropdown({
       }}
     >
       {results.slice(0, 8).map((item) => (
-        <Link
+        <a
           key={item.id}
           href={`/products/${item.slug}`}
-          onClick={onSelect}
+          onMouseDown={(e) => { e.preventDefault(); onSelect(item.slug); }}
+          onClick={(e) => e.preventDefault()}
           style={{
             display: "flex",
             alignItems: "center",
@@ -102,6 +103,7 @@ function SearchDropdown({
             textDecoration: "none",
             borderBottom: "1px solid hsl(var(--primary) / 0.08)",
             transition: "background 0.12s",
+            cursor: "pointer",
           }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
@@ -154,7 +156,7 @@ function SearchDropdown({
 
           {/* Arrow hint */}
           <div style={{ color: "hsl(var(--primary) / 0.4)", fontSize: "0.68rem", flexShrink: 0 }}>→</div>
-        </Link>
+        </a>
       ))}
 
       {results.length === 0 && query.trim() && (
@@ -225,10 +227,11 @@ export default function Navbar() {
 
   const showDropdown = dropdownOpen && searchVal.trim().length > 0;
 
-  function handleSelect() {
+  function handleSelect(slug?: string) {
     setSearchVal("");
     setDropdownOpen(false);
     setSearchOpen(false);
+    if (slug) navigate(`/products/${slug}`);
   }
 
   const desktopRef = useSearchDropdown(searchVal, () => setDropdownOpen(false));
@@ -658,10 +661,12 @@ export default function Navbar() {
                 }}
               >
                 {filteredResults.slice(0, 6).map((item) => (
-                  <Link
+                  <a
                     key={item.id}
                     href={`/products/${item.slug}`}
-                    onClick={handleSelect}
+                    onMouseDown={(e) => { e.preventDefault(); navigate(`/products/${item.slug}`); handleSelect(); }}
+                    onTouchStart={() => { navigate(`/products/${item.slug}`); handleSelect(); }}
+                    onClick={(e) => e.preventDefault()}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -669,6 +674,7 @@ export default function Navbar() {
                       padding: "9px 12px",
                       textDecoration: "none",
                       borderBottom: "1px solid hsl(var(--primary) / 0.08)",
+                      cursor: "pointer",
                     }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
@@ -702,7 +708,7 @@ export default function Navbar() {
                         {CATEGORY_LABEL[item.category] ?? item.category}
                       </div>
                     </div>
-                  </Link>
+                  </a>
                 ))}
               </div>
             )}
