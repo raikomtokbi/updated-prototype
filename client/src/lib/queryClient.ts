@@ -1,10 +1,19 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { useAuthStore } from "./store/authstore";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
+}
+
+function adminHeadersFor(url: string): Record<string, string> {
+  if (typeof url === "string" && url.startsWith("/api/admin")) {
+    const role = useAuthStore.getState().user?.role ?? "super_admin";
+    return { "x-admin-role": role };
+  }
+  return {};
 }
 
 export async function apiRequest(
@@ -17,6 +26,7 @@ export async function apiRequest(
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
+      ...adminHeadersFor(url),
       ...(extraHeaders ?? {}),
     },
     body: data ? JSON.stringify(data) : undefined,
@@ -33,8 +43,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const url = queryKey.join("/") as string;
+    const res = await fetch(url, {
       credentials: "include",
+      headers: adminHeadersFor(url),
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
