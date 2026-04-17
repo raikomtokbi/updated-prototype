@@ -32,7 +32,7 @@ export default function Contact() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to send message");
-      setSuccess("Thanks for reaching out! We'll reply to your email within 24 hours.");
+      setSuccess("Thanks for reaching out! We'll reply to your email within 72 hours, excluding holidays.");
       setName("");
       setEmail("");
       setMessage("");
@@ -139,10 +139,10 @@ export default function Contact() {
               Response time
             </p>
             <p style={{ fontSize: "0.82rem", color: "hsl(var(--foreground))", fontWeight: 500 }}>
-              Within 24 hours
+              Within 72 hours
             </p>
             <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", marginTop: "0.3rem" }}>
-              Mon – Sun, including public holidays
+              Mon – Fri, excluding public holidays
             </p>
           </div>
         </div>
