@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2, Link2, Zap, Smile, ArrowLeft, RefreshCw, CheckCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Loader2, TrendingUp, Gamepad2, Link2, Zap, Smile, ArrowLeft, RefreshCw, CheckCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { ProductMappingModal } from "@/components/admin/ProductMappingModal";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
@@ -240,7 +240,7 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
           labelStyle={labelStyle}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={labelStyle}>Category</label>
           <select style={inputStyle} value={form.category} onChange={(e) => set("category", e.target.value)}>
@@ -256,10 +256,6 @@ function GameForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_GAME; 
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
-        <div>
-          <label style={labelStyle}>Sort Order</label>
-          <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
       </div>
 
@@ -475,17 +471,13 @@ function ServiceForm({ initial, onSubmit, loading }: { initial: typeof EMPTY_SER
           <input style={inputStyle} type="number" step="0.01" value={form.finalPrice} onChange={(e) => set("finalPrice", e.target.value)} placeholder="auto" />
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: "0.7rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.7rem" }}>
         <div>
           <label style={labelStyle}>Status</label>
           <select style={inputStyle} value={form.status} onChange={(e) => set("status", e.target.value)}>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
-        <div>
-          <label style={labelStyle}>Sort Order</label>
-          <input style={inputStyle} type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", parseInt(e.target.value) || 0)} />
         </div>
         <div>
           <label style={labelStyle}>Stock <span style={{ fontWeight: 400, textTransform: "none", fontSize: "10px" }}>(blank = unlimited)</span></label>
@@ -995,6 +987,27 @@ function ServicesPanel({ game }: { game: Game }) {
     mutationFn: (id: string) => adminApi.delete(`/services/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }),
   });
+  const reorderMut = useMutation({
+    mutationFn: async (updates: { id: string; sortOrder: number }[]) => {
+      await Promise.all(updates.map((u) => adminApi.patch(`/services/${u.id}`, { sortOrder: u.sortOrder })));
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [`/api/admin/services?gameId=${game.id}`] }),
+  });
+
+  const sortedSvcs = [...svcs].sort(
+    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)
+  );
+
+  function move(idx: number, dir: -1 | 1) {
+    const target = idx + dir;
+    if (target < 0 || target >= sortedSvcs.length) return;
+    const updates = sortedSvcs.map((s, i) => ({
+      id: s.id,
+      sortOrder: i === idx ? target : i === target ? idx : i,
+    }));
+    reorderMut.mutate(updates);
+  }
+
   return (
     <div style={{ padding: "0 16px 16px", marginTop: "8px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -1019,7 +1032,7 @@ function ServicesPanel({ game }: { game: Game }) {
               </tr>
             </thead>
             <tbody>
-              {svcs.map((s) => (
+              {sortedSvcs.map((s, idx) => (
                 <tr key={s.id} style={{ borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
                   <td style={{ padding: "8px 10px", fontWeight: 500, color: "hsl(var(--foreground))" }}>
                     <div>{s.name}</div>
@@ -1037,7 +1050,25 @@ function ServicesPanel({ game }: { game: Game }) {
                   </td>
                   <td style={{ padding: "8px 10px" }}><span style={statusBadge(s.status === "active")}>{s.status}</span></td>
                   <td style={{ padding: "8px 10px" }}>
-                    <div style={{ display: "flex", gap: "6px" }}>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <button
+                        style={{ ...btnEdit, opacity: idx === 0 || reorderMut.isPending ? 0.4 : 1, cursor: idx === 0 ? "not-allowed" : "pointer" }}
+                        onClick={() => move(idx, -1)}
+                        disabled={idx === 0 || reorderMut.isPending}
+                        title="Move up"
+                        data-testid={`button-move-up-service-${s.id}`}
+                      >
+                        <ArrowUp size={11} />
+                      </button>
+                      <button
+                        style={{ ...btnEdit, opacity: idx === sortedSvcs.length - 1 || reorderMut.isPending ? 0.4 : 1, cursor: idx === sortedSvcs.length - 1 ? "not-allowed" : "pointer" }}
+                        onClick={() => move(idx, 1)}
+                        disabled={idx === sortedSvcs.length - 1 || reorderMut.isPending}
+                        title="Move down"
+                        data-testid={`button-move-down-service-${s.id}`}
+                      >
+                        <ArrowDown size={11} />
+                      </button>
                       <button style={btnEdit} onClick={() => setEditSvc(s)}><Pencil size={11} /></button>
                       <button style={btnDanger} onClick={() => { if (confirm("Delete this service?")) delMut.mutate(s.id); }}><Trash2 size={11} /></button>
                     </div>
