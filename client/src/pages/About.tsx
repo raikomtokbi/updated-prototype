@@ -24,6 +24,7 @@ export default function About() {
   });
 
   const siteName = settings?.site_name || "Nexcoin";
+  const siteLogo = settings?.site_logo || "";
   const headline = settings?.about_headline || `About ${siteName}`;
   const tagline =
     settings?.about_tagline ||
@@ -82,12 +83,23 @@ export default function About() {
         <div
           style={{
             width: "56px", height: "56px", borderRadius: "0.9rem",
-            background: "hsla(258,90%,66%,0.12)", border: "1px solid hsla(258,90%,66%,0.25)",
+            background: siteLogo ? "transparent" : "hsla(258,90%,66%,0.12)",
+            border: siteLogo ? "none" : "1px solid hsla(258,90%,66%,0.25)",
             display: "flex", alignItems: "center", justifyContent: "center",
             margin: "0 auto 1.25rem", position: "relative",
+            overflow: "hidden",
           }}
         >
-          <Zap size={26} style={{ color: "hsl(var(--primary))" }} />
+          {siteLogo ? (
+            <img
+              src={siteLogo}
+              alt={`${siteName} logo`}
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              data-testid="img-about-logo"
+            />
+          ) : (
+            <Zap size={26} style={{ color: "hsl(var(--primary))" }} />
+          )}
         </div>
         <h1
           className="font-orbitron"
