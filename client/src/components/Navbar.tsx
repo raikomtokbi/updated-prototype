@@ -247,6 +247,17 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
+  // Dynamically update the browser favicon and apple-touch-icon from admin settings
+  useEffect(() => {
+    if (!siteSettings) return;
+    const faviconUrl = (siteSettings as any).site_favicon || (siteSettings as any).pwa_icon || "";
+    if (!faviconUrl) return;
+    const iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const appleLink = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+    if (iconLink) iconLink.href = faviconUrl;
+    if (appleLink) appleLink.href = (siteSettings as any).pwa_icon || faviconUrl;
+  }, [siteSettings]);
+
   const announcementEnabled = siteSettings?.announcement_enabled === "true";
   const announcementText = siteSettings?.announcement_text || "";
   const showAnnouncement = announcementEnabled && !!announcementText;

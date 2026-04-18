@@ -35,6 +35,8 @@ async function getSeoValues(): Promise<Record<string, string>> {
     map.seo_keywords || "game top-up, game credits, voucher, gift card";
   const ogImage = map.og_image || map.site_logo || "";
   const siteUrl = map.site_url || process.env.SITE_URL || "";
+  const faviconUrl = map.site_favicon || map.pwa_icon || "/favicon.png";
+  const appleTouchIconUrl = map.pwa_icon || map.site_favicon || "/icons/icon-192.png";
 
   const values: Record<string, string> = {
     __SEO_TITLE__: seoTitle,
@@ -44,6 +46,8 @@ async function getSeoValues(): Promise<Record<string, string>> {
     __OG_DESCRIPTION__: seoDescription,
     __OG_IMAGE__: ogImage,
     __SITE_URL__: siteUrl,
+    __FAVICON_URL__: faviconUrl,
+    __APPLE_TOUCH_ICON_URL__: appleTouchIconUrl,
   };
 
   cache = { at: now, values };
