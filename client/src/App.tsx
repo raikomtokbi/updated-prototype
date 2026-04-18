@@ -109,9 +109,15 @@ function ScrollToTop() {
 function PublicRoutes() {
   return (
     <div className="min-h-screen flex flex-col">
+      <a
+        href="#main-content"
+        className="skip-to-content"
+      >
+        Skip to main content
+      </a>
       <ScrollToTop />
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/products" component={Products} />

@@ -255,7 +255,10 @@ function HeroSlider() {
         {SLIDES.map((_, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => goTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            aria-current={i === current ? "true" : undefined}
             data-testid={`button-slide-dot-${i}`}
             style={{
               width: i === current ? "20px" : "6px", height: "6px", borderRadius: "9999px",
@@ -360,9 +363,9 @@ function FeaturesStrip() {
                   <Icon size={20} color="hsl(var(--primary))" />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                  <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem", margin: "0 0 0.25rem" }}>
                     {title}
-                  </h3>
+                  </p>
                   <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
                 </div>
               </div>
@@ -398,12 +401,12 @@ function TrendingGames() {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
             <Zap size={16} color="hsl(var(--primary))" />
-            <span
+            <h2
               className="font-orbitron"
-              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}
             >
               Trending Now
-            </span>
+            </h2>
           </div>
           <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Top up the most popular games instantly
@@ -531,12 +534,12 @@ function VouchersSection() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
               <Gift size={16} color="hsl(var(--primary))" />
-              <span
+              <h2
                 className="font-orbitron"
-                style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+                style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}
               >
                 Vouchers & Gift Cards
-              </span>
+              </h2>
             </div>
             <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
               Top up instantly with vouchers and gift cards
@@ -667,12 +670,12 @@ function GamesGrid() {
         <div style={{ marginBottom: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
             <Gamepad2 size={16} color="hsl(var(--primary))" />
-            <span
+            <h2
               className="font-orbitron"
-              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))" }}
+              style={{ fontSize: "0.9rem", fontWeight: 800, color: "hsl(var(--foreground))", margin: 0 }}
             >
               Games
-            </span>
+            </h2>
           </div>
           <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             Browse our full game catalog and top up instantly
@@ -1078,7 +1081,7 @@ function Footer() {
 
           {/* Marketplace */}
           <div>
-            <h4
+            <h3
               style={{
                 fontSize: "0.68rem",
                 fontWeight: 700,
@@ -1089,7 +1092,7 @@ function Footer() {
               }}
             >
               Marketplace
-            </h4>
+            </h3>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {MARKETPLACE.map((item) => (
                 <li key={item.label}>
@@ -1108,7 +1111,7 @@ function Footer() {
 
           {/* About */}
           <div>
-            <h4
+            <h3
               style={{
                 fontSize: "0.68rem",
                 fontWeight: 700,
@@ -1119,7 +1122,7 @@ function Footer() {
               }}
             >
               About
-            </h4>
+            </h3>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {ABOUT_LINKS.map((item) => (
                 <li key={item.label}>
@@ -1138,7 +1141,7 @@ function Footer() {
 
           {/* Legals */}
           <div>
-            <h4
+            <h3
               style={{
                 fontSize: "0.68rem",
                 fontWeight: 700,
@@ -1149,7 +1152,7 @@ function Footer() {
               }}
             >
               Legals
-            </h4>
+            </h3>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
               {LEGAL_LINKS.map((item) => (
                 <li key={item.label}>

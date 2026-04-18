@@ -279,6 +279,7 @@ export default function Navbar() {
         </div>
       )}
       <nav
+        aria-label="Main navigation"
         style={{
           background: isLight ? "rgba(255,255,255,0.93)" : "rgba(0, 0, 0, 0.88)",
           borderBottom: isLight ? "1px solid hsl(var(--border))" : "1px solid hsl(var(--primary) / 0.18)",
@@ -894,7 +895,7 @@ export default function Navbar() {
         </div>
 
         {/* Drawer nav links */}
-        <nav style={{ padding: "0.75rem 0.75rem 0", flex: 1, overflowY: "auto" }}>
+        <nav aria-label="Mobile navigation" style={{ padding: "0.75rem 0.75rem 0", flex: 1, overflowY: "auto" }}>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
