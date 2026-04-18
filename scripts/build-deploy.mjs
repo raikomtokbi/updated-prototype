@@ -87,6 +87,25 @@ if (!fs.existsSync(frontendSrc)) {
 }
 copyDir(frontendSrc, frontendDest);
 
+// ── Step 4.5: Restore SEO tokens in built index.html ─────────
+// The vite-plugin-meta-images replaces __OG_IMAGE__ with the Replit dev
+// domain URL at build time. We restore the token here so the production
+// server's seoInjector can substitute the correct URL from site_settings.
+const builtIndexHtml = path.join(frontendDest, "index.html");
+if (fs.existsSync(builtIndexHtml)) {
+  let html = fs.readFileSync(builtIndexHtml, "utf-8");
+  html = html.replace(
+    /(<meta\s+property="og:image"\s+content=")[^"]*(")/,
+    '$1__OG_IMAGE__$2'
+  );
+  html = html.replace(
+    /(<meta\s+name="twitter:image"\s+content=")[^"]*(")/,
+    '$1__OG_IMAGE__$2'
+  );
+  fs.writeFileSync(builtIndexHtml, html, "utf-8");
+  console.log("Restored __OG_IMAGE__ token in client/dist/index.html");
+}
+
 // ── Step 5: Create upload directories ────────────────────────
 console.log("\n=== Step 5: Creating required directories ===");
 ensureDir(path.join(deployDir, "public", "uploads"));
