@@ -772,6 +772,27 @@ function GamesGrid() {
   );
 }
 
+// ─── Countdown helper ─────────────────────────────────────────────────────────
+function useCountdown(target: string) {
+  const calc = () => {
+    if (!target) return null;
+    const diff = new Date(target).getTime() - Date.now();
+    if (diff <= 0) return { d: 0, h: 0, m: 0, s: 0, expired: true };
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    return { d, h, m, s, expired: false };
+  };
+  const [tick, setTick] = useState(calc);
+  useEffect(() => {
+    if (!target) return;
+    const id = setInterval(() => setTick(calc()), 1000);
+    return () => clearInterval(id);
+  }, [target]);
+  return tick;
+}
+
 // ─── Weekend Bonus Banner ─────────────────────────────────────────────────────
 function BonusBanner() {
   const { data: siteSettings = {} } = useQuery<Record<string, string>>({
@@ -784,6 +805,8 @@ function BonusBanner() {
     || ((siteSettings.bonus_main_title || "GET") + " " + (siteSettings.bonus_percent || "20%") + " BONUS " + (siteSettings.bonus_main_suffix || "CREDITS"));
   const description = siteSettings.bonus_description || "Top up using any supported payment method this weekend and receive bonus credits on all top-ups. Offer ends Sunday.";
   const buttonText = siteSettings.bonus_button_text || "Claim Now";
+  const expiresAt = siteSettings.bonus_expires_at || "";
+  const countdown = useCountdown(expiresAt);
 
   if (siteSettings.bonus_enabled !== "true") return null;
 
@@ -824,6 +847,37 @@ function BonusBanner() {
             {description}
           </p>
         </div>
+
+        {/* Countdown */}
+        {countdown && !countdown.expired && (
+          <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+            {[
+              { v: countdown.d, label: "D" },
+              { v: countdown.h, label: "H" },
+              { v: countdown.m, label: "M" },
+              { v: countdown.s, label: "S" },
+            ].map(({ v, label }) => (
+              <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                <div style={{
+                  width: "38px", height: "36px",
+                  background: "hsl(var(--primary) / 0.1)",
+                  border: "1px solid hsl(var(--primary) / 0.22)",
+                  borderRadius: "7px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "0.88rem", fontWeight: 800, fontFamily: "var(--font-orbitron, monospace)",
+                  color: "hsl(var(--primary))",
+                  letterSpacing: "-0.02em",
+                }}>
+                  {String(v).padStart(2, "0")}
+                </div>
+                <span style={{ fontSize: "0.52rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", letterSpacing: "0.08em" }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {countdown?.expired && (
+          <span style={{ fontSize: "0.65rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>Offer ended</span>
+        )}
 
         {/* CTA */}
         <Link

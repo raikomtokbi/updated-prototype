@@ -189,6 +189,7 @@ export default function Campaigns() {
     headline: "",
     button_text: "",
     description: "",
+    expires_at: "",
   });
 
   useEffect(() => {
@@ -200,6 +201,7 @@ export default function Campaigns() {
         headline,
         button_text: settings.bonus_button_text ?? "",
         description: settings.bonus_description ?? "",
+        expires_at: settings.bonus_expires_at ?? "",
       });
       setBonusEnabled(settings.bonus_enabled === "true");
     }
@@ -322,6 +324,19 @@ export default function Campaigns() {
             <label style={labelStyle}>Button Text</label>
             <input data-testid="input-bonus-button" style={inputStyle} value={bonus.button_text} onChange={(e) => setB("button_text", e.target.value)} placeholder="e.g. Claim Now" />
           </div>
+          <div>
+            <label style={labelStyle}>Offer Expires (optional)</label>
+            <input
+              data-testid="input-bonus-expires"
+              type="datetime-local"
+              style={inputStyle}
+              value={bonus.expires_at ? bonus.expires_at.slice(0, 16) : ""}
+              onChange={(e) => setB("expires_at", e.target.value ? new Date(e.target.value).toISOString() : "")}
+            />
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
+              Displays a live countdown on the banner. Leave blank to hide the timer.
+            </p>
+          </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button
               onClick={() => saveBonus.mutate({
@@ -329,6 +344,7 @@ export default function Campaigns() {
                 bonus_headline: bonus.headline,
                 bonus_button_text: bonus.button_text,
                 bonus_description: bonus.description,
+                bonus_expires_at: bonus.expires_at,
                 bonus_enabled: bonusEnabled.toString(),
               })}
               disabled={saveBonus.isPending}
