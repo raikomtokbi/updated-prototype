@@ -300,6 +300,15 @@ function FeaturesStrip() {
     },
   ];
 
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIdx(prev => (prev + 1) % features.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [features.length]);
+
   return (
     <section
       style={{
@@ -309,51 +318,81 @@ function FeaturesStrip() {
         width: "calc(100% - 20px)",
         maxWidth: "1320px",
         margin: "12px auto 0",
-        padding: "1.25rem 1.5rem",
+        padding: "1rem 1.5rem 0.85rem",
         overflow: "hidden",
       }}
     >
-      <div
-        style={{
-          maxWidth: "1320px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "2rem",
-        }}
-      >
-        {features.map(({ iconName, title, desc }, idx: number) => {
-          const Icon = iconMap[iconName] || Zap;
-          return (
-            <div
-              key={idx}
-              style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}
-            >
+      {/* Sliding track */}
+      <div style={{ overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            width: `${features.length * 100}%`,
+            transform: `translateX(-${(activeIdx * 100) / features.length}%)`,
+            transition: "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          {features.map(({ iconName, title, desc }, idx: number) => {
+            const Icon = iconMap[iconName] || Zap;
+            return (
               <div
+                key={idx}
                 style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "10px",
-                  background: "hsl(var(--primary) / 0.12)",
-                  border: "1px solid hsl(var(--primary) / 0.25)",
+                  width: `${100 / features.length}%`,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  boxShadow: "0 0 12px hsl(var(--primary) / 0.15)",
+                  gap: "1rem",
+                  padding: "0.1rem 0",
                 }}
               >
-                <Icon size={20} color="hsl(var(--primary))" />
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "10px",
+                    background: "hsl(var(--primary) / 0.12)",
+                    border: "1px solid hsl(var(--primary) / 0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: "0 0 12px hsl(var(--primary) / 0.15)",
+                  }}
+                >
+                  <Icon size={20} color="hsl(var(--primary))" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                    {title}
+                  </h3>
+                  <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
+                </div>
               </div>
-              <div>
-                <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.3rem" }}>
-                  {title}
-                </h3>
-                <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>{desc}</p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Dot indicators */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "0.75rem" }}>
+        {features.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveIdx(idx)}
+            style={{
+              width: activeIdx === idx ? "20px" : "6px",
+              height: "6px",
+              borderRadius: "3px",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              background: activeIdx === idx
+                ? "hsl(var(--primary))"
+                : "hsl(var(--muted-foreground) / 0.35)",
+              transition: "width 0.3s ease, background 0.3s ease",
+            }}
+          />
+        ))}
       </div>
     </section>
   );
@@ -1224,8 +1263,8 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
       <HeroSlider />
-      <TrendingGames />
       <FeaturesStrip />
+      <TrendingGames />
       <VouchersSection />
       <BonusBanner />
       <GamesGrid />
