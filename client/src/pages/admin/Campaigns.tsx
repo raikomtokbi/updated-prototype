@@ -34,6 +34,34 @@ const labelStyle: React.CSSProperties = {
   display: "block", textTransform: "uppercase", letterSpacing: "0.04em",
 };
 
+function tzParts(date: Date, tz: string) {
+  const p = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(date);
+  const g = (t: string) => p.find(x => x.type === t)?.value ?? "00";
+  return { y: g("year"), mo: g("month"), d: g("day"), h: g("hour") === "24" ? "00" : g("hour"), mi: g("minute"), s: g("second") };
+}
+
+function isoToLocalInput(iso: string, tz: string): string {
+  if (!iso) return "";
+  try {
+    const { y, mo, d, h, mi } = tzParts(new Date(iso), tz);
+    return `${y}-${mo}-${d}T${h}:${mi}`;
+  } catch { return iso.slice(0, 16); }
+}
+
+function localInputToISO(localDt: string, tz: string): string {
+  if (!localDt) return "";
+  try {
+    const naive = new Date(localDt + "Z");
+    const { y, mo, d, h, mi, s } = tzParts(naive, tz);
+    const wallMs = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`).getTime();
+    const utcMs = naive.getTime() + (naive.getTime() - wallMs);
+    return new Date(utcMs).toISOString();
+  } catch { return new Date(localDt).toISOString(); }
+}
+
 function CampaignForm({ initial, onSubmit, loading }: { initial: Partial<Campaign>; onSubmit: (d: any) => void; loading: boolean }) {
   const isMobile = useMobile(768);
   const toInput = (d: Date | string | null | undefined) => {
@@ -325,13 +353,20 @@ export default function Campaigns() {
             <input data-testid="input-bonus-button" style={inputStyle} value={bonus.button_text} onChange={(e) => setB("button_text", e.target.value)} placeholder="e.g. Claim Now" />
           </div>
           <div>
-            <label style={labelStyle}>Offer Expires (optional)</label>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "4px" }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Offer Expires (optional)</label>
+              {settings.site_timezone && (
+                <span style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", background: "hsl(var(--muted))", borderRadius: "4px", padding: "1px 6px" }}>
+                  {settings.site_timezone}
+                </span>
+              )}
+            </div>
             <input
               data-testid="input-bonus-expires"
               type="datetime-local"
               style={inputStyle}
-              value={bonus.expires_at ? bonus.expires_at.slice(0, 16) : ""}
-              onChange={(e) => setB("expires_at", e.target.value ? new Date(e.target.value).toISOString() : "")}
+              value={isoToLocalInput(bonus.expires_at, settings.site_timezone || "UTC")}
+              onChange={(e) => setB("expires_at", e.target.value ? localInputToISO(e.target.value, settings.site_timezone || "UTC") : "")}
             />
             <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "4px 0 0" }}>
               Displays a live countdown on the banner. Leave blank to hide the timer.
