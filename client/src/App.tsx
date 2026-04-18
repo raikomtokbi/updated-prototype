@@ -259,11 +259,13 @@ export default function App() {
     document.head.appendChild(inline);
   }, [siteSettings?.ga_measurement_id]);
 
-  // ── Fire GA page_view on every navigation ─────────────────────────────────
+  // ── Fire GA page_view on every navigation (storefront only) ──────────────
   useEffect(() => {
     const measurementId = siteSettings?.ga_measurement_id?.trim();
     if (!measurementId) return;
     if (typeof (window as any).gtag !== "function") return;
+    // Skip tracking for all admin panel routes
+    if (location.startsWith("/admin")) return;
     (window as any).gtag("event", "page_view", {
       page_path: location,
       send_to: measurementId,
