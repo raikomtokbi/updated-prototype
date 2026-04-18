@@ -13,7 +13,6 @@ import {
   Ticket,
   RefreshCcw,
   Users,
-  UserCheck,
   Megaphone,
   BadgePercent,
   Settings,
@@ -107,7 +106,6 @@ const navSections: NavSection[] = [
     title: "USER MANAGER",
     items: [
       { label: "User", icon: <Users size={15} />, path: "/admin/users", permKey: "users" },
-      { label: "Subscriber", icon: <UserCheck size={15} />, path: "/admin/subscribers", permKey: "subscribers" },
     ],
   },
   {

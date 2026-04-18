@@ -46,7 +46,6 @@ const AdminVouchers = lazy(() => import("./pages/admin/Vouchers"));
 const GiftCards = lazy(() => import("./pages/admin/GiftCards"));
 const Subscriptions = lazy(() => import("./pages/admin/Subscriptions"));
 const Users = lazy(() => import("./pages/admin/Users"));
-const Subscribers = lazy(() => import("./pages/admin/Subscribers"));
 const Campaigns = lazy(() => import("./pages/admin/Campaigns"));
 const Coupons = lazy(() => import("./pages/admin/Coupons"));
 const ControlPanel = lazy(() => import("./pages/admin/ControlPanel"));
@@ -83,7 +82,6 @@ function AdminRoutes() {
         <Route path="/admin/vouchers" component={AdminVouchers} />
         <Route path="/admin/subscriptions" component={Subscriptions} />
         <Route path="/admin/users" component={Users} />
-        <Route path="/admin/subscribers" component={Subscribers} />
         <Route path="/admin/campaigns" component={Campaigns} />
         <Route path="/admin/coupons" component={Coupons} />
         <Route path="/admin/control-panel" component={ControlPanel} />

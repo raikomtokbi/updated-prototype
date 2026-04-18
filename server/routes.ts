@@ -1332,11 +1332,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(result.map(({ password: _p, ...u }) => u));
   });
 
-  app.get("/api/admin/users/subscribers", requireAdmin, async (_req, res) => {
-    const result = await storage.getSubscribedUsers();
-    res.json(result.map(({ password: _p, ...u }) => u));
-  });
-
   app.post("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       const user = await storage.createUser(req.body);

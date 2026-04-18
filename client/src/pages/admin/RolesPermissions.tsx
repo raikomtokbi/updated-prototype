@@ -4,7 +4,7 @@ import {
   Shield, Plus, Trash2, Save, ChevronDown, ChevronRight,
   Lock, LayoutDashboard, BarChart2, ShoppingCart, Tag, CreditCard,
   RotateCcw, Mail, LifeBuoy, Gamepad2, Package, Ticket,
-  RefreshCcw, Users, UserCheck, Megaphone, BadgePercent,
+  RefreshCcw, Users, Megaphone, BadgePercent,
   Settings, Wallet, Plug, Palette, FileEdit, Key, X, Check,
   GripVertical,
 } from "lucide-react";
@@ -58,7 +58,6 @@ const PERMISSION_GROUPS = [
     group: "Users",
     permissions: [
       { key: "users", label: "Users", Icon: Users },
-      { key: "subscribers", label: "Subscribers", Icon: UserCheck },
     ],
   },
   {
