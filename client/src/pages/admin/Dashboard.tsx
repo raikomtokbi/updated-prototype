@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import AdminLayout, { useMobile } from "@/components/admin/AdminLayout";
-import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown, Mail, Send, X } from "lucide-react";
+import { Loader2, DollarSign, ShoppingBag, Users, LifeBuoy, Calendar, ChevronDown, Mail, Send, X, Bell } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/lib/store/authstore";
@@ -96,8 +96,27 @@ export default function Dashboard() {
   const [orderRangeKey, setOrderRangeKey] = useState("today");
   const [orderCustomRange, setOrderCustomRange] = useState<DateRange | undefined>(undefined);
 
-  // ── Email composer state ───────────────────────────────────────────────────
+  // ── Push notification state ────────────────────────────────────────────────
   const { toast } = useToast();
+  const [pushForm, setPushForm] = useState({ title: "", body: "", url: "" });
+  const { data: pushStats } = useQuery<{ total: number }>({
+    queryKey: ["/api/admin/push/stats"],
+    refetchInterval: 30000,
+  });
+  const sendPushMutation = useMutation({
+    mutationFn: async (data: typeof pushForm) => {
+      const res = await apiRequest("POST", "/api/admin/push/send", data);
+      if (!res.ok) { const j = await res.json(); throw new Error(j.error || "Failed"); }
+      return res.json() as Promise<{ sent: number; failed: number }>;
+    },
+    onSuccess: (result) => {
+      setPushForm({ title: "", body: "", url: "" });
+      toast({ title: "Notification sent", description: `Delivered to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.` });
+    },
+    onError: (e: any) => {
+      toast({ title: "Send failed", description: e.message, variant: "destructive" });
+    },
+  });
   const [emailForm, setEmailForm] = useState({ fromName: "", replyTo: "", cc: "", to: "", subject: "", body: "" });
   const [emailSent, setEmailSent] = useState(false);
   const [showReplyTo, setShowReplyTo] = useState(false);
@@ -300,6 +319,66 @@ export default function Dashboard() {
               <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))" }}>{sc.sub}</div>
             </div>
           ))}
+        </div>
+
+        {/* ── Push Notifications ──────────────────────────────────── */}
+        <div style={{ ...card, padding: isMobile ? "12px" : "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
+            <div style={{ width: "28px", height: "28px", borderRadius: "7px", background: "hsl(var(--primary) / 0.12)", border: "1px solid hsl(var(--primary) / 0.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Bell size={14} color="hsl(var(--primary))" />
+            </div>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))" }}>Push Notifications</span>
+            <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", background: "hsl(var(--muted))", borderRadius: "12px", padding: "2px 8px", marginLeft: "auto" }}>
+              {pushStats?.total ?? 0} subscriber{pushStats?.total !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr auto", gap: "8px", alignItems: "end" }}>
+            <div>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "4px" }}>Title</label>
+              <input
+                data-testid="input-push-title"
+                value={pushForm.title}
+                onChange={(e) => setPushForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. New deal available!"
+                style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "6px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "4px" }}>Message</label>
+              <input
+                data-testid="input-push-body"
+                value={pushForm.body}
+                onChange={(e) => setPushForm(f => ({ ...f, body: e.target.value }))}
+                placeholder="Short notification message"
+                style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "6px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "4px" }}>Link (optional)</label>
+              <input
+                data-testid="input-push-url"
+                value={pushForm.url}
+                onChange={(e) => setPushForm(f => ({ ...f, url: e.target.value }))}
+                placeholder="/products or https://..."
+                style={{ width: "100%", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px", padding: "6px 10px", fontSize: "12px", color: "hsl(var(--foreground))", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <button
+              data-testid="button-push-send"
+              disabled={!pushForm.title || !pushForm.body || sendPushMutation.isPending}
+              onClick={() => sendPushMutation.mutate(pushForm)}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                background: (!pushForm.title || !pushForm.body || sendPushMutation.isPending) ? "hsl(var(--muted))" : "hsl(var(--primary))",
+                color: (!pushForm.title || !pushForm.body || sendPushMutation.isPending) ? "hsl(var(--muted-foreground))" : "hsl(var(--primary-foreground))",
+                border: "none", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", fontWeight: 600, cursor: (!pushForm.title || !pushForm.body || sendPushMutation.isPending) ? "not-allowed" : "pointer",
+                whiteSpace: "nowrap", flexShrink: 0, transition: "background 0.2s",
+              }}
+            >
+              {sendPushMutation.isPending ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={12} />}
+              Send
+            </button>
+          </div>
         </div>
 
         {/* ── Charts ─────────────────────────────────────────────────── */}

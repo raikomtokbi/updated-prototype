@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Wrench, Loader2 } from "lucide-react";
 import { applyThemeVars } from "@/lib/theme";
 import { usePageTracking } from "@/hooks/usePageTracking";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 import Navbar from "./components/Navbar";
 import CookieBanner from "./components/CookieBanner";
 import Home from "./pages/Home";
@@ -235,6 +236,7 @@ export default function App() {
   const [location] = useLocation();
   const isAdmin = location === "/admin" || location.startsWith("/admin/");
   usePageTracking();
+  usePushSubscription();
 
   const { data: siteSettings, isLoading: settingsLoading } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],

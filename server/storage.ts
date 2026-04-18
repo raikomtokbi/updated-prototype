@@ -37,9 +37,11 @@ import {
   lioGamesConfigs, lioGamesMappings,
   upiPaymentSettings, unmatchedPayments,
   rolePermissions,
+  pushSubscriptions,
   type UpiPaymentSettings, type InsertUpiPaymentSettings,
   type UnmatchedPayment, type InsertUnmatchedPayment,
   type RolePermission,
+  type PushSubscription, type InsertPushSubscription,
 } from "@shared/schema";
 import { eq, desc, asc, count, sum, and, gte, lte, lt, sql, not, like } from "drizzle-orm";
 import { db } from "./db";
@@ -264,6 +266,12 @@ export interface IStorage {
   deleteRolePermission(role: string): Promise<void>;
   updateRolePermissionOrders(orders: { role: string; sortOrder: number }[]): Promise<void>;
   seedDefaultRolePermissions(): Promise<void>;
+
+  // Push Subscriptions
+  savePushSubscription(data: InsertPushSubscription): Promise<PushSubscription>;
+  deletePushSubscription(endpoint: string): Promise<void>;
+  getAllPushSubscriptions(): Promise<PushSubscription[]>;
+  countPushSubscriptions(): Promise<number>;
 }
 
 // ─── Helper: fetch-after-write (no RETURNING needed) ─────────────────────────
@@ -1373,6 +1381,30 @@ export class DatabaseStorage implements IStorage {
         }
       }
     }
+  }
+  // ── Push Subscriptions ────────────────────────────────────────────────────
+  async savePushSubscription(data: InsertPushSubscription): Promise<PushSubscription> {
+    const id = randomUUID();
+    await db.insert(pushSubscriptions).values({ id, ...data })
+      .onConflictDoUpdate({
+        target: pushSubscriptions.endpoint,
+        set: { p256dh: data.p256dh, auth: data.auth },
+      });
+    const [row] = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.endpoint, data.endpoint));
+    return row;
+  }
+
+  async deletePushSubscription(endpoint: string): Promise<void> {
+    await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+
+  async getAllPushSubscriptions(): Promise<PushSubscription[]> {
+    return db.select().from(pushSubscriptions);
+  }
+
+  async countPushSubscriptions(): Promise<number> {
+    const [row] = await db.select({ n: count() }).from(pushSubscriptions);
+    return row?.n ?? 0;
   }
 }
 

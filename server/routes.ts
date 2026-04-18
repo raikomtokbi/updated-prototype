@@ -4,6 +4,7 @@ import type { Server } from "http";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, createHmac, randomUUID } from "crypto";
+import webpush from "web-push";
 import { generateOrderNumber } from "./lib/idGenerator";
 import { startEmailPaymentPoller } from "./services/emailPaymentService";
 import bcrypt from "bcryptjs";
@@ -3314,6 +3315,90 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       console.error("[auto-expire] Error expiring pending orders:", err);
     }
   }, TEN_MIN_MS);
+
+  // ── VAPID key init ────────────────────────────────────────────────────────
+  (async () => {
+    try {
+      let pub = await storage.getSiteSetting("vapid_public_key");
+      let priv = await storage.getSiteSetting("vapid_private_key");
+      if (!pub?.value || !priv?.value) {
+        const keys = webpush.generateVAPIDKeys();
+        await storage.upsertSiteSetting("vapid_public_key", keys.publicKey);
+        await storage.upsertSiteSetting("vapid_private_key", keys.privateKey);
+        pub = { value: keys.publicKey } as any;
+        priv = { value: keys.privateKey } as any;
+        console.log("[Push] Generated new VAPID keys");
+      }
+      webpush.setVapidDetails("mailto:admin@nexcoin.app", pub!.value!, priv!.value!);
+    } catch (err) {
+      console.error("[Push] VAPID init error:", err);
+    }
+  })();
+
+  // ── Push: return public VAPID key ─────────────────────────────────────────
+  app.get("/api/push/vapid-key", async (_req, res) => {
+    try {
+      const key = await storage.getSiteSetting("vapid_public_key");
+      if (!key?.value) return res.status(503).json({ error: "Push not ready" });
+      res.json({ publicKey: key.value });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ── Push: save subscription ───────────────────────────────────────────────
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const { endpoint, keys } = req.body;
+      if (!endpoint || !keys?.p256dh || !keys?.auth)
+        return res.status(400).json({ error: "Invalid subscription" });
+      await storage.savePushSubscription({ endpoint, p256dh: keys.p256dh, auth: keys.auth });
+      res.json({ ok: true });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ── Push: remove subscription ─────────────────────────────────────────────
+  app.post("/api/push/unsubscribe", async (req, res) => {
+    try {
+      const { endpoint } = req.body;
+      if (endpoint) await storage.deletePushSubscription(endpoint);
+      res.json({ ok: true });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ── Push: subscriber count (admin) ────────────────────────────────────────
+  app.get("/api/admin/push/stats", requireAdmin, async (_req, res) => {
+    try {
+      const total = await storage.countPushSubscriptions();
+      res.json({ total });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ── Push: send notification (admin) ───────────────────────────────────────
+  app.post("/api/admin/push/send", requireAdmin, async (req, res) => {
+    try {
+      const { title, body, url, icon } = req.body;
+      if (!title || !body) return res.status(400).json({ error: "title and body are required" });
+      const subs = await storage.getAllPushSubscriptions();
+      if (subs.length === 0) return res.json({ sent: 0, failed: 0 });
+      const payload = JSON.stringify({ title, body, url: url || "/", icon: icon || "/favicon.ico" });
+      let sent = 0; let failed = 0;
+      await Promise.all(subs.map(async (sub) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          );
+          sent++;
+        } catch (err: any) {
+          failed++;
+          // Remove expired/invalid subscriptions
+          if (err.statusCode === 404 || err.statusCode === 410) {
+            await storage.deletePushSubscription(sub.endpoint).catch(() => {});
+          }
+        }
+      }));
+      res.json({ sent, failed });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
 
   // Start UPI email payment poller — pass handleOrderCompleted so auto-matched
   // payments also trigger Busan fulfillment + confirmation email.
