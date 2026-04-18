@@ -42,13 +42,14 @@ run("npx vite build --config vite.config.deploy.ts");
 
 // ── Step 3: Bundle server with esbuild ────────────────────────
 console.log("\n=== Step 3: Bundling server ===");
+ensureDir(path.join(deployDir, "dist"));
 const result = await esbuild.build({
   entryPoints: [path.join(root, "server", "index.ts")],
   bundle: true,
   platform: "node",
   target: "node18",
   format: "cjs",
-  outfile: path.join(deployDir, "app.js"),
+  outfile: path.join(deployDir, "dist", "index.cjs"),
   define: { "process.env.NODE_ENV": '"production"' },
   external: [
     "fsevents",
@@ -74,7 +75,7 @@ if (result.errors?.length) {
   console.error("esbuild errors:", result.errors);
   process.exit(1);
 }
-console.log("Server bundle: nexcoin-deploy/app.js");
+console.log("Server bundle: nexcoin-deploy/dist/index.cjs");
 
 // ── Step 4: Copy built frontend ───────────────────────────────
 console.log("\n=== Step 4: Copying frontend assets ===");
@@ -131,10 +132,10 @@ Generated: ${new Date().toISOString()}
 ## Requirements
 - Node.js 18+ (managed via cPanel Node.js App)
 - MySQL 5.7+  or  MariaDB 10.3+
-- NO npm install needed — all dependencies are bundled into app.js
+- NO npm install needed — all dependencies are bundled into dist/index.cjs
 
 ## Folder Contents
-  app.js           ← startup file for cPanel (all server code bundled here)
+  dist/index.cjs   ← startup file for cPanel (all server code bundled here)
   client/dist/     ← compiled frontend (HTML, JS, CSS, images)
   public/uploads/  ← user-uploaded images (must be writable, chmod 755)
   uploads/plugins/ ← plugin uploads (must be writable, chmod 755)
@@ -168,7 +169,7 @@ STEP-BY-STEP DEPLOYMENT
    • Application mode: Production
    • Application root : /home/<cpanel_user>/public_html  (or your subfolder)
    • Application URL  : yourdomain.com  (or subdomain)
-   • Startup file     : app.js
+   • Startup file     : dist/index.cjs
    • Click CREATE
 
 5. SET ENVIRONMENT VARIABLES
@@ -239,6 +240,6 @@ Next steps:
   2. Import setup.sql into your MySQL database
   3. Upload all files to your cPanel hosting
   4. Set DATABASE_URL, NODE_ENV, SESSION_SECRET in cPanel
-  5. Set startup file to app.js and start the app
+  5. Set startup file to dist/index.cjs and start the app
   6. See README.txt for full instructions
 `);

@@ -1,13 +1,13 @@
 # Nexcoin — cPanel Deployment Guide
-Generated: 2026-04-18T08:52:44.183Z
+Generated: 2026-04-18T08:56:09.774Z
 
 ## Requirements
 - Node.js 18+ (managed via cPanel Node.js App)
 - MySQL 5.7+  or  MariaDB 10.3+
-- NO npm install needed — all dependencies are bundled into app.js
+- NO npm install needed — all dependencies are bundled into dist/index.cjs
 
 ## Folder Contents
-  app.js           ← startup file for cPanel (all server code bundled here)
+  dist/index.cjs   ← startup file for cPanel (all server code bundled here)
   client/dist/     ← compiled frontend (HTML, JS, CSS, images)
   public/uploads/  ← user-uploaded images (must be writable, chmod 755)
   uploads/plugins/ ← plugin uploads (must be writable, chmod 755)
@@ -41,7 +41,7 @@ STEP-BY-STEP DEPLOYMENT
    • Application mode: Production
    • Application root : /home/<cpanel_user>/public_html  (or your subfolder)
    • Application URL  : yourdomain.com  (or subdomain)
-   • Startup file     : app.js
+   • Startup file     : dist/index.cjs
    • Click CREATE
 
 5. SET ENVIRONMENT VARIABLES
