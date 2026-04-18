@@ -322,55 +322,48 @@ function FeaturesStrip() {
         overflow: "hidden",
       }}
     >
-      {/* Sliding track */}
-      <div style={{ overflow: "hidden" }}>
-        <div
-          style={{
-            display: "flex",
-            width: `${features.length * 100}%`,
-            transform: `translateX(-${(activeIdx * 100) / features.length}%)`,
-            transition: "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
-        >
-          {features.map(({ iconName, title, desc }, idx: number) => {
-            const Icon = iconMap[iconName] || Zap;
-            return (
+      {/* Crossfade track */}
+      <div style={{ position: "relative", height: "44px" }}>
+        {features.map(({ iconName, title, desc }, idx: number) => {
+          const Icon = iconMap[iconName] || Zap;
+          return (
+            <div
+              key={idx}
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                opacity: activeIdx === idx ? 1 : 0,
+                transition: "opacity 0.7s ease-in-out",
+                pointerEvents: activeIdx === idx ? "auto" : "none",
+              }}
+            >
               <div
-                key={idx}
                 style={{
-                  width: `${100 / features.length}%`,
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "10px",
+                  background: "hsl(var(--primary) / 0.12)",
+                  border: "1px solid hsl(var(--primary) / 0.25)",
                   display: "flex",
                   alignItems: "center",
-                  gap: "1rem",
-                  padding: "0.1rem 0",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                <div
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "10px",
-                    background: "hsl(var(--primary) / 0.12)",
-                    border: "1px solid hsl(var(--primary) / 0.25)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    boxShadow: "0 0 12px hsl(var(--primary) / 0.15)",
-                  }}
-                >
-                  <Icon size={20} color="hsl(var(--primary))" />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
-                    {title}
-                  </h3>
-                  <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
-                </div>
+                <Icon size={20} color="hsl(var(--primary))" />
               </div>
-            );
-          })}
-        </div>
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem" }}>
+                  {title}
+                </h3>
+                <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
