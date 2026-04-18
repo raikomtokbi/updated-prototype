@@ -183,15 +183,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       const siteName = obj.site_name || "Nexcoin";
       const iconSrc = obj.pwa_icon || obj.site_logo || "";
+      // When a custom icon is uploaded, use it exclusively with explicit sizes so the
+      // browser is forced to pick it. Listing static icons alongside it causes browsers
+      // to prefer the static ones (they have explicit px dimensions; "any" is for SVGs).
       const icons = iconSrc
         ? [
-            { src: iconSrc, sizes: "any", type: "image/png", purpose: "any maskable" },
-            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+            { src: iconSrc, sizes: "512x512", type: "image/png", purpose: "any" },
+            { src: iconSrc, sizes: "192x192", type: "image/png", purpose: "any" },
+            { src: iconSrc, sizes: "512x512", type: "image/png", purpose: "maskable" },
+            { src: iconSrc, sizes: "192x192", type: "image/png", purpose: "maskable" },
           ]
         : [
-            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
           ];
 
       const manifest = {
