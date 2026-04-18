@@ -174,6 +174,52 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     console.warn("[Seed] Could not seed default admin:", err);
   }
 
+  // ── Dynamic PWA manifest (reads site settings so icon/name stay in sync) ──
+  app.get("/manifest.json", async (_req, res) => {
+    try {
+      const settings = await storage.getAllSiteSettings();
+      const obj: Record<string, string> = {};
+      settings.forEach((s) => { obj[s.key] = s.value ?? ""; });
+
+      const siteName = obj.site_name || "Nexcoin";
+      const iconSrc = obj.pwa_icon || obj.site_logo || "";
+      const icons = iconSrc
+        ? [
+            { src: iconSrc, sizes: "any", type: "image/png", purpose: "any maskable" },
+            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          ]
+        : [
+            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          ];
+
+      const manifest = {
+        name: `${siteName} — Game Top-Ups`,
+        short_name: siteName,
+        description: obj.site_description || "Buy game credits, vouchers, and subscriptions instantly.",
+        start_url: "/",
+        scope: "/",
+        display: "standalone",
+        orientation: "portrait-primary",
+        background_color: "#0d1117",
+        theme_color: "#6d48e5",
+        categories: ["games", "shopping"],
+        icons,
+        shortcuts: [
+          { name: "Browse Games", short_name: "Games", url: "/products", description: "Browse all top-up games" },
+          { name: "Offers", short_name: "Offers", url: "/offers", description: "Current promotions" },
+        ],
+      };
+
+      res.setHeader("Content-Type", "application/manifest+json");
+      res.setHeader("Cache-Control", "no-cache, no-store");
+      res.json(manifest);
+    } catch {
+      res.status(500).json({ error: "Failed to generate manifest" });
+    }
+  });
+
   // ── Public site settings (read-only for storefront) ───────────────────────
   app.get("/api/site-settings", async (_req, res) => {
     const settings = await storage.getAllSiteSettings();

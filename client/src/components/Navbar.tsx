@@ -178,7 +178,8 @@ export default function Navbar() {
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user, logout } = useAuthStore();
   const isLight = useIsLight();
-  const { canInstall, install } = useInstallPrompt();
+  const { canInstall, hasNativePrompt, isIOS, install, dismiss } = useInstallPrompt();
+  const [showIOSHint, setShowIOSHint] = useState(false);
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -453,33 +454,71 @@ export default function Navbar() {
 
             {/* Install PWA */}
             {canInstall && (
-              <button
-                data-testid="button-install-pwa"
-                onClick={install}
-                aria-label="Install app"
-                title="Add to home screen"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
-                  padding: "0 0.75rem",
-                  height: "34px",
-                  borderRadius: "8px",
-                  background: "hsl(var(--primary) / 0.1)",
-                  border: "1px solid hsl(var(--primary) / 0.35)",
-                  color: "hsl(var(--primary))",
-                  fontSize: "0.68rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.18)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
-              >
-                <Download size={13} />
-                <span className="desktop-only" style={{ display: "inline" }}>Install App</span>
-              </button>
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+                  <button
+                    data-testid="button-install-pwa"
+                    onClick={() => {
+                      if (isIOS) { setShowIOSHint((v) => !v); }
+                      else if (hasNativePrompt) { install(); }
+                      else { setShowIOSHint((v) => !v); }
+                    }}
+                    aria-label="Add to home screen"
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.35rem",
+                      padding: "0 0.65rem", height: "34px", borderRadius: "8px 0 0 8px",
+                      background: "hsl(var(--primary) / 0.1)",
+                      border: "1px solid hsl(var(--primary) / 0.35)",
+                      borderRight: "none",
+                      color: "hsl(var(--primary))",
+                      fontSize: "0.68rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.18)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
+                  >
+                    <Download size={13} />
+                    <span className="desktop-only" style={{ display: "inline" }}>Install App</span>
+                  </button>
+                  <button
+                    data-testid="button-dismiss-pwa"
+                    onClick={dismiss}
+                    aria-label="Dismiss install prompt"
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      width: "26px", height: "34px", borderRadius: "0 8px 8px 0",
+                      background: "hsl(var(--primary) / 0.1)",
+                      border: "1px solid hsl(var(--primary) / 0.35)",
+                      color: "hsl(var(--primary))", cursor: "pointer", flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.18)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
+                  >
+                    <X size={11} />
+                  </button>
+                </div>
+                {/* iOS instructions tooltip */}
+                {showIOSHint && (
+                  <div style={{
+                    position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 9999,
+                    background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+                    borderRadius: "10px", padding: "12px 14px", width: "220px",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+                  }}>
+                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0 0 6px" }}>
+                      Add to Home Screen
+                    </p>
+                    <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.55 }}>
+                      {isIOS
+                        ? <>Tap the <strong>Share</strong> button in Safari, then choose <strong>&ldquo;Add to Home Screen&rdquo;</strong>.</>
+                        : <>Open this site in your browser and tap the <strong>menu</strong> → <strong>&ldquo;Install App&rdquo;</strong> or <strong>&ldquo;Add to Home Screen&rdquo;</strong>.</>
+                      }
+                    </p>
+                    <button onClick={() => setShowIOSHint(false)} style={{ marginTop: "8px", fontSize: "10px", color: "hsl(var(--muted-foreground))", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                      Close
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Cart */}
@@ -992,28 +1031,52 @@ export default function Navbar() {
           }}
         >
           {canInstall && (
-            <button
-              data-testid="drawer-button-install-pwa"
-              onClick={() => { setDrawerOpen(false); install(); }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                width: "100%",
-                padding: "0.65rem",
-                borderRadius: "8px",
-                background: "hsl(var(--primary) / 0.1)",
-                border: "1px solid hsl(var(--primary) / 0.35)",
-                color: "hsl(var(--primary))",
-                fontSize: "0.82rem",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <Download size={14} />
-              Add to Home Screen
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ display: "flex", gap: "4px" }}>
+                <button
+                  data-testid="drawer-button-install-pwa"
+                  onClick={() => {
+                    if (isIOS) { setShowIOSHint((v) => !v); }
+                    else if (hasNativePrompt) { setDrawerOpen(false); install(); }
+                    else { setShowIOSHint((v) => !v); }
+                  }}
+                  style={{
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                    padding: "0.65rem", borderRadius: "8px 0 0 8px",
+                    background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.35)",
+                    borderRight: "none", color: "hsl(var(--primary))", fontSize: "0.82rem", fontWeight: 600, cursor: "pointer",
+                  }}
+                >
+                  <Download size={14} />
+                  Add to Home Screen
+                </button>
+                <button
+                  data-testid="drawer-button-dismiss-pwa"
+                  onClick={dismiss}
+                  aria-label="Dismiss"
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    width: "38px", borderRadius: "0 8px 8px 0",
+                    background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.35)",
+                    color: "hsl(var(--primary))", cursor: "pointer", flexShrink: 0,
+                  }}
+                >
+                  <X size={13} />
+                </button>
+              </div>
+              {showIOSHint && (
+                <div style={{
+                  padding: "10px 12px", borderRadius: "8px",
+                  background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))",
+                  fontSize: "11px", color: "hsl(var(--muted-foreground))", lineHeight: 1.55,
+                }}>
+                  {isIOS
+                    ? <>Tap the <strong style={{ color: "hsl(var(--foreground))" }}>Share</strong> button in Safari, then <strong style={{ color: "hsl(var(--foreground))" }}>&ldquo;Add to Home Screen&rdquo;</strong>.</>
+                    : <>Open in your browser → tap menu → <strong style={{ color: "hsl(var(--foreground))" }}>&ldquo;Install App&rdquo;</strong> or <strong style={{ color: "hsl(var(--foreground))" }}>&ldquo;Add to Home Screen&rdquo;</strong>.</>
+                  }
+                </div>
+              )}
+            </div>
           )}
           <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
             {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}

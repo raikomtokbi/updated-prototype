@@ -195,6 +195,7 @@ const DEFAULTS: SettingsMap = {
   site_description: "We are a premier digital marketplace for gamers worldwide, offering instant top-ups, vouchers, and subscriptions.",
   site_logo: "",
   site_favicon: "",
+  pwa_icon: "",
   site_timezone: "UTC",
   date_format: "DD/MM/YYYY",
   default_currency: "USD",
@@ -759,7 +760,7 @@ export default function ControlPanel() {
               autoComplete="off"
             />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: "14px" }}>
             <ImageUploadField
               label="Site Logo"
               value={local.site_logo ?? ""}
@@ -776,6 +777,19 @@ export default function ControlPanel() {
               labelStyle={labelStyle}
               ratio="square"
             />
+            <div>
+              <ImageUploadField
+                label="App Icon (PWA)"
+                value={local.pwa_icon ?? ""}
+                onChange={(url) => set("pwa_icon", url)}
+                inputStyle={inputStyle}
+                labelStyle={labelStyle}
+                ratio="square"
+              />
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
+                Shown on home screen after install. Falls back to Site Logo if empty.
+              </p>
+            </div>
           </div>
         </div>
       </div>
