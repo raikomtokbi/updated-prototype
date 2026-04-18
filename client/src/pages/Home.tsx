@@ -372,28 +372,6 @@ function FeaturesStrip() {
           })}
         </div>
       </div>
-
-      {/* Dot indicators */}
-      <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "0.75rem" }}>
-        {features.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActiveIdx(idx)}
-            style={{
-              width: activeIdx === idx ? "20px" : "6px",
-              height: "6px",
-              borderRadius: "3px",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              background: activeIdx === idx
-                ? "hsl(var(--primary))"
-                : "hsl(var(--muted-foreground) / 0.35)",
-              transition: "width 0.3s ease, background 0.3s ease",
-            }}
-          />
-        ))}
-      </div>
     </section>
   );
 }
@@ -1263,8 +1241,8 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
       <HeroSlider />
-      <FeaturesStrip />
       <TrendingGames />
+      <FeaturesStrip />
       <VouchersSection />
       <BonusBanner />
       <GamesGrid />
