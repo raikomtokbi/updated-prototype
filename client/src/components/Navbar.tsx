@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Zap, Menu, X, Search, LogOut, Gamepad2, Gift, Ticket, RefreshCcw } from "lucide-react";
+import { ShoppingCart, User, Zap, Menu, X, Search, LogOut, Gamepad2, Gift, Ticket, RefreshCcw, Download } from "lucide-react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useIsLight } from "@/hooks/useIsLight";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -177,6 +178,7 @@ export default function Navbar() {
   const itemCount = useCartStore((s) => s.getItemCount());
   const { isAuthenticated, user, logout } = useAuthStore();
   const isLight = useIsLight();
+  const { canInstall, install } = useInstallPrompt();
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -448,6 +450,37 @@ export default function Navbar() {
             >
               <Search size={15} />
             </button>
+
+            {/* Install PWA */}
+            {canInstall && (
+              <button
+                data-testid="button-install-pwa"
+                onClick={install}
+                aria-label="Install app"
+                title="Add to home screen"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  padding: "0 0.75rem",
+                  height: "34px",
+                  borderRadius: "8px",
+                  background: "hsl(var(--primary) / 0.1)",
+                  border: "1px solid hsl(var(--primary) / 0.35)",
+                  color: "hsl(var(--primary))",
+                  fontSize: "0.68rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.18)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.1)"; }}
+              >
+                <Download size={13} />
+                <span className="desktop-only" style={{ display: "inline" }}>Install App</span>
+              </button>
+            )}
 
             {/* Cart */}
             <Link
@@ -953,11 +986,38 @@ export default function Navbar() {
           style={{
             padding: "1rem 1.25rem",
             borderTop: "1px solid hsl(var(--primary) / 0.12)",
-            fontSize: "0.68rem",
-            color: "hsl(var(--muted-foreground))",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
           }}
         >
-          {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}
+          {canInstall && (
+            <button
+              data-testid="drawer-button-install-pwa"
+              onClick={() => { setDrawerOpen(false); install(); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                width: "100%",
+                padding: "0.65rem",
+                borderRadius: "8px",
+                background: "hsl(var(--primary) / 0.1)",
+                border: "1px solid hsl(var(--primary) / 0.35)",
+                color: "hsl(var(--primary))",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              <Download size={14} />
+              Add to Home Screen
+            </button>
+          )}
+          <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
+            {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}
+          </div>
         </div>
       </div>
     </>
