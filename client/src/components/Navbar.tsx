@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
+import { useSiteStore } from "@/lib/store/siteStore";
 import { useIsLight } from "@/hooks/useIsLight";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
