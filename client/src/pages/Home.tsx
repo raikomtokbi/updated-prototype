@@ -529,9 +529,9 @@ function VouchersSection() {
     staleTime: 60_000,
   });
 
-  const vouchers = products.filter(
-    (p: any) => p.category === "voucher" || p.category === "gift_card"
-  );
+  const vouchers = products
+    .filter((p: any) => p.category === "voucher" || p.category === "gift_card")
+    .slice(0, 12);
 
   if (!isLoading && vouchers.length === 0) return null;
 
