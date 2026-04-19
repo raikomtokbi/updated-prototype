@@ -422,3 +422,18 @@ textarea {
 .admin-table tr:last-child td {
   border-bottom: none;
 }
+
+/* Mobile marquee: seamless circular scroll for homepage product rows */
+@keyframes home-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.home-marquee-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: home-marquee-scroll 40s linear infinite;
+}
+.home-marquee-track:hover {
+  animation-play-state: paused;
+}

@@ -402,6 +402,16 @@ function TrendingGames() {
     queryKey: ["/api/games/trending"],
     refetchInterval: 30000,
   });
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const useMarquee = isMobile && !isLoading && trendingGames.length > 1;
+  const displayGames = useMarquee ? [...trendingGames, ...trendingGames] : trendingGames;
 
   return (
     <section style={{ padding: "1rem 0 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
@@ -451,8 +461,8 @@ function TrendingGames() {
         ref={scrollRef}
         style={{
           display: "flex",
-          gap: "1rem",
-          overflowX: "auto",
+          gap: useMarquee ? 0 : "1rem",
+          overflowX: useMarquee ? "hidden" : "auto",
           padding: "0.5rem 1.5rem 1rem",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -469,9 +479,10 @@ function TrendingGames() {
             No trending games yet. Enable trending in the admin panel.
           </div>
         ) : (
-          trendingGames.map((game, idx) => (
+          <div className={useMarquee ? "home-marquee-track" : undefined} style={useMarquee ? undefined : { display: "flex", gap: "1rem" }}>
+          {displayGames.map((game, idx) => (
             <Link
-              key={game.id}
+              key={`${game.id}-${idx}`}
               href={`/products/${game.slug}`}
               data-testid={`card-game-${idx}`}
               style={{
@@ -514,7 +525,8 @@ function TrendingGames() {
                 </div>
               </div>
             </Link>
-          ))
+          ))}
+          </div>
         )}
       </div>
     </section>
@@ -532,6 +544,17 @@ function VouchersSection() {
   const vouchers = products
     .filter((p: any) => p.category === "voucher" || p.category === "gift_card")
     .slice(0, 12);
+
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const useMarquee = isMobile && !isLoading && vouchers.length > 1;
+  const displayVouchers = useMarquee ? [...vouchers, ...vouchers] : vouchers;
 
   if (!isLoading && vouchers.length === 0) return null;
 
@@ -583,8 +606,8 @@ function VouchersSection() {
           ref={scrollRef}
           style={{
             display: "flex",
-            gap: "1rem",
-            overflowX: "auto",
+            gap: useMarquee ? 0 : "1rem",
+            overflowX: useMarquee ? "hidden" : "auto",
             padding: "0.5rem 1.5rem 1rem",
             scrollbarWidth: "none",
             msOverflowStyle: "none",
@@ -598,9 +621,10 @@ function VouchersSection() {
               ))}
             </>
           ) : (
-            vouchers.map((product: any, idx: number) => (
+            <div className={useMarquee ? "home-marquee-track" : undefined} style={useMarquee ? undefined : { display: "flex", gap: "1rem" }}>
+            {displayVouchers.map((product: any, idx: number) => (
               <Link
-                key={product.id}
+                key={`${product.id}-${idx}`}
                 href={`/products/${product.id}`}
                 data-testid={`card-voucher-${idx}`}
                 style={{
@@ -662,7 +686,8 @@ function VouchersSection() {
                   )}
                 </div>
               </Link>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </div>
