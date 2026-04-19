@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `is_email_verified` TINYINT(1)   NOT NULL DEFAULT 0,
   `is_subscribed`     TINYINT(1)   NOT NULL DEFAULT 0,
   `last_login_at`     TIMESTAMP    NULL DEFAULT NULL,
+  `deletion_scheduled_at` TIMESTAMP NULL DEFAULT NULL,
   `created_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

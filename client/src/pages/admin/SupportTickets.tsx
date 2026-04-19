@@ -154,7 +154,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
             background: "hsl(var(--background))", border: "1px solid hsl(var(--border))",
             borderRadius: "8px", overflow: "hidden",
           }}>
-            <div style={{ padding: "8px 14px", borderBottom: "1px solid hsl(220,15%,14%)" }}>
+            <div style={{ padding: "8px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em" }}>
                 Conversation
               </span>
@@ -164,7 +164,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
               <div style={{ display: "flex", gap: "8px" }}>
                 <div style={{
                   width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
-                  background: "hsl(220,20%,20%)", border: "1px solid hsl(220,15%,28%)",
+                  background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: "11px", fontWeight: 700, color: "hsl(var(--muted-foreground))",
                 }}>U</div>
@@ -174,7 +174,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                     {ticket.category && <> · <span style={{ color: "hsl(var(--primary))" }}>{ticket.category}</span></>}
                   </div>
                   <div style={{
-                    background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,22%)",
+                    background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                     borderRadius: "0 8px 8px 8px", padding: "8px 12px",
                     fontSize: "13px", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
                   }}>
@@ -190,10 +190,10 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                   <div key={r.id} style={{ display: "flex", gap: "8px", flexDirection: isAdmin ? "row-reverse" : "row" }}>
                     <div style={{
                       width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
-                      background: isAdmin ? "hsl(var(--primary))" : "hsl(220,20%,20%)",
-                      border: isAdmin ? "none" : "1px solid hsl(220,15%,28%)",
+                      background: isAdmin ? "hsl(var(--primary))" : "hsl(var(--muted))",
+                      border: isAdmin ? "none" : "1px solid hsl(var(--border))",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: "11px", fontWeight: 700, color: "white",
+                      fontSize: "11px", fontWeight: 700, color: isAdmin ? "white" : "hsl(var(--muted-foreground))",
                     }}>
                       {isAdmin ? "A" : "U"}
                     </div>
@@ -202,8 +202,8 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                         {isAdmin ? "Admin" : "User"} · {formatDate(r.createdAt)}
                       </div>
                       <div style={{
-                        background: isAdmin ? "hsla(258,90%,55%,0.14)" : "hsl(220,20%,13%)",
-                        border: `1px solid ${isAdmin ? "hsla(258,90%,55%,0.28)" : "hsl(220,15%,22%)"}`,
+                        background: isAdmin ? "hsl(var(--primary) / 0.12)" : "hsl(var(--card))",
+                        border: `1px solid ${isAdmin ? "hsl(var(--primary) / 0.28)" : "hsl(var(--border))"}`,
                         borderRadius: isAdmin ? "8px 0 8px 8px" : "0 8px 8px 8px",
                         padding: "8px 12px",
                         fontSize: "13px", color: "hsl(var(--foreground))", lineHeight: 1.6, whiteSpace: "pre-wrap",
@@ -252,7 +252,7 @@ function TicketViewModal({ ticketId, onClose }: { ticketId: string; onClose: () 
                 onClick={() => fileRef.current?.click()}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "4px",
-                  background: "hsl(220,20%,13%)", border: "1px solid hsl(220,15%,20%)",
+                  background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
                   borderRadius: "6px", padding: "5px 10px",
                   fontSize: "11px", fontWeight: 600, color: "hsl(var(--muted-foreground))", cursor: "pointer",
                 }}

@@ -841,14 +841,30 @@ function DeleteAccountSection() {
   const [showDelete, setShowDelete] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [, navigate] = useLocation();
-  const { logout } = useAuthStore();
+  const { logout, user: authUser } = useAuthStore();
   const { toast } = useToast();
+  const qc = useQueryClient();
+
+  // Pull the live user record so we know if a deletion is already scheduled.
+  const { data: me } = useQuery<{ deletionScheduledAt?: string | null }>({
+    queryKey: ["/api/user"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/user", undefined, {
+        "X-Username": authUser?.username ?? "",
+      });
+      return res.json();
+    },
+    enabled: !!authUser,
+  });
+
+  const scheduledAt = me?.deletionScheduledAt ? new Date(me.deletionScheduledAt) : null;
+  const isScheduled = !!(scheduledAt && scheduledAt.getTime() > Date.now());
 
   const deleteMutation = useMutation({
     mutationFn: async (password: string) => {
       const res = await fetch("/api/user/delete", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Username": authUser?.username ?? "" },
         body: JSON.stringify({ password }),
       });
       if (!res.ok) {
@@ -857,10 +873,30 @@ function DeleteAccountSection() {
       }
       return res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Account deleted", description: "Your account has been permanently deleted." });
+    onSuccess: (data: any) => {
+      toast({
+        title: "Account scheduled for deletion",
+        description: data?.message ||
+          "Your account will be permanently deleted in 72 hours. Log back in within that window to cancel.",
+      });
       logout();
       navigate("/");
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/user/cancel-deletion", {}, {
+        "X-Username": authUser?.username ?? "",
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({ title: "Deletion cancelled", description: "Your account is no longer scheduled for deletion." });
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -875,6 +911,37 @@ function DeleteAccountSection() {
     deleteMutation.mutate(deletePassword);
   };
 
+  const hoursRemaining = scheduledAt
+    ? Math.max(0, Math.ceil((scheduledAt.getTime() - Date.now()) / (60 * 60 * 1000)))
+    : 0;
+
+  if (isScheduled) {
+    return (
+      <div style={{
+        background: "hsla(40,90%,55%,0.08)", border: "1px solid hsla(40,90%,55%,0.25)",
+        borderRadius: "0.75rem", padding: "1.25rem",
+      }}>
+        <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "hsl(40,90%,60%)", marginBottom: "0.4rem" }}>
+          Account Scheduled for Deletion
+        </h3>
+        <p style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, marginBottom: "0.9rem" }}>
+          Your account is scheduled to be permanently deleted in approximately{" "}
+          <strong style={{ color: "hsl(var(--foreground))" }}>{hoursRemaining} hour{hoursRemaining !== 1 ? "s" : ""}</strong>
+          {" "}({scheduledAt!.toLocaleString()}). You can cancel this anytime before then.
+        </p>
+        <button
+          onClick={() => cancelMutation.mutate()}
+          disabled={cancelMutation.isPending}
+          className="btn-primary"
+          style={{ fontSize: "0.7rem" }}
+          data-testid="button-cancel-deletion"
+        >
+          {cancelMutation.isPending ? <Loader2 size={14} className="inline animate-spin" /> : "Cancel Deletion"}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.2)",
@@ -886,7 +953,7 @@ function DeleteAccountSection() {
             Delete Account
           </h3>
           <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", margin: 0 }}>
-            Permanently delete your account and all associated data. This action cannot be undone.
+            Schedules your account for permanent deletion in 72 hours. You can cancel anytime within that window by logging back in.
           </p>
         </div>
         <button
@@ -909,7 +976,7 @@ function DeleteAccountSection() {
             borderRadius: "0.5rem", padding: "0.75rem",
             fontSize: "0.68rem", color: "hsl(0,72%,65%)",
           }}>
-            This will permanently delete your account, orders, and personal information. This cannot be reversed.
+            Your account will be scheduled for deletion in 72 hours. You can sign back in within that window to cancel. After 72 hours, all data is permanently removed and cannot be recovered.
           </div>
           <div>
             <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>
@@ -939,7 +1006,7 @@ function DeleteAccountSection() {
             }}
             data-testid="button-confirm-delete"
           >
-            {deleteMutation.isPending ? <Loader2 size={14} className="inline animate-spin" /> : "Permanently Delete Account"}
+            {deleteMutation.isPending ? <Loader2 size={14} className="inline animate-spin" /> : "Schedule Deletion (72-hour grace)"}
           </button>
         </div>
       )}

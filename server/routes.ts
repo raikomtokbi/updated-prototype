@@ -1001,6 +1001,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   }
 
   // ── User profile & orders ───────────────────────────────────────────────────
+  // Return the current user record (without password). Used by the account page
+  // to detect a pending deletion and show the cancel banner.
+  app.get("/api/user", requireUser, async (req: any, res) => {
+    const { password: _pw, ...safeUser } = req.currentUser;
+    res.json(safeUser);
+  });
+
   app.get("/api/user/orders", requireUser, async (req: any, res) => {
     const userOrders = await storage.getOrdersByUser(req.currentUser.id);
     const ordersWithItems = await Promise.all(
@@ -1041,6 +1048,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  // Soft-delete: schedules the account for permanent deletion in 72h.
+  // The user can log back in within that window and cancel via /api/user/cancel-deletion.
   app.delete("/api/user/delete", requireUser, async (req: any, res) => {
     const { password } = req.body;
     if (!password) {
@@ -1049,8 +1058,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!(await bcrypt.compare(password, req.currentUser.password))) {
       return res.status(401).json({ message: "Invalid password" });
     }
-    await storage.deleteUser(req.currentUser.id);
-    res.json({ ok: true, message: "Account deleted successfully" });
+    const scheduledAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+    await storage.updateUser(req.currentUser.id, { deletionScheduledAt: scheduledAt } as any);
+    res.json({
+      ok: true,
+      deletionScheduledAt: scheduledAt.toISOString(),
+      message: "Your account is scheduled for permanent deletion in 72 hours. Log back in within that window to cancel.",
+    });
+  });
+
+  // Cancel a pending account deletion (only allowed by the account owner).
+  app.post("/api/user/cancel-deletion", requireUser, async (req: any, res) => {
+    if (!req.currentUser?.deletionScheduledAt) {
+      return res.status(400).json({ message: "No pending deletion to cancel" });
+    }
+    await storage.updateUser(req.currentUser.id, { deletionScheduledAt: null } as any);
+    res.json({ ok: true, message: "Account deletion cancelled" });
   });
 
   // ── User-facing Support Tickets ────────────────────────────────────────────
@@ -3615,6 +3638,36 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Start UPI email payment poller — pass handleOrderCompleted so auto-matched
   // payments also trigger Busan fulfillment + confirmation email.
   startEmailPaymentPoller((orderId) => handleOrderCompleted(orderId));
+
+  // Hourly purge of accounts whose 72-hour deletion grace window has elapsed.
+  // Runs once at startup (after a short delay) and every hour thereafter.
+  const purgeExpiredAccounts = async () => {
+    try {
+      const now = Date.now();
+      let offset = 0;
+      const pageSize = 100;
+      // Stream through users in pages so we don't hold the whole table in memory.
+      while (true) {
+        const page = await storage.getAllUsers(pageSize, offset);
+        if (!page.length) break;
+        for (const u of page) {
+          const ts = (u as any).deletionScheduledAt;
+          if (ts && new Date(ts).getTime() <= now) {
+            await storage.deleteUser(u.id).catch((e) =>
+              console.error(`[purge] failed to delete user ${u.id}:`, e)
+            );
+            console.log(`[purge] removed user ${u.id} after grace period`);
+          }
+        }
+        if (page.length < pageSize) break;
+        offset += pageSize;
+      }
+    } catch (e) {
+      console.error("[purge] account purge job failed:", e);
+    }
+  };
+  setTimeout(purgeExpiredAccounts, 60_000);
+  setInterval(purgeExpiredAccounts, 60 * 60 * 1000);
 
   return httpServer;
 }

@@ -125,10 +125,14 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
           <p style={{ fontSize: "13px", color: "hsl(var(--muted-foreground))", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{ticket?.message ?? "—"}</p>
         </div>
 
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <div style={{ flex: 1 }}>
+        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ flex: "1 1 180px", minWidth: "140px" }}>
             <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginBottom: "0.4rem" }}>Status</p>
-            <select style={inputStyle} value={status || ticket?.status || ""} onChange={(e) => setStatus(e.target.value)}>
+            <select
+              style={{ ...inputStyle, minHeight: "auto", padding: "0.5rem 0.6rem" }}
+              value={status || ticket?.status || ""}
+              onChange={(e) => setStatus(e.target.value)}
+            >
               <option value="open">Open</option>
               <option value="in_progress">In Progress</option>
               <option value="resolved">Resolved</option>
@@ -140,7 +144,6 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
               onClick={() => statusMut.mutate(status || ticket?.status)}
               disabled={statusMut.isPending}
               style={{
-                alignSelf: "flex-end",
                 padding: "0.5rem 1rem",
                 background: "linear-gradient(135deg, hsl(142, 71%, 45%), hsl(145, 70%, 35%))",
                 color: "white",
@@ -149,6 +152,7 @@ function ContactViewModal({ ticketId, onClose }: { ticketId: string; onClose: ()
                 cursor: "pointer",
                 fontSize: "12px",
                 fontWeight: 600,
+                whiteSpace: "nowrap",
               }}
             >
               {statusMut.isPending ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : "Update"}

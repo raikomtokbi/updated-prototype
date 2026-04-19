@@ -373,7 +373,26 @@ export default function Users() {
                       <td style={tdStyle}><StatusBadge value={u.role} /></td>
                       <td style={{ ...tdStyle, fontSize: "12px", color: "hsl(var(--muted-foreground))" }}>{formatDate(u.createdAt)}</td>
                       <td style={tdStyle}>
-                        <StatusBadge value={statusVal} />
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                          <StatusBadge value={statusVal} />
+                          {(u as any).deletionScheduledAt && new Date((u as any).deletionScheduledAt).getTime() > Date.now() && (
+                            <span
+                              title={`Scheduled deletion: ${new Date((u as any).deletionScheduledAt).toLocaleString()}`}
+                              style={{
+                                fontSize: "10px",
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                background: "hsla(40,90%,55%,0.14)",
+                                color: "hsl(40,90%,60%)",
+                                border: "1px solid hsla(40,90%,55%,0.28)",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Pending Deletion
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ ...tdStyle, minWidth: "200px" }}>
                         <UserActionButtons

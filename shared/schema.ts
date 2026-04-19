@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   isEmailVerified: boolean("is_email_verified").notNull().default(false),
   isSubscribed: boolean("is_subscribed").notNull().default(false),
   lastLoginAt: timestamp("last_login_at"),
+  deletionScheduledAt: timestamp("deletion_scheduled_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
