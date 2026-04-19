@@ -38,7 +38,13 @@ export const useAuthStore = create<AuthState>()(
         return role === "super_admin" || role === "admin" || role === "staff";
       },
       setUser: (user, token) =>
-        set({ user, token: token ?? null, isAuthenticated: true }),
+        set((prev) => ({
+          user,
+          // Preserve any previously-stored token if a new one isn't supplied
+          // (e.g. profile-update responses that don't reissue a JWT).
+          token: token ?? prev.token ?? null,
+          isAuthenticated: true,
+        })),
       logout: () => {
         // Clear cart when logging out
         const cartStore = useCartStore.getState();
@@ -51,3 +57,8 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+/** Read the current bearer token outside React (e.g. from queryClient). */
+export function getAuthToken(): string | null {
+  return useAuthStore.getState().token;
+}

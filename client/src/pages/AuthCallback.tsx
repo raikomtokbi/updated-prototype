@@ -22,7 +22,7 @@ export default function AuthCallback() {
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
         if (!ok) throw new Error(data.message || "Authentication failed");
-        setUser(data.user);
+        setUser(data.user, data.token);
         navigate("/account");
       })
       .catch((err) => {

@@ -16,6 +16,11 @@ function adminHeadersFor(url: string): Record<string, string> {
   return {};
 }
 
+function authHeader(): Record<string, string> {
+  const token = useAuthStore.getState().token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -26,6 +31,7 @@ export async function apiRequest(
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
+      ...authHeader(),
       ...adminHeadersFor(url),
       ...(extraHeaders ?? {}),
     },
@@ -46,7 +52,7 @@ export const getQueryFn: <T>(options: {
     const url = queryKey.join("/") as string;
     const res = await fetch(url, {
       credentials: "include",
-      headers: adminHeadersFor(url),
+      headers: { ...authHeader(), ...adminHeadersFor(url) },
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

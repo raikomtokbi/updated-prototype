@@ -70,10 +70,19 @@ export default function VoucherOrders() {
       qc.invalidateQueries({ queryKey: ["/api/admin/orders"] });
       const ds = data?.deliveryStatus;
       if (ds === "delivered") alert("Order delivered successfully.");
+      else if (ds === "pending") alert("Provider returned pending — verify with the provider then use 'Mark Delivered'.");
       else if (ds === "failed") alert("Delivery attempt failed. Check provider config and product mapping.");
       else if (ds === "not_applicable") alert("Provider is not active or no mappings exist for this order.");
     },
     onError: (err: any) => alert(err?.message || "Delivery failed"),
+  });
+
+  // Manually mark an order as delivered after verifying fulfillment with the
+  // provider (used for orders that come back with a pending result).
+  const markDeliveredMut = useMutation({
+    mutationFn: (id: string) => adminApi.post(`/orders/${id}/mark-delivered`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
+    onError: (err: any) => alert(err?.message || "Failed to mark delivered"),
   });
 
   const filtered = useMemo(() => {
@@ -223,6 +232,21 @@ export default function VoucherOrders() {
                                 data-testid={`button-deliver-order-${o.id}`}
                               >
                                 {deliverMut.isPending ? "Delivering…" : "Deliver Order"}
+                              </button>
+                            )}
+                            {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (
+                              <button
+                                style={btnSuccess}
+                                onClick={() => {
+                                  if (confirm("Mark this order as delivered? Use this only after verifying fulfillment with the provider.")) {
+                                    markDeliveredMut.mutate(o.id);
+                                  }
+                                }}
+                                disabled={markDeliveredMut.isPending}
+                                title="Manually close out this order after verifying delivery with the provider"
+                                data-testid={`button-mark-delivered-${o.id}`}
+                              >
+                                {markDeliveredMut.isPending ? "Marking…" : "Mark Delivered"}
                               </button>
                             )}
                             {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (

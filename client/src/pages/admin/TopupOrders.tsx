@@ -64,11 +64,9 @@ function itemDeliveryStatus(
   if (!itemCmsId) return { state: "pending" };
   const match = attempts.find((a) => String(a.cmsProduct) === String(itemCmsId));
   if (!match) return { state: "pending" };
-  return {
-    state: match.success ? "delivered" : "failed",
-    provider: match.provider,
-    message: match.message,
-  };
+  if (match.success) return { state: "delivered", provider: match.provider, message: match.message };
+  if ((match as any).pending) return { state: "pending", provider: match.provider, message: match.message };
+  return { state: "failed", provider: match.provider, message: match.message };
 }
 
 function ItemDeliveryPill({ status, provider, message }: { status: "delivered" | "failed" | "pending"; provider?: string; message?: string }) {
@@ -139,10 +137,19 @@ export default function TopupOrders() {
       qc.invalidateQueries({ queryKey: ["/api/admin/orders"] });
       const ds = data?.deliveryStatus;
       if (ds === "delivered") alert("Order delivered successfully.");
+      else if (ds === "pending") alert("Provider returned pending — verify with the provider then use 'Mark Delivered'.");
       else if (ds === "failed") alert("Delivery attempt failed. Check provider config and product mapping.");
       else if (ds === "not_applicable") alert("Provider is not active or no mappings exist for this order.");
     },
     onError: (err: any) => alert(err?.message || "Delivery failed"),
+  });
+
+  // Manually mark an order as delivered after verifying fulfillment with the
+  // provider (used for Liogames orders that come back with a pending result).
+  const markDeliveredMut = useMutation({
+    mutationFn: (id: string) => adminApi.post(`/orders/${id}/mark-delivered`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
+    onError: (err: any) => alert(err?.message || "Failed to mark delivered"),
   });
 
   const filtered = useMemo(() => {
@@ -312,6 +319,21 @@ export default function TopupOrders() {
                                   : hasMixedDelivery
                                     ? `Deliver Pending (${pendingItems.length})`
                                     : "Deliver Order"}
+                              </button>
+                            )}
+                            {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (
+                              <button
+                                style={btnSuccess}
+                                onClick={() => {
+                                  if (confirm("Mark this order as delivered? Use this only after verifying fulfillment with the provider.")) {
+                                    markDeliveredMut.mutate(o.id);
+                                  }
+                                }}
+                                disabled={markDeliveredMut.isPending}
+                                title="Manually close out this order after verifying delivery with the provider"
+                                data-testid={`button-mark-delivered-${o.id}`}
+                              >
+                                {markDeliveredMut.isPending ? "Marking…" : "Mark Delivered"}
                               </button>
                             )}
                             {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (

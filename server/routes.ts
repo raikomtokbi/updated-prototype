@@ -4,6 +4,7 @@ import type { Server } from "http";
 import path from "path";
 import fs from "fs";
 import { createHash, randomBytes, createHmac, randomUUID } from "crypto";
+import { signUserToken, verifyUserToken, extractBearerToken } from "./lib/jwt";
 import webpush from "web-push";
 import { generateOrderNumber } from "./lib/idGenerator";
 import { startEmailPaymentPoller } from "./services/emailPaymentService";
@@ -103,11 +104,21 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// Client sends X-Admin-Role header for demo auth
-// In production replace with real JWT/session verification
-function injectAdminRole(req: Request, _res: Response, next: NextFunction) {
-  const header = req.headers["x-admin-role"] as string | undefined;
-  (req as any).adminRole = header ?? null;
+// Resolve the caller's role from the signed JWT in Authorization: Bearer.
+// Uses the role embedded in the token (verified server-side at sign time) so
+// the client cannot spoof admin access via a header. Falls back to no role if
+// the token is missing/invalid — `requireAdmin` will then 403.
+async function injectAdminRole(req: Request, _res: Response, next: NextFunction) {
+  const token = extractBearerToken(req.headers["authorization"] as string | undefined);
+  const claims = token ? verifyUserToken(token) : null;
+  let role: string | null = null;
+  if (claims?.uid) {
+    // Re-read role from DB so a demoted/banned admin loses access immediately,
+    // even if their (still-valid) JWT was minted while they were an admin.
+    const user = await storage.getUser(claims.uid);
+    if (user && !(user as any).isBanned) role = user.role ?? null;
+  }
+  (req as any).adminRole = role;
   next();
 }
 
@@ -585,7 +596,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
     resetLoginAttempts(username);
     const { password: _pw, ...safeUser } = user;
-    return res.json({ user: safeUser });
+    const token = signUserToken({ uid: user.id, role: user.role });
+    return res.json({ user: safeUser, token });
   });
 
   // ── Social OAuth ──────────────────────────────────────────────────────────
@@ -765,7 +777,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(401).json({ message: "Invalid or expired token" });
     }
     socialTokens.delete(token);
-    return res.json({ user: entry.user });
+    const u = entry.user as { id?: string; role?: string };
+    const jwtToken = u?.id ? signUserToken({ uid: u.id, role: u.role }) : undefined;
+    return res.json({ user: entry.user, token: jwtToken });
   });
 
   // ── Forgot password / OTP reset ────────────────────────────────────────────
@@ -984,18 +998,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!isActive) {
         return res.status(201).json({ user: safeUser, pending: true, message: "Account created. Awaiting admin approval before you can log in." });
       }
-      return res.status(201).json({ user: safeUser });
+      const token = signUserToken({ uid: user.id, role: user.role });
+      return res.status(201).json({ user: safeUser, token });
     } catch (e: any) {
       return res.status(400).json({ message: e.message });
     }
   });
 
   // ── User middleware ─────────────────────────────────────────────────────────
+  // Identity is verified from a signed JWT in the Authorization header.
+  // Falls back to nothing — clients without a valid token receive 401 and the
+  // global query handler redirects to login.
   async function requireUser(req: any, res: any, next: any) {
-    const username = req.headers["x-username"] as string | undefined;
-    if (!username) return res.status(401).json({ message: "Unauthorized" });
-    const user = await storage.getUserByUsername(username);
+    const token = extractBearerToken(req.headers["authorization"] as string | undefined);
+    const claims = token ? verifyUserToken(token) : null;
+    if (!claims) {
+      return res.status(401).json({ message: "Unauthorized — please sign in again" });
+    }
+    const user = await storage.getUser(claims.uid);
     if (!user) return res.status(401).json({ message: "User not found" });
+    if ((user as any).isBanned) {
+      return res.status(403).json({ message: "Your account has been banned." });
+    }
     req.currentUser = user;
     next();
   }
@@ -1466,6 +1490,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const { deliveryStatus, deliveryNote } = req.body;
     await storage.updateOrderDelivery(req.params.id, deliveryStatus, deliveryNote);
     res.json({ ok: true });
+  });
+
+  // Admin "Mark Delivered" — manually closes out an order after verifying
+  // fulfillment with the provider (e.g. Liogames orders that come back with a
+  // pending/processing state). Does not re-trigger any provider call.
+  app.post("/api/admin/orders/:id/mark-delivered", requireAdmin, async (req, res) => {
+    const { note } = (req.body ?? {}) as { note?: string };
+    const order = await storage.getOrderById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.status !== "completed") {
+      return res.status(400).json({
+        message: "Payment must be completed before the order can be marked delivered.",
+      });
+    }
+    const stamp = `Manually marked delivered by admin at ${new Date().toISOString()}${note ? ` — ${note}` : ""}`;
+    const combinedNote = order.deliveryNote ? `${order.deliveryNote}\n${stamp}` : stamp;
+    await storage.updateOrderDelivery(req.params.id, "delivered", combinedNote);
+    res.json({ ok: true, deliveryStatus: "delivered" });
   });
 
   // Manual fulfillment trigger — used by the admin "Deliver order" button.
@@ -2323,7 +2365,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             baseUrl: lioConfig.baseUrl ?? undefined,
           });
           console.log(`[Liogames] order ${orderId} product ${lioMap.lioProductId}:`, result);
-          const success = !!result.ok && result.data?.result !== "failed";
+          // Liogames returns a `result` field that can be "success", "pending",
+          // "processing", "failed", etc. Only treat an explicit "success" as a
+          // delivered item; treat ambiguous/in-progress states as PENDING so the
+          // admin can verify with the provider and use "Mark Delivered" or
+          // "Mark Failed" rather than auto-completing prematurely.
+          const lioResult = String(result.data?.result ?? "").toLowerCase();
+          const lioStatus = String(result.data?.status ?? "").toLowerCase();
+          const isSuccess = !!result.ok && lioResult === "success";
+          const isFailed = !result.ok || lioResult === "failed" || lioStatus === "failed";
+          const isPending = !isSuccess && !isFailed;
           deliveryResponses.push({
             cmsProduct: cmsId,
             provider: "liogames",
@@ -2331,12 +2382,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             lioVariation: lioMap.lioVariationId ?? null,
             playerId, zoneId: zoneId || null,
             partnerRef,
-            success,
+            success: isSuccess,
+            pending: isPending,
             message: result.message,
             data: result.data,
           });
-          if (!success)
-          lastError = result.message ?? "Liogames order failed";
+          if (isFailed) lastError = result.message ?? "Liogames order failed";
           continue;
         }
 
@@ -2399,9 +2450,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!anyMappingFound) {
         await storage.updateOrderDelivery(orderId, "not_applicable");
       } else {
+        const pendingIds = new Set(
+          deliveryResponses.filter((r) => r && (r as any).pending).map((r) => String(r.cmsProduct))
+        );
         const allDelivered = [...itemsNeedingDelivery].every((id) => successIds.has(id));
+        const anyFailed = [...itemsNeedingDelivery].some(
+          (id) => !successIds.has(id) && !pendingIds.has(id)
+        );
         if (allDelivered) {
           await storage.updateOrderDelivery(orderId, "delivered", noteJson);
+        } else if (!anyFailed) {
+          // No outright failures — provider hasn't given a terminal answer yet.
+          // Leave the order in pending so the admin can verify and either
+          // "Mark Delivered" or "Mark Failed" from the orders dashboard.
+          await storage.updateOrderDelivery(
+            orderId,
+            "pending",
+            noteJson ?? "Awaiting provider confirmation",
+          );
         } else {
           await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "Some items failed to deliver"));
         }
