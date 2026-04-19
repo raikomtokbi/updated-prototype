@@ -418,7 +418,10 @@ textarea {
   top: 0;
 }
 
-/* Admin tables: prevent last row's border from clashing with rounded card edge */
+/* Admin tables: prevent header/last-row borders from clashing with rounded card edges */
+.admin-table thead th {
+  border-bottom: none !important;
+}
 .admin-table tr:last-child td {
   border-bottom: none;
 }
