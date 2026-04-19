@@ -233,13 +233,16 @@ export function ProductMappingModal({
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 3000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
-      <div style={{
-        position: "relative", width: "100%", maxWidth: "500px", maxHeight: "88vh",
-        overflowY: "auto", background: "hsl(var(--background))",
-        border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem",
-      }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative", width: "100%", maxWidth: "500px", maxHeight: "88vh",
+          overflowY: "auto", background: "hsl(var(--background))",
+          border: "1px solid hsl(var(--primary) / 0.25)", borderRadius: "10px", padding: "1.5rem",
+        }}
+      >
         <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>

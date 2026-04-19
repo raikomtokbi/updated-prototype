@@ -115,32 +115,63 @@ function PackageManager({ productId }: { productId: string }) {
           <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>No packages yet.</p>
         )}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 70px 60px auto" : "1fr 90px 90px 70px auto", gap: "0.4rem", alignItems: "end" }}>
-        <div>
-          <label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label>
-          <input style={inputStyle} placeholder="e.g. $25 Gift Card" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+      {isMobile ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label>
+            <input style={inputStyle} placeholder="e.g. $25 Gift Card" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.4rem" }}>
+            <div>
+              <label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label>
+              <input style={inputStyle} type="number" placeholder="25.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label>
+              <input style={inputStyle} type="number" placeholder="Opt" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ ...labelStyle, marginBottom: "2px" }}>Stock</label>
+              <input style={inputStyle} type="number" min="0" placeholder="∞" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }}
+            disabled={!newLabel || !newPrice || addPkg.isPending}
+            style={{ ...btnPrimary, padding: "7px 10px", justifyContent: "center", width: "100%" }}
+          >
+            <PlusCircle size={14} /> Add Package
+          </button>
         </div>
-        <div>
-          <label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label>
-          <input style={inputStyle} type="number" placeholder="25.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 90px 70px auto", gap: "0.4rem", alignItems: "end" }}>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Label</label>
+            <input style={inputStyle} placeholder="e.g. $25 Gift Card" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Price</label>
+            <input style={inputStyle} type="number" placeholder="25.00" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label>
+            <input style={inputStyle} type="number" placeholder="Opt" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, marginBottom: "2px" }}>Stock</label>
+            <input style={inputStyle} type="number" min="0" placeholder="∞" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
+          </div>
+          <button
+            type="button"
+            onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }}
+            disabled={!newLabel || !newPrice || addPkg.isPending}
+            style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}
+          >
+            <PlusCircle size={14} />
+          </button>
         </div>
-        <div>
-          <label style={{ ...labelStyle, marginBottom: "2px" }}>Orig</label>
-          <input style={inputStyle} type="number" placeholder="Opt" value={newOrigPrice} onChange={(e) => setNewOrigPrice(e.target.value)} />
-        </div>
-        <div>
-          <label style={{ ...labelStyle, marginBottom: "2px" }}>Stock</label>
-          <input style={inputStyle} type="number" min="0" placeholder="∞" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
-        </div>
-        <button
-          type="button"
-          onClick={() => { if (newLabel && newPrice) addPkg.mutate(); }}
-          disabled={!newLabel || !newPrice || addPkg.isPending}
-          style={{ ...btnPrimary, padding: "7px 10px", alignSelf: "end" }}
-        >
-          <PlusCircle size={14} />
-        </button>
-      </div>
+      )}
       {mappingPkg && (
         <ProductMappingModal
           cmsProductId={mappingPkg.id}
