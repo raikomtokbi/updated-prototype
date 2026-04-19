@@ -15,6 +15,7 @@ const STATUS_OPTIONS = [
   { value: "completed", label: "Completed" },
   { value: "failed", label: "Failed" },
   { value: "refunded", label: "Refunded" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 const DELIVERY_OPTIONS = [
@@ -85,6 +86,18 @@ export default function TopupOrders() {
     mutationFn: ({ id, deliveryStatus }: { id: string; deliveryStatus: string }) =>
       adminApi.patch(`/orders/${id}/delivery`, { deliveryStatus }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/admin/orders"] }),
+  });
+
+  const deliverMut = useMutation({
+    mutationFn: (id: string) => adminApi.post(`/orders/${id}/deliver`, {}),
+    onSuccess: (data: any) => {
+      qc.invalidateQueries({ queryKey: ["/api/admin/orders"] });
+      const ds = data?.deliveryStatus;
+      if (ds === "delivered") alert("Order delivered successfully.");
+      else if (ds === "failed") alert("Delivery attempt failed. Check provider config and product mapping.");
+      else if (ds === "not_applicable") alert("Provider is not active or no mappings exist for this order.");
+    },
+    onError: (err: any) => alert(err?.message || "Delivery failed"),
   });
 
   const filtered = useMemo(() => {
@@ -208,28 +221,49 @@ export default function TopupOrders() {
                                 </button>
                                 <button
                                   style={btnDanger}
-                                  onClick={() => statusMut.mutate({ id: o.id, status: "failed" })}
+                                  onClick={() => {
+                                    if (confirm("Cancel this order? This will mark it as cancelled.")) {
+                                      statusMut.mutate({ id: o.id, status: "cancelled" });
+                                    }
+                                  }}
                                   disabled={statusMut.isPending}
-                                  data-testid={`button-reject-order-${o.id}`}
+                                  data-testid={`button-cancel-order-${o.id}`}
                                 >
-                                  Reject
+                                  Cancel
                                 </button>
                               </>
                             )}
-                            {o.status === "completed" && deliveryPending && (
+                            {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (
                               <button
                                 style={btnNeutral}
-                                onClick={() => deliveryMut.mutate({ id: o.id, deliveryStatus: "delivered" })}
-                                disabled={deliveryMut.isPending}
-                                data-testid={`button-confirm-delivery-${o.id}`}
+                                onClick={() => deliverMut.mutate(o.id)}
+                                disabled={deliverMut.isPending}
+                                data-testid={`button-deliver-order-${o.id}`}
                               >
-                                Confirm Delivery
+                                {deliverMut.isPending ? "Delivering…" : "Deliver Order"}
                               </button>
                             )}
-                            {o.status === "completed" && !deliveryPending && (
+                            {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (
+                              <button
+                                style={btnDanger}
+                                onClick={() => {
+                                  if (confirm("Refund this order? Payment will be marked as refunded.")) {
+                                    statusMut.mutate({ id: o.id, status: "refunded" });
+                                  }
+                                }}
+                                disabled={statusMut.isPending}
+                                data-testid={`button-refund-order-${o.id}`}
+                              >
+                                Refund
+                              </button>
+                            )}
+                            {o.status === "completed" && o.deliveryStatus === "delivered" && (
                               <span style={{ fontSize: "11px", color: "hsl(142,71%,45%)" }}>Delivered</span>
                             )}
-                            {(o.status === "failed" || o.status === "refunded") && (
+                            {o.status === "completed" && o.deliveryStatus === "not_applicable" && (
+                              <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>
+                            )}
+                            {(o.status === "failed" || o.status === "refunded" || o.status === "cancelled") && (
                               <span style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}>—</span>
                             )}
                           </div>

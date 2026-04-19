@@ -8,7 +8,7 @@ import { z } from "zod";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const userRoleEnum = pgEnum("user_role", ["super_admin", "admin", "staff", "user"]);
-export const orderStatusEnum = pgEnum("order_status", ["pending", "processing", "completed", "failed", "refunded"]);
+export const orderStatusEnum = pgEnum("order_status", ["pending", "processing", "completed", "failed", "refunded", "cancelled"]);
 export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "success", "failed", "refunded"]);
 export const ticketStatusEnum = pgEnum("ticket_status", ["open", "in_progress", "resolved", "closed"]);
 export const ticketPriorityEnum = pgEnum("ticket_priority", ["low", "medium", "high", "urgent"]);

@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `id`                   VARCHAR(36)   NOT NULL,
   `user_id`              VARCHAR(36)   DEFAULT NULL,
   `order_number`         VARCHAR(191)  NOT NULL,
-  `status`               ENUM('pending','processing','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `status`               ENUM('pending','processing','completed','failed','refunded','cancelled') NOT NULL DEFAULT 'pending',
   `total_amount`         DECIMAL(10,2) NOT NULL,
   `currency`             VARCHAR(10)   NOT NULL DEFAULT 'USD',
   `notes`                TEXT          DEFAULT NULL,

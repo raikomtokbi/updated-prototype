@@ -96,7 +96,7 @@ export const orders = mysqlTable("orders", {
   id: varchar("id", { length: 36 }).primaryKey(),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   orderNumber: varchar("order_number", { length: 191 }).notNull().unique(),
-  status: mysqlEnum("status", ["pending", "processing", "completed", "failed", "refunded"]).notNull().default("pending"),
+  status: mysqlEnum("status", ["pending", "processing", "completed", "failed", "refunded", "cancelled"]).notNull().default("pending"),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
   notes: text("notes"),

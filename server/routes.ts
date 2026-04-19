@@ -1445,6 +1445,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  // Manual fulfillment trigger — used by the admin "Deliver order" button.
+  // Only allowed when payment is completed; auto-delivery never runs on
+  // pending/cancelled/failed/refunded orders.
+  app.post("/api/admin/orders/:id/deliver", requireAdmin, async (req, res) => {
+    const order = await storage.getOrderById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.status !== "completed") {
+      return res.status(400).json({
+        message: "Order payment must be completed before delivery can be attempted.",
+      });
+    }
+    try {
+      await fulfillBusanOrder(req.params.id);
+      const updated = await storage.getOrderById(req.params.id);
+      res.json({ ok: true, deliveryStatus: updated?.deliveryStatus ?? null });
+    } catch (err: any) {
+      console.error("[admin/orders/deliver] error:", err);
+      res.status(500).json({ message: err?.message || "Delivery failed" });
+    }
+  });
+
   // ── Transactions ───────────────────────────────────────────────────────────
   app.get("/api/admin/transactions", requireAdmin, async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 50;
