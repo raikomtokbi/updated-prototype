@@ -93,7 +93,7 @@ function PackageManager({ productId }: { productId: string }) {
                     title="Stock (blank = unlimited)"
                   />
                 </div>
-                <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+                <button type="button" onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
               </div>
             </div>
           );

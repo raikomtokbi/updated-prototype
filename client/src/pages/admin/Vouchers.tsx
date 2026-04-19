@@ -96,11 +96,12 @@ function PackageManager({ productId }: { productId: string }) {
                   />
                 </div>
                 <button
+                  type="button"
                   title="Map to Provider"
                   onClick={() => setMappingPkg(pkg)}
                   style={{ background: "none", border: "1px solid hsl(var(--primary) / 0.3)", borderRadius: "4px", cursor: "pointer", padding: "2px 5px", display: "flex", alignItems: "center", color: "hsl(var(--primary))" }}
                 ><Link2 size={10} /></button>
-                <button onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
+                <button type="button" onClick={() => delPkg.mutate(pkg.id)} style={{ ...btnDanger, padding: "2px 6px", fontSize: "11px" }}><X size={10} /></button>
               </div>
             </div>
           );
