@@ -249,45 +249,40 @@ export default function App() {
 
   const maintenanceMode = siteSettings?.maintenance_mode === "true";
 
-  // ── Inject Google Analytics 4 (storefront only) ──────────────────────────
-  useEffect(() => {
-    const measurementId = siteSettings?.ga_measurement_id?.trim();
-    if (!measurementId) return;
-    if (document.getElementById("ga-script")) return; // already injected
-    // Never inject the GA4 script when the user lands directly on an admin route
-    if (location.startsWith("/admin")) return;
-    const s = document.createElement("script");
-    s.id = "ga-script";
-    s.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    s.async = true;
-    document.head.appendChild(s);
-    const inline = document.createElement("script");
-    inline.id = "ga-inline";
-    // Deny analytics_storage by default; we grant it explicitly on each storefront page_view
-    inline.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});gtag('js',new Date());gtag('config','${measurementId}',{send_page_view:false});`;
-    document.head.appendChild(inline);
-  }, [siteSettings?.ga_measurement_id]);
-
-  // ── Grant/deny GA4 consent per route; fire page_view for storefront only ──
+  // ── Google Analytics 4: storefront only ──────────────────────────────────
   useEffect(() => {
     const measurementId = siteSettings?.ga_measurement_id?.trim();
     if (!measurementId) return;
     const win = window as any;
-    const gtagFn = typeof win.gtag === "function" ? win.gtag.bind(win) : null;
-    if (!gtagFn) return;
 
     if (location.startsWith("/admin")) {
-      // Deny ALL GA4 data collection — stops heartbeats, Enhanced Measurement, everything
-      gtagFn("consent", "update", { analytics_storage: "denied" });
+      // Remove GA4 scripts and wipe globals so no data is sent from admin pages
+      document.getElementById("ga-script")?.remove();
+      document.getElementById("ga-inline")?.remove();
+      delete win.gtag;
+      delete win.dataLayer;
       return;
     }
 
-    // Restore consent and track the storefront page
-    gtagFn("consent", "update", { analytics_storage: "granted" });
-    gtagFn("event", "page_view", {
-      page_path: location,
-      send_to: measurementId,
-    });
+    // Inject GA4 script if not already present
+    if (!document.getElementById("ga-script")) {
+      const s = document.createElement("script");
+      s.id = "ga-script";
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+      s.async = true;
+      document.head.appendChild(s);
+      const inline = document.createElement("script");
+      inline.id = "ga-inline";
+      inline.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${measurementId}',{send_page_view:false});`;
+      document.head.appendChild(inline);
+    }
+
+    if (typeof win.gtag === "function") {
+      win.gtag("event", "page_view", {
+        page_path: location,
+        send_to: measurementId,
+      });
+    }
   }, [location, siteSettings?.ga_measurement_id]);
 
   useEffect(() => {
