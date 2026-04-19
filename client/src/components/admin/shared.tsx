@@ -3,7 +3,9 @@ import { Search } from "lucide-react";
 // ─── Common styles ─────────────────────────────────────────────────────────────
 export const card: React.CSSProperties = {
   background: "hsl(var(--card))",
-  border: "1px solid hsl(220, 15%, 13%)",
+  borderRight: "1px solid hsl(220, 15%, 13%)",
+  borderBottom: "1px solid hsl(220, 15%, 13%)",
+  borderLeft: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   overflow: "hidden",
 };
