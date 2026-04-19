@@ -1059,9 +1059,6 @@ export default function Navbar() {
               )}
             </div>
           )}
-          <div style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))" }}>
-            {siteSettings?.site_name || "Nexcoin"} &copy; {new Date().getFullYear()}
-          </div>
         </div>
       </div>
     </>
