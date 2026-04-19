@@ -115,13 +115,22 @@ const FOOTER_EXCLUDED_PREFIXES = [
   "/login",
   "/register",
   "/auth",
+  "/account",
+  "/terms",
+  "/privacy",
+  "/refund-policy",
+  "/delivery-cancellation",
 ];
 
 function PublicRoutes() {
   const [location] = useLocation();
-  const showFooter = !FOOTER_EXCLUDED_PREFIXES.some(
-    (p) => location === p || location.startsWith(`${p}/`)
-  );
+  const isProductDetails =
+    location.startsWith("/products/") && location !== "/products";
+  const showFooter =
+    !isProductDetails &&
+    !FOOTER_EXCLUDED_PREFIXES.some(
+      (p) => location === p || location.startsWith(`${p}/`)
+    );
 
   return (
     <div className="min-h-screen flex flex-col">
