@@ -80,16 +80,13 @@ export function useInstallPrompt() {
   };
 
   const isInstalled = state === "installed";
-  const isDismissed = state === "dismissed";
 
   return {
-    // Show the button whenever not installed or dismissed — even before the
-    // native beforeinstallprompt fires so it appears on first visit.
-    canInstall: !isInstalled && !isDismissed,
+    // Show the button whenever not installed — cannot be dismissed
+    canInstall: !isInstalled,
     hasNativePrompt: !!prompt,  // true = we can trigger Chrome/Android native UI
     isIOS,                       // true = show manual "Share → Add" instructions
     isInstalled,
     install,
-    dismiss,
   };
 }
