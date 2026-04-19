@@ -63,6 +63,7 @@ async function runRealtimeReport(
 }
 
 function ga4DateRange(range: string): { startDate: string; endDate: string } {
+  if (range === "today") return { startDate: "today", endDate: "today" };
   if (range === "7days") return { startDate: "7daysAgo", endDate: "today" };
   if (range === "90days") return { startDate: "90daysAgo", endDate: "today" };
   return { startDate: "30daysAgo", endDate: "today" };

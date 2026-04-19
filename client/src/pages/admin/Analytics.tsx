@@ -27,6 +27,7 @@ const COLORS = [
 ];
 
 const RANGE_OPTIONS = [
+  { key: "today", label: "Today" },
   { key: "7days", label: "7d" },
   { key: "30days", label: "30d" },
   { key: "90days", label: "90d" },
