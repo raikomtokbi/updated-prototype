@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Zap, Menu, X, Search, LogOut, Gamepad2, Gift, Ticket, RefreshCcw, Download } from "lucide-react";
+import { ShoppingCart, User, Zap, Menu, X, Search, LogOut, Gamepad2, Gift, Ticket, RefreshCcw, Download, Bell, BellOff } from "lucide-react";
+import { usePushPermission } from "@/hooks/usePushSubscription";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -181,6 +182,9 @@ export default function Navbar() {
   const isLight = useIsLight();
   const { canInstall, hasNativePrompt, isIOS, install } = useInstallPrompt();
   const [showIOSHint, setShowIOSHint] = useState(false);
+  const { permission: pushPermission, requestSubscribe, supported: pushSupported } = usePushPermission();
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushMsg, setPushMsg] = useState<string | null>(null);
 
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -1026,6 +1030,48 @@ export default function Navbar() {
             gap: "0.75rem",
           }}
         >
+          {pushSupported && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <button
+                data-testid="drawer-button-notifications"
+                disabled={pushBusy || pushPermission === "denied"}
+                onClick={async () => {
+                  if (pushPermission === "granted") {
+                    setPushMsg("Notifications already enabled.");
+                    return;
+                  }
+                  setPushBusy(true);
+                  setPushMsg(null);
+                  const result = await requestSubscribe();
+                  setPushBusy(false);
+                  if (result === "granted") setPushMsg("Notifications enabled!");
+                  else if (result === "denied") setPushMsg("Permission denied. Enable it in your browser's site settings.");
+                  else if (result === "unsupported") setPushMsg("Your browser doesn't support push notifications.");
+                  else setPushMsg("Couldn't enable notifications. Please try again.");
+                }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                  padding: "0.65rem", borderRadius: "8px",
+                  background: pushPermission === "granted" ? "hsl(142,70%,45%,0.12)" : "hsl(var(--primary) / 0.1)",
+                  border: pushPermission === "granted" ? "1px solid hsl(142,70%,45%,0.4)" : "1px solid hsl(var(--primary) / 0.35)",
+                  color: pushPermission === "granted" ? "hsl(142,70%,45%)" : "hsl(var(--primary))",
+                  fontSize: "0.82rem", fontWeight: 600,
+                  cursor: pushBusy || pushPermission === "denied" ? "not-allowed" : "pointer",
+                  opacity: pushBusy ? 0.7 : 1,
+                }}
+              >
+                {pushPermission === "denied" ? <BellOff size={14} /> : <Bell size={14} />}
+                {pushPermission === "granted" ? "Notifications Enabled" : pushPermission === "denied" ? "Notifications Blocked" : pushBusy ? "Enabling…" : "Enable Notifications"}
+              </button>
+              {pushMsg && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px",
+                  background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))",
+                  fontSize: "11px", color: "hsl(var(--muted-foreground))", lineHeight: 1.5,
+                }}>{pushMsg}</div>
+              )}
+            </div>
+          )}
           {canInstall && (
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <button
