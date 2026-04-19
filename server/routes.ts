@@ -2198,6 +2198,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return;
       }
 
+      // Parse previous delivery responses (if any) so a re-run only retries
+      // items that haven't succeeded yet. Successful entries are preserved.
+      let priorResponses: any[] = [];
+      if (order.deliveryNote) {
+        try {
+          const parsed = JSON.parse(order.deliveryNote);
+          if (Array.isArray(parsed)) priorResponses = parsed;
+        } catch { /* note wasn't JSON — ignore */ }
+      }
+      const alreadyDelivered = new Set(
+        priorResponses.filter((r) => r && r.success).map((r) => String(r.cmsProduct))
+      );
+
       // Load all provider configs once
       const [busanConfig, lioConfig, smileConfig] = await Promise.all([
         storage.getBusanConfig().catch(() => undefined),
@@ -2205,14 +2218,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         storage.getSmileOneConfig().catch(() => undefined),
       ]);
 
-      let anySuccess = false;
       let lastError = "";
       let anyMappingFound = false;
-      const deliveryResponses: any[] = [];
+      // Start with the previously-successful responses so per-item history is preserved
+      const deliveryResponses: any[] = priorResponses.filter((r) => r && r.success);
 
       for (const item of cartItems) {
         const cmsId = item.packageId || item.productId;
         if (!cmsId) continue;
+        if (alreadyDelivered.has(String(cmsId))) {
+          // Skip — this item was already delivered in a previous attempt
+          anyMappingFound = true;
+          continue;
+        }
 
         // Look up all three mappings in parallel; first hit wins
         const [busanMap, lioMap, smileMap] = await Promise.all([
@@ -2251,8 +2269,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             playerId, zoneId: zoneId || null,
             ...result,
           });
-          if (result.success) anySuccess = true;
-          else lastError = result.message ?? "Busan top-up failed";
+          if (!result.success)
+          lastError = result.message ?? "Busan top-up failed";
           continue;
         }
 
@@ -2294,8 +2312,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             message: result.message,
             data: result.data,
           });
-          if (success) anySuccess = true;
-          else lastError = result.message ?? "Liogames order failed";
+          if (!result.success)
+          lastError = result.message ?? "Liogames order failed";
           continue;
         }
 
@@ -2327,8 +2345,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             playerId, zoneId: zoneId || null,
             ...result,
           });
-          if (result.success) anySuccess = true;
-          else lastError = (result as any).message ?? "Smile.one purchase failed";
+          if (!result.success)
+          lastError = (result as any).message ?? "Smile.one purchase failed";
           continue;
         }
 
@@ -2336,12 +2354,34 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
 
       const noteJson = deliveryResponses.length > 0 ? JSON.stringify(deliveryResponses) : undefined;
+
+      // Build the set of cmsProductIds that need delivery (had a mapping for some provider)
+      // and the set that ended up successful after this run. If all needed items succeeded
+      // → delivered. Otherwise → failed (so the admin can retry just the missing ones).
+      const successIds = new Set(
+        deliveryResponses.filter((r) => r && r.success).map((r) => String(r.cmsProduct))
+      );
+      const itemsNeedingDelivery = new Set<string>();
+      // Re-walk cart to know which items had any provider mapping at all
+      // (we already collected anyMappingFound above; here we recount to drive status).
+      // Items skipped via alreadyDelivered are also "needing delivery" historically.
+      for (const item of cartItems) {
+        const cmsId = item.packageId || item.productId;
+        if (!cmsId) continue;
+        if (alreadyDelivered.has(String(cmsId)) || deliveryResponses.some((r) => String(r.cmsProduct) === String(cmsId))) {
+          itemsNeedingDelivery.add(String(cmsId));
+        }
+      }
+
       if (!anyMappingFound) {
         await storage.updateOrderDelivery(orderId, "not_applicable");
-      } else if (anySuccess) {
-        await storage.updateOrderDelivery(orderId, "delivered", noteJson);
       } else {
-        await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "All provider attempts failed"));
+        const allDelivered = [...itemsNeedingDelivery].every((id) => successIds.has(id));
+        if (allDelivered) {
+          await storage.updateOrderDelivery(orderId, "delivered", noteJson);
+        } else {
+          await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "Some items failed to deliver"));
+        }
       }
     } catch (err) {
       console.error("[fulfillOrder] error:", err);

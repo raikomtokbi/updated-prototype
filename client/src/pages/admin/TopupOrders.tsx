@@ -30,7 +30,7 @@ function formatDate(d: string | Date | null | undefined) {
   return d ? new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 }
 
-function parseNotesItems(notes: string | null | undefined): Array<{ productTitle?: string; packageName?: string; userId?: string; zoneId?: string; quantity?: number }> {
+function parseNotesItems(notes: string | null | undefined): Array<{ productTitle?: string; packageName?: string; userId?: string; zoneId?: string; quantity?: number; packageId?: string; productId?: string }> {
   if (!notes) return [];
   try {
     const parsed = JSON.parse(notes);
@@ -38,6 +38,51 @@ function parseNotesItems(notes: string | null | undefined): Array<{ productTitle
     if (Array.isArray(parsed?.items)) return parsed.items;
   } catch {}
   return [];
+}
+
+type DeliveryAttempt = {
+  cmsProduct: string;
+  provider?: string;
+  success?: boolean;
+  message?: string;
+  status?: string;
+};
+
+function parseDeliveryAttempts(note: string | null | undefined): DeliveryAttempt[] {
+  if (!note) return [];
+  try {
+    const parsed = JSON.parse(note);
+    if (Array.isArray(parsed)) return parsed as DeliveryAttempt[];
+  } catch {}
+  return [];
+}
+
+function itemDeliveryStatus(
+  itemCmsId: string | undefined,
+  attempts: DeliveryAttempt[]
+): { state: "delivered" | "failed" | "pending"; provider?: string; message?: string } {
+  if (!itemCmsId) return { state: "pending" };
+  const match = attempts.find((a) => String(a.cmsProduct) === String(itemCmsId));
+  if (!match) return { state: "pending" };
+  return {
+    state: match.success ? "delivered" : "failed",
+    provider: match.provider,
+    message: match.message,
+  };
+}
+
+function ItemDeliveryPill({ status, provider, message }: { status: "delivered" | "failed" | "pending"; provider?: string; message?: string }) {
+  const base: React.CSSProperties = {
+    display: "inline-block", padding: "1px 6px", borderRadius: "4px",
+    fontSize: "10px", fontWeight: 600, marginLeft: "6px",
+  };
+  if (status === "delivered") {
+    return <span title={provider ? `Delivered via ${provider}` : "Delivered"} style={{ ...base, background: "rgba(74,222,128,0.12)", color: "hsl(142,71%,55%)" }}>Delivered{provider ? ` · ${provider}` : ""}</span>;
+  }
+  if (status === "failed") {
+    return <span title={message || "Delivery failed"} style={{ ...base, background: "rgba(248,113,113,0.12)", color: "hsl(0,80%,68%)", cursor: message ? "help" : "default" }}>Failed{provider ? ` · ${provider}` : ""}{message ? " ⓘ" : ""}</span>;
+  }
+  return <span style={{ ...base, background: "rgba(251,191,36,0.12)", color: "hsl(38,95%,62%)" }}>Pending</span>;
 }
 
 function DeliveryBadge({ status, note }: { status: string | null | undefined; note?: string | null }) {
@@ -158,7 +203,18 @@ export default function TopupOrders() {
                 {filtered.map((o) => {
                   const items = parseNotesItems(o.notes);
                   const firstItem = items[0];
+                  const firstItemCmsId = firstItem?.packageId || firstItem?.productId;
                   const isExpanded = expandedOrder === o.id;
+                  const attempts = parseDeliveryAttempts(o.deliveryNote);
+                  const firstItemDelivery = itemDeliveryStatus(firstItemCmsId, attempts);
+                  // Items still pending delivery (not yet attempted, or last attempt failed)
+                  const pendingItems = items.filter((it) => {
+                    const cms = it.packageId || it.productId;
+                    if (!cms) return false;
+                    const s = itemDeliveryStatus(cms, attempts).state;
+                    return s !== "delivered";
+                  });
+                  const hasMixedDelivery = attempts.length > 0 && pendingItems.length > 0 && pendingItems.length < items.length;
                   const deliveryPending = !o.deliveryStatus || o.deliveryStatus === "pending" || o.deliveryStatus === "failed";
 
                   return (
@@ -179,12 +235,22 @@ export default function TopupOrders() {
                         <td style={tdStyle}>
                           {firstItem ? (
                             <div>
-                              <div style={{ fontWeight: 500, color: "hsl(var(--foreground))", fontSize: "12px" }}>{firstItem.productTitle ?? "—"}</div>
+                              <div style={{ fontWeight: 500, color: "hsl(var(--foreground))", fontSize: "12px", display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                                <span>{firstItem.productTitle ?? "—"}</span>
+                                {attempts.length > 0 && (
+                                  <ItemDeliveryPill status={firstItemDelivery.state} provider={firstItemDelivery.provider} message={firstItemDelivery.message} />
+                                )}
+                              </div>
                               <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }}>{firstItem.packageName ?? ""}{firstItem.quantity && firstItem.quantity > 1 ? ` ×${firstItem.quantity}` : ""}</div>
                               {items.length > 1 && (
                                 <button onClick={() => setExpandedOrder(isExpanded ? null : o.id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "10px", color: "hsl(258,80%,65%)", padding: 0, marginTop: "2px" }}>
-                                  +{items.length - 1} more
+                                  {isExpanded ? "− hide items" : `+${items.length - 1} more`}
                                 </button>
+                              )}
+                              {hasMixedDelivery && !isExpanded && (
+                                <div style={{ fontSize: "10px", color: "hsl(38,95%,62%)", marginTop: "2px" }}>
+                                  {pendingItems.length} of {items.length} items pending delivery
+                                </div>
                               )}
                             </div>
                           ) : (
@@ -238,9 +304,14 @@ export default function TopupOrders() {
                                 style={btnNeutral}
                                 onClick={() => deliverMut.mutate(o.id)}
                                 disabled={deliverMut.isPending}
+                                title={hasMixedDelivery ? `Retries only the ${pendingItems.length} undelivered item(s)` : "Trigger delivery for this order"}
                                 data-testid={`button-deliver-order-${o.id}`}
                               >
-                                {deliverMut.isPending ? "Delivering…" : "Deliver Order"}
+                                {deliverMut.isPending
+                                  ? "Delivering…"
+                                  : hasMixedDelivery
+                                    ? `Deliver Pending (${pendingItems.length})`
+                                    : "Deliver Order"}
                               </button>
                             )}
                             {o.status === "completed" && (o.deliveryStatus === "pending" || o.deliveryStatus === "failed" || !o.deliveryStatus) && (
@@ -270,21 +341,30 @@ export default function TopupOrders() {
                         </td>
                       </tr>
 
-                      {isExpanded && items.slice(1).map((item, idx) => (
-                        <tr key={`${o.id}-item-${idx}`} style={{ background: "hsl(220,20%,7%)", borderBottom: "1px solid hsl(220,15%,10%)" }}>
-                          <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))", fontSize: "11px" }} colSpan={2}>
-                            <div style={{ paddingLeft: "12px" }}>
-                              <div style={{ color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>{item.productTitle ?? "—"}</div>
-                              <div style={{ color: "hsl(var(--muted-foreground))", fontSize: "10px" }}>{item.packageName ?? ""}</div>
-                            </div>
-                          </td>
-                          <td style={{ ...tdStyle, fontSize: "11px" }}>
-                            {item.userId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>ID: {item.userId}</div>}
-                            {item.zoneId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>Zone: {item.zoneId}</div>}
-                          </td>
-                          <td colSpan={4} style={tdStyle} />
-                        </tr>
-                      ))}
+                      {isExpanded && items.slice(1).map((item, idx) => {
+                        const cms = item.packageId || item.productId;
+                        const d = itemDeliveryStatus(cms, attempts);
+                        return (
+                          <tr key={`${o.id}-item-${idx}`} style={{ background: "hsl(220,20%,7%)", borderBottom: "1px solid hsl(220,15%,10%)" }}>
+                            <td style={{ ...tdStyle, color: "hsl(var(--muted-foreground))", fontSize: "11px" }} colSpan={2}>
+                              <div style={{ paddingLeft: "12px" }}>
+                                <div style={{ color: "hsl(var(--muted-foreground))", fontWeight: 500, display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                                  <span>{item.productTitle ?? "—"}</span>
+                                  {attempts.length > 0 && (
+                                    <ItemDeliveryPill status={d.state} provider={d.provider} message={d.message} />
+                                  )}
+                                </div>
+                                <div style={{ color: "hsl(var(--muted-foreground))", fontSize: "10px" }}>{item.packageName ?? ""}</div>
+                              </div>
+                            </td>
+                            <td style={{ ...tdStyle, fontSize: "11px" }}>
+                              {item.userId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>ID: {item.userId}</div>}
+                              {item.zoneId && <div style={{ fontFamily: "monospace", color: "hsl(var(--muted-foreground))" }}>Zone: {item.zoneId}</div>}
+                            </td>
+                            <td colSpan={4} style={tdStyle} />
+                          </tr>
+                        );
+                      })}
                     </Fragment>
                   );
                 })}
