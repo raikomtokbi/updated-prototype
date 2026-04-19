@@ -304,13 +304,61 @@ function FeaturesStrip() {
   ];
 
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
 
   useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
     const timer = setInterval(() => {
       setActiveIdx(prev => (prev + 1) % features.length);
     }, 2000);
     return () => clearInterval(timer);
-  }, [features.length]);
+  }, [features.length, isMobile]);
+
+  const renderFeature = ({ iconName, title, desc }: { iconName: string; title: string; desc: string }, idx: number, widthPct: number) => {
+    const Icon = iconMap[iconName] || Zap;
+    return (
+      <div
+        key={idx}
+        style={{
+          width: `${widthPct}%`,
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "10px",
+            background: "hsl(var(--primary) / 0.12)",
+            border: "1px solid hsl(var(--primary) / 0.25)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={20} color="hsl(var(--primary))" />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem", margin: "0 0 0.25rem" }}>
+            {title}
+          </p>
+          <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section
@@ -325,54 +373,24 @@ function FeaturesStrip() {
         overflow: "hidden",
       }}
     >
-      {/* Sliding track — clipped to one card width */}
-      <div style={{ overflow: "hidden" }}>
-        <div
-          style={{
-            display: "flex",
-            width: `${features.length * 100}%`,
-            transform: `translateX(-${(activeIdx * 100) / features.length}%)`,
-            transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
-        >
-          {features.map(({ iconName, title, desc }, idx: number) => {
-            const Icon = iconMap[iconName] || Zap;
-            return (
-              <div
-                key={idx}
-                style={{
-                  width: `${100 / features.length}%`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                }}
-              >
-                <div
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "10px",
-                    background: "hsl(var(--primary) / 0.12)",
-                    border: "1px solid hsl(var(--primary) / 0.25)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon size={20} color="hsl(var(--primary))" />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "0.25rem", margin: "0 0 0.25rem" }}>
-                    {title}
-                  </p>
-                  <p style={{ fontSize: "0.68rem", color: "hsl(var(--muted-foreground))", lineHeight: 1.5, margin: 0 }}>{desc}</p>
-                </div>
-              </div>
-            );
-          })}
+      {isMobile ? (
+        <div style={{ overflow: "hidden" }}>
+          <div
+            style={{
+              display: "flex",
+              width: `${features.length * 100}%`,
+              transform: `translateX(-${(activeIdx * 100) / features.length}%)`,
+              transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            {features.map((f, idx) => renderFeature(f, idx, 100 / features.length))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          {features.map((f, idx) => renderFeature(f, idx, 100 / features.length))}
+        </div>
+      )}
     </section>
   );
 }
