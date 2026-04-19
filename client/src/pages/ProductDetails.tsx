@@ -1079,6 +1079,12 @@ export default function ProductDetails() {
   const [, navigate] = useLocation();
   const slug = params.slug ?? "";
 
+  // Vouchers, gift cards & subscriptions are linked by UUID (product.id);
+  // games are linked by their slug. Detect which endpoint to call so we
+  // don't fire a guaranteed-404 request and pollute the console.
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+
   const { data: game, isLoading: gameLoading, isError: gameError } = useQuery<Game>({
     queryKey: [`/api/games/by-slug/${slug}`],
     queryFn: async () => {
@@ -1087,7 +1093,7 @@ export default function ProductDetails() {
       return res.json();
     },
     retry: false,
-    enabled: !!slug,
+    enabled: !!slug && !isUuid,
   });
 
   const { data: product, isLoading: productLoading, isError: productError } = useQuery<Product>({
@@ -1098,11 +1104,13 @@ export default function ProductDetails() {
       return res.json();
     },
     retry: false,
-    enabled: !!slug && gameError,
+    enabled: !!slug && (isUuid || gameError),
   });
 
-  const isLoading = gameLoading || (gameError && productLoading);
-  const notFound = gameError && productError;
+  const isLoading = isUuid
+    ? productLoading
+    : gameLoading || (gameError && productLoading);
+  const notFound = isUuid ? productError : gameError && productError;
 
   if (isLoading) {
     return (
