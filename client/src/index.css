@@ -422,3 +422,21 @@ textarea {
 .admin-table tr:last-child td {
   border-bottom: none;
 }
+/* Replace the header borderBottom with an inset divider that doesn't touch the rounded card edges */
+.admin-table thead th {
+  border-bottom: none !important;
+  position: relative;
+}
+.admin-table thead tr {
+  position: relative;
+}
+.admin-table thead tr::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  height: 1px;
+  background: hsl(220, 15%, 13%);
+  pointer-events: none;
+}
