@@ -1,5 +1,5 @@
 # Nexcoin — cPanel Deployment Guide
-Generated: 2026-04-19T04:11:10.779Z
+Generated: 2026-04-19T05:01:57.772Z
 
 ## Requirements
 - Node.js 18+ (managed via cPanel Node.js App)
