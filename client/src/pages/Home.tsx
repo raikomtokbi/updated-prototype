@@ -1070,7 +1070,7 @@ function BonusBanner() {
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
+export function Footer() {
   const isLight = useIsLight();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
@@ -1459,7 +1459,6 @@ export default function Home() {
       <VouchersSection />
       <BonusBanner />
       <GamesGrid />
-      <Footer />
     </div>
   );
 }

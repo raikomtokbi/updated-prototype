@@ -7,7 +7,7 @@ import { usePageTracking } from "@/hooks/usePageTracking";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 import Navbar from "./components/Navbar";
 import CookieBanner from "./components/CookieBanner";
-import Home from "./pages/Home";
+import Home, { Footer } from "./pages/Home";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -106,7 +106,23 @@ function ScrollToTop() {
   return null;
 }
 
+// Routes where the global footer should NOT render (transactional / auth flows)
+const FOOTER_EXCLUDED_PREFIXES = [
+  "/cart",
+  "/checkout",
+  "/payment-return",
+  "/payment/upi",
+  "/login",
+  "/register",
+  "/auth",
+];
+
 function PublicRoutes() {
+  const [location] = useLocation();
+  const showFooter = !FOOTER_EXCLUDED_PREFIXES.some(
+    (p) => location === p || location.startsWith(`${p}/`)
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
       <a
@@ -145,6 +161,7 @@ function PublicRoutes() {
           <Route component={NotFound} />
         </Switch>
       </main>
+      {showFooter && <Footer />}
     </div>
   );
 }
