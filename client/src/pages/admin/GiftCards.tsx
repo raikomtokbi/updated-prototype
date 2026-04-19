@@ -288,7 +288,7 @@ export default function GiftCards() {
       </Toolbar>
 
       <div style={card}>
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", borderRadius: "8px" }}>
         <table className="admin-table" style={{ width: "100%", minWidth: "480px", borderCollapse: "collapse" }}>
           <thead>
             <tr>

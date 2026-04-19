@@ -225,7 +225,7 @@ export default function Subscriptions() {
           </span>
         </Toolbar>
 
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", borderRadius: "8px" }}>
           {isLoading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: "13px" }}>Loading plans...</div>
           ) : filtered.length === 0 ? (
