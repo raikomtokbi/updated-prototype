@@ -2312,7 +2312,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             message: result.message,
             data: result.data,
           });
-          if (!result.success)
+          if (!success)
           lastError = result.message ?? "Liogames order failed";
           continue;
         }
