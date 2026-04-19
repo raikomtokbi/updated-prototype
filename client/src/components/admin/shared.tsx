@@ -6,6 +6,8 @@ export const card: React.CSSProperties = {
   border: "1px solid hsl(220, 15%, 13%)",
   borderRadius: "8px",
   overflow: "hidden",
+  isolation: "isolate",
+  WebkitMaskImage: "-webkit-radial-gradient(white, black)",
 };
 
 export const inputStyle: React.CSSProperties = {
