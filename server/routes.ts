@@ -1201,7 +1201,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     // Built-in fallback
     const now = new Date();
     let fromDate: Date;
-    if (range === "7days") fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    if (range === "today") { fromDate = new Date(now); fromDate.setHours(0, 0, 0, 0); }
+    else if (range === "7days") fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     else if (range === "90days") fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     else fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const siteTimezone = settingsMap.site_timezone || "UTC";
