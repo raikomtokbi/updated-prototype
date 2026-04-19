@@ -60,28 +60,10 @@ async function main() {
     },
   });
 
-  console.log("Creating deployment package: deploy.zip ...");
-  const zip = new AdmZip();
-
-  // Server bundle
-  zip.addLocalFile("dist/index.cjs", "dist");
-
-  // Built frontend (client/dist/ → public/ on server)
-  addDirToZip(zip, "client/dist", "public");
-
-  // MySQL setup SQL — run once in cPanel phpMyAdmin
-  if (fs.existsSync("migrations/setup.sql")) {
-    zip.addLocalFile("migrations/setup.sql", "migrations");
-  }
-
-  // Minimal package.json for cPanel Node.js Selector startup
-  const minPkg = {
-    name: "nexcoin",
-    version: "1.0.0",
-    type: "commonjs",
-    scripts: { start: "node dist/index.cjs" },
-  };
-  zip.addFile("package.json", Buffer.from(JSON.stringify(minPkg, null, 2)));
+  // Skipping zip packaging — build artifacts left on disk:
+  //   dist/index.cjs       (bundled server)
+  //   client/dist/         (built frontend)
+  //   migrations/setup.sql (MySQL schema)
 
   // .env.example to guide the server setup
   const envExample = [
@@ -99,7 +81,7 @@ async function main() {
     "# Path that Express serves uploads from (default: /uploads)",
     "# UPLOADS_URL_PATH=/uploads",
   ].join("\n");
-  zip.addFile(".env.example", Buffer.from(envExample));
+  fs.writeFileSync("dist/.env.example", envExample);
 
   // Deployment README
   const readme = [
@@ -157,27 +139,13 @@ async function main() {
     "      username: admin",
     "      password: admin123456",
   ].join("\n");
-  zip.addFile("DEPLOY.md", Buffer.from(readme));
+  fs.writeFileSync("dist/DEPLOY.md", readme);
 
-  zip.writeZip("deploy.zip");
-
-  const sizeMb = (fs.statSync("deploy.zip").size / 1024 / 1024).toFixed(1);
   console.log(`\nBuild complete!`);
-  console.log(`  deploy.zip  (${sizeMb} MB)`);
-  console.log(`\nSee DEPLOY.md inside the zip for step-by-step cPanel setup instructions.`);
-}
-
-function addDirToZip(zip: AdmZip, dirPath: string, zipPath: string) {
-  if (!fs.existsSync(dirPath)) return;
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
-    if (entry.isDirectory()) {
-      addDirToZip(zip, fullPath, `${zipPath}/${entry.name}`);
-    } else {
-      zip.addLocalFile(fullPath, zipPath);
-    }
-  }
+  console.log(`  dist/index.cjs       — bundled server`);
+  console.log(`  client/dist/         — built frontend (upload as 'public/' on server)`);
+  console.log(`  migrations/setup.sql — MySQL schema`);
+  console.log(`  dist/DEPLOY.md       — cPanel setup guide`);
 }
 
 main().catch((err) => {
