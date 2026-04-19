@@ -11,6 +11,116 @@ import { FaDiscord } from "react-icons/fa";
 import { useSiteStore } from "@/lib/store/siteStore";
 import { useIsLight } from "@/hooks/useIsLight";
 
+/**
+ * Auto-scrolling marquee that the user can also swipe/drag manually.
+ * - Scrolls horizontally at ~`speed` px per frame (~60fps).
+ * - Items list should be duplicated by the caller (so we can wrap seamlessly
+ *   when scrollLeft passes half the content width).
+ * - Auto-scroll pauses while the user is touching/dragging or hovering, and
+ *   resumes after `resumeAfterMs` of idle time.
+ */
+function useAutoMarquee(opts: { enabled: boolean; speed?: number; resumeAfterMs?: number }) {
+  const { enabled, speed = 0.6, resumeAfterMs = 1500 } = opts;
+  const ref = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const el = ref.current;
+    if (!el) return;
+
+    const pause = () => {
+      pausedRef.current = true;
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+    const scheduleResume = () => {
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = setTimeout(() => { pausedRef.current = false; }, resumeAfterMs);
+    };
+
+    // Auto-scroll loop
+    const tick = () => {
+      if (el && !pausedRef.current) {
+        const half = el.scrollWidth / 2;
+        let next = el.scrollLeft + speed;
+        if (next >= half) next -= half; // seamless wrap (caller duplicates items)
+        el.scrollLeft = next;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    // Touch / pointer pause
+    const onPointerDown = () => pause();
+    const onPointerUp = () => scheduleResume();
+    const onTouchStart = () => pause();
+    const onTouchEnd = () => scheduleResume();
+    const onMouseEnter = () => pause();
+    const onMouseLeave = () => scheduleResume();
+    const onScroll = () => {
+      // user-driven scroll (wheel, trackpad) also counts as interaction
+      if (!pausedRef.current) return;
+      scheduleResume();
+    };
+
+    // Mouse drag-to-pan (desktop)
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      startX = e.clientX;
+      startScroll = el.scrollLeft;
+      pause();
+      el.style.cursor = "grabbing";
+      e.preventDefault();
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      el.scrollLeft = startScroll - (e.clientX - startX);
+    };
+    const onMouseUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      el.style.cursor = "grab";
+      scheduleResume();
+    };
+
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd);
+    el.addEventListener("mouseenter", onMouseEnter);
+    el.addEventListener("mouseleave", onMouseLeave);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    el.style.cursor = "grab";
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("mouseenter", onMouseEnter);
+      el.removeEventListener("mouseleave", onMouseLeave);
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      el.style.cursor = "";
+    };
+  }, [enabled, speed, resumeAfterMs]);
+
+  return ref;
+}
+
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 const DEFAULT_FEATURES = [
@@ -397,7 +507,6 @@ function FeaturesStrip() {
 
 // ─── Trending Games ───────────────────────────────────────────────────────────
 function TrendingGames() {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const { data: trendingGames = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/games/trending"],
     refetchInterval: 30000,
@@ -412,6 +521,7 @@ function TrendingGames() {
   }, []);
   const useMarquee = isMobile && !isLoading && trendingGames.length > 1;
   const displayGames = useMarquee ? [...trendingGames, ...trendingGames] : trendingGames;
+  const scrollRef = useAutoMarquee({ enabled: useMarquee });
 
   return (
     <section style={{ padding: "1rem 0 1.5rem", maxWidth: "1320px", margin: "0 auto" }}>
@@ -461,12 +571,15 @@ function TrendingGames() {
         ref={scrollRef}
         style={{
           display: "flex",
-          gap: useMarquee ? 0 : "1rem",
-          overflowX: useMarquee ? "hidden" : "auto",
+          gap: useMarquee ? "1rem" : "1rem",
+          overflowX: "auto",
           padding: "0.5rem 1.5rem 1rem",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-        }}
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-x pan-y",
+          userSelect: "none",
+        } as React.CSSProperties}
       >
         {isLoading ? (
           <div style={{ display: "flex", gap: "1rem" }}>
@@ -479,7 +592,7 @@ function TrendingGames() {
             No trending games yet. Enable trending in the admin panel.
           </div>
         ) : (
-          <div className={useMarquee ? "home-marquee-track" : undefined} style={useMarquee ? undefined : { display: "flex", gap: "1rem" }}>
+          <div style={{ display: "flex", gap: "1rem" }}>
           {displayGames.map((game, idx) => (
             <Link
               key={`${game.id}-${idx}`}
@@ -535,7 +648,6 @@ function TrendingGames() {
 
 // ─── Vouchers Section ─────────────────────────────────────────────────────────
 function VouchersSection() {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const { data: products = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/products"],
     staleTime: 60_000,
@@ -555,6 +667,7 @@ function VouchersSection() {
   }, []);
   const useMarquee = isMobile && !isLoading && vouchers.length > 1;
   const displayVouchers = useMarquee ? [...vouchers, ...vouchers] : vouchers;
+  const scrollRef = useAutoMarquee({ enabled: useMarquee });
 
   if (!isLoading && vouchers.length === 0) return null;
 
@@ -606,12 +719,14 @@ function VouchersSection() {
           ref={scrollRef}
           style={{
             display: "flex",
-            gap: useMarquee ? 0 : "1rem",
-            overflowX: useMarquee ? "hidden" : "auto",
+            gap: "1rem",
+            overflowX: "auto",
             padding: "0.5rem 1.5rem 1rem",
             scrollbarWidth: "none",
             msOverflowStyle: "none",
             WebkitOverflowScrolling: "touch",
+            touchAction: "pan-x pan-y",
+            userSelect: "none",
           } as React.CSSProperties}
         >
           {isLoading ? (
@@ -621,7 +736,7 @@ function VouchersSection() {
               ))}
             </>
           ) : (
-            <div className={useMarquee ? "home-marquee-track" : undefined} style={useMarquee ? undefined : { display: "flex", gap: "1rem" }}>
+            <div style={{ display: "flex", gap: "1rem" }}>
             {displayVouchers.map((product: any, idx: number) => (
               <Link
                 key={`${product.id}-${idx}`}
