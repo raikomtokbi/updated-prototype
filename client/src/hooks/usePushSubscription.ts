@@ -16,8 +16,7 @@ export function usePushSubscription() {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
     if (Notification.permission === "denied") return;
 
-    const KEY = "_push_subscribed";
-    if (sessionStorage.getItem(KEY)) return;
+    const SESSION_KEY = "_push_subscribed";
 
     (async () => {
       try {
@@ -29,10 +28,22 @@ export function usePushSubscription() {
         await navigator.serviceWorker.ready;
 
         const existing = await reg.pushManager.getSubscription();
+
         if (existing) {
-          sessionStorage.setItem(KEY, "1");
+          // Always re-sync with server once per session — handles fresh DB deployments
+          if (!sessionStorage.getItem(SESSION_KEY)) {
+            await fetch("/api/push/subscribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(existing),
+            });
+            sessionStorage.setItem(SESSION_KEY, "1");
+          }
           return;
         }
+
+        // No subscription yet — request permission once per session
+        if (sessionStorage.getItem(SESSION_KEY)) return;
 
         const permission = await Notification.requestPermission();
         if (permission !== "granted") return;
@@ -47,8 +58,10 @@ export function usePushSubscription() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(subscription),
         });
-        sessionStorage.setItem(KEY, "1");
-      } catch (_) {}
+        sessionStorage.setItem(SESSION_KEY, "1");
+      } catch (err) {
+        console.error("[Push] Subscription error:", err);
+      }
     })();
   }, [location]);
 }
