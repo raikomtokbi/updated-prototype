@@ -231,7 +231,7 @@ export default function Subscriptions() {
           ) : filtered.length === 0 ? (
             <EmptyState message={plans.length === 0 ? "No subscription plans yet. Add your first plan." : "No plans match your filters."} />
           ) : (
-            <table style={{ width: "100%", minWidth: "560px", borderCollapse: "collapse", fontSize: "13px" }}>
+            <table className="admin-table" style={{ width: "100%", minWidth: "560px", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr>
                   {["Plan Name", "Description", "Status", "Sort", "Created", "Actions"].map((h) => (

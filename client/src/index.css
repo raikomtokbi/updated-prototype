@@ -417,3 +417,8 @@ textarea {
 .skip-to-content:focus {
   top: 0;
 }
+
+/* Admin tables: prevent last row's border from clashing with rounded card edge */
+.admin-table tr:last-child td {
+  border-bottom: none;
+}

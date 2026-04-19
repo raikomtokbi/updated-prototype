@@ -289,7 +289,7 @@ export default function GiftCards() {
 
       <div style={card}>
         <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", minWidth: "480px", borderCollapse: "collapse" }}>
+        <table className="admin-table" style={{ width: "100%", minWidth: "480px", borderCollapse: "collapse" }}>
           <thead>
             <tr>
               {["Title", "Status", "Sort", "Created", "Actions"].map((h) => (
