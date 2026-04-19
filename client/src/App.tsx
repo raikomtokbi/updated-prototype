@@ -265,14 +265,33 @@ export default function App() {
     document.head.appendChild(inline);
   }, [siteSettings?.ga_measurement_id]);
 
-  // ── Fire GA page_view on every navigation (storefront only) ──────────────
+  // ── Block all GA4 tracking on admin routes (including Enhanced Measurement) ──
   useEffect(() => {
     const measurementId = siteSettings?.ga_measurement_id?.trim();
     if (!measurementId) return;
-    if (typeof (window as any).gtag !== "function") return;
-    // Skip tracking for all admin panel routes
-    if (location.startsWith("/admin")) return;
-    (window as any).gtag("event", "page_view", {
+
+    const win = window as any;
+
+    if (location.startsWith("/admin")) {
+      // Patch window.gtag so Enhanced Measurement page_view auto-fires are dropped
+      if (!win.__originalGtag && typeof win.gtag === "function") {
+        win.__originalGtag = win.gtag;
+        win.gtag = (...args: any[]) => {
+          if (args[0] === "event" && args[1] === "page_view") return;
+          win.__originalGtag(...args);
+        };
+      }
+      return;
+    }
+
+    // Restore real gtag when back on storefront
+    if (win.__originalGtag) {
+      win.gtag = win.__originalGtag;
+      win.__originalGtag = undefined;
+    }
+
+    if (typeof win.gtag !== "function") return;
+    win.gtag("event", "page_view", {
       page_path: location,
       send_to: measurementId,
     });
