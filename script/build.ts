@@ -2,6 +2,7 @@ import { build, type Plugin } from "esbuild";
 import { execSync } from "child_process";
 import * as path from "path";
 import * as fs from "fs";
+import AdmZip from "adm-zip";
 
 // ─── esbuild plugin: redirect server/db.ts → server/db.mysql.ts ──────────────
 // and @shared/schema → shared/schema.mysql.ts during the MySQL production build.
@@ -59,23 +60,18 @@ async function main() {
     },
   });
 
-  console.log("Assembling production build under  build/ ...");
-
-  // Fresh build folder — wipe any previous output
-  if (fs.existsSync("build")) fs.rmSync("build", { recursive: true, force: true });
-  fs.mkdirSync("build", { recursive: true });
-  fs.mkdirSync("build/dist", { recursive: true });
-  fs.mkdirSync("build/migrations", { recursive: true });
+  console.log("Creating deployment package: deploy.zip ...");
+  const zip = new AdmZip();
 
   // Server bundle
-  fs.copyFileSync("dist/index.cjs", "build/dist/index.cjs");
+  zip.addLocalFile("dist/index.cjs", "dist");
 
-  // Built frontend (client/dist/ → build/public/ on server)
-  copyDir("client/dist", "build/public");
+  // Built frontend (client/dist/ → public/ on server)
+  addDirToZip(zip, "client/dist", "public");
 
   // MySQL setup SQL — run once in cPanel phpMyAdmin
   if (fs.existsSync("migrations/setup.sql")) {
-    fs.copyFileSync("migrations/setup.sql", "build/migrations/setup.sql");
+    zip.addLocalFile("migrations/setup.sql", "migrations");
   }
 
   // Minimal package.json for cPanel Node.js Selector startup
@@ -85,7 +81,7 @@ async function main() {
     type: "commonjs",
     scripts: { start: "node dist/index.cjs" },
   };
-  fs.writeFileSync("build/package.json", JSON.stringify(minPkg, null, 2));
+  zip.addFile("package.json", Buffer.from(JSON.stringify(minPkg, null, 2)));
 
   // .env.example to guide the server setup
   const envExample = [
@@ -103,7 +99,7 @@ async function main() {
     "# Path that Express serves uploads from (default: /uploads)",
     "# UPLOADS_URL_PATH=/uploads",
   ].join("\n");
-  fs.writeFileSync("build/.env.example", envExample);
+  zip.addFile(".env.example", Buffer.from(envExample));
 
   // Deployment README
   const readme = [
@@ -161,35 +157,27 @@ async function main() {
     "      username: admin",
     "      password: admin123456",
   ].join("\n");
-  fs.writeFileSync("build/DEPLOY.md", readme);
+  zip.addFile("DEPLOY.md", Buffer.from(readme));
 
-  const totalBytes = dirSize("build");
-  const sizeMb = (totalBytes / 1024 / 1024).toFixed(1);
+  zip.writeZip("deploy.zip");
+
+  const sizeMb = (fs.statSync("deploy.zip").size / 1024 / 1024).toFixed(1);
   console.log(`\nBuild complete!`);
-  console.log(`  build/  (${sizeMb} MB)`);
-  console.log(`\nDownload the  build/  folder from the file tree and upload its contents to cPanel.`);
-  console.log(`See  build/DEPLOY.md  for step-by-step cPanel setup instructions.`);
+  console.log(`  deploy.zip  (${sizeMb} MB)`);
+  console.log(`\nSee DEPLOY.md inside the zip for step-by-step cPanel setup instructions.`);
 }
 
-function copyDir(src: string, dest: string) {
-  if (!fs.existsSync(src)) return;
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
-    if (entry.isDirectory()) copyDir(s, d);
-    else fs.copyFileSync(s, d);
+function addDirToZip(zip: AdmZip, dirPath: string, zipPath: string) {
+  if (!fs.existsSync(dirPath)) return;
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      addDirToZip(zip, fullPath, `${zipPath}/${entry.name}`);
+    } else {
+      zip.addLocalFile(fullPath, zipPath);
+    }
   }
-}
-
-function dirSize(dir: string): number {
-  let total = 0;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) total += dirSize(full);
-    else total += fs.statSync(full).size;
-  }
-  return total;
 }
 
 main().catch((err) => {
