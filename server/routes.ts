@@ -2175,15 +2175,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ── Helper: fulfill Busan top-ups for an order ───────────────────────────────
-  async function fulfillBusanOrder(orderId: string): Promise<void> {
+  // ── Helper: fulfill an order across all top-up providers ────────────────────
+  // Per-item provider routing: look up which mapping table contains the
+  // CMS package id and dispatch to the matching upstream (Busan / Liogames /
+  // Smile.one). One order may mix providers across items.
+  async function fulfillOrder(orderId: string): Promise<void> {
     try {
-      const busanConfig = await storage.getBusanConfig();
-      if (!busanConfig?.apiToken || !busanConfig.isActive) {
-        await storage.updateOrderDelivery(orderId, "not_applicable");
-        return;
-      }
-
       const order = await storage.getOrderById(orderId);
       if (!order) return;
 
@@ -2192,62 +2189,168 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (order.notes) {
         try {
           const parsed = JSON.parse(order.notes);
-          // Handle both legacy array format and new { payerName, items } object format
           cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
         } catch { cartItems = []; }
       }
 
+      if (cartItems.length === 0) {
+        await storage.updateOrderDelivery(orderId, "not_applicable");
+        return;
+      }
+
+      // Load all provider configs once
+      const [busanConfig, lioConfig, smileConfig] = await Promise.all([
+        storage.getBusanConfig().catch(() => undefined),
+        storage.getLioGamesConfig().catch(() => undefined),
+        storage.getSmileOneConfig().catch(() => undefined),
+      ]);
+
       let anySuccess = false;
       let lastError = "";
+      let anyMappingFound = false;
       const deliveryResponses: any[] = [];
 
       for (const item of cartItems) {
-        if (!item.packageId && !item.productId) continue;
-        const mapping = await storage.getBusanMappingByCmsProductId(item.packageId || item.productId);
-        if (!mapping) {
-          console.log(`[Busan] No mapping for package/product ${item.packageId || item.productId} in order ${orderId}`);
+        const cmsId = item.packageId || item.productId;
+        if (!cmsId) continue;
+
+        // Look up all three mappings in parallel; first hit wins
+        const [busanMap, lioMap, smileMap] = await Promise.all([
+          storage.getBusanMappingByCmsProductId(cmsId).catch(() => undefined),
+          storage.getLioGamesMappingByCmsProductId(cmsId).catch(() => undefined),
+          storage.getSmileOneMappingByCmsProductId(cmsId).catch(() => undefined),
+        ]);
+
+        const playerId = item.playerId || item.userId || "";
+        const zoneId = item.zoneId || "";
+        const qty = Number(item.quantity) || 1;
+
+        // ── Busan ────────────────────────────────────────────────────────
+        if (busanMap) {
+          anyMappingFound = true;
+          if (!busanConfig?.apiToken || !busanConfig.isActive) {
+            lastError = "Busan provider not configured/active";
+            deliveryResponses.push({ cmsProduct: cmsId, provider: "busan", success: false, message: lastError });
+            continue;
+          }
+          const result = await createBusanOrder(
+            busanConfig.apiToken!,
+            busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
+            {
+              productId: busanMap.busanProductId,
+              playerId,
+              zoneId: zoneId || undefined,
+              currency: busanConfig.currency ?? "INR",
+            }
+          );
+          console.log(`[Busan] order ${orderId} product ${busanMap.busanProductId}:`, result);
+          deliveryResponses.push({
+            cmsProduct: cmsId,
+            provider: "busan",
+            busanProduct: busanMap.busanProductId,
+            playerId, zoneId: zoneId || null,
+            ...result,
+          });
+          if (result.success) anySuccess = true;
+          else lastError = result.message ?? "Busan top-up failed";
           continue;
         }
 
-        const orderResult = await createBusanOrder(
-          busanConfig.apiToken!,
-          busanConfig.apiBaseUrl ?? "https://1gamestopup.com/api/v1",
-          {
-            productId: mapping.busanProductId,
-            playerId: item.playerId || item.userId || "",
-            zoneId: item.zoneId || undefined,
-            currency: busanConfig.currency ?? "INR",
+        // ── Liogames ─────────────────────────────────────────────────────
+        if (lioMap) {
+          anyMappingFound = true;
+          if (!lioConfig?.memberCode || !lioConfig?.secret || !lioConfig.isActive) {
+            lastError = "Liogames provider not configured/active";
+            deliveryResponses.push({ cmsProduct: cmsId, provider: "liogames", success: false, message: lastError });
+            continue;
           }
-        );
-        console.log(`[Busan] Top-up for order ${orderId}, product ${mapping.busanProductId}:`, orderResult);
-        deliveryResponses.push({
-          cmsProduct: item.packageId || item.productId,
-          busanProduct: mapping.busanProductId,
-          playerId: item.playerId || item.userId || "",
-          zoneId: item.zoneId || null,
-          ...orderResult,
-        });
-        if (orderResult.success) {
-          anySuccess = true;
-        } else {
-          lastError = orderResult.message ?? "Top-up failed";
+          const partnerRef = `${order.orderNumber || orderId}-${cmsId}`.slice(0, 64);
+          const payload: Record<string, unknown> = {
+            member_code: lioConfig.memberCode,
+            partner_ref: partnerRef,
+            product_id: lioMap.lioProductId,
+            qty,
+            player: {
+              player_id: playerId,
+              ...(zoneId ? { server_id: zoneId } : {}),
+            },
+          };
+          if (lioMap.lioVariationId) payload.variation_id = lioMap.lioVariationId;
+          const result = await createLiogamesOrder(payload, {
+            memberCode: lioConfig.memberCode,
+            secret: lioConfig.secret,
+            baseUrl: lioConfig.baseUrl ?? undefined,
+          });
+          console.log(`[Liogames] order ${orderId} product ${lioMap.lioProductId}:`, result);
+          const success = !!result.ok && result.data?.result !== "failed";
+          deliveryResponses.push({
+            cmsProduct: cmsId,
+            provider: "liogames",
+            lioProduct: lioMap.lioProductId,
+            lioVariation: lioMap.lioVariationId ?? null,
+            playerId, zoneId: zoneId || null,
+            partnerRef,
+            success,
+            message: result.message,
+            data: result.data,
+          });
+          if (success) anySuccess = true;
+          else lastError = result.message ?? "Liogames order failed";
+          continue;
         }
+
+        // ── Smile.one ────────────────────────────────────────────────────
+        if (smileMap) {
+          anyMappingFound = true;
+          const smileCreds = await resolveSmileCredentials();
+          if (!smileConfig?.isActive || !smileCreds) {
+            lastError = "Smile.one provider not configured/active";
+            deliveryResponses.push({ cmsProduct: cmsId, provider: "smileone", success: false, message: lastError });
+            continue;
+          }
+          const userInput: Record<string, string> = { user_id: playerId };
+          if (zoneId) userInput.zone_id = zoneId;
+          const result = await smileCreatePurchase(
+            smileMap.gameSlug,
+            smileMap.smileProductId,
+            userInput,
+            smileMap.region || smileConfig.region,
+            smileCreds,
+          );
+          console.log(`[Smile.one] order ${orderId} product ${smileMap.smileProductId}:`, result);
+          deliveryResponses.push({
+            cmsProduct: cmsId,
+            provider: "smileone",
+            smileProduct: smileMap.smileProductId,
+            gameSlug: smileMap.gameSlug,
+            region: smileMap.region || smileConfig.region,
+            playerId, zoneId: zoneId || null,
+            ...result,
+          });
+          if (result.success) anySuccess = true;
+          else lastError = (result as any).message ?? "Smile.one purchase failed";
+          continue;
+        }
+
+        console.log(`[fulfillOrder] No provider mapping for package ${cmsId} in order ${orderId}`);
       }
 
-      // Save delivery status on the order with full Busan response stored as note
       const noteJson = deliveryResponses.length > 0 ? JSON.stringify(deliveryResponses) : undefined;
-      if (cartItems.length === 0) {
+      if (!anyMappingFound) {
         await storage.updateOrderDelivery(orderId, "not_applicable");
       } else if (anySuccess) {
         await storage.updateOrderDelivery(orderId, "delivered", noteJson);
       } else {
-        await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "No mapping or top-up failed"));
+        await storage.updateOrderDelivery(orderId, "failed", noteJson ?? (lastError || "All provider attempts failed"));
       }
     } catch (err) {
-      console.error("[Busan] fulfillBusanOrder error:", err);
+      console.error("[fulfillOrder] error:", err);
       await storage.updateOrderDelivery(orderId, "failed", String(err));
     }
   }
+
+  // Backwards-compat alias — older callers still reference fulfillBusanOrder
+  const fulfillBusanOrder = fulfillOrder;
 
   // ── Shared order-completion handler ──────────────────────────────────────────
   // Called from every payment confirmation path. Runs Busan fulfillment then
