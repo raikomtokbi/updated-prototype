@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
+import { apiRequest } from "@/lib/queryClient";
 import type { Order } from "@shared/schema";
 import {
   card, thStyle, tdStyle, btnSuccess, btnDanger, btnNeutral,
@@ -20,8 +21,8 @@ const STATUS_OPTIONS = [
 
 const VOUCHER_CATEGORIES = ["voucher", "gift_card", "subscription"];
 
-function formatDate(d: string | Date | null | undefined) {
-  return d ? new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+function formatDate(d: string | Date | null | undefined, tz = "UTC") {
+  return d ? new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: tz }) : "—";
 }
 
 function parseNotesItems(notes: string | null | undefined): Array<Record<string, any>> {
@@ -51,6 +52,14 @@ export default function VoucherOrders() {
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const highlightId = useMemo(() => new URLSearchParams(window.location.search).get("highlight"), []);
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    queryFn: () => apiRequest("GET", "/api/site-settings").then(r => r.json()),
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+  const siteTimezone = siteSettings?.site_timezone ?? "UTC";
 
   const { data: orders = [], isLoading } = useQuery<AnyOrder[]>({
     queryKey: ["/api/admin/orders"],
@@ -197,7 +206,7 @@ export default function VoucherOrders() {
                           )}
                         </td>
                         <td style={tdStyle}><StatusBadge value={o.status} /></td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
+                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt, siteTimezone)}</td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                             {o.status === "pending" && (

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminApi } from "@/lib/store/useAdmin";
+import { apiRequest } from "@/lib/queryClient";
 import type { Order } from "@shared/schema";
 import {
   card, thStyle, tdStyle, btnSuccess, btnDanger, btnNeutral,
@@ -26,8 +27,8 @@ const DELIVERY_OPTIONS = [
   { value: "not_applicable", label: "N/A" },
 ];
 
-function formatDate(d: string | Date | null | undefined) {
-  return d ? new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+function formatDate(d: string | Date | null | undefined, tz = "UTC") {
+  return d ? new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: tz }) : "—";
 }
 
 function parseNotesItems(notes: string | null | undefined): Array<{ productTitle?: string; packageName?: string; userId?: string; zoneId?: string; quantity?: number; packageId?: string; productId?: string }> {
@@ -112,6 +113,14 @@ export default function TopupOrders() {
   const [deliveryFilter, setDeliveryFilter] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const highlightId = useMemo(() => new URLSearchParams(window.location.search).get("highlight"), []);
+
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    queryFn: () => apiRequest("GET", "/api/site-settings").then(r => r.json()),
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+  const siteTimezone = siteSettings?.site_timezone ?? "UTC";
 
   const { data: orders = [], isLoading } = useQuery<AnyOrder[]>({
     queryKey: ["/api/admin/orders"],
@@ -279,7 +288,7 @@ export default function TopupOrders() {
                         <td style={tdStyle}>
                           <DeliveryBadge status={o.deliveryStatus} note={o.deliveryNote} />
                         </td>
-                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt)}</td>
+                        <td style={{ ...tdStyle, fontSize: "11px", color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{formatDate(o.createdAt, siteTimezone)}</td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                             {o.status === "pending" && (
