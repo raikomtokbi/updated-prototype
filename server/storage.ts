@@ -43,7 +43,7 @@ import {
   type RolePermission,
   type PushSubscription, type InsertPushSubscription,
 } from "@shared/schema";
-import { eq, desc, asc, count, sum, and, gte, lte, lt, sql, not, like } from "drizzle-orm";
+import { eq, desc, asc, count, sum, and, gte, lte, lt, sql, not, like, inArray } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -967,7 +967,10 @@ export class DatabaseStorage implements IStorage {
     const [orderCount] = await db.select({ count: count() }).from(orders).where(rangeFilter);
     const [revenueRow] = await db.select({ total: sum(orders.totalAmount) }).from(orders)
       .where(rangeFilter ? and(eq(orders.status, "completed"), rangeFilter) : eq(orders.status, "completed"));
-    const [ticketCount] = await db.select({ count: count() }).from(tickets).where(ticketRangeFilter);
+    const openStatusFilter = inArray(tickets.status, ["open", "in_progress"]);
+    const [ticketCount] = await db.select({ count: count() }).from(tickets).where(
+      ticketRangeFilter ? and(openStatusFilter, ticketRangeFilter) : openStatusFilter
+    );
     return {
       totalUsers: userCount.count,
       totalOrders: orderCount.count,
