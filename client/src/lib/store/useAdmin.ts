@@ -1,11 +1,16 @@
-import { useAuthStore } from "./authstore";
+import { useAuthStore, getAuthToken } from "./authstore";
 
-const BASE_HEADERS = () => {
+const BASE_HEADERS = (): Record<string, string> => {
   const { user } = useAuthStore.getState();
-  return {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-admin-role": user?.role ?? "super_admin",
   };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  // Kept for backwards compat with any middleware still inspecting it; the
+  // server now derives the actual role from the verified JWT, not this header.
+  if (user?.role) headers["x-admin-role"] = user.role;
+  return headers;
 };
 
 async function adminFetch(path: string, options: RequestInit = {}) {
