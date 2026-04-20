@@ -3013,9 +3013,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/admin/busan/config", requireAdmin, async (req, res) => {
     try {
-      const { apiToken, currency, isActive } = req.body as Record<string, any>;
+      const { apiToken, apiBaseUrl, currency, isActive } = req.body as Record<string, any>;
       const config = await storage.upsertBusanConfig({
         apiToken,
+        apiBaseUrl: apiBaseUrl || null,
         currency: currency || "IDR",
         isActive: isActive !== false,
       });
