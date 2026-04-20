@@ -6,7 +6,7 @@ import {
   Calendar, Hash, Clock, Headphones, Send, Paperclip, ArrowLeft, ChevronDown,
   RotateCcw, ChevronLeft,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/store/authstore";
+import { useAuthStore, getAuthToken } from "@/lib/store/authstore";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -239,8 +239,9 @@ function OrdersTab({ user }: { user: any }) {
   const { data: orders, isLoading, error } = useQuery<any[]>({
     queryKey: ["/api/user/orders"],
     queryFn: async () => {
+      const token = getAuthToken();
       const res = await fetch("/api/user/orders", {
-        headers: { "X-Username": user.username },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         credentials: "include",
       });
       if (res.status === 401) {
@@ -256,9 +257,13 @@ function OrdersTab({ user }: { user: any }) {
 
   const refundMutation = useMutation({
     mutationFn: async (order: any) => {
+      const token = getAuthToken();
       const res = await fetch("/api/tickets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({
           subject: `Refund Request — Order #${order.orderNumber}`,
@@ -862,9 +867,13 @@ function DeleteAccountSection() {
 
   const deleteMutation = useMutation({
     mutationFn: async (password: string) => {
+      const token = getAuthToken();
       const res = await fetch("/api/user/delete", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json", "X-Username": authUser?.username ?? "" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ password }),
       });
       if (!res.ok) {
@@ -1044,7 +1053,10 @@ function TicketsTab({ user }: { user: any }) {
   const [attachment, setAttachment] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const authHeaders = { "X-Username": user.username };
+  const authHeaders: Record<string, string> = (() => {
+    const token = getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  })();
 
   const { data: tickets = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/tickets"],
