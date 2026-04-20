@@ -330,7 +330,12 @@ export default function App() {
   ]);
 
   if (isAdmin) {
-    return <AdminRoutes />;
+    return (
+      <>
+        <ScrollToTop />
+        <AdminRoutes />
+      </>
+    );
   }
 
   if (maintenanceMode) {
