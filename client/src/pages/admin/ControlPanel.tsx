@@ -196,6 +196,8 @@ const DEFAULTS: SettingsMap = {
   site_logo: "",
   site_favicon: "",
   pwa_icon: "",
+  pwa_icon_192: "",
+  pwa_icon_512: "",
   site_timezone: "UTC",
   date_format: "DD/MM/YYYY",
   default_currency: "USD",
@@ -791,6 +793,37 @@ export default function ControlPanel() {
               />
               <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
                 Shown on home screen after install. Falls back to Site Logo if empty.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "14px", marginTop: "14px" }}>
+            <div>
+              <ImageUploadField
+                label="PWA Icon — 192×192"
+                value={local.pwa_icon_192 ?? ""}
+                onChange={(url) => set("pwa_icon_192", url)}
+                inputStyle={inputStyle}
+                labelStyle={labelStyle}
+                ratio="square"
+                brandingKind="pwa_icon_192"
+              />
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
+                Optional. Used for the 192×192 PWA slot. Falls back to App Icon (PWA) above.
+              </p>
+            </div>
+            <div>
+              <ImageUploadField
+                label="PWA Icon — 512×512"
+                value={local.pwa_icon_512 ?? ""}
+                onChange={(url) => set("pwa_icon_512", url)}
+                inputStyle={inputStyle}
+                labelStyle={labelStyle}
+                ratio="square"
+                brandingKind="pwa_icon_512"
+              />
+              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
+                Optional. Used for the 512×512 PWA slot (splash, install prompts). Falls back to App Icon (PWA) above.
               </p>
             </div>
           </div>

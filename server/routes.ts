@@ -54,7 +54,13 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 const brandingDir = path.resolve(process.cwd(), "public/branding");
 if (!fs.existsSync(brandingDir)) fs.mkdirSync(brandingDir, { recursive: true });
 
-const ALLOWED_BRANDING_KINDS = ["logo", "favicon", "pwa_icon"] as const;
+const ALLOWED_BRANDING_KINDS = [
+  "logo",
+  "favicon",
+  "pwa_icon",
+  "pwa_icon_192",
+  "pwa_icon_512",
+] as const;
 type BrandingKind = (typeof ALLOWED_BRANDING_KINDS)[number];
 
 const brandingUpload = multer({
@@ -63,9 +69,17 @@ const brandingUpload = multer({
     filename: (req, file, cb) => {
       const kind = String((req.query?.kind ?? req.body?.kind ?? "asset")).toLowerCase();
       const ext = path.extname(file.originalname).toLowerCase() || ".png";
-      // Timestamp suffix doubles as a cache-buster so the new logo replaces
-      // the old one in the browser immediately on upload.
-      cb(null, `${kind}-${Date.now()}${ext}`);
+      // Preserve the user's original filename (sanitized) so the saved file
+      // is recognisable, then append a short cache-buster suffix so each
+      // upload produces a unique URL the browser won't serve from cache.
+      const rawBase = path.basename(file.originalname, path.extname(file.originalname));
+      const safeBase = rawBase
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "")
+        .slice(0, 40) || "image";
+      const stamp = Date.now().toString(36);
+      cb(null, `${kind}-${safeBase}-${stamp}${ext}`);
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -221,23 +235,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       settings.forEach((s) => { obj[s.key] = s.value ?? ""; });
 
       const siteName = obj.site_name || "Nexcoin";
-      const iconSrc = obj.pwa_icon || obj.site_logo || "";
-      // When a custom icon is uploaded, use it exclusively with explicit sizes so the
-      // browser is forced to pick it. Listing static icons alongside it causes browsers
-      // to prefer the static ones (they have explicit px dimensions; "any" is for SVGs).
-      const icons = iconSrc
-        ? [
-            { src: iconSrc, sizes: "512x512", type: "image/png", purpose: "any" },
-            { src: iconSrc, sizes: "192x192", type: "image/png", purpose: "any" },
-            { src: iconSrc, sizes: "512x512", type: "image/png", purpose: "maskable" },
-            { src: iconSrc, sizes: "192x192", type: "image/png", purpose: "maskable" },
-          ]
-        : [
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-            { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-            { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-          ];
+      // Prefer dedicated 192/512 uploads; fall back to a single pwa_icon, then
+      // site_logo, then the bundled static defaults. Each size is reported
+      // separately so browsers can pick the best fit.
+      const icon192 =
+        obj.pwa_icon_192 || obj.pwa_icon || obj.site_logo || "/icons/icon-192.png";
+      const icon512 =
+        obj.pwa_icon_512 || obj.pwa_icon || obj.site_logo || "/icons/icon-512.png";
+      const icons = [
+        { src: icon512, sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: icon512, sizes: "512x512", type: "image/png", purpose: "maskable" },
+        { src: icon192, sizes: "192x192", type: "image/png", purpose: "maskable" },
+      ];
 
       const manifest = {
         name: `${siteName} — Game Top-Ups`,
