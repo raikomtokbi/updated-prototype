@@ -1610,6 +1610,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const stamp = `Manually marked delivered by admin at ${new Date().toISOString()}${note ? ` — ${note}` : ""}`;
     const combinedNote = order.deliveryNote ? `${order.deliveryNote}\n${stamp}` : stamp;
     await storage.updateOrderDelivery(req.params.id, "delivered", combinedNote);
+    sendOrderSuccessEmail(req.params.id).catch((e) =>
+      console.error("[mark-delivered] order_success email error:", e)
+    );
     res.json({ ok: true, deliveryStatus: "delivered" });
   });
 
@@ -2570,6 +2573,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         );
         if (allDelivered) {
           await storage.updateOrderDelivery(orderId, "delivered", noteJson);
+          sendOrderSuccessEmail(orderId).catch((e) =>
+            console.error("[fulfillOrder] order_success email error:", e)
+          );
         } else if (!anyFailed) {
           // No outright failures — provider hasn't given a terminal answer yet.
           // Leave the order in pending so the admin can verify and either
@@ -2649,6 +2655,65 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       });
     } catch (emailErr) {
       console.error("[handleOrderCompleted] Confirmation email error:", emailErr);
+    }
+  }
+
+  // Sends the "Order Success" email after delivery is confirmed (auto or manual).
+  async function sendOrderSuccessEmail(orderId: string): Promise<void> {
+    try {
+      const o = await storage.getOrderById(orderId);
+      if (!o?.userId) return;
+
+      const [user, smtpConfig, template, settings] = await Promise.all([
+        storage.getUser(o.userId),
+        getSmtpConfig(),
+        getEmailTemplateWithDefault("order_success"),
+        storage.getAllSiteSettings(),
+      ]);
+      if (!user?.email || !smtpConfig || !template) return;
+      if (!(template as any).isEnabled) return;
+
+      const siteObj: Record<string, string> = {};
+      settings.forEach((s) => { siteObj[s.key] = s.value ?? ""; });
+      const siteName = siteObj.site_name || "Nexcoin";
+
+      let cartItems: any[] = [];
+      try {
+        const parsed = o.notes ? JSON.parse(o.notes) : null;
+        cartItems = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.items) ? parsed.items : []);
+      } catch {}
+      const firstItem = cartItems[0];
+      const now = new Date();
+
+      await sendTemplatedEmail({
+        to: user.email,
+        template: template as any,
+        cc: (template as any).copyEmail ?? undefined,
+        vars: {
+          user_name: user.fullName || user.username,
+          user_email: user.email,
+          user_id: user.id,
+          order_id: o.orderNumber,
+          order_amount: `${o.currency === "INR" ? "₹" : "$"}${Number(o.totalAmount).toFixed(2)}`,
+          order_currency: o.currency,
+          order_date: now.toLocaleDateString(),
+          order_time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          order_status: "Delivered",
+          payment_method: o.paymentMethod ?? "Manual",
+          game_name: firstItem?.productTitle ?? "",
+          product_name: firstItem?.packageName ?? firstItem?.productTitle ?? "",
+          product_quantity: String(firstItem?.quantity ?? 1),
+          player_id: firstItem?.userId ?? firstItem?.playerId ?? "",
+          zone_id: firstItem?.zoneId ?? "",
+          site_name: siteName,
+          site_url: siteObj.site_url || "",
+          support_email: siteObj.contact_email || "",
+        },
+        siteName,
+        smtpConfig,
+      });
+    } catch (emailErr) {
+      console.error("[sendOrderSuccessEmail] error:", emailErr);
     }
   }
 

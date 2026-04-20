@@ -301,20 +301,26 @@ If you did not request this, please ignore this email or contact support.`,
     styles: null,
   },
   {
-    type: "promotional",
-    name: "Promotional Email",
-    subject: "Special Offer from {{site_name}}",
-    title: "Exclusive Deal Just for You",
+    type: "order_success",
+    name: "Order Success Email",
+    subject: "Your Order Has Been Delivered — #{{order_id}}",
+    title: "Your Order Has Been Delivered!",
     body: `Hi {{user_name}},
 
-We have an exciting offer waiting for you at {{site_name}}!
+Great news! Your order has been successfully delivered.
 
-Don't miss out on our latest promotions, discounts, and special deals on your favorite game top-ups and vouchers.
+Order ID: {{order_id}}
+Amount: {{order_amount}}
+Date: {{order_date}}
+Product: {{product_name}}
+Status: Delivered
 
-Check out what's new today and save big on your next purchase.`,
-    footerText: "You received this email because you subscribed to {{site_name}} promotions. Unsubscribe at any time.",
-    buttonText: "View Offers",
-    buttonLink: "{{site_url}}/offers",
+Your items are now ready. If you have any issues, please contact our support team.
+
+Thank you for shopping with {{site_name}}!`,
+    footerText: "© {{site_name}}. For support, contact us at {{support_email}}.",
+    buttonText: "View Order",
+    buttonLink: "{{site_url}}/account",
     isEnabled: true,
     styles: null,
   },

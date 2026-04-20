@@ -272,7 +272,7 @@ function fmtTime(sec: number) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function Analytics() {
-  const [range, setRange] = useState("30days");
+  const [range, setRange] = useState("today");
   const isMobile = useMobile(768);
 
   const { data, isLoading } = useQuery<any>({
