@@ -1103,43 +1103,54 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/user/orders", requireUser, async (req: any, res) => {
-    const userOrders = await storage.getOrdersByUser(req.currentUser.id);
-    const ordersWithItems = await Promise.all(
-      userOrders.map(async (order) => {
-        const items = await storage.getOrderItemsByOrder(order.id);
-        return { ...order, items };
-      })
-    );
-    res.json(ordersWithItems);
+    try {
+      const userOrders = await storage.getOrdersByUser(req.currentUser.id);
+      const ordersWithItems = await Promise.all(
+        userOrders.map(async (order) => {
+          const items = await storage.getOrderItemsByOrder(order.id);
+          return { ...order, items };
+        })
+      );
+      res.json(ordersWithItems);
+    } catch (err: any) {
+      console.error("[user/orders]", err?.message);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
   });
 
   app.patch("/api/user/profile", requireUser, async (req: any, res) => {
-    const { fullName, email, phone } = req.body ?? {};
-    const updated = await storage.updateUser(req.currentUser.id, { fullName, email, phone });
-    if (!updated) return res.status(404).json({ message: "User not found" });
-    const { password: _pw, ...safeUser } = updated;
-    res.json({ user: safeUser });
+    try {
+      const { fullName, email, phone } = req.body ?? {};
+      const updated = await storage.updateUser(req.currentUser.id, { fullName, email, phone });
+      if (!updated) return res.status(404).json({ message: "User not found" });
+      const { password: _pw, ...safeUser } = updated;
+      res.json({ user: safeUser });
+    } catch (err: any) {
+      console.error("[user/profile]", err?.message);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
   });
 
   app.post("/api/user/change-password", requireUser, async (req: any, res) => {
-    const { currentPassword, newPassword } = req.body ?? {};
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Current and new password required" });
+    try {
+      const { currentPassword, newPassword } = req.body ?? {};
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new password required" });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters" });
+      }
+      const passwordMatch = await bcrypt.compare(currentPassword, req.currentUser.password);
+      if (!passwordMatch) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(req.currentUser.id, { password: hashedPassword });
+      res.json({ ok: true });
+    } catch (err: any) {
+      console.error("[user/change-password]", err?.message);
+      res.status(500).json({ message: "Failed to change password" });
     }
-    if (newPassword.length < 8) {
-      return res.status(400).json({ message: "New password must be at least 8 characters" });
-    }
-
-    // Verify current password with bcrypt
-    const passwordMatch = await bcrypt.compare(currentPassword, req.currentUser.password);
-    if (!passwordMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await storage.updateUser(req.currentUser.id, { password: hashedPassword });
-    res.json({ ok: true });
   });
 
   // Soft-delete: schedules the account for permanent deletion in 72h.

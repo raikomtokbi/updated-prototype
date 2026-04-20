@@ -10,6 +10,7 @@ import { useMobile } from "@/components/admin/AdminLayout";
 import { useNavGuard } from "@/hooks/useNavGuard";
 import { useToast } from "@/hooks/use-toast";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { getAuthToken } from "@/lib/store/authstore";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -650,10 +651,13 @@ function TestEmailDialog({ type, onClose }: { type: string; onClose: () => void 
     setSending(true);
     setResult(null);
     try {
+      const token = getAuthToken();
       const res = await fetch(`/api/admin/email-templates/${type}/test`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-role": "super_admin" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ to }),
       });
       const data = await res.json();
@@ -898,10 +902,13 @@ function TemplateEditor({
   const { toast } = useToast();
   const saveMut = useMutation({
     mutationFn: async (data: FormState) => {
+      const token = getAuthToken();
       const res = await fetch(`/api/admin/email-templates/${def.type}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-admin-role": "super_admin" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           type: data.type,
           name: data.name,
