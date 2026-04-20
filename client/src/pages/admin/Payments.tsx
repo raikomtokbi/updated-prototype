@@ -99,7 +99,10 @@ export default function Payments() {
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
     queryFn: () => apiRequest("GET", "/api/site-settings").then(r => r.json()),
-    staleTime: 300000,
+    // staleTime intentionally low so a Site Timezone change in Control Panel
+    // is reflected here on the next render without a manual refresh.
+    staleTime: 0,
+    refetchOnMount: true,
   });
   const siteTimezone = siteSettings?.site_timezone ?? "UTC";
 

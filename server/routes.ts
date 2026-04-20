@@ -235,13 +235,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       settings.forEach((s) => { obj[s.key] = s.value ?? ""; });
 
       const siteName = obj.site_name || "Nexcoin";
-      // Prefer dedicated 192/512 uploads; fall back to a single pwa_icon, then
-      // site_logo, then the bundled static defaults. Each size is reported
-      // separately so browsers can pick the best fit.
-      const icon192 =
-        obj.pwa_icon_192 || obj.pwa_icon || obj.site_logo || "/icons/icon-192.png";
-      const icon512 =
-        obj.pwa_icon_512 || obj.pwa_icon || obj.site_logo || "/icons/icon-512.png";
+      // PWA icons are uploaded manually via cPanel to fixed file paths so
+      // hosts that block multipart uploads still work. Replace the files
+      // at /icons/icon-192.png and /icons/icon-512.png to update them.
+      const icon192 = "/icons/icon-192.png";
+      const icon512 = "/icons/icon-512.png";
       const icons = [
         { src: icon512, sizes: "512x512", type: "image/png", purpose: "any" },
         { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },

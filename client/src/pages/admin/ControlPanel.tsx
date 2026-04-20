@@ -781,51 +781,27 @@ export default function ControlPanel() {
               ratio="square"
               brandingKind="favicon"
             />
-            <div>
-              <ImageUploadField
-                label="App Icon (PWA)"
-                value={local.pwa_icon ?? ""}
-                onChange={(url) => set("pwa_icon", url)}
-                inputStyle={inputStyle}
-                labelStyle={labelStyle}
-                ratio="square"
-                brandingKind="pwa_icon"
-              />
-              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
-                Shown on home screen after install. Falls back to Site Logo if empty.
-              </p>
-            </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "14px", marginTop: "14px" }}>
-            <div>
-              <ImageUploadField
-                label="PWA Icon — 192×192"
-                value={local.pwa_icon_192 ?? ""}
-                onChange={(url) => set("pwa_icon_192", url)}
-                inputStyle={inputStyle}
-                labelStyle={labelStyle}
-                ratio="square"
-                brandingKind="pwa_icon_192"
-              />
-              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
-                Optional. Used for the 192×192 PWA slot. Falls back to App Icon (PWA) above.
-              </p>
+          {/* PWA icons are served from fixed file paths so they can be
+              uploaded manually via cPanel File Manager / FTP. The previous
+              upload UI was removed because the multipart upload was unreliable
+              on some hosts. The manifest.json endpoint always points to the
+              two paths shown below. */}
+          <div style={{ marginTop: "14px", padding: "12px 14px", border: "1px dashed hsl(var(--border))", borderRadius: "8px", background: "hsl(var(--muted))" }}>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: "6px" }}>
+              PWA App Icons (manual upload)
             </div>
-            <div>
-              <ImageUploadField
-                label="PWA Icon — 512×512"
-                value={local.pwa_icon_512 ?? ""}
-                onChange={(url) => set("pwa_icon_512", url)}
-                inputStyle={inputStyle}
-                labelStyle={labelStyle}
-                ratio="square"
-                brandingKind="pwa_icon_512"
-              />
-              <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
-                Optional. Used for the 512×512 PWA slot (splash, install prompts). Falls back to App Icon (PWA) above.
-              </p>
-            </div>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "0 0 8px", lineHeight: 1.55 }}>
+              Upload your two PWA icons via cPanel File Manager or FTP, replacing the existing files at these exact paths:
+            </p>
+            <ul style={{ fontSize: "11px", fontFamily: "monospace", color: "hsl(var(--foreground))", margin: 0, paddingLeft: "18px", lineHeight: 1.7 }}>
+              <li>public_html/icons/icon-192.png &nbsp; (192×192 PNG)</li>
+              <li>public_html/icons/icon-512.png &nbsp; (512×512 PNG)</li>
+            </ul>
+            <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "8px 0 0", lineHeight: 1.55 }}>
+              After uploading, hard-refresh the browser (Ctrl+Shift+R) to see the new icon. The manifest is regenerated on every request, so no app restart is needed.
+            </p>
           </div>
         </div>
       </div>
