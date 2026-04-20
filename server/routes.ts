@@ -1235,48 +1235,54 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── Dashboard stats ────────────────────────────────────────────────────────
   app.get("/api/admin/stats", requireAdmin, async (req, res) => {
-    const range = (req.query.range as string) || "all";
-    const now = new Date();
-    let from: Date | undefined;
-    let to: Date | undefined;
+    try {
+      const range = (req.query.range as string) || "all";
+      const now = new Date();
+      let from: Date | undefined;
+      let to: Date | undefined;
 
-    if (range !== "all") {
-      // Get site timezone for accurate "today" boundary
-      const allSettings = await storage.getAllSiteSettings();
-      const tz = (allSettings.find(s => s.key === "site_timezone")?.value) || "UTC";
+      if (range !== "all") {
+        const allSettings = await storage.getAllSiteSettings();
+        const tz = (allSettings.find(s => s.key === "site_timezone")?.value) || "UTC";
 
-      function startOfDayInTz(timezone: string): Date {
-        const parts = new Intl.DateTimeFormat("en-US", {
-          timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-        }).formatToParts(now);
-        const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
-        const y = get("year"), mo = get("month") - 1, d = get("day");
-        const h = get("hour") % 24, mi = get("minute"), s = get("second");
-        const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
-        return new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
+        function boundaryInTz(timezone: string, endOfDay: boolean): Date {
+          const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+          }).formatToParts(now);
+          const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
+          const y = get("year"), mo = get("month") - 1, d = get("day");
+          const h = get("hour") % 24, mi = get("minute"), s = get("second");
+          const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
+          return endOfDay
+            ? new Date(Date.UTC(y, mo, d, 23, 59, 59, 999) - tzOffsetMs)
+            : new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
+        }
+
+        to = boundaryInTz(tz, true);
+
+        if (range === "today") {
+          from = boundaryInTz(tz, false);
+        } else if (range === "7days") {
+          from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0);
+        } else if (range === "30days") {
+          from = new Date(now); from.setDate(now.getDate() - 29); from.setHours(0, 0, 0, 0);
+        } else if (range === "6months") {
+          from = new Date(now); from.setMonth(now.getMonth() - 5); from.setDate(1); from.setHours(0, 0, 0, 0);
+        } else if (range === "12months") {
+          from = new Date(now); from.setFullYear(now.getFullYear() - 1); from.setDate(1); from.setHours(0, 0, 0, 0);
+        } else if (range === "custom" && req.query.from && req.query.to) {
+          from = new Date(req.query.from as string);
+          to = new Date(req.query.to as string); to.setHours(23, 59, 59, 999);
+        }
       }
 
-      to = new Date(now); to.setHours(23, 59, 59, 999);
-
-      if (range === "today") {
-        from = startOfDayInTz(tz);
-      } else if (range === "7days") {
-        from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0);
-      } else if (range === "30days") {
-        from = new Date(now); from.setDate(now.getDate() - 29); from.setHours(0, 0, 0, 0);
-      } else if (range === "6months") {
-        from = new Date(now); from.setMonth(now.getMonth() - 5); from.setDate(1); from.setHours(0, 0, 0, 0);
-      } else if (range === "12months") {
-        from = new Date(now); from.setFullYear(now.getFullYear() - 1); from.setDate(1); from.setHours(0, 0, 0, 0);
-      } else if (range === "custom" && req.query.from && req.query.to) {
-        from = new Date(req.query.from as string);
-        to = new Date(req.query.to as string); to.setHours(23, 59, 59, 999);
-      }
+      const stats = await storage.getDashboardStats(from, to);
+      res.json(stats);
+    } catch (err: any) {
+      console.error("[Stats] Error:", err?.message ?? err);
+      res.status(500).json({ error: "Failed to fetch stats" });
     }
-
-    const stats = await storage.getDashboardStats(from, to);
-    res.json(stats);
   });
 
   // ── Page View Tracking ─────────────────────────────────────────────────────
@@ -1332,57 +1338,73 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── Analytics (time-series for charts) ────────────────────────────────────
   app.get("/api/admin/analytics", requireAdmin, async (req, res) => {
-    const range = (req.query.range as string) || "12months";
-    const now = new Date();
-    let from: Date;
-    let groupBy: "hour" | "day" | "week" | "month" = "month";
+    try {
+      const range = (req.query.range as string) || "12months";
+      const now = new Date();
+      let from: Date;
+      let groupBy: "hour" | "day" | "week" | "month" = "month";
 
-    // Fetch the configured site timezone so chart labels display in the admin's timezone
-    const allSettings = await storage.getAllSiteSettings();
-    const settingsMap: Record<string, string> = {};
-    allSettings.forEach(s => { settingsMap[s.key] = s.value ?? ""; });
-    const siteTimezone = settingsMap.site_timezone || "UTC";
+      // Fetch the configured site timezone so chart labels display in the admin's timezone
+      const allSettings = await storage.getAllSiteSettings();
+      const settingsMap: Record<string, string> = {};
+      allSettings.forEach(s => { settingsMap[s.key] = s.value ?? ""; });
+      const siteTimezone = settingsMap.site_timezone || "UTC";
 
-    // Returns the start of today (midnight) in the given IANA timezone, as a UTC Date
-    function startOfDayInTz(tz: string): Date {
-      const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-      }).formatToParts(now);
-      const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
-      const y = get("year"), mo = get("month") - 1, d = get("day");
-      const h = get("hour") % 24, mi = get("minute"), s = get("second");
-      // tzOffsetMs = how much the TZ is ahead of UTC (e.g. IST = +19800000)
-      const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
-      // midnight UTC that corresponds to midnight in the target TZ
-      return new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
-    }
+      // Returns the start of today (midnight) in the given IANA timezone, as a UTC Date
+      function startOfDayInTz(tz: string): Date {
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+        }).formatToParts(now);
+        const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
+        const y = get("year"), mo = get("month") - 1, d = get("day");
+        const h = get("hour") % 24, mi = get("minute"), s = get("second");
+        const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
+        return new Date(Date.UTC(y, mo, d, 0, 0, 0) - tzOffsetMs);
+      }
 
-    if (range === "custom" && req.query.from && req.query.to) {
-      from = new Date(req.query.from as string);
-      const to = new Date(req.query.to as string);
-      to.setHours(23, 59, 59, 999);
-      const days = Math.round((to.getTime() - from.getTime()) / 86400000);
-      groupBy = days <= 1 ? "hour" : days <= 60 ? "day" : days <= 180 ? "week" : "month";
+      // Returns end of day in the site timezone (23:59:59.999 local → UTC)
+      function endOfDayInTz(tz: string): Date {
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+        }).formatToParts(now);
+        const get = (t: string) => parseInt(parts.find((p) => p.type === t)!.value);
+        const y = get("year"), mo = get("month") - 1, d = get("day");
+        const h = get("hour") % 24, mi = get("minute"), s = get("second");
+        const tzOffsetMs = Date.UTC(y, mo, d, h, mi, s) - now.getTime();
+        return new Date(Date.UTC(y, mo, d, 23, 59, 59, 999) - tzOffsetMs);
+      }
+
+      if (range === "custom" && req.query.from && req.query.to) {
+        from = new Date(req.query.from as string);
+        const to = new Date(req.query.to as string);
+        to.setHours(23, 59, 59, 999);
+        const days = Math.round((to.getTime() - from.getTime()) / 86400000);
+        groupBy = days <= 1 ? "hour" : days <= 60 ? "day" : days <= 180 ? "week" : "month";
+        const data = await storage.getAnalytics(from, to, groupBy, siteTimezone);
+        return res.json(data);
+      }
+
+      if (range === "today") {
+        from = startOfDayInTz(siteTimezone); groupBy = "hour";
+      } else if (range === "7days") {
+        from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0); groupBy = "day";
+      } else if (range === "30days") {
+        from = new Date(now); from.setDate(now.getDate() - 29); from.setHours(0, 0, 0, 0); groupBy = "day";
+      } else if (range === "6months") {
+        from = new Date(now); from.setMonth(now.getMonth() - 5); from.setDate(1); from.setHours(0, 0, 0, 0); groupBy = "month";
+      } else {
+        from = new Date(now); from.setFullYear(now.getFullYear() - 1); from.setDate(1); from.setHours(0, 0, 0, 0); groupBy = "month";
+      }
+
+      const to = endOfDayInTz(siteTimezone);
       const data = await storage.getAnalytics(from, to, groupBy, siteTimezone);
-      return res.json(data);
+      res.json(data);
+    } catch (err: any) {
+      console.error("[Analytics] Error:", err?.message ?? err);
+      res.status(500).json({ error: "Failed to fetch analytics" });
     }
-
-    if (range === "today") {
-      from = startOfDayInTz(siteTimezone); groupBy = "hour";
-    } else if (range === "7days") {
-      from = new Date(now); from.setDate(now.getDate() - 6); from.setHours(0, 0, 0, 0); groupBy = "day";
-    } else if (range === "30days") {
-      from = new Date(now); from.setDate(now.getDate() - 29); from.setHours(0, 0, 0, 0); groupBy = "day";
-    } else if (range === "6months") {
-      from = new Date(now); from.setMonth(now.getMonth() - 5); from.setDate(1); from.setHours(0, 0, 0, 0); groupBy = "month";
-    } else {
-      from = new Date(now); from.setFullYear(now.getFullYear() - 1); from.setDate(1); from.setHours(0, 0, 0, 0); groupBy = "month";
-    }
-
-    const to = new Date(now); to.setHours(23, 59, 59, 999);
-    const data = await storage.getAnalytics(from, to, groupBy, siteTimezone);
-    res.json(data);
   });
 
   // ── Admin Games ────────────────────────────────────────────────────────────

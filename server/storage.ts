@@ -983,15 +983,40 @@ export class DatabaseStorage implements IStorage {
   async getAnalytics(from: Date, to: Date, groupBy: "hour" | "day" | "week" | "month", timezone = "UTC") {
     // Sanitize timezone name (IANA names only contain A-Z, a-z, 0-9, /, _, +, -)
     const safeTz = (timezone || "UTC").replace(/[^a-zA-Z0-9/_+\-]/g, "");
-    const tz = sql.raw(`'${safeTz}'`);
 
     // Dialect-aware date math: DB_DIALECT=mysql uses MySQL functions; default is PostgreSQL.
     const isMysql = process.env.DB_DIALECT === "mysql";
 
+    // For MySQL: CONVERT_TZ with IANA names (e.g. 'Asia/Kolkata') requires the
+    // mysql.time_zone tables to be loaded — most shared cPanel hosts don't have them.
+    // Use a numeric UTC offset instead (+05:30) which works without any extra tables.
+    function ianaToOffset(tz: string): string {
+      try {
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+        }).formatToParts(now);
+        const get = (t: string) => parseInt(parts.find(p => p.type === t)!.value);
+        const y = get("year"), mo = get("month") - 1, d = get("day");
+        const h = get("hour") % 24, mi = get("minute"), s = get("second");
+        const diffMin = Math.round((Date.UTC(y, mo, d, h, mi, s) - now.getTime()) / 60000);
+        const sign = diffMin >= 0 ? "+" : "-";
+        const abs = Math.abs(diffMin);
+        return `${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+      } catch {
+        return "+00:00";
+      }
+    }
+
+    const tzSql = isMysql
+      ? sql.raw(`'${ianaToOffset(safeTz)}'`)
+      : sql.raw(`'${safeTz}'`);
+
     // Convert stored UTC timestamp to the target local timezone.
     const localTs = isMysql
-      ? sql`CONVERT_TZ(${orders.createdAt}, 'UTC', ${tz})`
-      : sql`(${orders.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${tz}`;
+      ? sql`CONVERT_TZ(${orders.createdAt}, '+00:00', ${tzSql})`
+      : sql`(${orders.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${tzSql}`;
 
     // Truncate to the appropriate bucket in local time (for chronological ORDER BY).
     const truncTs = isMysql
@@ -1025,7 +1050,9 @@ export class DatabaseStorage implements IStorage {
       .orderBy(truncTs);
 
     function fmtLabel(period: unknown, gb: string) {
-      const raw = (period as string).trim();
+      if (period == null) return "—";
+      const raw = String(period).trim();
+      if (!raw) return "—";
       // For hourly data: PostgreSQL already returned the time formatted in the target timezone
       // (e.g. "01:00 AM") — return it directly, no JS conversion needed.
       if (gb === "hour") return raw;
