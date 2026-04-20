@@ -49,6 +49,34 @@ import {
 const uploadsDir = path.resolve(process.cwd(), "public/uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
+// Branding assets (site logo, favicon, PWA icon) live in their own folder so
+// they're easy to back up, audit, and exclude from generic /uploads cleanup.
+const brandingDir = path.resolve(process.cwd(), "public/branding");
+if (!fs.existsSync(brandingDir)) fs.mkdirSync(brandingDir, { recursive: true });
+
+const ALLOWED_BRANDING_KINDS = ["logo", "favicon", "pwa_icon"] as const;
+type BrandingKind = (typeof ALLOWED_BRANDING_KINDS)[number];
+
+const brandingUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, brandingDir),
+    filename: (req, file, cb) => {
+      const kind = String((req.query?.kind ?? req.body?.kind ?? "asset")).toLowerCase();
+      const ext = path.extname(file.originalname).toLowerCase() || ".png";
+      // Timestamp suffix doubles as a cache-buster so the new logo replaces
+      // the old one in the browser immediately on upload.
+      cb(null, `${kind}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  },
+});
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -534,6 +562,40 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ── File upload ────────────────────────────────────────────────────────────
   app.use("/uploads", express.static(uploadsDir));
+  app.use("/branding", express.static(brandingDir));
+
+  // Dedicated upload for site branding (logo / favicon / pwa_icon). Saves
+  // into /public/branding so generic /uploads stays free of brand assets and
+  // each new upload replaces the previous file for that kind. Returns a
+  // cache-busted URL so the navbar swaps to the new logo right away.
+  app.post(
+    "/api/admin/upload/branding",
+    injectAdminRole,
+    requireAdmin,
+    brandingUpload.single("file"),
+    (req: any, res) => {
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const kind = String((req.query?.kind ?? req.body?.kind ?? "")).toLowerCase() as BrandingKind;
+      if (!ALLOWED_BRANDING_KINDS.includes(kind)) {
+        // Roll back the saved file — kind is required for the cleanup logic.
+        try { fs.unlinkSync(req.file.path); } catch {}
+        return res.status(400).json({ message: "Invalid branding kind" });
+      }
+      // Sweep older files for the same kind so we don't accumulate orphans.
+      try {
+        for (const name of fs.readdirSync(brandingDir)) {
+          if (name === req.file.filename) continue;
+          if (name.startsWith(`${kind}-`) || name.startsWith(`${kind}.`)) {
+            try { fs.unlinkSync(path.join(brandingDir, name)); } catch {}
+          }
+        }
+      } catch {}
+      // Bust the SEO HTML cache so the next page load injects the new asset.
+      try { invalidateSeoCache(); } catch {}
+      const url = `/branding/${req.file.filename}`;
+      res.json({ url, kind });
+    },
+  );
 
   app.post("/api/admin/upload", injectAdminRole, requireAdmin, upload.single("file"), (req: any, res) => {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });

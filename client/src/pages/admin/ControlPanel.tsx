@@ -768,6 +768,7 @@ export default function ControlPanel() {
               inputStyle={inputStyle}
               labelStyle={labelStyle}
               ratio="square"
+              brandingKind="logo"
             />
             <ImageUploadField
               label="Favicon"
@@ -776,6 +777,7 @@ export default function ControlPanel() {
               inputStyle={inputStyle}
               labelStyle={labelStyle}
               ratio="square"
+              brandingKind="favicon"
             />
             <div>
               <ImageUploadField
@@ -785,6 +787,7 @@ export default function ControlPanel() {
                 inputStyle={inputStyle}
                 labelStyle={labelStyle}
                 ratio="square"
+                brandingKind="pwa_icon"
               />
               <p style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", margin: "6px 0 0" }}>
                 Shown on home screen after install. Falls back to Site Logo if empty.

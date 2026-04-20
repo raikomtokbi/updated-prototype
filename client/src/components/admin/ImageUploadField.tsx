@@ -13,6 +13,9 @@ interface ImageUploadFieldProps {
   labelStyle: React.CSSProperties;
   ratio?: AspectRatio;
   showRatioSelector?: boolean;
+  // Optional: when provided, uploads go to /api/admin/upload/branding?kind=...
+  // and the file is saved into /public/branding instead of /public/uploads.
+  brandingKind?: "logo" | "favicon" | "pwa_icon";
 }
 
 const RATIO_META: Record<AspectRatio, { aspect: string | undefined; hint: string | null }> = {
@@ -30,6 +33,7 @@ export function ImageUploadField({
   labelStyle,
   ratio: externalRatio,
   showRatioSelector = false,
+  brandingKind,
 }: ImageUploadFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -49,12 +53,19 @@ export function ImageUploadField({
     setUploading(true);
     setError(null);
     try {
-      const { user } = useAuthStore.getState();
+      const { user, token } = useAuthStore.getState();
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/admin/upload", {
+      const endpoint = brandingKind
+        ? `/api/admin/upload/branding?kind=${encodeURIComponent(brandingKind)}`
+        : "/api/admin/upload";
+      const headers: Record<string, string> = {
+        "x-admin-role": user?.role ?? "super_admin",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "x-admin-role": user?.role ?? "super_admin" },
+        headers,
         body: fd,
       });
       if (!res.ok) throw new Error(await res.text());

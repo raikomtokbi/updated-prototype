@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/store/cartStore";
 import { useAuthStore } from "@/lib/store/authstore";
 import { useSiteStore } from "@/lib/store/siteStore";
+import { getSiteBoot } from "@/lib/siteBoot";
 import { useIsLight } from "@/hooks/useIsLight";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
@@ -186,12 +187,21 @@ export default function Navbar() {
   const [pushBusy, setPushBusy] = useState(false);
   const [pushMsg, setPushMsg] = useState<string | null>(null);
 
+  // Server injects the current branding into window.__SITE_BOOT__ so we can
+  // render the real logo/name on first paint instead of flashing the default.
+  const boot = getSiteBoot();
   const { data: siteSettings } = useQuery<Record<string, string>>({
     queryKey: ["/api/site-settings"],
     staleTime: 0,
+    placeholderData: {
+      site_name: boot.site_name,
+      site_logo: boot.site_logo,
+      site_favicon: boot.site_favicon,
+      pwa_icon: boot.pwa_icon,
+    },
   });
-  const siteName = siteSettings?.site_name?.toUpperCase() || "NEXCOIN";
-  const siteLogo = siteSettings?.site_logo || "";
+  const siteName = (siteSettings?.site_name || boot.site_name || "Nexcoin").toUpperCase();
+  const siteLogo = siteSettings?.site_logo || boot.site_logo || "";
 
   const { data: games = [] } = useQuery<any[]>({
     queryKey: ["/api/games"],

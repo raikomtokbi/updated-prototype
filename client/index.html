@@ -46,6 +46,10 @@
     <link rel="apple-touch-icon" href="__APPLE_TOUCH_ICON_URL__" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- Server-injected boot payload: lets the React app paint the user's logo
+         and site name on first render (no flash of default branding). -->
+    <script>window.__SITE_BOOT__ = __SITE_BOOT_JSON__;</script>
+
     <!-- Google Fonts loaded non-blocking (preload + async stylesheet swap) — saves ~1.5s FCP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

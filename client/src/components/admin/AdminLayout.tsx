@@ -39,6 +39,7 @@ import {
 
 import { useAuthStore } from "@/lib/store/authstore";
 import { useSiteStore, type SiteStatus } from "@/lib/store/siteStore";
+import { getSiteBoot } from "@/lib/siteBoot";
 import { adminApi } from "@/lib/store/useAdmin";
 import type { Notification } from "@shared/schema";
 
@@ -141,9 +142,16 @@ const navSections: NavSection[] = [
 
 function AdminSidebar({ onClose, animate }: { onClose?: () => void; animate?: boolean }) {
   const [location] = useLocation();
-  const { data: siteSettings } = useQuery<Record<string, string>>({ queryKey: ["/api/site-settings"], staleTime: 60000 });
-  const siteLogo = siteSettings?.site_logo || "";
-  const siteName = siteSettings?.site_name || "Nexcoin";
+  // Use server-injected boot data so the admin sidebar renders the real
+  // logo on first paint (no flash of default branding).
+  const boot = getSiteBoot();
+  const { data: siteSettings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/site-settings"],
+    staleTime: 60000,
+    placeholderData: { site_logo: boot.site_logo, site_name: boot.site_name },
+  });
+  const siteLogo = siteSettings?.site_logo || boot.site_logo || "";
+  const siteName = siteSettings?.site_name || boot.site_name || "Nexcoin";
   const { data: myPerms, isLoading: permsLoading } = useQuery<{ role: string; permissions: string[] }>({
     queryKey: ["/api/admin/my-permissions"],
     queryFn: () => adminApi.get("/my-permissions"),
