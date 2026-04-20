@@ -2369,11 +2369,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           continue;
         }
 
-        // Look up all three mappings in parallel; first hit wins
+        // Look up all three mappings in parallel; first hit wins. Wrap each
+        // call in an async IIFE so a SYNCHRONOUS throw (e.g. the storage
+        // method being missing on an older deploy) is caught by the inner
+        // catch instead of rejecting the whole Promise.all and crashing
+        // every other provider's delivery.
+        const safeLookup = <T>(fn: () => Promise<T>): Promise<T | undefined> =>
+          (async () => {
+            try { return await fn(); } catch { return undefined; }
+          })();
         const [busanMap, lioMap, smileMap] = await Promise.all([
-          storage.getBusanMappingByCmsProductId(cmsId).catch(() => undefined),
-          storage.getLioGamesMappingByCmsProductId(cmsId).catch(() => undefined),
-          storage.getSmileOneMappingByCmsProductId(cmsId).catch(() => undefined),
+          safeLookup(() => storage.getBusanMappingByCmsProductId(cmsId)),
+          safeLookup(() => storage.getLioGamesMappingByCmsProductId(cmsId)),
+          safeLookup(() => storage.getSmileOneMappingByCmsProductId(cmsId)),
         ]);
 
         const playerId = item.playerId || item.userId || "";

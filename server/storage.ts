@@ -198,6 +198,7 @@ export interface IStorage {
   // Smile.one Mappings
   getAllSmileOneMappings(): Promise<SmileOneMapping[]>;
   getSmileOneMappingsByGame(gameSlug: string): Promise<SmileOneMapping[]>;
+  getSmileOneMappingByCmsProductId(cmsProductId: string): Promise<SmileOneMapping | undefined>;
   createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping>;
   updateSmileOneMapping(id: string, data: Partial<SmileOneMapping>): Promise<SmileOneMapping | undefined>;
   deleteSmileOneMapping(id: string): Promise<void>;
@@ -1094,6 +1095,19 @@ export class DatabaseStorage implements IStorage {
 
   async getSmileOneMappingsByGame(gameSlug: string): Promise<SmileOneMapping[]> {
     return db.select().from(smileOneMappings).where(eq(smileOneMappings.gameSlug, gameSlug));
+  }
+
+  // Look up a Smile.one mapping by the CMS package id used in cart items.
+  // fulfillOrder() in routes.ts calls this in parallel with the Busan and
+  // LioGames variants — a missing method here breaks delivery for ALL
+  // providers because the surrounding Promise.all rejects synchronously.
+  async getSmileOneMappingByCmsProductId(cmsProductId: string): Promise<SmileOneMapping | undefined> {
+    const [row] = await db
+      .select()
+      .from(smileOneMappings)
+      .where(eq(smileOneMappings.cmsProductId, cmsProductId))
+      .limit(1);
+    return row;
   }
 
   async createSmileOneMapping(data: InsertSmileOneMapping): Promise<SmileOneMapping> {
