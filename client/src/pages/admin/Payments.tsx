@@ -64,6 +64,7 @@ interface Order {
   userId: string | null;
   orderNumber: string;
   status: string;
+  deliveryStatus: string | null;
   totalAmount: string;
   currency: string;
   notes: string | null;
@@ -224,7 +225,7 @@ export default function Payments() {
                         </td>
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-                            {o.status === "completed" && (
+                            {o.status === "completed" && o.deliveryStatus !== "delivered" && (
                               <button
                                 style={btnNeutral}
                                 onClick={() => refundMutation.mutate(o.id)}
